@@ -1,0 +1,71 @@
+apply plugin: 'c'
+apply plugin: 'java'
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+model {
+    buildTypes {
+        release
+    }
+    
+    components {
+        abootimg(NativeExecutableSpec) {
+            binaries.all {
+                cppCompiler.define 'HAS_BLKID'
+                linker.args '-lblkid'
+            }
+        }
+    }
+
+    components {
+        mkbootfs(NativeExecutableSpec) {
+            binaries.all {
+            }
+        }
+    }
+}
+
+def workdir='unzip_boot'
+task unpack_bootimg(type: Exec, dependsOn: 'abootimgExecutable') {
+    new File(workdir + '/root').mkdirs()
+    workingDir '.'
+    executable 'build/exe/abootimg/abootimg'
+    args = ['-x', 'boot.img', workdir+'/bootimg.cfg', workdir+'/kernel', workdir+'/ramdisk.img.gz'] 
+}
+
+task unpack_ramdisk_gz << {
+    unGunzipFile(workdir+"/ramdisk.img.gz", workdir + "/ramdisk.img")
+}
+unpack_ramdisk_gz.dependsOn(unpack_bootimg)
+
+task unpack_cpio(type: Exec, dependsOn: unpack_ramdisk_gz) {
+    workingDir workdir + "/root"
+    executable 'cpio'
+    args = ['-i', '-F', '../ramdisk.img']
+}
+
+public void unGunzipFile(String compressedFile, String decompressedFile) throws IOException {
+    byte[] buffer = new byte[1024];
+    try {
+        FileInputStream fileIn = new FileInputStream(compressedFile);
+        GZIPInputStream gZIPInputStream = new GZIPInputStream(fileIn);
+        FileOutputStream fileOutputStream = new FileOutputStream(decompressedFile);
+        int bytes_read;
+        while ((bytes_read = gZIPInputStream.read(buffer)) > 0) {
+            fileOutputStream.write(buffer, 0, bytes_read);
+        }
+        gZIPInputStream.close();
+        fileOutputStream.close();
+        System.out.println("The file was decompressed successfully!");
+    } catch (IOException ex) {
+        throw ex;
+    }
+}
+
+task unpack(type: Delete, dependsOn: unpack_cpio) {
+  delete workdir + "/ramdisk.img.gz"
+}
