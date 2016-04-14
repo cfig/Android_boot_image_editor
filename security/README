@@ -1,0 +1,34 @@
+The following commands were used to generate the test key pairs:
+
+  development/tools/make_key testkey  '/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN=Android/emailAddress=android@android.com'
+  development/tools/make_key platform '/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN=Android/emailAddress=android@android.com'
+  development/tools/make_key shared   '/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN=Android/emailAddress=android@android.com'
+  development/tools/make_key media    '/C=US/ST=California/L=Mountain View/O=Android/OU=Android/CN=Android/emailAddress=android@android.com'
+
+The following standard test keys are currently included:
+
+testkey -- a generic key for packages that do not otherwise specify a key.
+platform -- a test key for packages that are part of the core platform.
+shared -- a test key for things that are shared in the home/contacts process.
+media -- a test key for packages that are part of the media/download system.
+
+These test keys are used strictly in development, and should never be assumed
+to convey any sort of validity.  When $BUILD_SECURE=true, the code should not
+honor these keys in any context.
+
+
+signing using the openssl commandline (for boot/system images)
+--------------------------------------------------------------
+
+1. convert pk8 format key to pem format
+   % openssl pkcs8 -inform DER -nocrypt -in testkey.pk8 -out testkey.pem
+
+2. create a signature using the pem format key
+   % openssl dgst -binary -sha1 -sign testkey.pem FILE > FILE.sig
+
+extracting public keys for embedding
+------------------------------------
+it's a Java tool
+but it generates C code
+take a look at commands/recovery/Android.mk
+you'll see it running $(HOST_OUT_JAVA_LIBRARIES)/dumpkey.jar

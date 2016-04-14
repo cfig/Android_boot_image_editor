@@ -16,7 +16,7 @@ model {
         abootimg(NativeExecutableSpec) {
             binaries.all {
                 cppCompiler.define 'HAS_BLKID'
-                linker.args '-lblkid'
+                linker.args "-lblkid"
             }
         }
     }
@@ -38,11 +38,12 @@ task unpack_bootimg(type: Exec, dependsOn: 'abootimgExecutable') {
 }
 
 task unpack_ramdisk_gz << {
-    unGunzipFile(workdir+"/ramdisk.img.gz", workdir + "/ramdisk.img")
+    unGnuzipFile(workdir+"/ramdisk.img.gz", workdir + "/ramdisk.img")
 }
 unpack_ramdisk_gz.dependsOn(unpack_bootimg)
 
-task unpack_cpio(type: Exec, dependsOn: unpack_ramdisk_gz) {
+//task unpack_cpio(type: Exec, dependsOn: unpack_ramdisk_gz) {
+task unpack_cpio(type: Exec) {
     workingDir workdir + "/root"
     executable 'cpio'
     args = ['-i', '-F', '../ramdisk.img']
@@ -52,7 +53,30 @@ task unpack(type: Delete, dependsOn: unpack_cpio) {
   delete workdir + "/ramdisk.img.gz"
 }
 
-public void unGunzipFile(String compressedFile, String decompressedFile) throws IOException {
+task pack_ramdisk_and_gz { Task task ->
+    doLast {
+        ByteArrayOutputStream mkbootfs_out = new ByteArrayOutputStream()
+        task.project.exec {
+            commandLine = [
+                'build/exe/mkbootfs/mkbootfs', workdir + "/root"
+            ]
+            standardOutput = mkbootfs_out 
+        }
+        def ByteArrayInputStream gzip_in = new ByteArrayInputStream(mkbootfs_out.buf)
+        gnuZipFile(workdir + "/ramdisk.img.gz", gzip_in)
+    }
+}
+
+task featuresWaiting(type: Exec) {
+    commandLine 'build/exe/mkbootimg/mkbootimg', \
+        '--kernel', workdir + "/kernel", \
+        '--ramdisk', workdir + "/ramdisk.img.gz", \
+        '--cmdline', "cmdlineeeee", \
+        '--base', '0x01000000', \
+        '--output', 'out'
+}
+
+public void unGnuzipFile(String compressedFile, String decompressedFile) throws IOException {
     byte[] buffer = new byte[1024];
     try {
         FileInputStream fileIn = new FileInputStream(compressedFile);
@@ -65,6 +89,44 @@ public void unGunzipFile(String compressedFile, String decompressedFile) throws 
         gZIPInputStream.close();
         fileOutputStream.close();
         System.out.println("The file was decompressed successfully!");
+    } catch (IOException ex) {
+        throw ex;
+    }
+}
+
+public void gnuZipFile(String compressedFile, InputStream fis) throws IOException {
+    byte[] buffer = new byte[1024];
+    try {
+        FileOutputStream fos = new FileOutputStream(compressedFile);
+        GZIPOutputStream gos = new GZIPOutputStream(fos);
+
+        int bytes_read;
+        while ((bytes_read = fis.read(buffer)) > 0) {
+            gos .write(buffer, 0, bytes_read);
+        }
+        gos.finish();
+        gos.close();
+        System.out.println("The file compressed successfully!");
+    } catch (IOException ex) {
+        throw ex;
+    }
+}
+
+public void gnuZipFile(String compressedFile, String decompressedFile) throws IOException {
+    byte[] buffer = new byte[1024];
+    try {
+        FileOutputStream fos = new FileOutputStream(compressedFile);
+        GZIPOutputStream gos = new GZIPOutputStream(fos);
+
+        FileInputStream fis = new FileInputStream(decompressedFile);
+        int bytes_read;
+        while ((bytes_read = fis.read(buffer)) > 0) {
+            gos .write(buffer, 0, bytes_read);
+        }
+        fis.close();
+        gos.finish();
+        gos.close();
+        System.out.println("The file compressed successfully!");
     } catch (IOException ex) {
         throw ex;
     }
