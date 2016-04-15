@@ -1,0 +1,14 @@
+apply plugin: 'java'
+
+jar() {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Quickstart',
+                   'Main-Class': 'com.android.verity.BootSignature'
+    }   
+    from {configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }} //pack dependent jar 
+}
+
+dependencies {
+    compile project(':bouncycastle:bcpkix')
+    compile project(':bouncycastle:bcprov')
+}

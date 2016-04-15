@@ -11,7 +11,7 @@ model {
     buildTypes {
         release
     }
-    
+
     components {
         abootimg(NativeExecutableSpec) {
             binaries.all {
@@ -27,14 +27,29 @@ model {
             }
         }
     }
+
+    components {
+        libmincrypt(NativeLibrarySpec) {
+            binaries.all {
+            }
+        }
+        mkbootimg(NativeExecutableSpec) {
+            binaries.all {
+                cCompiler.args '-std=c11'
+                lib library: "libmincrypt", linkage: 'static'
+            }
+        }
+    }
 }
 
-def workdir='unzip_boot'
+def workdir='build/unzip_boot'
 task unpack_bootimg(type: Exec, dependsOn: 'abootimgExecutable') {
-    new File(workdir + '/root').mkdirs()
+    doFirst {
+        new File(workdir + '/root').mkdirs()
+    }
     workingDir '.'
     executable 'build/exe/abootimg/abootimg'
-    args = ['-x', 'boot.img', workdir+'/bootimg.cfg', workdir+'/kernel', workdir+'/ramdisk.img.gz'] 
+    args = ['-x', 'boot.img', workdir+'/bootimg.cfg', workdir+'/kernel', workdir+'/ramdisk.img.gz']
 }
 
 task unpack_ramdisk_gz << {
@@ -42,8 +57,7 @@ task unpack_ramdisk_gz << {
 }
 unpack_ramdisk_gz.dependsOn(unpack_bootimg)
 
-//task unpack_cpio(type: Exec, dependsOn: unpack_ramdisk_gz) {
-task unpack_cpio(type: Exec) {
+task unpack_cpio(type: Exec, dependsOn: unpack_ramdisk_gz) {
     workingDir workdir + "/root"
     executable 'cpio'
     args = ['-i', '-F', '../ramdisk.img']
@@ -51,6 +65,7 @@ task unpack_cpio(type: Exec) {
 
 task unpack(type: Delete, dependsOn: unpack_cpio) {
   delete workdir + "/ramdisk.img.gz"
+  delete workdir + "/ramdisk.img"
 }
 
 task pack_ramdisk_and_gz { Task task ->
@@ -60,20 +75,21 @@ task pack_ramdisk_and_gz { Task task ->
             commandLine = [
                 'build/exe/mkbootfs/mkbootfs', workdir + "/root"
             ]
-            standardOutput = mkbootfs_out 
+            standardOutput = mkbootfs_out
         }
         def ByteArrayInputStream gzip_in = new ByteArrayInputStream(mkbootfs_out.buf)
         gnuZipFile(workdir + "/ramdisk.img.gz", gzip_in)
     }
 }
+pack_ramdisk_and_gz.dependsOn('mkbootfsExecutable')
 
-task featuresWaiting(type: Exec) {
-    commandLine 'build/exe/mkbootimg/mkbootimg', \
-        '--kernel', workdir + "/kernel", \
-        '--ramdisk', workdir + "/ramdisk.img.gz", \
-        '--cmdline', "cmdlineeeee", \
-        '--base', '0x01000000', \
-        '--output', 'out'
+task pack_clear(type: Exec, dependsOn: [pack_ramdisk_and_gz, 'mkbootimgExecutable']) {
+    commandLine 'build/exe/mkbootimg/mkbootimg',
+        '--kernel', workdir + "/kernel",
+        '--ramdisk', workdir + "/ramdisk.img.gz",
+        '--cmdline', "cmdlineeeee",
+        '--base', '0x01000000',
+        '--output', 'boot.img.clear'
 }
 
 public void unGnuzipFile(String compressedFile, String decompressedFile) throws IOException {
@@ -131,3 +147,11 @@ public void gnuZipFile(String compressedFile, String decompressedFile) throws IO
         throw ex;
     }
 }
+
+task pack(type: JavaExec, dependsOn: pack_clear) {
+    main = 'com.android.verity.BootSignature'
+    classpath = files("boot_signer/build/libs/boot_signer.jar")
+    maxHeapSize '512m'
+    args '/boot','boot.img.clear', 'security/verity.pk8', 'security/verity.x509.pem', 'boot.img.signed'
+}
+
