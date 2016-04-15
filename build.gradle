@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+def workdir='build/unzip_boot'
+
 task wrapper(type: Wrapper) {
     gradleVersion = '2.12'
 }
@@ -46,7 +48,6 @@ model {
     }
 }
 
-def workdir='build/unzip_boot'
 task unpack_bootimg(type: Exec, dependsOn: 'abootimgExecutable') {
     doFirst {
         new File(workdir + '/root').mkdirs()
@@ -87,16 +88,16 @@ task pack_ramdisk_and_gz { Task task ->
 }
 pack_ramdisk_and_gz.dependsOn('mkbootfsExecutable')
 
-task pack_clear(type: Exec, dependsOn: [pack_ramdisk_and_gz, 'mkbootimgExecutable']) {
+task pack_clear(type: Exec, dependsOn: [pack_ramdisk_and_gz, 'mkbootimgExecutable']) << {
     commandLine 'build/exe/mkbootimg/mkbootimg',
         '--kernel', workdir + "/kernel",
         '--ramdisk', workdir + "/ramdisk.img.gz",
-        '--cmdline', "cmdlineeeee",
-        '--base', '0x01000000',
+        '--cmdline', getRamdiskConfig(workdir, 'cmdline'),
+        '--base', getBaseAddress(workdir),
         '--output', 'boot.img.clear'
 }
 
-public void unGnuzipFile(String compressedFile, String decompressedFile) throws IOException {
+void unGnuzipFile(String compressedFile, String decompressedFile) throws IOException {
     byte[] buffer = new byte[1024];
     try {
         FileInputStream fileIn = new FileInputStream(compressedFile);
@@ -114,7 +115,7 @@ public void unGnuzipFile(String compressedFile, String decompressedFile) throws 
     }
 }
 
-public void gnuZipFile(String compressedFile, InputStream fis) throws IOException {
+void gnuZipFile(String compressedFile, InputStream fis) throws IOException {
     byte[] buffer = new byte[1024];
     try {
         FileOutputStream fos = new FileOutputStream(compressedFile);
@@ -132,7 +133,7 @@ public void gnuZipFile(String compressedFile, InputStream fis) throws IOExceptio
     }
 }
 
-public void gnuZipFile(String compressedFile, String decompressedFile) throws IOException {
+void gnuZipFile(String compressedFile, String decompressedFile) throws IOException {
     byte[] buffer = new byte[1024];
     try {
         FileOutputStream fos = new FileOutputStream(compressedFile);
@@ -152,10 +153,32 @@ public void gnuZipFile(String compressedFile, String decompressedFile) throws IO
     }
 }
 
+String getBaseAddress(String inWorkdir) {
+    Long ret = Long.parseLong(getRamdiskConfig(inWorkdir, "kerneladdr").substring(2), 16) - 0x8000L;
+    return Long.toHexString(ret);
+}
+
+String getRamdiskConfig(String inWorkdir, String inKey) {
+    String ret;
+    try {
+        Properties prop = new Properties();
+        InputStream fis = new FileInputStream(inWorkdir+ "/bootimg.cfg")
+        prop.load(fis);
+        ret = prop.getProperty(inKey);
+        if (fis != null) {
+            fis.close();
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+        throw e;
+    }
+    return ret;
+}
+
 task pack(type: JavaExec, dependsOn: pack_clear) {
     main = 'com.android.verity.BootSignature'
     classpath = files("boot_signer/build/libs/boot_signer.jar")
     maxHeapSize '512m'
     args '/boot','boot.img.clear', 'security/verity.pk8', 'security/verity.x509.pem', 'boot.img.signed'
 }
-
+pack.dependsOn('boot_signer:jar')
