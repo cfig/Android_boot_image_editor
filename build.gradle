@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.12'
+}
+
 model {
     buildTypes {
         release
