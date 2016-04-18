@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 def workdir='build/unzip_boot'
 
@@ -181,16 +183,24 @@ String getRamdiskConfig(String inWorkdir, String inKey) {
         return "0x0";
     }
     try {
-        Properties prop = new Properties();
-        InputStream fis = new FileInputStream(inWorkdir+ "/bootimg.cfg")
-        prop.load(fis);
-        ret = prop.getProperty(inKey);
-        if (fis != null) {
-            fis.close();
+        BufferedReader br = new BufferedReader(new FileReader(inWorkdir + "/bootimg.cfg"));
+        String item;
+        while (true) {
+            item = br.readLine();
+            if (null == item) {
+                break;
+            }
+            Pattern r = Pattern.compile("(?<=" + inKey + " = ).*");
+            Matcher m = r.matcher(item);
+            if (m.find()) {
+                ret = m.group(0)
+            }
         }
-    } catch (IOException e) {
-        throw new RuntimeException("IOException");
+    } catch (Exception e) {
+        e.printStackTrace();
+        throw new RuntimeException("Fatal Error");
     }
+
     return ret;
 }
 
