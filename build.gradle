@@ -216,3 +216,29 @@ task _setup(type: Copy) {
     into '.'
 }
 
+void Run(List<String> inCmd) {
+    println("CMD: " + inCmd)
+    ProcessBuilder pb = new ProcessBuilder(inCmd)
+            .directory(new File("."))
+            .redirectErrorStream(true);
+    Process p = pb.start()
+    p.inputStream.eachLine {println it}
+    p.waitFor();
+    assert 0 == p.exitValue()
+}
+
+void Run(String inCmd) {
+    Run(Arrays.asList(inCmd.split()))
+}
+
+
+void updateBootImage() {
+    Run("adb root")
+    Run("adb push boot.img.signed /cache/")
+    List<String> cmd2 = ["adb", "shell", "dd if=/cache/boot.img.signed of=/dev/block/by-name/boot"];
+    Run(cmd2)
+}
+
+task flash << {
+    updateBootImage()
+}
