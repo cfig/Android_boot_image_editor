@@ -21,7 +21,12 @@ So the recommended OS is Linux.
 You can get a full [Android version list](https://source.android.com/source/build-numbers.html) here.
 
 ## Usage
-First put your boot.img at **$(CURDIR)/boot.img**, then start gradle 'unpack' task:
+Get tools via git:
+
+    git clone https://github.com/cfig/Nexus_boot_image_editor.git
+    cd Nexus_boot_image_editor
+
+Then put your boot.img at **$(CURDIR)/boot.img**, then start gradle 'unpack' task:
 
     cp <original_boot_image> boot.img
     ./gradew unpack
