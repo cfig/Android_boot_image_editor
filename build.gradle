@@ -242,3 +242,35 @@ void updateBootImage() {
 task flash << {
     updateBootImage()
 }
+
+task debug(dependsOn: ['addSystemBin', 'addSystemLib']) {
+    description "add debug tools into recovery rootfs"
+    println(System.getenv("PATH"))
+}
+
+task addSystemBin(type: Copy, dependsOn: 'unpack') {
+    String[] bins = [ "sh", "logcat", "logd", "linker", "toolbox", "toybox" ]
+    from System.getenv("ANDROID_PRODUCT_OUT") + '/system/bin'
+    into workdir + "/root/system/bin"
+    include { details ->
+        inTargetList(details.file.name, bins)
+    }
+}
+
+task addSystemLib(type: Copy, dependsOn: 'unpack') {
+    String[] libs = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so" ]
+    from System.getenv("ANDROID_PRODUCT_OUT") + '/system/lib'
+    into workdir + "/root/system/lib"
+    include { details ->
+        inTargetList(details.file.name, libs)
+    }
+}
+
+boolean inTargetList(String file, String[] inArray) {
+    for (String item : inArray) {
+        if (item.equals(file)) {
+            return true;
+        }
+    }
+    return false;
+}
