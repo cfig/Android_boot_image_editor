@@ -36,10 +36,7 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 // END android-removed
 import org.bouncycastle.jcajce.provider.symmetric.util.PBESecretKeyFactory;
 import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-// BEGIN android-removed
-// import org.bouncycastle.util.Arrays;
-// END android-removed
+import org.bouncycastle.util.Arrays;
 
 public final class RC2
 {
@@ -147,7 +144,7 @@ public final class RC2
     {
         public PBEWithMD5AndRC2()
         {
-            super(new CBCBlockCipher(new RC2Engine()));
+            super(new CBCBlockCipher(new RC2Engine()), PKCS5S1, MD5, 64, 8);
         }
     }
     
@@ -159,7 +156,7 @@ public final class RC2
     {
         public PBEWithSHA1AndRC2()
         {
-            super(new CBCBlockCipher(new RC2Engine()));
+            super(new CBCBlockCipher(new RC2Engine()), PKCS5S1, SHA1, 64, 8);
         }
     }
 
@@ -171,7 +168,7 @@ public final class RC2
     {
         public PBEWithSHAAnd128BitRC2()
         {
-            super(new CBCBlockCipher(new RC2Engine()));
+            super(new CBCBlockCipher(new RC2Engine()), PKCS12, SHA1, 128, 8);
         }
     }
 
@@ -183,7 +180,7 @@ public final class RC2
     {
         public PBEWithSHAAnd40BitRC2()
         {
-            super(new CBCBlockCipher(new RC2Engine()));
+            super(new CBCBlockCipher(new RC2Engine()), PKCS12, SHA1, 40, 8);
         }
     }
 
@@ -218,7 +215,7 @@ public final class RC2
     //     extends BaseAlgorithmParameterGenerator
     // {
     //     RC2ParameterSpec spec = null;
-    //
+    // 
     //     protected void engineInit(
     //         AlgorithmParameterSpec genParamSpec,
     //         SecureRandom random)
@@ -229,28 +226,28 @@ public final class RC2
     //             spec = (RC2ParameterSpec)genParamSpec;
     //             return;
     //         }
-    //
+    // 
     //         throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for RC2 parameter generation.");
     //     }
-    //
+    // 
     //     protected AlgorithmParameters engineGenerateParameters()
     //     {
     //         AlgorithmParameters params;
-    //
+    // 
     //         if (spec == null)
     //         {
     //             byte[] iv = new byte[8];
-    //
+    // 
     //             if (random == null)
     //             {
     //                 random = new SecureRandom();
     //             }
-    //
+    // 
     //             random.nextBytes(iv);
-    //
+    // 
     //             try
     //             {
-    //                 params = AlgorithmParameters.getInstance("RC2", BouncyCastleProvider.PROVIDER_NAME);
+    //                 params = createParametersInstance("RC2");
     //                 params.init(new IvParameterSpec(iv));
     //             }
     //             catch (Exception e)
@@ -262,7 +259,7 @@ public final class RC2
     //         {
     //             try
     //             {
-    //                 params = AlgorithmParameters.getInstance("RC2", BouncyCastleProvider.PROVIDER_NAME);
+    //                 params = createParametersInstance("RC2");
     //                 params.init(spec);
     //             }
     //             catch (Exception e)
@@ -270,11 +267,11 @@ public final class RC2
     //                 throw new RuntimeException(e.getMessage());
     //             }
     //         }
-    //
+    // 
     //         return params;
     //     }
     // }
-    //
+    // 
     // public static class KeyGenerator
     //     extends BaseKeyGenerator
     // {
@@ -283,7 +280,7 @@ public final class RC2
     //         super("RC2", 128, new CipherKeyGenerator());
     //     }
     // }
-    //
+    // 
     // public static class AlgParams
     //     extends BaseAlgorithmParameters
     // {
@@ -305,7 +302,7 @@ public final class RC2
     //         0x64, 0x6d, 0x7a, 0xd4, 0x10, 0x81, 0x44, 0xef, 0x49, 0xd6, 0xae, 0x2e, 0xdd, 0x76, 0x5c, 0x2f,
     //         0xa7, 0x1c, 0xc9, 0x09, 0x69, 0x9a, 0x83, 0xcf, 0x29, 0x39, 0xb9, 0xe9, 0x4c, 0xff, 0x43, 0xab
     //     };
-    //
+    // 
     //     private static final short[] ekb = {
     //         0x5d, 0xbe, 0x9b, 0x8b, 0x11, 0x99, 0x6e, 0x4d, 0x59, 0xf3, 0x85, 0xa6, 0x3f, 0xb7, 0x83, 0xc5,
     //         0xe4, 0x73, 0x6b, 0x3a, 0x68, 0x5a, 0xc0, 0x47, 0xa0, 0x64, 0x34, 0x0c, 0xf1, 0xd0, 0x52, 0xa5,
@@ -324,15 +321,15 @@ public final class RC2
     //         0xbd, 0x22, 0xbf, 0x9f, 0x7e, 0xa9, 0x51, 0x4b, 0x4c, 0xfb, 0x02, 0xd3, 0x70, 0x86, 0x31, 0xe7,
     //         0x3b, 0x05, 0x03, 0x54, 0x60, 0x48, 0x65, 0x18, 0xd2, 0xcd, 0x5f, 0x32, 0x88, 0x0e, 0x35, 0xfd
     //     };
-    //
+    // 
     //     private byte[] iv;
     //     private int parameterVersion = 58;
-    //
+    // 
     //     protected byte[] engineGetEncoded()
     //     {
     //         return Arrays.clone(iv);
     //     }
-    //
+    // 
     //     protected byte[] engineGetEncoded(
     //         String format)
     //         throws IOException
@@ -348,15 +345,15 @@ public final class RC2
     //                 return new RC2CBCParameter(parameterVersion, engineGetEncoded()).getEncoded();
     //             }
     //         }
-    //
+    // 
     //         if (format.equals("RAW"))
     //         {
     //             return engineGetEncoded();
     //         }
-    //
+    // 
     //         return null;
     //     }
-    //
+    // 
     //     protected AlgorithmParameterSpec localEngineGetParameterSpec(
     //         Class paramSpec)
     //         throws InvalidParameterSpecException
@@ -375,15 +372,15 @@ public final class RC2
     //                 }
     //             }
     //         }
-    //
+    // 
     //         if (paramSpec == IvParameterSpec.class)
     //         {
     //             return new IvParameterSpec(iv);
     //         }
-    //
+    // 
     //         throw new InvalidParameterSpecException("unknown parameter spec passed to RC2 parameters object.");
     //     }
-    //
+    // 
     //     protected void engineInit(
     //         AlgorithmParameterSpec paramSpec)
     //         throws InvalidParameterSpecException
@@ -406,7 +403,7 @@ public final class RC2
     //                     parameterVersion = effKeyBits;
     //                 }
     //             }
-    //
+    // 
     //             this.iv = ((RC2ParameterSpec)paramSpec).getIV();
     //         }
     //         else
@@ -414,14 +411,14 @@ public final class RC2
     //             throw new InvalidParameterSpecException("IvParameterSpec or RC2ParameterSpec required to initialise a RC2 parameters algorithm parameters object");
     //         }
     //     }
-    //
+    // 
     //     protected void engineInit(
     //         byte[] params)
     //         throws IOException
     //     {
     //         this.iv = Arrays.clone(params);
     //     }
-    //
+    // 
     //     protected void engineInit(
     //         byte[] params,
     //         String format)
@@ -430,26 +427,26 @@ public final class RC2
     //         if (this.isASN1FormatString(format))
     //         {
     //             RC2CBCParameter p = RC2CBCParameter.getInstance(ASN1Primitive.fromByteArray(params));
-    //
+    // 
     //             if (p.getRC2ParameterVersion() != null)
     //             {
     //                 parameterVersion = p.getRC2ParameterVersion().intValue();
     //             }
-    //
+    // 
     //             iv = p.getIV();
-    //
+    // 
     //             return;
     //         }
-    //
+    // 
     //         if (format.equals("RAW"))
     //         {
     //             engineInit(params);
     //             return;
     //         }
-    //
+    // 
     //         throw new IOException("Unknown parameters format in IV parameters object");
     //     }
-    //
+    // 
     //     protected String engineToString()
     //     {
     //         return "RC2 Parameters";
@@ -468,7 +465,6 @@ public final class RC2
 
         public void configure(ConfigurableProvider provider)
         {
-
             // BEGIN android-removed
             // provider.addAlgorithm("AlgorithmParameterGenerator.RC2", PREFIX + "$AlgParamGen");
             // provider.addAlgorithm("AlgorithmParameterGenerator.1.2.840.113549.3.2", PREFIX + "$AlgParamGen");
@@ -481,8 +477,8 @@ public final class RC2
             //
             // provider.addAlgorithm("Cipher.RC2", PREFIX + "$ECB");
             // provider.addAlgorithm("Cipher.RC2WRAP", PREFIX + "$Wrap");
-            // provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.id_alg_CMSRC2wrap, "RC2WRAP");
-            // provider.addAlgorithm("Cipher.1.2.840.113549.3.2", PREFIX + "$CBC");
+            // provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.id_alg_CMSRC2wrap, "RC2WRAP");
+            // provider.addAlgorithm("Cipher", PKCSObjectIdentifiers.RC2_CBC, PREFIX + "$CBC");
             //
             // provider.addAlgorithm("Mac.RC2MAC", PREFIX + "$CBCMAC");
             // provider.addAlgorithm("Alg.Alias.Mac.RC2", "RC2MAC");
@@ -497,12 +493,12 @@ public final class RC2
             provider.addAlgorithm("Alg.Alias.SecretKeyFactory.PBEWITHSHA1ANDRC2-CBC", "PBEWITHSHA1ANDRC2");
 
             // BEGIN android-removed
-            // provider.addAlgorithm("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD2AndRC2_CBC, "PBEWITHMD2ANDRC2");
+            // provider.addAlgorithm("Alg.Alias.SecretKeyFactory", PKCSObjectIdentifiers.pbeWithMD2AndRC2_CBC, "PBEWITHMD2ANDRC2");
             // END android-removed
 
-            provider.addAlgorithm("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD5AndRC2_CBC, "PBEWITHMD5ANDRC2");
+            provider.addAlgorithm("Alg.Alias.SecretKeyFactory", PKCSObjectIdentifiers.pbeWithMD5AndRC2_CBC, "PBEWITHMD5ANDRC2");
 
-            provider.addAlgorithm("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithSHA1AndRC2_CBC, "PBEWITHSHA1ANDRC2");
+            provider.addAlgorithm("Alg.Alias.SecretKeyFactory", PKCSObjectIdentifiers.pbeWithSHA1AndRC2_CBC, "PBEWITHSHA1ANDRC2");
             provider.addAlgorithm("Alg.Alias.SecretKeyFactory.1.2.840.113549.1.12.1.5", "PBEWITHSHAAND128BITRC2-CBC");
             provider.addAlgorithm("Alg.Alias.SecretKeyFactory.1.2.840.113549.1.12.1.6", "PBEWITHSHAAND40BITRC2-CBC");
 
@@ -514,28 +510,31 @@ public final class RC2
 
             provider.addAlgorithm("SecretKeyFactory.PBEWITHSHAAND128BITRC2-CBC", PREFIX + "$PBEWithSHAAnd128BitKeyFactory");
             provider.addAlgorithm("SecretKeyFactory.PBEWITHSHAAND40BITRC2-CBC", PREFIX + "$PBEWithSHAAnd40BitKeyFactory");
-            
+
             // BEGIN android-removed
-            // provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithMD2AndRC2_CBC, "PBEWITHMD2ANDRC2");
+            // provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.pbeWithMD2AndRC2_CBC, "PBEWITHMD2ANDRC2");
             // END android-removed
 
-            provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithMD5AndRC2_CBC, "PBEWITHMD5ANDRC2");
+            provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.pbeWithMD5AndRC2_CBC, "PBEWITHMD5ANDRC2");
 
-            provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithSHA1AndRC2_CBC, "PBEWITHSHA1ANDRC2");
+            provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.pbeWithSHA1AndRC2_CBC, "PBEWITHSHA1ANDRC2");
 
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.5", "PKCS12PBE");
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.6", "PKCS12PBE");
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters.PBEWithSHAAnd3KeyTripleDES", "PKCS12PBE");
 
-            provider.addAlgorithm("Alg.Alias.Cipher.1.2.840.113549.1.12.1.5", "PBEWITHSHAAND128BITRC2-CBC");
-            provider.addAlgorithm("Alg.Alias.Cipher.1.2.840.113549.1.12.1.6", "PBEWITHSHAAND40BITRC2-CBC");
+            provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC2_CBC, "PBEWITHSHAAND128BITRC2-CBC");
+            provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.pbeWithSHAAnd40BitRC2_CBC, "PBEWITHSHAAND40BITRC2-CBC");
             provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHSHA1AND128BITRC2-CBC", "PBEWITHSHAAND128BITRC2-CBC");
             provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHSHA1AND40BITRC2-CBC", "PBEWITHSHAAND40BITRC2-CBC");
             provider.addAlgorithm("Cipher.PBEWITHSHA1ANDRC2", PREFIX + "$PBEWithSHA1AndRC2");
+            provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHSHAANDRC2-CBC", "PBEWITHSHA1ANDRC2");
+            provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHSHA1ANDRC2-CBC", "PBEWITHSHA1ANDRC2");
 
             provider.addAlgorithm("Cipher.PBEWITHSHAAND128BITRC2-CBC", PREFIX + "$PBEWithSHAAnd128BitRC2");
             provider.addAlgorithm("Cipher.PBEWITHSHAAND40BITRC2-CBC", PREFIX + "$PBEWithSHAAnd40BitRC2");
             provider.addAlgorithm("Cipher.PBEWITHMD5ANDRC2", PREFIX + "$PBEWithMD5AndRC2");
+            provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHMD5ANDRC2-CBC", "PBEWITHMD5ANDRC2");
 
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters.PBEWITHSHA1ANDRC2", "PKCS12PBE");
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDRC2", "PKCS12PBE");

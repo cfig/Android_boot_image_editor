@@ -103,7 +103,7 @@ public class X509V2AttributeCertificate
     
     public AttributeCertificateHolder getHolder()
     {
-        return new AttributeCertificateHolder((ASN1Sequence)cert.getAcinfo().getHolder().toASN1Object());
+        return new AttributeCertificateHolder((ASN1Sequence)cert.getAcinfo().getHolder().toASN1Primitive());
     }
     
     public AttributeCertificateIssuer getIssuer()
@@ -164,7 +164,7 @@ public class X509V2AttributeCertificate
     
     public byte[] getSignature()
     {
-        return cert.getSignatureValue().getBytes();
+        return cert.getSignatureValue().getOctets();
     }
     
     public final void verify(
@@ -180,7 +180,7 @@ public class X509V2AttributeCertificate
             throw new CertificateException("Signature algorithm in certificate info not same as outer certificate");
         }
 
-        signature = Signature.getInstance(cert.getSignatureAlgorithm().getObjectId().getId(), provider);
+        signature = Signature.getInstance(cert.getSignatureAlgorithm().getAlgorithm().getId(), provider);
 
         signature.initVerify(key);
 

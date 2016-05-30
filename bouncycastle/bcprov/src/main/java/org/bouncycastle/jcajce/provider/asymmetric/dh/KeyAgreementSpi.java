@@ -4,9 +4,9 @@ import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.Hashtable;
 
 import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
@@ -15,9 +15,13 @@ import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.crypto.params.DESParameters;
-import org.bouncycastle.util.Integers;
-import org.bouncycastle.util.Strings;
+import org.bouncycastle.crypto.DerivationFunction;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.agreement.kdf.DHKEKGenerator;
+// END android-removed
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.jcajce.provider.asymmetric.util.BaseAgreementSpi;
+import org.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
 
 /**
  * Diffie-Hellman key agreement. There's actually a better way of doing this
@@ -25,29 +29,25 @@ import org.bouncycastle.util.Strings;
  * details.
  */
 public class KeyAgreementSpi
-    extends javax.crypto.KeyAgreementSpi
+    extends BaseAgreementSpi
 {
     private BigInteger      x;
     private BigInteger      p;
     private BigInteger      g;
-    private BigInteger      result;
 
-    private static final Hashtable algorithms = new Hashtable();
-
-    static
+    public KeyAgreementSpi()
     {
-        Integer i64 = Integers.valueOf(64);
-        Integer i192 = Integers.valueOf(192);
-        Integer i128 = Integers.valueOf(128);
-        Integer i256 = Integers.valueOf(256);
-
-        algorithms.put("DES", i64);
-        algorithms.put("DESEDE", i192);
-        algorithms.put("BLOWFISH", i128);
-        algorithms.put("AES", i256);
+        super("Diffie-Hellman", null);
     }
 
-    private byte[] bigIntToBytes(
+    public KeyAgreementSpi(
+        String kaAlgorithm,
+        DerivationFunction kdf)
+    {
+        super(kaAlgorithm, kdf);
+    }
+
+    protected byte[] bigIntToBytes(
         BigInteger    r)
     {
         //
@@ -122,7 +122,7 @@ public class KeyAgreementSpi
             throw new IllegalStateException("Diffie-Hellman not initialised.");
         }
 
-        return bigIntToBytes(result);
+        return super.engineGenerateSecret();
     }
 
     protected int engineGenerateSecret(
@@ -135,45 +135,27 @@ public class KeyAgreementSpi
             throw new IllegalStateException("Diffie-Hellman not initialised.");
         }
 
-        byte[]  secret = bigIntToBytes(result);
-
-        if (sharedSecret.length - offset < secret.length)
-        {
-            throw new ShortBufferException("DHKeyAgreement - buffer too short");
-        }
-
-        System.arraycopy(secret, 0, sharedSecret, offset, secret.length);
-
-        return secret.length;
+        return super.engineGenerateSecret(sharedSecret, offset);
     }
 
     protected SecretKey engineGenerateSecret(
-        String algorithm) 
+        String algorithm)
+        throws NoSuchAlgorithmException
     {
         if (x == null)
         {
             throw new IllegalStateException("Diffie-Hellman not initialised.");
         }
 
-        String algKey = Strings.toUpperCase(algorithm);
         byte[] res = bigIntToBytes(result);
 
-        if (algorithms.containsKey(algKey))
+        // for JSSE compatibility
+        if (algorithm.equals("TlsPremasterSecret"))
         {
-            Integer length = (Integer)algorithms.get(algKey);
-
-            byte[] key = new byte[length.intValue() / 8];
-            System.arraycopy(res, 0, key, 0, key.length);
-
-            if (algKey.startsWith("DES"))
-            {
-                DESParameters.setOddParity(key);
-            }
-            
-            return new SecretKeySpec(key, algorithm);
+            return new SecretKeySpec(trimZeroes(res), algorithm);
         }
 
-        return new SecretKeySpec(res, algorithm);
+        return super.engineGenerateSecret(algorithm);
     }
 
     protected void engineInit(
@@ -190,14 +172,23 @@ public class KeyAgreementSpi
 
         if (params != null)
         {
-            if (!(params instanceof DHParameterSpec))
+            if (params instanceof DHParameterSpec)    // p, g override.
+            {
+                DHParameterSpec p = (DHParameterSpec)params;
+
+                this.p = p.getP();
+                this.g = p.getG();
+            }
+            else if (params instanceof UserKeyingMaterialSpec)
+            {
+                this.p = privKey.getParams().getP();
+                this.g = privKey.getParams().getG();
+                this.ukmParameters = ((UserKeyingMaterialSpec)params).getUserKeyingMaterial();
+            }
+            else
             {
                 throw new InvalidAlgorithmParameterException("DHKeyAgreement only accepts DHParameterSpec");
             }
-            DHParameterSpec p = (DHParameterSpec)params;
-
-            this.p = p.getP();
-            this.g = p.getG();
         }
         else
         {
@@ -224,4 +215,15 @@ public class KeyAgreementSpi
         this.g = privKey.getParams().getG();
         this.x = this.result = privKey.getX();
     }
+
+    // BEGIN android-removed
+    // public static class DHwithRFC2631KDF
+    //     extends KeyAgreementSpi
+    // {
+    //     public DHwithRFC2631KDF()
+    //     {
+    //         super("DHwithRFC2631KDF", new DHKEKGenerator(new SHA1Digest()));
+    //     }
+    // }
+    // END android-removed
 }

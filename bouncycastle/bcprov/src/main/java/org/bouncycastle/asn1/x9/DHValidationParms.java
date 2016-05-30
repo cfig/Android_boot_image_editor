@@ -9,6 +9,9 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERSequence;
 
+/**
+ * @deprecated use ValidationParams
+ */
 public class DHValidationParms extends ASN1Object
 {
     private DERBitString seed;
@@ -21,17 +24,16 @@ public class DHValidationParms extends ASN1Object
 
     public static DHValidationParms getInstance(Object obj)
     {
-        if (obj == null || obj instanceof DHDomainParameters)
+        if (obj instanceof DHValidationParms)
         {
             return (DHValidationParms)obj;
         }
-
-        if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new DHValidationParms((ASN1Sequence)obj);
+            return new DHValidationParms(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("Invalid DHValidationParms: " + obj.getClass().getName());
+        return null;
     }
 
     public DHValidationParms(DERBitString seed, ASN1Integer pgenCounter)

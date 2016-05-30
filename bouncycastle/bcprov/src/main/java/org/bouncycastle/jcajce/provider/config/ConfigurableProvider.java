@@ -15,7 +15,7 @@ public interface ConfigurableProvider
     static final String THREAD_LOCAL_EC_IMPLICITLY_CA = "threadLocalEcImplicitlyCa";
 
     /**
-     * Elliptic Curve CA parameters - thread local version
+     * Elliptic Curve CA parameters - VM wide version
      */
     static final String EC_IMPLICITLY_CA = "ecImplicitlyCa";
 
@@ -32,6 +32,8 @@ public interface ConfigurableProvider
     void setParameter(String parameterName, Object parameter);
 
     void addAlgorithm(String key, String value);
+
+    void addAlgorithm(String type, ASN1ObjectIdentifier oid, String className);
 
     boolean hasAlgorithm(String type, String name);
 

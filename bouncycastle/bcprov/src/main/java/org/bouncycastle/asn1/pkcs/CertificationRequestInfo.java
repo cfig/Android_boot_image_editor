@@ -25,8 +25,8 @@ import org.bouncycastle.asn1.x509.X509Name;
  *  Attributes { ATTRIBUTE:IOSet } ::= SET OF Attribute{{ IOSet }}
  *
  *  Attribute { ATTRIBUTE:IOSet } ::= SEQUENCE {
- *    type    ATTRIBUTE.&id({IOSet}),
- *    values  SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{\@type})
+ *    type    ATTRIBUTE.&amp;id({IOSet}),
+ *    values  SET SIZE(1..MAX) OF ATTRIBUTE.&amp;Type({IOSet}{\@type})
  *  }
  * </pre>
  */
@@ -67,18 +67,18 @@ public class CertificationRequestInfo
      * @param attributes any attributes to be associated with the request.
      */
     public CertificationRequestInfo(
-        X500Name subject,
+        X500Name                subject,
         SubjectPublicKeyInfo    pkInfo,
         ASN1Set                 attributes)
     {
-        this.subject = subject;
-        this.subjectPKInfo = pkInfo;
-        this.attributes = attributes;
-
-        if ((subject == null) || (version == null) || (subjectPKInfo == null))
+        if ((subject == null) || (pkInfo == null))
         {
             throw new IllegalArgumentException("Not all mandatory fields set in CertificationRequestInfo generator.");
         }
+
+        this.subject = subject;
+        this.subjectPKInfo = pkInfo;
+        this.attributes = attributes;
     }
 
     /**
@@ -89,14 +89,14 @@ public class CertificationRequestInfo
         SubjectPublicKeyInfo    pkInfo,
         ASN1Set                 attributes)
     {
-        this.subject = X500Name.getInstance(subject.toASN1Primitive());
-        this.subjectPKInfo = pkInfo;
-        this.attributes = attributes;
-
-        if ((subject == null) || (version == null) || (subjectPKInfo == null))
+        if ((subject == null) || (pkInfo == null))
         {
             throw new IllegalArgumentException("Not all mandatory fields set in CertificationRequestInfo generator.");
         }
+        
+        this.subject = X500Name.getInstance(subject.toASN1Primitive());
+        this.subjectPKInfo = pkInfo;
+        this.attributes = attributes;
     }
 
     /**

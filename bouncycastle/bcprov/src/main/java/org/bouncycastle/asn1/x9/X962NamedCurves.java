@@ -19,17 +19,20 @@ public class X962NamedCurves
     {
         protected X9ECParameters createParameters()
         {
+            BigInteger n = new BigInteger("ffffffffffffffffffffffff99def836146bc9b1b4d22831", 16);
+            BigInteger h = BigInteger.valueOf(1);
+
             ECCurve cFp192v1 = new ECCurve.Fp(
                 new BigInteger("6277101735386680763835789423207666416083908700390324961279"),
                 new BigInteger("fffffffffffffffffffffffffffffffefffffffffffffffc", 16),
-                new BigInteger("64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1", 16));
+                new BigInteger("64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1", 16),
+                n, h);
 
             return new X9ECParameters(
                 cFp192v1,
-                cFp192v1.decodePoint(
+                new X9ECPoint(cFp192v1,
                     Hex.decode("03188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012")),
-                new BigInteger("ffffffffffffffffffffffff99def836146bc9b1b4d22831", 16),
-                BigInteger.valueOf(1),
+                n, h,
                 Hex.decode("3045AE6FC8422f64ED579528D38120EAE12196D5"));
         }
     };
@@ -38,17 +41,20 @@ public class X962NamedCurves
     {
         protected X9ECParameters createParameters()
         {
+            BigInteger n = new BigInteger("fffffffffffffffffffffffe5fb1a724dc80418648d8dd31", 16);
+            BigInteger h = BigInteger.valueOf(1);
+
             ECCurve cFp192v2 = new ECCurve.Fp(
                 new BigInteger("6277101735386680763835789423207666416083908700390324961279"),
                 new BigInteger("fffffffffffffffffffffffffffffffefffffffffffffffc", 16),
-                new BigInteger("cc22d6dfb95c6b25e49c0d6364a4e5980c393aa21668d953", 16));
+                new BigInteger("cc22d6dfb95c6b25e49c0d6364a4e5980c393aa21668d953", 16),
+                n, h);
 
             return new X9ECParameters(
                 cFp192v2,
-                cFp192v2.decodePoint(
+                new X9ECPoint(cFp192v2,
                     Hex.decode("03eea2bae7e1497842f2de7769cfe9c989c072ad696f48034a")),
-                new BigInteger("fffffffffffffffffffffffe5fb1a724dc80418648d8dd31", 16),
-                BigInteger.valueOf(1),
+                n, h,
                 Hex.decode("31a92ee2029fd10d901b113e990710f0d21ac6b6"));
         }
     };
@@ -57,17 +63,20 @@ public class X962NamedCurves
     {
         protected X9ECParameters createParameters()
         {
+            BigInteger n = new BigInteger("ffffffffffffffffffffffff7a62d031c83f4294f640ec13", 16);
+            BigInteger h = BigInteger.valueOf(1);
+
             ECCurve cFp192v3 = new ECCurve.Fp(
                 new BigInteger("6277101735386680763835789423207666416083908700390324961279"),
                 new BigInteger("fffffffffffffffffffffffffffffffefffffffffffffffc", 16),
-                new BigInteger("22123dc2395a05caa7423daeccc94760a7d462256bd56916", 16));
+                new BigInteger("22123dc2395a05caa7423daeccc94760a7d462256bd56916", 16),
+                n, h);
 
             return new X9ECParameters(
                 cFp192v3,
-                cFp192v3.decodePoint(
+                new X9ECPoint(cFp192v3,
                     Hex.decode("027d29778100c65a1da1783716588dce2b8b4aee8e228f1896")),
-                new BigInteger("ffffffffffffffffffffffff7a62d031c83f4294f640ec13", 16),
-                BigInteger.valueOf(1),
+                n, h,
                 Hex.decode("c469684435deb378c4b65ca9591e2a5763059a2e"));
         }
     };
@@ -76,17 +85,20 @@ public class X962NamedCurves
     {
         protected X9ECParameters createParameters()
         {
+            BigInteger n = new BigInteger("7fffffffffffffffffffffff7fffff9e5e9a9f5d9071fbd1522688909d0b", 16);
+            BigInteger h = BigInteger.valueOf(1);
+
             ECCurve cFp239v1 = new ECCurve.Fp(
                 new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"),
                 new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16),
-                new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16));
+                new BigInteger("6b016c3bdcf18941d0d654921475ca71a9db2fb27d1d37796185c2942c0a", 16),
+                n, h);
 
             return new X9ECParameters(
                 cFp239v1,
-                cFp239v1.decodePoint(
+                new X9ECPoint(cFp239v1,
                     Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")),
-                new BigInteger("7fffffffffffffffffffffff7fffff9e5e9a9f5d9071fbd1522688909d0b", 16),
-                BigInteger.valueOf(1),
+                n, h,
                 Hex.decode("e43bb460f0b80cc0c0b075798e948060f8321b7d"));
         }
     };
@@ -95,17 +107,20 @@ public class X962NamedCurves
     {
         protected X9ECParameters createParameters()
         {
+            BigInteger n = new BigInteger("7fffffffffffffffffffffff800000cfa7e8594377d414c03821bc582063", 16);
+            BigInteger h = BigInteger.valueOf(1);
+
             ECCurve cFp239v2 = new ECCurve.Fp(
                 new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"),
                 new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16),
-                new BigInteger("617fab6832576cbbfed50d99f0249c3fee58b94ba0038c7ae84c8c832f2c", 16));
+                new BigInteger("617fab6832576cbbfed50d99f0249c3fee58b94ba0038c7ae84c8c832f2c", 16),
+                n, h);
 
             return new X9ECParameters(
                 cFp239v2,
-                cFp239v2.decodePoint(
+                new X9ECPoint(cFp239v2,
                     Hex.decode("0238af09d98727705120c921bb5e9e26296a3cdcf2f35757a0eafd87b830e7")),
-                new BigInteger("7fffffffffffffffffffffff800000cfa7e8594377d414c03821bc582063", 16),
-                BigInteger.valueOf(1),
+                n, h,
                 Hex.decode("e8b4011604095303ca3b8099982be09fcb9ae616"));
         }
     };
@@ -114,17 +129,20 @@ public class X962NamedCurves
     {
         protected X9ECParameters createParameters()
         {
+            BigInteger n = new BigInteger("7fffffffffffffffffffffff7fffff975deb41b3a6057c3c432146526551", 16);
+            BigInteger h = BigInteger.valueOf(1);
+
             ECCurve cFp239v3 = new ECCurve.Fp(
                 new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"),
                 new BigInteger("7fffffffffffffffffffffff7fffffffffff8000000000007ffffffffffc", 16),
-                new BigInteger("255705fa2a306654b1f4cb03d6a750a30c250102d4988717d9ba15ab6d3e", 16));
+                new BigInteger("255705fa2a306654b1f4cb03d6a750a30c250102d4988717d9ba15ab6d3e", 16),
+                n, h);
 
             return new X9ECParameters(
                 cFp239v3,
-                cFp239v3.decodePoint(
+                new X9ECPoint(cFp239v3,
                     Hex.decode("036768ae8e18bb92cfcf005c949aa2c6d94853d0e660bbf854b1c9505fe95a")),
-                new BigInteger("7fffffffffffffffffffffff7fffff975deb41b3a6057c3c432146526551", 16),
-                BigInteger.valueOf(1),
+                n, h,
                 Hex.decode("7d7374168ffe3471b60a857686a19475d3bfa2ff"));
         }
     };
@@ -133,17 +151,20 @@ public class X962NamedCurves
     {
         protected X9ECParameters createParameters()
         {
+            BigInteger n = new BigInteger("ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551", 16);
+            BigInteger h = BigInteger.valueOf(1);
+
             ECCurve cFp256v1 = new ECCurve.Fp(
                 new BigInteger("115792089210356248762697446949407573530086143415290314195533631308867097853951"),
                 new BigInteger("ffffffff00000001000000000000000000000000fffffffffffffffffffffffc", 16),
-                new BigInteger("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16));
+                new BigInteger("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16),
+                n, h);
 
             return new X9ECParameters(
                 cFp256v1,
-                cFp256v1.decodePoint(
+                new X9ECPoint(cFp256v1,
                     Hex.decode("036b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296")),
-                new BigInteger("ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551", 16),
-                BigInteger.valueOf(1),
+                n, h,
                 Hex.decode("c49d360886e704936a6678e1139d26b7819f7e90"));
         }
     };
@@ -167,7 +188,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m163v1,
-                c2m163v1.decodePoint(
+                new X9ECPoint(c2m163v1,
                     Hex.decode("0307AF69989546103D79329FCC3D74880F33BBE803CB")),
                 c2m163v1n, c2m163v1h,
                 Hex.decode("D2C0FB15760860DEF1EEF4D696E6768756151754"));
@@ -190,7 +211,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m163v2,
-                c2m163v2.decodePoint(
+                new X9ECPoint(c2m163v2,
                     Hex.decode("030024266E4EB5106D0A964D92C4860E2671DB9B6CC5")),
                 c2m163v2n, c2m163v2h,
                 null);
@@ -213,7 +234,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m163v3,
-                c2m163v3.decodePoint(
+                new X9ECPoint(c2m163v3,
                     Hex.decode("0202F9F87B7C574D0BDECF8A22E6524775F98CDEBDCB")),
                 c2m163v3n, c2m163v3h,
                 null);
@@ -236,7 +257,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m176w1,
-                c2m176w1.decodePoint(
+                new X9ECPoint(c2m176w1,
                     Hex.decode("038D16C2866798B600F9F08BB4A8E860F3298CE04A5798")),
                 c2m176w1n, c2m176w1h,
                 null);
@@ -259,7 +280,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m191v1,
-                c2m191v1.decodePoint(
+                new X9ECPoint(c2m191v1,
                     Hex.decode("0236B3DAF8A23206F9C4F299D7B21A9C369137F2C84AE1AA0D")),
                 c2m191v1n, c2m191v1h,
                 Hex.decode("4E13CA542744D696E67687561517552F279A8C84"));
@@ -282,7 +303,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m191v2,
-                c2m191v2.decodePoint(
+                new X9ECPoint(c2m191v2,
                     Hex.decode("023809B2B7CC1B28CC5A87926AAD83FD28789E81E2C9E3BF10")),
                 c2m191v2n, c2m191v2h,
                 null);
@@ -305,7 +326,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m191v3,
-                c2m191v3.decodePoint(
+                new X9ECPoint(c2m191v3,
                     Hex.decode("03375D4CE24FDE434489DE8746E71786015009E66E38A926DD")),
                 c2m191v3n, c2m191v3h,
                 null);
@@ -328,7 +349,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m208w1,
-                c2m208w1.decodePoint(
+                new X9ECPoint(c2m208w1,
                     Hex.decode("0289FDFBE4ABE193DF9559ECF07AC0CE78554E2784EB8C1ED1A57A")),
                 c2m208w1n, c2m208w1h,
                 null);
@@ -351,7 +372,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m239v1,
-                c2m239v1.decodePoint(
+                new X9ECPoint(c2m239v1,
                     Hex.decode("0257927098FA932E7C0A96D3FD5B706EF7E5F5C156E16B7E7C86038552E91D")),
                 c2m239v1n, c2m239v1h,
                 null);
@@ -374,7 +395,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m239v2,
-                c2m239v2.decodePoint(
+                new X9ECPoint(c2m239v2,
                     Hex.decode("0228F9D04E900069C8DC47A08534FE76D2B900B7D7EF31F5709F200C4CA205")),
                 c2m239v2n, c2m239v2h,
                 null);
@@ -397,7 +418,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m239v3,
-                c2m239v3.decodePoint(
+                new X9ECPoint(c2m239v3,
                     Hex.decode("0370F6E9D04D289C4E89913CE3530BFDE903977D42B146D539BF1BDE4E9C92")),
                 c2m239v3n, c2m239v3h,
                 null);
@@ -420,7 +441,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m272w1,
-                c2m272w1.decodePoint(
+                new X9ECPoint(c2m272w1,
                     Hex.decode("026108BABB2CEEBCF787058A056CBE0CFE622D7723A289E08A07AE13EF0D10D171DD8D")),
                 c2m272w1n, c2m272w1h,
                 null);
@@ -443,7 +464,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m304w1,
-                c2m304w1.decodePoint(
+                new X9ECPoint(c2m304w1,
                     Hex.decode("02197B07845E9BE2D96ADB0F5F3C7F2CFFBD7A3EB8B6FEC35C7FD67F26DDF6285A644F740A2614")),
                 c2m304w1n, c2m304w1h,
                 null);
@@ -466,7 +487,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m359v1,
-                c2m359v1.decodePoint(
+                new X9ECPoint(c2m359v1,
                     Hex.decode("033C258EF3047767E7EDE0F1FDAA79DAEE3841366A132E163ACED4ED2401DF9C6BDCDE98E8E707C07A2239B1B097")),
                 c2m359v1n, c2m359v1h,
                 null);
@@ -489,7 +510,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m368w1,
-                c2m368w1.decodePoint(
+                new X9ECPoint(c2m368w1,
                     Hex.decode("021085E2755381DCCCE3C1557AFA10C2F0C0C2825646C5B34A394CBCFA8BC16B22E7E789E927BE216F02E1FB136A5F")),
                 c2m368w1n, c2m368w1h,
                 null);
@@ -512,7 +533,7 @@ public class X962NamedCurves
 
             return new X9ECParameters(
                 c2m431r1,
-                c2m431r1.decodePoint(
+                new X9ECPoint(c2m431r1,
                     Hex.decode("02120FC05D3C67A99DE161D2F4092622FECA701BE4F50F4758714E8A87BBF2A658EF8C21E7C5EFE965361F6C2999C0C247B0DBD70CE6B7")),
                 c2m431r1n, c2m431r1h,
                 null);
@@ -525,7 +546,7 @@ public class X962NamedCurves
 
     static void defineCurve(String name, ASN1ObjectIdentifier oid, X9ECParametersHolder holder)
     {
-        objIds.put(name, oid);
+        objIds.put(name.toLowerCase(), oid);
         names.put(oid, name);
         curves.put(oid, holder);
     }
@@ -560,14 +581,8 @@ public class X962NamedCurves
     public static X9ECParameters getByName(
         String name)
     {
-        ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)objIds.get(Strings.toLowerCase(name));
-
-        if (oid != null)
-        {
-            return getByOID(oid);
-        }
-
-        return null;
+        ASN1ObjectIdentifier oid = getOID(name);
+        return oid == null ? null : getByOID(oid);
     }
 
     /**
@@ -580,13 +595,7 @@ public class X962NamedCurves
         ASN1ObjectIdentifier oid)
     {
         X9ECParametersHolder holder = (X9ECParametersHolder)curves.get(oid);
-
-        if (holder != null)
-        {
-            return holder.getParameters();
-        }
-
-        return null;
+        return holder == null ? null : holder.getParameters();
     }
 
     /**
@@ -616,6 +625,6 @@ public class X962NamedCurves
      */
     public static Enumeration getNames()
     {
-        return objIds.keys();
+        return names.elements();
     }
 }

@@ -1,5 +1,6 @@
 package org.bouncycastle.jcajce.provider.asymmetric.rsa;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -14,6 +15,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
+import org.bouncycastle.util.Strings;
 
 public class BCRSAPublicKey
     implements RSAPublicKey
@@ -133,7 +135,7 @@ public class BCRSAPublicKey
     public String toString()
     {
         StringBuffer    buf = new StringBuffer();
-        String          nl = System.getProperty("line.separator");
+        String          nl = Strings.lineSeparator();
 
         buf.append("RSA Public Key").append(nl);
         buf.append("            modulus: ").append(this.getModulus().toString(16)).append(nl);
@@ -152,7 +154,7 @@ public class BCRSAPublicKey
         {
             algorithmIdentifier = AlgorithmIdentifier.getInstance(in.readObject());
         }
-        catch (OptionalDataException e)
+        catch (Exception e)
         {
             algorithmIdentifier = DEFAULT_ALGORITHM_IDENTIFIER;
         }

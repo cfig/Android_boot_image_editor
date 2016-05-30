@@ -5,16 +5,20 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BEROctetStringGenerator;
 import org.bouncycastle.asn1.BERSet;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
@@ -23,18 +27,65 @@ import org.bouncycastle.asn1.cms.ContentInfo;
 // import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
 // import org.bouncycastle.asn1.ocsp.OCSPResponse;
 // import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
+// import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
+// import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 // END android-removed
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.util.Store;
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.util.io.TeeInputStream;
 import org.bouncycastle.util.io.TeeOutputStream;
 
 class CMSUtils
 {
+    private static final Set<String> des = new HashSet<String>();
+
+    static
+    {
+        des.add("DES");
+        des.add("DESEDE");
+        // BEGIN android-removed
+        // des.add(OIWObjectIdentifiers.desCBC.getId());
+        // des.add(PKCSObjectIdentifiers.des_EDE3_CBC.getId());
+        // des.add(PKCSObjectIdentifiers.des_EDE3_CBC.getId());
+        // des.add(PKCSObjectIdentifiers.id_alg_CMS3DESwrap.getId());
+        // END android-removed
+    }
+
+    static boolean isDES(String algorithmID)
+    {
+        String name = Strings.toUpperCase(algorithmID);
+
+        return des.contains(name);
+    }
+
+    static boolean isEquivalent(AlgorithmIdentifier algId1, AlgorithmIdentifier algId2)
+    {
+        if (algId1 == null || algId2 == null)
+        {
+            return false;
+        }
+
+        if (!algId1.getAlgorithm().equals(algId2.getAlgorithm()))
+        {
+            return false;
+        }
+
+        ASN1Encodable params1 = algId1.getParameters();
+        ASN1Encodable params2 = algId2.getParameters();
+        if (params1 != null)
+        {
+            return params1.equals(params2) || (params1.equals(DERNull.INSTANCE) && params2 == null);
+        }
+
+        return params2 == null || params2.equals(DERNull.INSTANCE);
+    }
+
     static ContentInfo readContentInfo(
         byte[] input)
         throws CMSException
@@ -99,18 +150,37 @@ class CMSUtils
     static List getCRLsFromStore(Store crlStore)
         throws CMSException
     {
-        List certs = new ArrayList();
+        List crls = new ArrayList();
 
         try
         {
             for (Iterator it = crlStore.getMatches(null).iterator(); it.hasNext();)
             {
-                X509CRLHolder c = (X509CRLHolder)it.next();
+                Object rev = it.next();
 
-                certs.add(c.toASN1Structure());
+                if (rev instanceof X509CRLHolder)
+                {
+                    X509CRLHolder c = (X509CRLHolder)rev;
+
+                    crls.add(c.toASN1Structure());
+                }
+                // BEGIN android-removed
+                // else if (rev instanceof OtherRevocationInfoFormat)
+                // {
+                //     OtherRevocationInfoFormat infoFormat = OtherRevocationInfoFormat.getInstance(rev);
+                //
+                //     validateInfoFormat(infoFormat);
+                //
+                //     crls.add(new DERTaggedObject(false, 1, infoFormat));
+                // }
+                // END android-removed
+                else if (rev instanceof ASN1TaggedObject)
+                {
+                    crls.add(rev);
+                }
             }
 
-            return certs;
+            return crls;
         }
         catch (ClassCastException e)
         {
@@ -119,6 +189,19 @@ class CMSUtils
     }
 
     // BEGIN android-removed
+    // private static void validateInfoFormat(OtherRevocationInfoFormat infoFormat)
+    // {
+    //     if (CMSObjectIdentifiers.id_ri_ocsp_response.equals(infoFormat.getInfoFormat()))
+    //     {
+    //         OCSPResponse resp = OCSPResponse.getInstance(infoFormat.getInfo());
+    //
+    //         if (resp.getResponseStatus().getValue().intValue() != OCSPResponseStatus.SUCCESSFUL)
+    //         {
+    //             throw new IllegalArgumentException("cannot add unsuccessful OCSP response to CMS SignedData");
+    //         }
+    //     }
+    // }
+    //
     // static Collection getOthersFromStore(ASN1ObjectIdentifier otherRevocationInfoFormat, Store otherRevocationInfos)
     // {
     //     List others = new ArrayList();
@@ -126,18 +209,10 @@ class CMSUtils
     //     for (Iterator it = otherRevocationInfos.getMatches(null).iterator(); it.hasNext();)
     //     {
     //         ASN1Encodable info = (ASN1Encodable)it.next();
+    //         OtherRevocationInfoFormat infoFormat = new OtherRevocationInfoFormat(otherRevocationInfoFormat, info);
+    //         validateInfoFormat(infoFormat);
     //
-    //         if (CMSObjectIdentifiers.id_ri_ocsp_response.equals(otherRevocationInfoFormat))
-    //         {
-    //             OCSPResponse resp = OCSPResponse.getInstance(info);
-    //
-    //             if (resp.getResponseStatus().getValue().intValue() != OCSPResponseStatus.SUCCESSFUL)
-    //             {
-    //                 throw new IllegalArgumentException("cannot add unsuccessful OCSP response to CMS SignedData");
-    //             }
-    //         }
-    //
-    //         others.add(new DERTaggedObject(false, 1, new OtherRevocationInfoFormat(otherRevocationInfoFormat, info)));
+    //         others.add(new DERTaggedObject(false, 1, infoFormat));
     //     }
     //
     //     return others;
@@ -202,7 +277,7 @@ class CMSUtils
             throw new CMSException("Malformed content.", e);
         }
     }
-    
+
     public static byte[] streamToByteArray(
         InputStream in) 
         throws IOException

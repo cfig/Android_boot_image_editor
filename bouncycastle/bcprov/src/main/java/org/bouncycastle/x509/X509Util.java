@@ -23,8 +23,8 @@ import javax.security.auth.x500.X500Principal;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 // BEGIN android-removed
 // import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 // END android-removed
@@ -148,21 +148,21 @@ class X509Util
             new ASN1Integer(1));
     }
 
-    static DERObjectIdentifier getAlgorithmOID(
+    static ASN1ObjectIdentifier getAlgorithmOID(
         String algorithmName)
     {
         algorithmName = Strings.toUpperCase(algorithmName);
         
         if (algorithms.containsKey(algorithmName))
         {
-            return (DERObjectIdentifier)algorithms.get(algorithmName);
+            return (ASN1ObjectIdentifier)algorithms.get(algorithmName);
         }
         
-        return new DERObjectIdentifier(algorithmName);
+        return new ASN1ObjectIdentifier(algorithmName);
     }
     
     static AlgorithmIdentifier getSigAlgID(
-        DERObjectIdentifier sigOid,
+        ASN1ObjectIdentifier sigOid,
         String              algorithmName)
     {
         if (noParams.contains(sigOid))
@@ -218,7 +218,7 @@ class X509Util
     }
 
     static byte[] calculateSignature(
-        DERObjectIdentifier sigOid,
+        ASN1ObjectIdentifier sigOid,
         String              sigName,
         PrivateKey          key,
         SecureRandom        random,
@@ -249,7 +249,7 @@ class X509Util
     }
 
     static byte[] calculateSignature(
-        DERObjectIdentifier sigOid,
+        ASN1ObjectIdentifier sigOid,
         String              sigName,
         String              provider,
         PrivateKey          key,

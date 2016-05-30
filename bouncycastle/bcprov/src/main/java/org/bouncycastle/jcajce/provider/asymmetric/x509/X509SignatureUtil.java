@@ -5,15 +5,17 @@ import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.PSSParameterSpec;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Null;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 // BEGIN android-removed
 // import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 // END android-removed
@@ -26,6 +28,7 @@ import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
 // END android-removed
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 class X509SignatureUtil
 {
@@ -80,7 +83,33 @@ class X509SignatureUtil
             {
                 ASN1Sequence ecDsaParams = ASN1Sequence.getInstance(params);
                 
-                return getDigestAlgName((DERObjectIdentifier)ecDsaParams.getObjectAt(0)) + "withECDSA";
+                return getDigestAlgName((ASN1ObjectIdentifier)ecDsaParams.getObjectAt(0)) + "withECDSA";
+            }
+        }
+
+        Provider prov = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
+
+        if (prov != null)
+        {
+            String      algName = prov.getProperty("Alg.Alias.Signature." + sigAlgId.getAlgorithm().getId());
+
+            if (algName != null)
+            {
+                return algName;
+            }
+        }
+
+        Provider[] provs = Security.getProviders();
+
+        //
+        // search every provider looking for a real algorithm
+        //
+        for (int i = 0; i != provs.length; i++)
+        {
+            String algName = provs[i].getProperty("Alg.Alias.Signature." + sigAlgId.getAlgorithm().getId());
+            if (algName != null)
+            {
+                return algName;
             }
         }
 
@@ -92,7 +121,7 @@ class X509SignatureUtil
      * representations rather the the algorithm identifier (if possible).
      */
     private static String getDigestAlgName(
-        DERObjectIdentifier digestAlgOID)
+        ASN1ObjectIdentifier digestAlgOID)
     {
         if (PKCSObjectIdentifiers.md5.equals(digestAlgOID))
         {

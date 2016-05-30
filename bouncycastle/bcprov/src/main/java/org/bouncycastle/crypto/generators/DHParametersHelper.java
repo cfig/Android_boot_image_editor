@@ -6,6 +6,7 @@ import java.security.SecureRandom;
 // BEGIN android-added
 import java.util.logging.Logger;
 // END android-added
+import org.bouncycastle.math.ec.WNafUtil;
 import org.bouncycastle.util.BigIntegers;
 
 class DHParametersHelper
@@ -31,6 +32,7 @@ class DHParametersHelper
         // END android-added
         BigInteger p, q;
         int qLength = size - 1;
+        int minWeight = size >>> 2;
 
         for (;;)
         {
@@ -42,10 +44,28 @@ class DHParametersHelper
             // p <- 2q + 1
             p = q.shiftLeft(1).add(ONE);
 
-            if (p.isProbablePrime(certainty) && (certainty <= 2 || q.isProbablePrime(certainty)))
+            if (!p.isProbablePrime(certainty))
             {
-                break;
+                continue;
             }
+
+            if (certainty > 2 && !q.isProbablePrime(certainty - 2))
+            {
+                continue;
+            }
+
+            /*
+             * Require a minimum weight of the NAF representation, since low-weight primes may be
+             * weak against a version of the number-field-sieve for the discrete-logarithm-problem.
+             * 
+             * See "The number field sieve for integers of low weight", Oliver Schirokauer.
+             */
+            if (WNafUtil.getNafWeight(p) < minWeight)
+            {
+                continue;
+            }
+
+            break;
         }
         // BEGIN android-added
         long end = System.currentTimeMillis();

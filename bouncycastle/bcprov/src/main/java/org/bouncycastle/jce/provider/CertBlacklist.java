@@ -122,7 +122,15 @@ public class CertBlacklist {
 
     private static final Set<BigInteger> readSerialBlackList(String path) {
 
-        // start out with a base set of known bad values
+        /* Start out with a base set of known bad values.
+         *
+         * WARNING: Do not add short serials to this list!
+         *
+         * Since this currently doesn't compare the serial + issuer, you
+         * should only add serials that have enough entropy here. Short
+         * serials may inadvertently match a certificate that was issued
+         * not in compliance with the Baseline Requirements.
+         */
         Set<BigInteger> bl = new HashSet<BigInteger>(Arrays.asList(
             // From http://src.chromium.org/viewvc/chrome/trunk/src/net/base/x509_certificate.cc?revision=78748&view=markup
             // Not a real certificate. For testing only.
@@ -135,10 +143,7 @@ public class CertBlacklist {
             new BigInteger("d7558fdaf5f1105bb213282b707729a3", 16),
             new BigInteger("f5c86af36162f13a64f54f6dc9587c06", 16),
             new BigInteger("392a434f0e07df1f8aa305de34e0c229", 16),
-            new BigInteger("3e75ced46b693021218830ae86a82a71", 16),
-            new BigInteger("864", 16),
-            new BigInteger("827", 16),
-            new BigInteger("31da7", 16)
+            new BigInteger("3e75ced46b693021218830ae86a82a71", 16)
         ));
 
         // attempt to augment it with values taken from gservices

@@ -149,6 +149,7 @@ public class BootSignature extends ASN1Object
             throws Exception, IOException, CertificateEncodingException {
         ASN1InputStream s = new ASN1InputStream(cert.getEncoded());
         certificate = s.readObject();
+        publicKey = cert.getPublicKey();
     }
 
     public byte[] generateSignableImage(byte[] image) throws IOException {
@@ -253,7 +254,7 @@ public class BootSignature extends ASN1Object
         Utils.write(image_with_metadata, outPath);
     }
 
-    public static void verifySignature(String imagePath) throws Exception {
+    public static void verifySignature(String imagePath, String certPath) throws Exception {
         byte[] image = Utils.read(imagePath);
         int signableSize = getSignableImageSize(image);
 
@@ -263,6 +264,11 @@ public class BootSignature extends ASN1Object
 
         byte[] signature = Arrays.copyOfRange(image, signableSize, image.length);
         BootSignature bootsig = new BootSignature(signature);
+
+        if (!certPath.isEmpty()) {
+            System.err.println("NOTE: verifying using public key from " + certPath);
+            bootsig.setCertificate(Utils.loadPEMCertificate(certPath));
+        }
 
         try {
             if (bootsig.verify(Arrays.copyOf(image, signableSize))) {
@@ -291,8 +297,15 @@ public class BootSignature extends ASN1Object
         Security.addProvider(new BouncyCastleProvider());
 
         if ("-verify".equals(args[0])) {
+            String certPath = "";
+
+            if (args.length >= 4 && "-certificate".equals(args[2])) {
+                /* args[3] is the path to a public key certificate */
+                certPath = args[3];
+            }
+
             /* args[1] is the path to a signed boot image */
-            verifySignature(args[1]);
+            verifySignature(args[1], certPath);
         } else {
             /* args[0] is the target name, typically /boot
                args[1] is the path to a boot image to sign

@@ -15,9 +15,9 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.jcajce.DefaultJcaJceHelper;
-import org.bouncycastle.jcajce.NamedJcaJceHelper;
-import org.bouncycastle.jcajce.ProviderJcaJceHelper;
+import org.bouncycastle.jcajce.util.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.util.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.util.ProviderJcaJceHelper;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -190,8 +190,9 @@ public class JcaContentVerifierProviderBuilder
     private class SigVerifier
         implements ContentVerifier
     {
-        private SignatureOutputStream stream;
         private AlgorithmIdentifier algorithm;
+
+        protected SignatureOutputStream stream;
 
         SigVerifier(AlgorithmIdentifier algorithm, SignatureOutputStream stream)
         {
@@ -239,6 +240,27 @@ public class JcaContentVerifierProviderBuilder
             this.rawSignature = rawSignature;
         }
 
+        public boolean verify(byte[] expected)
+        {
+            try
+            {
+                return super.verify(expected);
+            }
+            finally
+            {
+                // we need to do this as in some PKCS11 implementations the session associated with the init of the
+                // raw signature will not be freed if verify is not called on it.
+                try
+                {
+                    rawSignature.verify(expected);
+                }
+                catch (Exception e)
+                {
+                    // ignore
+                }
+            }
+        }
+
         public boolean verify(byte[] digest, byte[] expected)
         {
             try
@@ -250,6 +272,19 @@ public class JcaContentVerifierProviderBuilder
             catch (SignatureException e)
             {
                 throw new RuntimeOperatorException("exception obtaining raw signature: " + e.getMessage(), e);
+            }
+            finally
+            {
+                // we need to do this as in some PKCS11 implementations the session associated with the init of the
+                // standard signature will not be freed if verify is not called on it.
+                try
+                {
+                    stream.verify(expected);
+                }
+                catch (Exception e)
+                {
+                    // ignore
+                }
             }
         }
     }
