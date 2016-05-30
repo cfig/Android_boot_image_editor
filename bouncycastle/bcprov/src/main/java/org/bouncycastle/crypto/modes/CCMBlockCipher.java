@@ -7,6 +7,7 @@ import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Mac;
+import org.bouncycastle.crypto.OutputLengthException;
 import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
 import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.ParametersWithIV;
@@ -42,7 +43,7 @@ public class CCMBlockCipher
         this.cipher = c;
         this.blockSize = c.getBlockSize();
         this.macBlock = new byte[blockSize];
-        
+
         if (blockSize != 16)
         {
             throw new IllegalArgumentException("cipher required with a block size of 16.");
@@ -86,7 +87,7 @@ public class CCMBlockCipher
         }
         else
         {
-            throw new IllegalArgumentException("invalid parameters passed to CCM");
+            throw new IllegalArgumentException("invalid parameters passed to CCM: " + params.getClass().getName());
         }
 
         // NOTE: Very basic support for key re-use, but no performance gain from it
@@ -99,7 +100,7 @@ public class CCMBlockCipher
         {
             throw new IllegalArgumentException("nonce must have length from 7 to 13 octets");
         }
-        
+
         reset();
     }
 
@@ -130,6 +131,10 @@ public class CCMBlockCipher
     public int processBytes(byte[] in, int inOff, int inLen, byte[] out, int outOff)
         throws DataLengthException, IllegalStateException
     {
+        if (in.length < (inOff + inLen))
+        {
+            throw new DataLengthException("Input buffer too short");
+        }
         data.write(in, inOff, inLen);
 
         return 0;
@@ -155,15 +160,15 @@ public class CCMBlockCipher
     /**
      * Returns a byte array containing the mac calculated as part of the
      * last encrypt or decrypt operation.
-     * 
+     *
      * @return the last mac calculated.
      */
     public byte[] getMac()
     {
         byte[] mac = new byte[macSize];
-        
+
         System.arraycopy(macBlock, 0, mac, 0, mac.length);
-        
+
         return mac;
     }
 
@@ -267,12 +272,14 @@ public class CCMBlockCipher
             outputLen = inLen + macSize;
             if (output.length < (outputLen + outOff))
             {
-                throw new DataLengthException("Output buffer too short.");
+                throw new OutputLengthException("Output buffer too short.");
             }
 
             calculateMac(in, inOff, inLen, macBlock);
 
-            ctrCipher.processBlock(macBlock, 0, macBlock, 0);   // S0
+            byte[] encMac = new byte[blockSize];
+
+            ctrCipher.processBlock(macBlock, 0, encMac, 0);   // S0
 
             while (inIndex < (inOff + inLen - blockSize))                 // S1...
             {
@@ -289,7 +296,7 @@ public class CCMBlockCipher
 
             System.arraycopy(block, 0, output, outIndex, inLen + inOff - inIndex);
 
-            System.arraycopy(macBlock, 0, output, outOff + inLen, macSize);
+            System.arraycopy(encMac, 0, output, outOff + inLen, macSize);
         }
         else
         {
@@ -300,7 +307,7 @@ public class CCMBlockCipher
             outputLen = inLen - macSize;
             if (output.length < (outputLen + outOff))
             {
-                throw new DataLengthException("Output buffer too short.");
+                throw new OutputLengthException("Output buffer too short.");
             }
 
             System.arraycopy(in, inOff + outputLen, macBlock, 0, macSize);
@@ -350,18 +357,18 @@ public class CCMBlockCipher
         // build b0
         //
         byte[] b0 = new byte[16];
-    
+
         if (hasAssociatedText())
         {
             b0[0] |= 0x40;
         }
-        
+
         b0[0] |= (((cMac.getMacSize() - 2) / 2) & 0x7) << 3;
 
         b0[0] |= ((15 - nonce.length) - 1) & 0x7;
-        
+
         System.arraycopy(nonce, 0, b0, 1, nonce.length);
-        
+
         int q = dataLen;
         int count = 1;
         while (q > 0)
@@ -370,22 +377,22 @@ public class CCMBlockCipher
             q >>>= 8;
             count++;
         }
-        
+
         cMac.update(b0, 0, b0.length);
-        
+
         //
         // process associated text
         //
         if (hasAssociatedText())
         {
             int extra;
-            
+
             int textLength = getAssociatedTextLength();
             if (textLength < ((1 << 16) - (1 << 8)))
             {
                 cMac.update((byte)(textLength >> 8));
                 cMac.update((byte)textLength);
-                
+
                 extra = 2;
             }
             else // can't go any higher than 2^32
@@ -396,7 +403,7 @@ public class CCMBlockCipher
                 cMac.update((byte)(textLength >> 16));
                 cMac.update((byte)(textLength >> 8));
                 cMac.update((byte)textLength);
-                
+
                 extra = 6;
             }
 
@@ -418,7 +425,7 @@ public class CCMBlockCipher
                 }
             }
         }
- 
+
         //
         // add the text
         //

@@ -64,6 +64,9 @@ public class SubjectPublicKeyInfo
         this.algId = algId;
     }
 
+    /**
+     @deprecated use SubjectPublicKeyInfo.getInstance()
+     */
     public SubjectPublicKeyInfo(
         ASN1Sequence  seq)
     {
@@ -104,7 +107,7 @@ public class SubjectPublicKeyInfo
     public ASN1Primitive parsePublicKey()
         throws IOException
     {
-        ASN1InputStream         aIn = new ASN1InputStream(keyData.getBytes());
+        ASN1InputStream         aIn = new ASN1InputStream(keyData.getOctets());
 
         return aIn.readObject();
     }
@@ -121,7 +124,7 @@ public class SubjectPublicKeyInfo
     public ASN1Primitive getPublicKey()
         throws IOException
     {
-        ASN1InputStream         aIn = new ASN1InputStream(keyData.getBytes());
+        ASN1InputStream         aIn = new ASN1InputStream(keyData.getOctets());
 
         return aIn.readObject();
     }

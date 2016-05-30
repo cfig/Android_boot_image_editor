@@ -103,7 +103,7 @@ public class AuthorityKeyIdentifier
      *       publicKey.getEncoded()).readObject());
      *   AuthorityKeyIdentifier aki = new AuthorityKeyIdentifier(apki);
      * </pre>
-     *
+     * @deprecated create the extension using org.bouncycastle.cert.X509ExtensionUtils
      **/
     public AuthorityKeyIdentifier(
         SubjectPublicKeyInfo    spki)
@@ -122,6 +122,7 @@ public class AuthorityKeyIdentifier
     /**
      * create an AuthorityKeyIdentifier with the GeneralNames tag and
      * the serial number provided as well.
+     * @deprecated create the extension using org.bouncycastle.cert.X509ExtensionUtils
      */
     public AuthorityKeyIdentifier(
         SubjectPublicKeyInfo    spki,
@@ -150,9 +151,7 @@ public class AuthorityKeyIdentifier
         GeneralNames            name,
         BigInteger              serialNumber)
     {
-        this.keyidentifier = null;
-        this.certissuer = GeneralNames.getInstance(name.toASN1Primitive());
-        this.certserno = new ASN1Integer(serialNumber);
+        this((byte[])null, name, serialNumber);
     }
 
     /**
@@ -161,9 +160,7 @@ public class AuthorityKeyIdentifier
      public AuthorityKeyIdentifier(
          byte[]                  keyIdentifier)
      {
-         this.keyidentifier = new DEROctetString(keyIdentifier);
-         this.certissuer = null;
-         this.certserno = null;
+         this(keyIdentifier, null, null);
      }
 
     /**
@@ -175,9 +172,9 @@ public class AuthorityKeyIdentifier
         GeneralNames            name,
         BigInteger              serialNumber)
     {
-        this.keyidentifier = new DEROctetString(keyIdentifier);
-        this.certissuer = GeneralNames.getInstance(name.toASN1Primitive());
-        this.certserno = new ASN1Integer(serialNumber);
+        this.keyidentifier = (keyIdentifier != null) ? new DEROctetString(keyIdentifier) : null;
+        this.certissuer = name;
+        this.certserno = (serialNumber != null) ? new ASN1Integer(serialNumber) : null;
     }
     
     public byte[] getKeyIdentifier()

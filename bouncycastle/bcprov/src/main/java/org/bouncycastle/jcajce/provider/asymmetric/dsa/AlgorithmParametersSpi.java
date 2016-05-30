@@ -33,7 +33,6 @@ public class AlgorithmParametersSpi
 
     /**
      * Return the X.509 ASN.1 structure DSAParameter.
-     * <p/>
      * <pre>
      *  DSAParameter ::= SEQUENCE {
      *                   prime INTEGER, -- p
@@ -70,7 +69,7 @@ public class AlgorithmParametersSpi
         Class paramSpec)
         throws InvalidParameterSpecException
     {
-        if (paramSpec == DSAParameterSpec.class)
+        if (paramSpec == DSAParameterSpec.class || paramSpec == AlgorithmParameterSpec.class)
         {
             return currentSpec;
         }

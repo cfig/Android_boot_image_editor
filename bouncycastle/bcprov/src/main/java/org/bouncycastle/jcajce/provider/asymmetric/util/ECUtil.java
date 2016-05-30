@@ -1,11 +1,14 @@
 package org.bouncycastle.jcajce.provider.asymmetric.util;
 
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 // BEGIN android-removed
+// import org.bouncycastle.asn1.anssi.ANSSINamedCurves;
 // import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 // END android-removed
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
@@ -15,8 +18,10 @@ import org.bouncycastle.asn1.sec.SECNamedCurves;
 // import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
 // END android-removed
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x9.ECNamedCurveTable;
 import org.bouncycastle.asn1.x9.X962NamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
@@ -217,11 +222,60 @@ public class ECUtil
         throw new InvalidKeyException("can't identify EC private key.");
     }
 
+    public static int getOrderBitLength(BigInteger order, BigInteger privateValue)
+    {
+        if (order == null)     // implicitly CA
+        {
+            ECParameterSpec implicitCA = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
+
+            if (implicitCA == null)
+            {
+                return privateValue.bitLength();   // a guess but better than an exception!
+            }
+
+            return implicitCA.getN().bitLength();
+        }
+        else
+        {
+            return order.bitLength();
+        }
+    }
+
     public static ASN1ObjectIdentifier getNamedCurveOid(
-        String name)
+        String curveName)
+    {
+        String name;
+
+        if (curveName.indexOf(' ') > 0)
+        {
+            name = curveName.substring(curveName.indexOf(' ') + 1);
+        }
+        else
+        {
+            name = curveName;
+        }
+
+        try
+        {
+            if (name.charAt(0) >= '0' && name.charAt(0) <= '2')
+            {
+                return new ASN1ObjectIdentifier(name);
+            }
+            else
+            {
+                return lookupOidByName(name);
+            }
+        }
+        catch (IllegalArgumentException ex)
+        {
+            return lookupOidByName(name);
+        }
+    }
+
+    private static ASN1ObjectIdentifier lookupOidByName(String name)
     {
         ASN1ObjectIdentifier oid = X962NamedCurves.getOID(name);
-        
+
         if (oid == null)
         {
             oid = SECNamedCurves.getOID(name);
@@ -238,20 +292,49 @@ public class ECUtil
             // {
             //     oid = ECGOST3410NamedCurves.getOID(name);
             // }
+            // if (oid == null)
+            // {
+            //     oid = ANSSINamedCurves.getOID(name);
+            // }
             // END android-removed
         }
 
         return oid;
     }
-    
+
+    public static ASN1ObjectIdentifier getNamedCurveOid(
+        ECParameterSpec ecParameterSpec)
+    {
+        for (Enumeration names = ECNamedCurveTable.getNames(); names.hasMoreElements();)
+        {
+            String name = (String)names.nextElement();
+
+            X9ECParameters params = ECNamedCurveTable.getByName(name);
+
+            if (params.getN().equals(ecParameterSpec.getN())
+                && params.getH().equals(ecParameterSpec.getH())
+                && params.getCurve().equals(ecParameterSpec.getCurve())
+                && params.getG().equals(ecParameterSpec.getG()))
+            {
+                return org.bouncycastle.asn1.x9.ECNamedCurveTable.getOID(name);
+            }
+        }
+
+        return null;
+    }
+
     public static X9ECParameters getNamedCurveByOid(
         ASN1ObjectIdentifier oid)
     {
-        X9ECParameters params = X962NamedCurves.getByOID(oid);
-        
+        X9ECParameters params = CustomNamedCurves.getByOID(oid);
+
         if (params == null)
         {
-            params = SECNamedCurves.getByOID(oid);
+            params = X962NamedCurves.getByOID(oid);
+            if (params == null)
+            {
+                params = SECNamedCurves.getByOID(oid);
+            }
             if (params == null)
             {
                 params = NISTNamedCurves.getByOID(oid);
@@ -260,6 +343,33 @@ public class ECUtil
             // if (params == null)
             // {
             //     params = TeleTrusTNamedCurves.getByOID(oid);
+            // }
+            // END android-removed
+        }
+
+        return params;
+    }
+
+    public static X9ECParameters getNamedCurveByName(
+        String curveName)
+    {
+        X9ECParameters params = CustomNamedCurves.getByName(curveName);
+
+        if (params == null)
+        {
+            params = X962NamedCurves.getByName(curveName);
+            if (params == null)
+            {
+                params = SECNamedCurves.getByName(curveName);
+            }
+            if (params == null)
+            {
+                params = NISTNamedCurves.getByName(curveName);
+            }
+            // BEGIN android-removed
+            // if (params == null)
+            // {
+            //     params = TeleTrusTNamedCurves.getByName(curveName);
             // }
             // END android-removed
         }

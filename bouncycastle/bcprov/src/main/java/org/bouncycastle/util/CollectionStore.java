@@ -8,10 +8,10 @@ import java.util.List;
 /**
  * A simple collection backed store.
  */
-public class CollectionStore
-    implements Store
+public class CollectionStore<T>
+    implements Store<T>, Iterable<T>
 {
-    private Collection _local;
+    private Collection<T> _local;
 
     /**
      * Basic constructor.
@@ -19,9 +19,9 @@ public class CollectionStore
      * @param collection - initial contents for the store, this is copied.
      */
     public CollectionStore(
-        Collection collection)
+        Collection<T> collection)
     {
-        _local = new ArrayList(collection);
+        _local = new ArrayList<T>(collection);
     }
 
     /**
@@ -30,20 +30,20 @@ public class CollectionStore
      * @param selector the selector to match against.
      * @return a possibly empty collection of matching objects.
      */
-    public Collection getMatches(Selector selector)
+    public Collection<T> getMatches(Selector<T> selector)
     {
         if (selector == null)
         {
-            return new ArrayList(_local);
+            return new ArrayList<T>(_local);
         }
         else
         {
-            List col = new ArrayList();
-            Iterator iter = _local.iterator();
+            List<T> col = new ArrayList<T>();
+            Iterator<T> iter = _local.iterator();
 
             while (iter.hasNext())
             {
-                Object obj = iter.next();
+                T obj = iter.next();
 
                 if (selector.match(obj))
                 {
@@ -53,5 +53,10 @@ public class CollectionStore
 
             return col;
         }
+    }
+
+    public Iterator<T> iterator()
+    {
+        return getMatches(null).iterator();
     }
 }

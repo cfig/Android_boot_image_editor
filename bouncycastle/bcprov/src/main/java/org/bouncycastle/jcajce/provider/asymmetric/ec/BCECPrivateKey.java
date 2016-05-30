@@ -35,6 +35,7 @@ import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.util.Strings;
 
 public class BCECPrivateKey
     implements ECPrivateKey, org.bouncycastle.jce.interfaces.ECPrivateKey, PKCS12BagAttributeCarrier, ECPointEncoder
@@ -210,38 +211,8 @@ public class BCECPrivateKey
     {
         X962Parameters params = X962Parameters.getInstance(info.getPrivateKeyAlgorithm().getParameters());
 
-        if (params.isNamedCurve())
-        {
-            ASN1ObjectIdentifier oid = ASN1ObjectIdentifier.getInstance(params.getParameters());
-            X9ECParameters ecP = ECUtil.getNamedCurveByOid(oid);
-            EllipticCurve ellipticCurve = EC5Util.convertCurve(ecP.getCurve(), ecP.getSeed());
-
-            ecSpec = new ECNamedCurveSpec(
-                    ECUtil.getCurveName(oid),
-                    ellipticCurve,
-                    new ECPoint(
-                            ecP.getG().getAffineXCoord().toBigInteger(),
-                            ecP.getG().getAffineYCoord().toBigInteger()),
-                    ecP.getN(),
-                    ecP.getH());
-        }
-        else if (params.isImplicitlyCA())
-        {
-            ecSpec = null;
-        }
-        else
-        {
-            X9ECParameters      ecP = X9ECParameters.getInstance(params.getParameters());
-            EllipticCurve       ellipticCurve = EC5Util.convertCurve(ecP.getCurve(), ecP.getSeed());
-
-            this.ecSpec = new ECParameterSpec(
-                ellipticCurve,
-                new ECPoint(
-                        ecP.getG().getAffineXCoord().toBigInteger(),
-                        ecP.getG().getAffineYCoord().toBigInteger()),
-                ecP.getN(),
-                ecP.getH().intValue());
-        }
+        ECCurve curve = EC5Util.getCurve(configuration, params);
+        ecSpec = EC5Util.convertToSpec(params, curve);
 
         ASN1Encodable privKey = info.parsePrivateKey();
         if (privKey instanceof ASN1Integer)
@@ -282,7 +253,8 @@ public class BCECPrivateKey
      */
     public byte[] getEncoded()
     {
-        X962Parameters          params;
+        X962Parameters  params;
+        int orderBitLength;
 
         if (ecSpec instanceof ECNamedCurveSpec)
         {
@@ -293,10 +265,12 @@ public class BCECPrivateKey
             }
 
             params = new X962Parameters(curveOid);
+            orderBitLength = ECUtil.getOrderBitLength(ecSpec.getOrder(), this.getS());
         }
         else if (ecSpec == null)
         {
             params = new X962Parameters(DERNull.INSTANCE);
+            orderBitLength = ECUtil.getOrderBitLength(null, this.getS());
         }
         else
         {
@@ -310,6 +284,7 @@ public class BCECPrivateKey
                 ecSpec.getCurve().getSeed());
 
             params = new X962Parameters(ecP);
+            orderBitLength = ECUtil.getOrderBitLength(ecSpec.getOrder(), this.getS());
         }
         
         PrivateKeyInfo          info;
@@ -317,11 +292,11 @@ public class BCECPrivateKey
 
         if (publicKey != null)
         {
-            keyStructure = new org.bouncycastle.asn1.sec.ECPrivateKey(this.getS(), publicKey, params);
+            keyStructure = new org.bouncycastle.asn1.sec.ECPrivateKey(orderBitLength, this.getS(), publicKey, params);
         }
         else
         {
-            keyStructure = new org.bouncycastle.asn1.sec.ECPrivateKey(this.getS(), params);
+            keyStructure = new org.bouncycastle.asn1.sec.ECPrivateKey(orderBitLength, this.getS(), params);
         }
 
         try
@@ -414,7 +389,7 @@ public class BCECPrivateKey
     public String toString()
     {
         StringBuffer    buf = new StringBuffer();
-        String          nl = System.getProperty("line.separator");
+        String          nl = Strings.lineSeparator();
 
         buf.append("EC Private Key").append(nl);
         buf.append("             S: ").append(this.d.toString(16)).append(nl);

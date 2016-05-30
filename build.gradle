@@ -31,19 +31,6 @@ model {
             }
         }
     }
-
-    components {
-        libmincrypt(NativeLibrarySpec) {
-            binaries.all {
-            }
-        }
-        mkbootimg(NativeExecutableSpec) {
-            binaries.all {
-                cCompiler.args '-std=c11'
-                lib library: "libmincrypt", linkage: 'static'
-            }
-        }
-    }
 }
 
 task unpack_bootimg(type: Exec, dependsOn: 'abootimgExecutable') {
@@ -95,11 +82,11 @@ task pack_ramdisk_and_gz { Task task ->
 }
 pack_ramdisk_and_gz.dependsOn('mkbootfsExecutable')
 
-task pack_clear(type: Exec, dependsOn: [pack_ramdisk_and_gz, 'mkbootimgExecutable']) {
+task pack_clear(type: Exec, dependsOn: [pack_ramdisk_and_gz]) {
     def theCmdLine = getRamdiskConfig(workdir, 'cmdline')
     def theBaseAddr = getBaseAddress(workdir)
     workingDir '.'
-    executable 'build/exe/mkbootimg/mkbootimg'
+    executable 'src/mkbootimg/mkbootimg'
     args = [
         '--kernel', workdir + "/kernel",
         '--ramdisk', workdir + "/ramdisk.img.gz",
@@ -245,7 +232,6 @@ task flash << {
 
 task debug(dependsOn: ['addSystemBin', 'addSystemLib']) {
     description "add debug tools into recovery rootfs"
-    println(System.getenv("PATH"))
 }
 
 task addSystemBin(type: Copy, dependsOn: 'unpack') {

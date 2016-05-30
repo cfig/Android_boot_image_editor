@@ -24,11 +24,13 @@ import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
+import org.bouncycastle.util.Encodable;
 
 /**
  * Holding class for an X.509 CRL structure.
  */
 public class X509CRLHolder
+    implements Encodable
 {
     private CertificateList x509CRL;
     private boolean isIndirect;
@@ -289,7 +291,7 @@ public class X509CRLHolder
             throw new CertException("unable to process signature: " + e.getMessage(), e);
         }
 
-        return verifier.verify(x509CRL.getSignature().getBytes());
+        return verifier.verify(x509CRL.getSignature().getOctets());
     }
 
     public boolean equals(

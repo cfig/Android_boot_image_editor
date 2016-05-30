@@ -44,7 +44,6 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseSecretKeyFactory;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseWrapCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.PBE;
 import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class DES
 {
@@ -187,7 +186,7 @@ public final class DES
 
             try
             {
-                params = AlgorithmParameters.getInstance("DES", BouncyCastleProvider.PROVIDER_NAME);
+                params = createParametersInstance("DES");
                 params.init(new IvParameterSpec(iv));
             }
             catch (Exception e)
@@ -406,7 +405,7 @@ public final class DES
     // {
     //     public PBEWithMD2()
     //     {
-    //         super(new CBCBlockCipher(new DESEngine()));
+    //         super(new CBCBlockCipher(new DESEngine()), PKCS5S1, MD2, 64, 8);
     //     }
     // }
     // END android-removed
@@ -419,7 +418,7 @@ public final class DES
     {
         public PBEWithMD5()
         {
-            super(new CBCBlockCipher(new DESEngine()));
+            super(new CBCBlockCipher(new DESEngine()), PKCS5S1, MD5, 64, 8);
         }
     }
 
@@ -431,7 +430,7 @@ public final class DES
     {
         public PBEWithSHA1()
         {
-            super(new CBCBlockCipher(new DESEngine()));
+            super(new CBCBlockCipher(new DESEngine()), PKCS5S1, SHA1, 64, 8);
         }
     }
     
@@ -450,7 +449,7 @@ public final class DES
 
             provider.addAlgorithm("Cipher.DES", PREFIX + "$ECB");
             // BEGIN android-removed
-            // provider.addAlgorithm("Cipher." + OIWObjectIdentifiers.desCBC, PREFIX + "$CBC");
+            // provider.addAlgorithm("Cipher", OIWObjectIdentifiers.desCBC, PREFIX + "$CBC");
             //
             // addAlias(provider, OIWObjectIdentifiers.desCBC, "DES");
             //
@@ -487,7 +486,7 @@ public final class DES
             // END android-removed
 
             provider.addAlgorithm("AlgorithmParameters.DES", PACKAGE + ".util.IvAlgorithmParameters");
-            provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + OIWObjectIdentifiers.desCBC, "DES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters", OIWObjectIdentifiers.desCBC, "DES");
 
             // BEGIN android-removed
             // provider.addAlgorithm("AlgorithmParameterGenerator.DES",  PREFIX + "$AlgParamGen");
@@ -499,13 +498,19 @@ public final class DES
             provider.addAlgorithm("Cipher.PBEWITHSHA1ANDDES", PREFIX + "$PBEWithSHA1");
             
             // BEGIN android-removed
-            // provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, "PBEWITHMD2ANDDES");
+            // provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, "PBEWITHMD2ANDDES");
             // END android-removed
-            provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithMD5AndDES_CBC, "PBEWITHMD5ANDDES");
-            provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithSHA1AndDES_CBC, "PBEWITHSHA1ANDDES");
-            
+            provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.pbeWithMD5AndDES_CBC, "PBEWITHMD5ANDDES");
+            provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.pbeWithSHA1AndDES_CBC, "PBEWITHSHA1ANDDES");
+
             // BEGIN android-removed
-            // provider.addAlgorithm("SecretKeyFactory.PBEWITHMD2ANDDES", PREFIX + "$PBEWithMD2KeyFactory");
+            // provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHMD2ANDDES-CBC", "PBEWITHMD2ANDDES");
+            // BEGIN android-removed
+            provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHMD5ANDDES-CBC", "PBEWITHMD5ANDDES");
+            provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHSHA1ANDDES-CBC", "PBEWITHSHA1ANDDES");
+
+            // BEGIN android-removed
+            // provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHMD2ANDDES-CBC", "PBEWITHMD2ANDDES");
             // END android-removed
             provider.addAlgorithm("SecretKeyFactory.PBEWITHMD5ANDDES", PREFIX + "$PBEWithMD5KeyFactory");
             provider.addAlgorithm("SecretKeyFactory.PBEWITHSHA1ANDDES", PREFIX + "$PBEWithSHA1KeyFactory");

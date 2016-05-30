@@ -1,65 +1,61 @@
 package org.bouncycastle.asn1.x500.style;
 
-import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERPrintableString;
-import org.bouncycastle.asn1.DERUTF8String;
-import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameStyle;
 
 public class RFC4519Style
-    implements X500NameStyle
+	extends AbstractX500NameStyle
 {
-    public static final ASN1ObjectIdentifier businessCategory = new ASN1ObjectIdentifier("2.5.4.15");
-    public static final ASN1ObjectIdentifier c = new ASN1ObjectIdentifier("2.5.4.6");
-    public static final ASN1ObjectIdentifier cn = new ASN1ObjectIdentifier("2.5.4.3");
-    public static final ASN1ObjectIdentifier dc = new ASN1ObjectIdentifier("0.9.2342.19200300.100.1.25");
-    public static final ASN1ObjectIdentifier description = new ASN1ObjectIdentifier("2.5.4.13");
-    public static final ASN1ObjectIdentifier destinationIndicator = new ASN1ObjectIdentifier("2.5.4.27");
-    public static final ASN1ObjectIdentifier distinguishedName = new ASN1ObjectIdentifier("2.5.4.49");
-    public static final ASN1ObjectIdentifier dnQualifier = new ASN1ObjectIdentifier("2.5.4.46");
-    public static final ASN1ObjectIdentifier enhancedSearchGuide = new ASN1ObjectIdentifier("2.5.4.47");
-    public static final ASN1ObjectIdentifier facsimileTelephoneNumber = new ASN1ObjectIdentifier("2.5.4.23");
-    public static final ASN1ObjectIdentifier generationQualifier = new ASN1ObjectIdentifier("2.5.4.44");
-    public static final ASN1ObjectIdentifier givenName = new ASN1ObjectIdentifier("2.5.4.42");
-    public static final ASN1ObjectIdentifier houseIdentifier = new ASN1ObjectIdentifier("2.5.4.51");
-    public static final ASN1ObjectIdentifier initials = new ASN1ObjectIdentifier("2.5.4.43");
-    public static final ASN1ObjectIdentifier internationalISDNNumber = new ASN1ObjectIdentifier("2.5.4.25");
-    public static final ASN1ObjectIdentifier l = new ASN1ObjectIdentifier("2.5.4.7");
-    public static final ASN1ObjectIdentifier member = new ASN1ObjectIdentifier("2.5.4.31");
-    public static final ASN1ObjectIdentifier name = new ASN1ObjectIdentifier("2.5.4.41");
-    public static final ASN1ObjectIdentifier o = new ASN1ObjectIdentifier("2.5.4.10");
-    public static final ASN1ObjectIdentifier ou = new ASN1ObjectIdentifier("2.5.4.11");
-    public static final ASN1ObjectIdentifier owner = new ASN1ObjectIdentifier("2.5.4.32");
-    public static final ASN1ObjectIdentifier physicalDeliveryOfficeName = new ASN1ObjectIdentifier("2.5.4.19");
-    public static final ASN1ObjectIdentifier postalAddress = new ASN1ObjectIdentifier("2.5.4.16");
-    public static final ASN1ObjectIdentifier postalCode = new ASN1ObjectIdentifier("2.5.4.17");
-    public static final ASN1ObjectIdentifier postOfficeBox = new ASN1ObjectIdentifier("2.5.4.18");
-    public static final ASN1ObjectIdentifier preferredDeliveryMethod = new ASN1ObjectIdentifier("2.5.4.28");
-    public static final ASN1ObjectIdentifier registeredAddress = new ASN1ObjectIdentifier("2.5.4.26");
-    public static final ASN1ObjectIdentifier roleOccupant = new ASN1ObjectIdentifier("2.5.4.33");
-    public static final ASN1ObjectIdentifier searchGuide = new ASN1ObjectIdentifier("2.5.4.14");
-    public static final ASN1ObjectIdentifier seeAlso = new ASN1ObjectIdentifier("2.5.4.34");
-    public static final ASN1ObjectIdentifier serialNumber = new ASN1ObjectIdentifier("2.5.4.5");
-    public static final ASN1ObjectIdentifier sn = new ASN1ObjectIdentifier("2.5.4.4");
-    public static final ASN1ObjectIdentifier st = new ASN1ObjectIdentifier("2.5.4.8");
-    public static final ASN1ObjectIdentifier street = new ASN1ObjectIdentifier("2.5.4.9");
-    public static final ASN1ObjectIdentifier telephoneNumber = new ASN1ObjectIdentifier("2.5.4.20");
-    public static final ASN1ObjectIdentifier teletexTerminalIdentifier = new ASN1ObjectIdentifier("2.5.4.22");
-    public static final ASN1ObjectIdentifier telexNumber = new ASN1ObjectIdentifier("2.5.4.21");
-    public static final ASN1ObjectIdentifier title = new ASN1ObjectIdentifier("2.5.4.12");
-    public static final ASN1ObjectIdentifier uid = new ASN1ObjectIdentifier("0.9.2342.19200300.100.1.1");
-    public static final ASN1ObjectIdentifier uniqueMember = new ASN1ObjectIdentifier("2.5.4.50");
-    public static final ASN1ObjectIdentifier userPassword = new ASN1ObjectIdentifier("2.5.4.35");
-    public static final ASN1ObjectIdentifier x121Address = new ASN1ObjectIdentifier("2.5.4.24");
-    public static final ASN1ObjectIdentifier x500UniqueIdentifier = new ASN1ObjectIdentifier("2.5.4.45");
+    public static final ASN1ObjectIdentifier businessCategory = new ASN1ObjectIdentifier("2.5.4.15").intern();
+    public static final ASN1ObjectIdentifier c = new ASN1ObjectIdentifier("2.5.4.6").intern();
+    public static final ASN1ObjectIdentifier cn = new ASN1ObjectIdentifier("2.5.4.3").intern();
+    public static final ASN1ObjectIdentifier dc = new ASN1ObjectIdentifier("0.9.2342.19200300.100.1.25").intern();
+    public static final ASN1ObjectIdentifier description = new ASN1ObjectIdentifier("2.5.4.13").intern();
+    public static final ASN1ObjectIdentifier destinationIndicator = new ASN1ObjectIdentifier("2.5.4.27").intern();
+    public static final ASN1ObjectIdentifier distinguishedName = new ASN1ObjectIdentifier("2.5.4.49").intern();
+    public static final ASN1ObjectIdentifier dnQualifier = new ASN1ObjectIdentifier("2.5.4.46").intern();
+    public static final ASN1ObjectIdentifier enhancedSearchGuide = new ASN1ObjectIdentifier("2.5.4.47").intern();
+    public static final ASN1ObjectIdentifier facsimileTelephoneNumber = new ASN1ObjectIdentifier("2.5.4.23").intern();
+    public static final ASN1ObjectIdentifier generationQualifier = new ASN1ObjectIdentifier("2.5.4.44").intern();
+    public static final ASN1ObjectIdentifier givenName = new ASN1ObjectIdentifier("2.5.4.42").intern();
+    public static final ASN1ObjectIdentifier houseIdentifier = new ASN1ObjectIdentifier("2.5.4.51").intern();
+    public static final ASN1ObjectIdentifier initials = new ASN1ObjectIdentifier("2.5.4.43").intern();
+    public static final ASN1ObjectIdentifier internationalISDNNumber = new ASN1ObjectIdentifier("2.5.4.25").intern();
+    public static final ASN1ObjectIdentifier l = new ASN1ObjectIdentifier("2.5.4.7").intern();
+    public static final ASN1ObjectIdentifier member = new ASN1ObjectIdentifier("2.5.4.31").intern();
+    public static final ASN1ObjectIdentifier name = new ASN1ObjectIdentifier("2.5.4.41").intern();
+    public static final ASN1ObjectIdentifier o = new ASN1ObjectIdentifier("2.5.4.10").intern();
+    public static final ASN1ObjectIdentifier ou = new ASN1ObjectIdentifier("2.5.4.11").intern();
+    public static final ASN1ObjectIdentifier owner = new ASN1ObjectIdentifier("2.5.4.32").intern();
+    public static final ASN1ObjectIdentifier physicalDeliveryOfficeName = new ASN1ObjectIdentifier("2.5.4.19").intern();
+    public static final ASN1ObjectIdentifier postalAddress = new ASN1ObjectIdentifier("2.5.4.16").intern();
+    public static final ASN1ObjectIdentifier postalCode = new ASN1ObjectIdentifier("2.5.4.17").intern();
+    public static final ASN1ObjectIdentifier postOfficeBox = new ASN1ObjectIdentifier("2.5.4.18").intern();
+    public static final ASN1ObjectIdentifier preferredDeliveryMethod = new ASN1ObjectIdentifier("2.5.4.28").intern();
+    public static final ASN1ObjectIdentifier registeredAddress = new ASN1ObjectIdentifier("2.5.4.26").intern();
+    public static final ASN1ObjectIdentifier roleOccupant = new ASN1ObjectIdentifier("2.5.4.33").intern();
+    public static final ASN1ObjectIdentifier searchGuide = new ASN1ObjectIdentifier("2.5.4.14").intern();
+    public static final ASN1ObjectIdentifier seeAlso = new ASN1ObjectIdentifier("2.5.4.34").intern();
+    public static final ASN1ObjectIdentifier serialNumber = new ASN1ObjectIdentifier("2.5.4.5").intern();
+    public static final ASN1ObjectIdentifier sn = new ASN1ObjectIdentifier("2.5.4.4").intern();
+    public static final ASN1ObjectIdentifier st = new ASN1ObjectIdentifier("2.5.4.8").intern();
+    public static final ASN1ObjectIdentifier street = new ASN1ObjectIdentifier("2.5.4.9").intern();
+    public static final ASN1ObjectIdentifier telephoneNumber = new ASN1ObjectIdentifier("2.5.4.20").intern();
+    public static final ASN1ObjectIdentifier teletexTerminalIdentifier = new ASN1ObjectIdentifier("2.5.4.22").intern();
+    public static final ASN1ObjectIdentifier telexNumber = new ASN1ObjectIdentifier("2.5.4.21").intern();
+    public static final ASN1ObjectIdentifier title = new ASN1ObjectIdentifier("2.5.4.12").intern();
+    public static final ASN1ObjectIdentifier uid = new ASN1ObjectIdentifier("0.9.2342.19200300.100.1.1").intern();
+    public static final ASN1ObjectIdentifier uniqueMember = new ASN1ObjectIdentifier("2.5.4.50").intern();
+    public static final ASN1ObjectIdentifier userPassword = new ASN1ObjectIdentifier("2.5.4.35").intern();
+    public static final ASN1ObjectIdentifier x121Address = new ASN1ObjectIdentifier("2.5.4.24").intern();
+    public static final ASN1ObjectIdentifier x500UniqueIdentifier = new ASN1ObjectIdentifier("2.5.4.45").intern();
 
     /**
      * default look up table translating OID values into their common symbols following
@@ -179,37 +175,19 @@ public class RFC4519Style
         defaultLookUp = copyHashTable(DefaultLookUp);
     }
 
-    public ASN1Encodable stringToValue(ASN1ObjectIdentifier oid, String value)
-    {
-        if (value.length() != 0 && value.charAt(0) == '#')
+    protected ASN1Encodable encodeStringValue(ASN1ObjectIdentifier oid,
+    		String value) {
+    	if (oid.equals(dc))
         {
-            try
-            {
-                return IETFUtils.valueFromHexString(value, 1);
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException("can't recode value for oid " + oid.getId());
-            }
+            return new DERIA5String(value);
         }
-        else
+        else if (oid.equals(c) || oid.equals(serialNumber) || oid.equals(dnQualifier)
+            || oid.equals(telephoneNumber))
         {
-            if (value.length() != 0 && value.charAt(0) == '\\')
-            {
-                value = value.substring(1);
-            }
-            if (oid.equals(dc))
-            {
-                return new DERIA5String(value);
-            }
-            else if (oid.equals(c) || oid.equals(serialNumber) || oid.equals(dnQualifier)
-                || oid.equals(telephoneNumber))
-            {
-                return new DERPrintableString(value);
-            }
+            return new DERPrintableString(value);
         }
 
-        return new DERUTF8String(value);
+    	return super.encodeStringValue(oid, value);
     }
 
     public String oidToDisplayName(ASN1ObjectIdentifier oid)
@@ -227,67 +205,6 @@ public class RFC4519Style
         return IETFUtils.decodeAttrName(attrName, defaultLookUp);
     }
 
-    public boolean areEqual(X500Name name1, X500Name name2)
-    {
-        RDN[] rdns1 = name1.getRDNs();
-        RDN[] rdns2 = name2.getRDNs();
-
-        if (rdns1.length != rdns2.length)
-        {
-            return false;
-        }
-
-        boolean reverse = false;
-
-        if (rdns1[0].getFirst() != null && rdns2[0].getFirst() != null)
-        {
-            reverse = !rdns1[0].getFirst().getType().equals(rdns2[0].getFirst().getType());  // guess forward
-        }
-
-        for (int i = 0; i != rdns1.length; i++)
-        {
-            if (!foundMatch(reverse, rdns1[i], rdns2))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private boolean foundMatch(boolean reverse, RDN rdn, RDN[] possRDNs)
-    {
-        if (reverse)
-        {
-            for (int i = possRDNs.length - 1; i >= 0; i--)
-            {
-                if (possRDNs[i] != null && rdnAreEqual(rdn, possRDNs[i]))
-                {
-                    possRDNs[i] = null;
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            for (int i = 0; i != possRDNs.length; i++)
-            {
-                if (possRDNs[i] != null && rdnAreEqual(rdn, possRDNs[i]))
-                {
-                    possRDNs[i] = null;
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    protected boolean rdnAreEqual(RDN rdn1, RDN rdn2)
-    {
-        return IETFUtils.rDNAreEqual(rdn1, rdn2);
-    }
-
     // parse backwards
     public RDN[] fromString(String dirName)
     {
@@ -300,43 +217,6 @@ public class RFC4519Style
         }
 
         return res;
-    }
-
-    public int calculateHashCode(X500Name name)
-    {
-        int hashCodeValue = 0;
-        RDN[] rdns = name.getRDNs();
-
-        // this needs to be order independent, like equals
-        for (int i = 0; i != rdns.length; i++)
-        {
-            if (rdns[i].isMultiValued())
-            {
-                AttributeTypeAndValue[] atv = rdns[i].getTypesAndValues();
-
-                for (int j = 0; j != atv.length; j++)
-                {
-                    hashCodeValue ^= atv[j].getType().hashCode();
-                    hashCodeValue ^= calcHashCode(atv[j].getValue());
-                }
-            }
-            else
-            {
-                hashCodeValue ^= rdns[i].getFirst().getType().hashCode();
-                hashCodeValue ^= calcHashCode(rdns[i].getFirst().getValue());
-            }
-        }
-
-        return hashCodeValue;
-    }
-
-    private int calcHashCode(ASN1Encodable enc)
-    {
-        String value = IETFUtils.valueToString(enc);
-
-        value = IETFUtils.canonicalize(value);
-
-        return value.hashCode();
     }
 
     // convert in reverse
@@ -364,17 +244,5 @@ public class RFC4519Style
         return buf.toString();
     }
 
-    private static Hashtable copyHashTable(Hashtable paramsMap)
-    {
-        Hashtable newTable = new Hashtable();
-
-        Enumeration keys = paramsMap.keys();
-        while (keys.hasMoreElements())
-        {
-            Object key = keys.nextElement();
-            newTable.put(key, paramsMap.get(key));
-        }
-
-        return newTable;
-    }
+    
 }

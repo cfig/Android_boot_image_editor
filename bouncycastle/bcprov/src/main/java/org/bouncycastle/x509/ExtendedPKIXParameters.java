@@ -18,6 +18,8 @@ import java.util.Set;
 
 /**
  * This class extends the PKIXParameters with a validity model parameter.
+ *
+ * @deprecated use PKIXExtendedParameters
  */
 public class ExtendedPKIXParameters
     extends PKIXParameters
@@ -42,8 +44,11 @@ public class ExtendedPKIXParameters
     /**
      * Creates an instance of <code>PKIXParameters</code> with the specified
      * <code>Set</code> of most-trusted CAs. Each element of the set is a
-     * {@link TrustAnchor TrustAnchor}. <p/> Note that the <code>Set</code>
+     * {@link TrustAnchor TrustAnchor}.
+     * <p>
+     *     Note that the <code>Set</code>
      * is copied to protect against subsequent modifications.
+     * </p>
      * 
      * @param trustAnchors a <code>Set</code> of <code>TrustAnchor</code>s
      * @throws InvalidAlgorithmParameterException if the specified
@@ -154,8 +159,11 @@ public class ExtendedPKIXParameters
      * when the end certificate was signed. The CA (or Root CA) certificate must
      * have been valid, when the CA certificate was signed and so on. So the
      * {@link PKIXParameters#setDate(java.util.Date)} method sets the time, when
-     * the <em>end certificate</em> must have been valid. <p/> It is used e.g.
+     * the <em>end certificate</em> must have been valid.
+     * <p>
+     * It is used e.g.
      * in the German signature law.
+     * </p>
      */
     public static final int CHAIN_VALIDITY_MODEL = 1;
 
@@ -278,6 +286,7 @@ public class ExtendedPKIXParameters
      * 
      * @param store The store to add.
      * @see #getStores()
+     * @deprectaed use addStore().
      */
     public void addAdditionalStore(Store store)
     {

@@ -124,6 +124,12 @@ public class ASN1InputStream
 
     /**
      * build an object given its tag and the number of bytes to construct it from.
+     *
+     * @param tag the full tag details.
+     * @param tagNo the tagNo defined.
+     * @param length the length of the object.
+     * @return the resulting primitive.
+     * @throws java.io.IOException on processing exception.
      */
     protected ASN1Primitive buildObject(
         int       tag,
@@ -230,11 +236,11 @@ public class ASN1InputStream
         //
         int length = readLength();
 
-        if (length < 0) // indefinite length method
+        if (length < 0) // indefinite-length method
         {
             if (!isConstructed)
             {
-                throw new IOException("indefinite length primitive encoding encountered");
+                throw new IOException("indefinite-length primitive encoding encountered");
             }
 
             IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(this, limit);
@@ -424,7 +430,7 @@ public class ASN1InputStream
         switch (tagNo)
         {
             case BIT_STRING:
-                return DERBitString.fromInputStream(defIn.getRemaining(), defIn);
+                return ASN1BitString.fromInputStream(defIn.getRemaining(), defIn);
             case BMP_STRING:
                 return new DERBMPString(getBMPCharBuffer(defIn));
             case BOOLEAN:
@@ -438,7 +444,7 @@ public class ASN1InputStream
             case IA5_STRING:
                 return new DERIA5String(defIn.toByteArray());
             case INTEGER:
-                return new ASN1Integer(defIn.toByteArray());
+                return new ASN1Integer(defIn.toByteArray(), false);
             case NULL:
                 return DERNull.INSTANCE;   // actual content is ignored (enforce 0 length?)
             case NUMERIC_STRING:
@@ -459,6 +465,10 @@ public class ASN1InputStream
                 return new DERUTF8String(defIn.toByteArray());
             case VISIBLE_STRING:
                 return new DERVisibleString(defIn.toByteArray());
+            case GRAPHIC_STRING:
+                return new DERGraphicString(defIn.toByteArray());
+            case VIDEOTEX_STRING:
+                return new DERVideotexString(defIn.toByteArray());
             default:
                 throw new IOException("unknown tag " + tagNo + " encountered");
         }
