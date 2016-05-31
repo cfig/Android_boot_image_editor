@@ -12,14 +12,14 @@ public class DERPrintableString
     extends ASN1Primitive
     implements ASN1String
 {
-    // BEGIN android-changed
     private final byte[]  string;
-    // END android-changed
 
     /**
      * return a printable string from the passed in object.
-     * 
+     *
+     * @param obj a DERPrintableString or an object that can be converted into one.
      * @exception IllegalArgumentException if the object cannot be converted.
+     * @return a DERPrintableString instance, or null.
      */
     public static DERPrintableString getInstance(
         Object  obj)
@@ -52,6 +52,7 @@ public class DERPrintableString
      *              tagged false otherwise.
      * @exception IllegalArgumentException if the tagged object cannot
      *               be converted.
+     * @return a DERPrintableString instance, or null.
      */
     public static DERPrintableString getInstance(
         ASN1TaggedObject obj,

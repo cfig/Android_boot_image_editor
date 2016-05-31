@@ -4,6 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * A parser for ASN.1 streams which also returns, where possible, parsers for the objects it encounters.
+ */
 public class ASN1StreamParser
 {
     private final InputStream _in;
@@ -58,7 +61,7 @@ public class ASN1StreamParser
         {
             if (!constructed)
             {
-                throw new IOException("indefinite length primitive encoding encountered");
+                throw new IOException("indefinite-length primitive encoding encountered");
             }
             
             return readIndef(tag);
@@ -89,8 +92,7 @@ public class ASN1StreamParser
             }
         }
 
-        // TODO ASN1Exception
-        throw new RuntimeException("implicit tagging not implemented");
+        throw new ASN1Exception("implicit tagging not implemented");
     }
 
     ASN1Primitive readTaggedObject(boolean constructed, int tag) throws IOException
@@ -142,11 +144,11 @@ public class ASN1StreamParser
         //
         int length = ASN1InputStream.readLength(_in, _limit);
 
-        if (length < 0) // indefinite length method
+        if (length < 0) // indefinite-length method
         {
             if (!isConstructed)
             {
-                throw new IOException("indefinite length primitive encoding encountered");
+                throw new IOException("indefinite-length primitive encoding encountered");
             }
 
             IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(_in, _limit);

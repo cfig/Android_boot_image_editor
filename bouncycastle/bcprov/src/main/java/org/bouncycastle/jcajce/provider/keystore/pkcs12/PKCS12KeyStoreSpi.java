@@ -15,6 +15,7 @@ import java.security.KeyStore.ProtectionParameter;
 import java.security.KeyStoreException;
 import java.security.KeyStoreSpi;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -31,8 +32,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.crypto.Cipher;
@@ -86,12 +89,16 @@ import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
-import org.bouncycastle.jcajce.provider.config.PKCS12StoreParameter;
-import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.jcajce.PKCS12Key;
+import org.bouncycastle.jcajce.PKCS12StoreParameter;
 // BEGIN android-removed
 // import org.bouncycastle.jcajce.spec.GOST28147ParameterSpec;
 // END android-removed
 import org.bouncycastle.jcajce.spec.PBKDF2KeySpec;
+import org.bouncycastle.jcajce.util.BCJcaJceHelper;
+import org.bouncycastle.jcajce.util.JcaJceHelper;
 import org.bouncycastle.jce.interfaces.BCKeyStore;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -105,10 +112,11 @@ public class PKCS12KeyStoreSpi
     extends KeyStoreSpi
     implements PKCSObjectIdentifiers, X509ObjectIdentifiers, BCKeyStore
 {
+    private final JcaJceHelper helper = new BCJcaJceHelper();
+
     private static final int SALT_SIZE = 20;
     private static final int MIN_ITERATIONS = 1024;
 
-    private static final Provider bcProvider = new BouncyCastleProvider();
     private static final DefaultSecretKeyProvider keySizeProvider = new DefaultSecretKeyProvider();
 
     private IgnoresCaseHashtable keys = new IgnoresCaseHashtable();
@@ -210,15 +218,25 @@ public class PKCS12KeyStoreSpi
     {
         try
         {
-            SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-                (ASN1Sequence)ASN1Primitive.fromByteArray(pubKey.getEncoded()));
+            SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(pubKey.getEncoded());
 
-            return new SubjectKeyIdentifier(info);
+            return new SubjectKeyIdentifier(getDigest(info));
         }
         catch (Exception e)
         {
             throw new RuntimeException("error creating key");
         }
+    }
+
+    private static byte[] getDigest(SubjectPublicKeyInfo spki)
+    {
+        Digest digest = new SHA1Digest();
+        byte[]  resBuf = new byte[digest.getDigestSize()];
+
+        byte[] bytes = spki.getPublicKeyData().getBytes();
+        digest.update(bytes, 0, bytes.length);
+        digest.doFinal(resBuf, 0);
+        return resBuf;
     }
 
     public void setRandom(
@@ -258,7 +276,8 @@ public class PKCS12KeyStoreSpi
 
     /**
      * this is not quite complete - we should follow up on the chain, a bit
-     * tricky if a certificate appears in more than one chain...
+     * tricky if a certificate appears in more than one chain... the store method
+     * now prunes out unused certificates from the chain map if they are present.
      */
     public void engineDeleteEntry(
         String alias)
@@ -433,14 +452,21 @@ public class PKCS12KeyStoreSpi
                     }
                 }
 
-                cs.addElement(c);
-                if (nextC != c)     // self signed - end of the chain
+                if (cs.contains(c))
                 {
-                    c = nextC;
+                    c = null;          // we've got a certificate chain loop time to stop
                 }
                 else
                 {
-                    c = null;
+                    cs.addElement(c);
+                    if (nextC != c)     // self signed - end of the chain
+                    {
+                        c = nextC;
+                    }
+                    else
+                    {
+                        c = null;
+                    }
                 }
             }
 
@@ -588,23 +614,15 @@ public class PKCS12KeyStoreSpi
             if (algorithm.on(PKCSObjectIdentifiers.pkcs_12PbeIds))
             {
                 PKCS12PBEParams pbeParams = PKCS12PBEParams.getInstance(algId.getParameters());
-
-                PBEKeySpec pbeSpec = new PBEKeySpec(password);
-                PrivateKey out;
-
-                SecretKeyFactory keyFact = SecretKeyFactory.getInstance(
-                    algorithm.getId(), bcProvider);
                 PBEParameterSpec defParams = new PBEParameterSpec(
                     pbeParams.getIV(),
                     pbeParams.getIterations().intValue());
 
-                SecretKey k = keyFact.generateSecret(pbeSpec);
+                Cipher cipher = helper.createCipher(algorithm.getId());
 
-                ((BCPBEKey)k).setTryWrongPKCS12Zero(wrongPKCS12Zero);
+                PKCS12Key key = new PKCS12Key(password, wrongPKCS12Zero);
 
-                Cipher cipher = Cipher.getInstance(algorithm.getId(), bcProvider);
-
-                cipher.init(Cipher.UNWRAP_MODE, k, defParams);
+                cipher.init(Cipher.UNWRAP_MODE, key, defParams);
 
                 // we pass "" as the key algorithm type as it is unknown at this point
                 return (PrivateKey)cipher.unwrap(data, "", Cipher.PRIVATE_KEY);
@@ -638,13 +656,12 @@ public class PKCS12KeyStoreSpi
 
         try
         {
-            SecretKeyFactory keyFact = SecretKeyFactory.getInstance(
-                algorithm, bcProvider);
+            SecretKeyFactory keyFact =  helper.createSecretKeyFactory(algorithm);
             PBEParameterSpec defParams = new PBEParameterSpec(
                 pbeParams.getIV(),
                 pbeParams.getIterations().intValue());
 
-            Cipher cipher = Cipher.getInstance(algorithm, bcProvider);
+            Cipher cipher = helper.createCipher(algorithm);
 
             cipher.init(Cipher.WRAP_MODE, keyFact.generateSecret(pbeSpec), defParams);
 
@@ -667,6 +684,7 @@ public class PKCS12KeyStoreSpi
         throws IOException
     {
         ASN1ObjectIdentifier algorithm = algId.getAlgorithm();
+        int mode = forEncryption ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
 
         if (algorithm.on(PKCSObjectIdentifiers.pkcs_12PbeIds))
         {
@@ -675,16 +693,13 @@ public class PKCS12KeyStoreSpi
 
             try
             {
-                SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithm.getId(), bcProvider);
                 PBEParameterSpec defParams = new PBEParameterSpec(
                     pbeParams.getIV(),
                     pbeParams.getIterations().intValue());
-                BCPBEKey key = (BCPBEKey)keyFact.generateSecret(pbeSpec);
+                PKCS12Key key = new PKCS12Key(password, wrongPKCS12Zero);
 
-                key.setTryWrongPKCS12Zero(wrongPKCS12Zero);
+                Cipher cipher = helper.createCipher(algorithm.getId());
 
-                Cipher cipher = Cipher.getInstance(algorithm.getId(), bcProvider);
-                int mode = forEncryption ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
                 cipher.init(mode, key, defParams);
                 return cipher.doFinal(data);
             }
@@ -697,7 +712,7 @@ public class PKCS12KeyStoreSpi
         {
             try
             {
-                Cipher cipher = createCipher(Cipher.DECRYPT_MODE, password, algId);
+                Cipher cipher = createCipher(mode, password, algId);
 
                 return cipher.doFinal(data);
             }
@@ -713,13 +728,13 @@ public class PKCS12KeyStoreSpi
     }
 
     private Cipher createCipher(int mode, char[] password, AlgorithmIdentifier algId)
-        throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
+        throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, NoSuchProviderException
     {
         PBES2Parameters alg = PBES2Parameters.getInstance(algId.getParameters());
         PBKDF2Params func = PBKDF2Params.getInstance(alg.getKeyDerivationFunc().getParameters());
         AlgorithmIdentifier encScheme = AlgorithmIdentifier.getInstance(alg.getEncryptionScheme());
 
-        SecretKeyFactory keyFact = SecretKeyFactory.getInstance(alg.getKeyDerivationFunc().getAlgorithm().getId(), bcProvider);
+        SecretKeyFactory keyFact = helper.createSecretKeyFactory(alg.getKeyDerivationFunc().getAlgorithm().getId());
         SecretKey key;
 
         if (func.isDefaultPrf())
@@ -1027,9 +1042,9 @@ public class PKCS12KeyStoreSpi
                             Enumeration e = b.getBagAttributes().getObjects();
                             while (e.hasMoreElements())
                             {
-                                ASN1Sequence sq = (ASN1Sequence)e.nextElement();
-                                ASN1ObjectIdentifier aOid = (ASN1ObjectIdentifier)sq.getObjectAt(0);
-                                ASN1Set attrSet = (ASN1Set)sq.getObjectAt(1);
+                                ASN1Sequence sq = ASN1Sequence.getInstance(e.nextElement());
+                                ASN1ObjectIdentifier aOid = ASN1ObjectIdentifier.getInstance(sq.getObjectAt(0));
+                                ASN1Set attrSet = ASN1Set.getInstance(sq.getObjectAt(1));
                                 ASN1Primitive attr = null;
 
                                 if (attrSet.size() > 0)
@@ -1050,16 +1065,16 @@ public class PKCS12KeyStoreSpi
                                     {
                                         bagAttr.setBagAttribute(aOid, attr);
                                     }
-                                }
 
-                                if (aOid.equals(pkcs_9_at_friendlyName))
-                                {
-                                    alias = ((DERBMPString)attr).getString();
-                                    keys.put(alias, privKey);
-                                }
-                                else if (aOid.equals(pkcs_9_at_localKeyId))
-                                {
-                                    localId = (ASN1OctetString)attr;
+                                    if (aOid.equals(pkcs_9_at_friendlyName))
+                                    {
+                                        alias = ((DERBMPString)attr).getString();
+                                        keys.put(alias, privKey);
+                                    }
+                                    else if (aOid.equals(pkcs_9_at_localKeyId))
+                                    {
+                                        localId = (ASN1OctetString)attr;
+                                    }
                                 }
                             }
 
@@ -1127,38 +1142,43 @@ public class PKCS12KeyStoreSpi
                 Enumeration e = b.getBagAttributes().getObjects();
                 while (e.hasMoreElements())
                 {
-                    ASN1Sequence sq = (ASN1Sequence)e.nextElement();
-                    ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)sq.getObjectAt(0);
-                    ASN1Primitive attr = (ASN1Primitive)((ASN1Set)sq.getObjectAt(1)).getObjectAt(0);
-                    PKCS12BagAttributeCarrier bagAttr = null;
+                    ASN1Sequence sq = ASN1Sequence.getInstance(e.nextElement());
+                    ASN1ObjectIdentifier oid = ASN1ObjectIdentifier.getInstance(sq.getObjectAt(0));
+                    ASN1Set attrSet = ASN1Set.getInstance(sq.getObjectAt(1));
 
-                    if (cert instanceof PKCS12BagAttributeCarrier)
+                    if (attrSet.size() > 0)   // sometimes this is empty!
                     {
-                        bagAttr = (PKCS12BagAttributeCarrier)cert;
+                        ASN1Primitive attr = (ASN1Primitive)attrSet.getObjectAt(0);
+                        PKCS12BagAttributeCarrier bagAttr = null;
 
-                        ASN1Encodable existing = bagAttr.getBagAttribute(oid);
-                        if (existing != null)
+                        if (cert instanceof PKCS12BagAttributeCarrier)
                         {
-                            // OK, but the value has to be the same
-                            if (!existing.toASN1Primitive().equals(attr))
+                            bagAttr = (PKCS12BagAttributeCarrier)cert;
+
+                            ASN1Encodable existing = bagAttr.getBagAttribute(oid);
+                            if (existing != null)
                             {
-                                throw new IOException(
-                                    "attempt to add existing attribute with different value");
+                                // OK, but the value has to be the same
+                                if (!existing.toASN1Primitive().equals(attr))
+                                {
+                                    throw new IOException(
+                                        "attempt to add existing attribute with different value");
+                                }
+                            }
+                            else
+                            {
+                                bagAttr.setBagAttribute(oid, attr);
                             }
                         }
-                        else
-                        {
-                            bagAttr.setBagAttribute(oid, attr);
-                        }
-                    }
 
-                    if (oid.equals(pkcs_9_at_friendlyName))
-                    {
-                        alias = ((DERBMPString)attr).getString();
-                    }
-                    else if (oid.equals(pkcs_9_at_localKeyId))
-                    {
-                        localId = (ASN1OctetString)attr;
+                        if (oid.equals(pkcs_9_at_friendlyName))
+                        {
+                            alias = ((DERBMPString)attr).getString();
+                        }
+                        else if (oid.equals(pkcs_9_at_localKeyId))
+                        {
+                            localId = (ASN1OctetString)attr;
+                        }
                     }
                 }
             }
@@ -1258,7 +1278,6 @@ public class PKCS12KeyStoreSpi
         // handle the key
         //
         ASN1EncodableVector keyS = new ASN1EncodableVector();
-
 
         Enumeration ks = keys.keys();
 
@@ -1509,6 +1528,8 @@ public class PKCS12KeyStoreSpi
             }
         }
 
+        Set usedSet = getUsedCertificateSet();
+
         cs = chainCerts.keys();
         while (cs.hasMoreElements())
         {
@@ -1516,6 +1537,11 @@ public class PKCS12KeyStoreSpi
             {
                 CertId certId = (CertId)cs.nextElement();
                 Certificate cert = (Certificate)chainCerts.get(certId);
+
+                if (!usedSet.contains(cert))
+                {
+                    continue;
+                }
 
                 if (doneCerts.get(cert) != null)
                 {
@@ -1635,7 +1661,35 @@ public class PKCS12KeyStoreSpi
         asn1Out.writeObject(pfx);
     }
 
-    private static byte[] calculatePbeMac(
+    private Set getUsedCertificateSet()
+    {
+        Set usedSet = new HashSet();
+
+        for (Enumeration en = keys.keys(); en.hasMoreElements();)
+        {
+            String alias = (String)en.nextElement();
+
+                Certificate[] certs = engineGetCertificateChain(alias);
+
+                for (int i = 0; i != certs.length; i++)
+                {
+                    usedSet.add(certs[i]);
+                }
+        }
+
+        for (Enumeration en = certs.keys(); en.hasMoreElements();)
+        {
+            String alias = (String)en.nextElement();
+
+            Certificate cert = engineGetCertificate(alias);
+
+            usedSet.add(cert);
+        }
+
+        return usedSet;
+    }
+
+    private byte[] calculatePbeMac(
         ASN1ObjectIdentifier oid,
         byte[] salt,
         int itCount,
@@ -1644,15 +1698,12 @@ public class PKCS12KeyStoreSpi
         byte[] data)
         throws Exception
     {
-        SecretKeyFactory keyFact = SecretKeyFactory.getInstance(oid.getId(), bcProvider);
         PBEParameterSpec defParams = new PBEParameterSpec(salt, itCount);
-        PBEKeySpec pbeSpec = new PBEKeySpec(password);
-        BCPBEKey key = (BCPBEKey)keyFact.generateSecret(pbeSpec);
-        key.setTryWrongPKCS12Zero(wrongPkcs12Zero);
 
-        Mac mac = Mac.getInstance(oid.getId(), bcProvider);
-        mac.init(key, defParams);
+        Mac mac = helper.createMac(oid.getId());
+        mac.init(new PKCS12Key(password, wrongPkcs12Zero), defParams);
         mac.update(data);
+
         return mac.doFinal();
     }
 
@@ -1661,20 +1712,19 @@ public class PKCS12KeyStoreSpi
     {
         public BCPKCS12KeyStore()
         {
-            super(bcProvider, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
+            super(new BouncyCastleProvider(), pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
         }
     }
-
     // BEGIN android-removed
     // public static class BCPKCS12KeyStore3DES
     //     extends PKCS12KeyStoreSpi
     // {
     //     public BCPKCS12KeyStore3DES()
     //     {
-    //         super(bcProvider, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
+    //         super(new BouncyCastleProvider(), pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
     //     }
     // }
-    //
+    // 
     // public static class DefPKCS12KeyStore
     //     extends PKCS12KeyStoreSpi
     // {
@@ -1683,7 +1733,7 @@ public class PKCS12KeyStoreSpi
     //         super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
     //     }
     // }
-    //
+    // 
     // public static class DefPKCS12KeyStore3DES
     //     extends PKCS12KeyStoreSpi
     // {
@@ -1755,7 +1805,7 @@ public class PKCS12KeyStoreSpi
 
             keySizes.put(new ASN1ObjectIdentifier("1.2.840.113533.7.66.10"), Integers.valueOf(128));
 
-            keySizes.put(PKCSObjectIdentifiers.des_EDE3_CBC.getId(), Integers.valueOf(192));
+            keySizes.put(PKCSObjectIdentifiers.des_EDE3_CBC, Integers.valueOf(192));
 
             keySizes.put(NISTObjectIdentifiers.id_aes128_CBC, Integers.valueOf(128));
             keySizes.put(NISTObjectIdentifiers.id_aes192_CBC, Integers.valueOf(192));

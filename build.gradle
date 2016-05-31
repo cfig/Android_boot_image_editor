@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 def workdir='build/unzip_boot'
+def defaultRootDir = workdir + "/root"
 
 model {
     buildTypes {
@@ -28,19 +29,6 @@ model {
     components {
         mkbootfs(NativeExecutableSpec) {
             binaries.all {
-            }
-        }
-    }
-
-    components {
-        libmincrypt(NativeLibrarySpec) {
-            binaries.all {
-            }
-        }
-        mkbootimg(NativeExecutableSpec) {
-            binaries.all {
-                cCompiler.args '-std=c11'
-                lib library: "libmincrypt", linkage: 'static'
             }
         }
     }
@@ -83,10 +71,21 @@ task unpack(type: Delete, dependsOn: unpack_cpio) {
 }
 
 task pack_ramdisk_and_gz { Task task ->
+    def rootDir = defaultRootDir
+    if (null != System.getenv("ANDROID_PRODUCT_OUT")) {
+        rootDir = System.getenv("ANDROID_PRODUCT_OUT") + "/root"
+    }
     doLast {
+        if (!rootDir.equals(defaultRootDir)) {
+            println("Warning:")
+            println("Warning:")
+            println("Warning:\tUsing [" + rootDir + "] for target root")
+            println("Warning:")
+            println("Warning:")
+        }
         ByteArrayOutputStream mkbootfs_out = new ByteArrayOutputStream()
         task.project.exec {
-            commandLine = [ 'build/exe/mkbootfs/mkbootfs', workdir + "/root" ]
+            commandLine = [ 'build/exe/mkbootfs/mkbootfs', rootDir ]
             standardOutput = mkbootfs_out
         }
         def ByteArrayInputStream gzip_in = new ByteArrayInputStream(mkbootfs_out.buf)
@@ -95,11 +94,11 @@ task pack_ramdisk_and_gz { Task task ->
 }
 pack_ramdisk_and_gz.dependsOn('mkbootfsExecutable')
 
-task pack_clear(type: Exec, dependsOn: [pack_ramdisk_and_gz, 'mkbootimgExecutable']) {
+task pack_clear(type: Exec, dependsOn: [pack_ramdisk_and_gz]) {
     def theCmdLine = getRamdiskConfig(workdir, 'cmdline')
     def theBaseAddr = getBaseAddress(workdir)
     workingDir '.'
-    executable 'build/exe/mkbootimg/mkbootimg'
+    executable 'src/mkbootimg/mkbootimg'
     args = [
         '--kernel', workdir + "/kernel",
         '--ramdisk', workdir + "/ramdisk.img.gz",
@@ -237,8 +236,41 @@ void updateBootImage() {
     Run("adb push boot.img.signed /cache/")
     List<String> cmd2 = ["adb", "shell", "dd if=/cache/boot.img.signed of=/dev/block/by-name/boot"];
     Run(cmd2)
+    cmd2 = ["adb", "shell", "rm -f /cache/boot.img.signed"];
+    Run(cmd2)
 }
 
 task flash << {
     updateBootImage()
+}
+
+task debug(dependsOn: ['addSystemBin', 'addSystemLib']) {
+    description "add debug tools into recovery rootfs"
+}
+
+task addSystemBin(type: Copy, dependsOn: 'unpack') {
+    String[] bins = [ "sh", "logcat", "logd", "linker", "toolbox", "toybox" ]
+    from System.getenv("ANDROID_PRODUCT_OUT") + '/system/bin'
+    into workdir + "/root/system/bin"
+    include { details ->
+        inTargetList(details.file.name, bins)
+    }
+}
+
+task addSystemLib(type: Copy, dependsOn: 'unpack') {
+    String[] libs = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so" ]
+    from System.getenv("ANDROID_PRODUCT_OUT") + '/system/lib'
+    into workdir + "/root/system/lib"
+    include { details ->
+        inTargetList(details.file.name, libs)
+    }
+}
+
+boolean inTargetList(String file, String[] inArray) {
+    for (String item : inArray) {
+        if (item.equals(file)) {
+            return true;
+        }
+    }
+    return false;
 }

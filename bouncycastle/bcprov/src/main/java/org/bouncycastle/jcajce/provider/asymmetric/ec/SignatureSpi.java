@@ -249,7 +249,7 @@ public class SignatureSpi
     // {
     //     public ecCVCDSA()
     //     {
-    //         super(new SHA1Digest(), new ECDSASigner(), new CVCDSAEncoder());
+    //         super(new SHA1Digest(), new ECDSASigner(), new PlainDSAEncoder());
     //     }
     // }
     //
@@ -258,7 +258,7 @@ public class SignatureSpi
     // {
     //     public ecCVCDSA224()
     //     {
-    //         super(new SHA224Digest(), new ECDSASigner(), new CVCDSAEncoder());
+    //         super(new SHA224Digest(), new ECDSASigner(), new PlainDSAEncoder());
     //     }
     // }
     //
@@ -267,7 +267,7 @@ public class SignatureSpi
     // {
     //     public ecCVCDSA256()
     //     {
-    //         super(new SHA256Digest(), new ECDSASigner(), new CVCDSAEncoder());
+    //         super(new SHA256Digest(), new ECDSASigner(), new PlainDSAEncoder());
     //     }
     // }
     //
@@ -276,7 +276,7 @@ public class SignatureSpi
     // {
     //     public ecCVCDSA384()
     //     {
-    //         super(new SHA384Digest(), new ECDSASigner(), new CVCDSAEncoder());
+    //         super(new SHA384Digest(), new ECDSASigner(), new PlainDSAEncoder());
     //     }
     // }
     //
@@ -285,7 +285,16 @@ public class SignatureSpi
     // {
     //     public ecCVCDSA512()
     //     {
-    //         super(new SHA512Digest(), new ECDSASigner(), new CVCDSAEncoder());
+    //         super(new SHA512Digest(), new ECDSASigner(), new PlainDSAEncoder());
+    //     }
+    // }
+    //
+    // static public class ecPlainDSARP160
+    //     extends SignatureSpi
+    // {
+    //     public ecPlainDSARP160()
+    //     {
+    //         super(new RIPEMD160Digest(), new ECDSASigner(), new PlainDSAEncoder());
     //     }
     // }
     // END android-removed
@@ -320,66 +329,68 @@ public class SignatureSpi
         }
     }
 
-    private static class CVCDSAEncoder
-        implements DSAEncoder
-    {
-        public byte[] encode(
-            BigInteger r,
-            BigInteger s)
-            throws IOException
-        {
-            byte[] first = makeUnsigned(r);
-            byte[] second = makeUnsigned(s);
-            byte[] res;
-
-            if (first.length > second.length)
-            {
-                res = new byte[first.length * 2];
-            }
-            else
-            {
-                res = new byte[second.length * 2];
-            }
-
-            System.arraycopy(first, 0, res, res.length / 2 - first.length, first.length);
-            System.arraycopy(second, 0, res, res.length - second.length, second.length);
-
-            return res;
-        }
-
-
-        private byte[] makeUnsigned(BigInteger val)
-        {
-            byte[] res = val.toByteArray();
-
-            if (res[0] == 0)
-            {
-                byte[] tmp = new byte[res.length - 1];
-
-                System.arraycopy(res, 1, tmp, 0, tmp.length);
-
-                return tmp;
-            }
-
-            return res;
-        }
-
-        public BigInteger[] decode(
-            byte[] encoding)
-            throws IOException
-        {
-            BigInteger[] sig = new BigInteger[2];
-
-            byte[] first = new byte[encoding.length / 2];
-            byte[] second = new byte[encoding.length / 2];
-
-            System.arraycopy(encoding, 0, first, 0, first.length);
-            System.arraycopy(encoding, first.length, second, 0, second.length);
-
-            sig[0] = new BigInteger(1, first);
-            sig[1] = new BigInteger(1, second);
-
-            return sig;
-        }
-    }
+    // BEGIN android-removed
+    // private static class PlainDSAEncoder
+    //     implements DSAEncoder
+    // {
+    //     public byte[] encode(
+    //         BigInteger r,
+    //         BigInteger s)
+    //         throws IOException
+    //     {
+    //         byte[] first = makeUnsigned(r);
+    //         byte[] second = makeUnsigned(s);
+    //         byte[] res;
+    //
+    //         if (first.length > second.length)
+    //         {
+    //             res = new byte[first.length * 2];
+    //         }
+    //         else
+    //         {
+    //             res = new byte[second.length * 2];
+    //         }
+    //
+    //         System.arraycopy(first, 0, res, res.length / 2 - first.length, first.length);
+    //         System.arraycopy(second, 0, res, res.length - second.length, second.length);
+    //
+    //         return res;
+    //     }
+    //
+    //
+    //     private byte[] makeUnsigned(BigInteger val)
+    //     {
+    //         byte[] res = val.toByteArray();
+    //
+    //         if (res[0] == 0)
+    //         {
+    //             byte[] tmp = new byte[res.length - 1];
+    //
+    //             System.arraycopy(res, 1, tmp, 0, tmp.length);
+    //
+    //             return tmp;
+    //         }
+    //
+    //         return res;
+    //     }
+    //
+    //     public BigInteger[] decode(
+    //         byte[] encoding)
+    //         throws IOException
+    //     {
+    //         BigInteger[] sig = new BigInteger[2];
+    //
+    //         byte[] first = new byte[encoding.length / 2];
+    //         byte[] second = new byte[encoding.length / 2];
+    //
+    //         System.arraycopy(encoding, 0, first, 0, first.length);
+    //         System.arraycopy(encoding, first.length, second, 0, second.length);
+    //
+    //         sig[0] = new BigInteger(1, first);
+    //         sig[1] = new BigInteger(1, second);
+    //
+    //         return sig;
+    //     }
+    // }
+    // END android-removed
 }

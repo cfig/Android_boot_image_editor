@@ -102,7 +102,7 @@ public final class Twofish
     {
         public PBEWithSHA()
         {
-            super(new CBCBlockCipher(new TwofishEngine()));
+            super(new CBCBlockCipher(new TwofishEngine()), PKCS12, SHA1, 256, 16);
         }
     }
 

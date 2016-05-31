@@ -13,13 +13,12 @@ import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 // BEGIN android-removed
 // import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 // import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
@@ -40,6 +39,7 @@ import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.util.Strings;
 
 public class JCEECPrivateKey
     implements ECPrivateKey, org.bouncycastle.jce.interfaces.ECPrivateKey, PKCS12BagAttributeCarrier, ECPointEncoder
@@ -254,9 +254,9 @@ public class JCEECPrivateKey
         }
 
         ASN1Encodable privKey = info.parsePrivateKey();
-        if (privKey instanceof DERInteger)
+        if (privKey instanceof ASN1Integer)
         {
-            DERInteger          derD = DERInteger.getInstance(privKey);
+            ASN1Integer          derD = ASN1Integer.getInstance(privKey);
 
             this.d = derD.getValue();
         }
@@ -296,10 +296,10 @@ public class JCEECPrivateKey
 
         if (ecSpec instanceof ECNamedCurveSpec)
         {
-            DERObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveSpec)ecSpec).getName());
+            ASN1ObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveSpec)ecSpec).getName());
             if (curveOid == null)  // guess it's the OID
             {
-                curveOid = new DERObjectIdentifier(((ECNamedCurveSpec)ecSpec).getName());
+                curveOid = new ASN1ObjectIdentifier(((ECNamedCurveSpec)ecSpec).getName());
             }
             params = new X962Parameters(curveOid);
         }
@@ -433,7 +433,7 @@ public class JCEECPrivateKey
     public String toString()
     {
         StringBuffer    buf = new StringBuffer();
-        String          nl = System.getProperty("line.separator");
+        String          nl = Strings.lineSeparator();
 
         buf.append("EC Private Key").append(nl);
         buf.append("             S: ").append(this.d.toString(16)).append(nl);

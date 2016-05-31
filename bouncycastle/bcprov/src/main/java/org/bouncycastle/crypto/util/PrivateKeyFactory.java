@@ -9,7 +9,6 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Sequence;
 // BEGIN android-removed
 // import org.bouncycastle.asn1.oiw.ElGamalParameter;
 // END android-removed
@@ -25,12 +24,14 @@ import org.bouncycastle.asn1.x9.ECNamedCurveTable;
 import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECNamedDomainParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.params.ElGamalParameters;
@@ -104,8 +105,8 @@ public class PrivateKeyFactory
         // BEGIN android-removed
         // else if (algId.getAlgorithm().equals(OIWObjectIdentifiers.elGamalAlgorithm))
         // {
-        //     ElGamalParameter params = new ElGamalParameter((ASN1Sequence)algId.getParameters());
-        //     ASN1Integer = (ASN1Integer)keyInfo.parsePrivateKey();
+        //     ElGamalParameter params = ElGamalParameter.getInstance(algId.getParameters());
+        //     ASN1Integer derX = (ASN1Integer)keyInfo.parsePrivateKey();
         //
         //     return new ElGamalPrivateKeyParameters(derX.getValue(), new ElGamalParameters(
         //         params.getP(), params.getG()));
@@ -130,23 +131,29 @@ public class PrivateKeyFactory
             X962Parameters params = new X962Parameters((ASN1Primitive)algId.getParameters());
 
             X9ECParameters x9;
+            ECDomainParameters dParams;
+
             if (params.isNamedCurve())
             {
-                ASN1ObjectIdentifier oid = ASN1ObjectIdentifier.getInstance(params.getParameters());
-                x9 = ECNamedCurveTable.getByOID(oid);
+                ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)params.getParameters();
+
+                x9 = CustomNamedCurves.getByOID(oid);
+                if (x9 == null)
+                {
+                    x9 = ECNamedCurveTable.getByOID(oid);
+                }
+                dParams = new ECNamedDomainParameters(
+                    oid, x9.getCurve(), x9.getG(), x9.getN(), x9.getH(), x9.getSeed());
             }
             else
             {
                 x9 = X9ECParameters.getInstance(params.getParameters());
+                dParams = new ECDomainParameters(
+                    x9.getCurve(), x9.getG(), x9.getN(), x9.getH(), x9.getSeed());
             }
 
             ECPrivateKey ec = ECPrivateKey.getInstance(keyInfo.parsePrivateKey());
             BigInteger d = ec.getKey();
-
-            // TODO We lose any named parameters here
-
-            ECDomainParameters dParams = new ECDomainParameters(
-                    x9.getCurve(), x9.getG(), x9.getN(), x9.getH(), x9.getSeed());
 
             return new ECPrivateKeyParameters(d, dParams);
         }

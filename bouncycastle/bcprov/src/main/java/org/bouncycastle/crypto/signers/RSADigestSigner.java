@@ -50,6 +50,8 @@ public class RSADigestSigner
         oidMap.put("SHA-256", NISTObjectIdentifiers.id_sha256);
         oidMap.put("SHA-384", NISTObjectIdentifiers.id_sha384);
         oidMap.put("SHA-512", NISTObjectIdentifiers.id_sha512);
+        oidMap.put("SHA-512/224", NISTObjectIdentifiers.id_sha512_224);
+        oidMap.put("SHA-512/256", NISTObjectIdentifiers.id_sha512_256);
 
         // BEGIN android-removed
         // oidMap.put("MD2", PKCSObjectIdentifiers.md2);
@@ -222,6 +224,8 @@ public class RSADigestSigner
         }
         else
         {
+            Arrays.constantTimeAreEqual(expected, expected);  // keep time "steady".
+
             return false;
         }
     }

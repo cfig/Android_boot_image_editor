@@ -63,9 +63,11 @@ public class DSA
             provider.addAlgorithm("Alg.Alias.Signature.DSAWITHSHA1", "SHA1withDSA");
             provider.addAlgorithm("Alg.Alias.Signature.SHA1WithDSA", "SHA1withDSA");
             provider.addAlgorithm("Alg.Alias.Signature.DSAWithSHA1", "SHA1withDSA");
-
-            provider.addAlgorithm("Alg.Alias.Signature.1.2.840.10040.4.3", "SHA1withDSA");
             // END android-changed
+
+            // BEGIN android-removed
+            // provider.addAlgorithm("Alg.Alias.Signature.1.2.840.10040.4.3", "DSA");
+            // END android-removed
 
             AsymmetricKeyInfoConverter keyFact = new KeyFactorySpi();
 

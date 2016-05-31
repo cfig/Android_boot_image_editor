@@ -10,6 +10,7 @@ import org.bouncycastle.crypto.digests.AndroidDigestFactory;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.util.Arrays;
 
 /**
  * Generator for PBE derived keys and ivs as defined by PKCS 5 V2.0 Scheme 2.
@@ -116,7 +117,7 @@ public class PKCS5S2ParametersGenerator
     {
         keySize = keySize / 8;
 
-        byte[]  dKey = generateDerivedKey(keySize);
+        byte[]  dKey = Arrays.copyOfRange(generateDerivedKey(keySize), 0, keySize);
 
         return new KeyParameter(dKey, 0, keySize);
     }

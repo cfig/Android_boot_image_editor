@@ -24,12 +24,12 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 // BEGIN android-removed
 // import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 // END android-removed
@@ -87,14 +87,14 @@ public class PKCS10CertificationRequest
     {
         // BEGIN android-removed
         // Dropping MD2
-        // algorithms.put("MD2WITHRSAENCRYPTION", new DERObjectIdentifier("1.2.840.113549.1.1.2"));
-        // algorithms.put("MD2WITHRSA", new DERObjectIdentifier("1.2.840.113549.1.1.2"));
+        // algorithms.put("MD2WITHRSAENCRYPTION", new ASN1ObjectIdentifier("1.2.840.113549.1.1.2"));
+        // algorithms.put("MD2WITHRSA", new ASN1ObjectIdentifier("1.2.840.113549.1.1.2"));
         // END android-removed
-        algorithms.put("MD5WITHRSAENCRYPTION", new DERObjectIdentifier("1.2.840.113549.1.1.4"));
-        algorithms.put("MD5WITHRSA", new DERObjectIdentifier("1.2.840.113549.1.1.4"));
-        algorithms.put("RSAWITHMD5", new DERObjectIdentifier("1.2.840.113549.1.1.4"));
-        algorithms.put("SHA1WITHRSAENCRYPTION", new DERObjectIdentifier("1.2.840.113549.1.1.5"));
-        algorithms.put("SHA1WITHRSA", new DERObjectIdentifier("1.2.840.113549.1.1.5"));
+        algorithms.put("MD5WITHRSAENCRYPTION", new ASN1ObjectIdentifier("1.2.840.113549.1.1.4"));
+        algorithms.put("MD5WITHRSA", new ASN1ObjectIdentifier("1.2.840.113549.1.1.4"));
+        algorithms.put("RSAWITHMD5", new ASN1ObjectIdentifier("1.2.840.113549.1.1.4"));
+        algorithms.put("SHA1WITHRSAENCRYPTION", new ASN1ObjectIdentifier("1.2.840.113549.1.1.5"));
+        algorithms.put("SHA1WITHRSA", new ASN1ObjectIdentifier("1.2.840.113549.1.1.5"));
         algorithms.put("SHA224WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha224WithRSAEncryption);
         algorithms.put("SHA224WITHRSA", PKCSObjectIdentifiers.sha224WithRSAEncryption);
         algorithms.put("SHA256WITHRSAENCRYPTION", PKCSObjectIdentifiers.sha256WithRSAEncryption);
@@ -108,7 +108,7 @@ public class PKCS10CertificationRequest
         algorithms.put("SHA256WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("SHA384WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("SHA512WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
-        algorithms.put("RSAWITHSHA1", new DERObjectIdentifier("1.2.840.113549.1.1.5"));
+        algorithms.put("RSAWITHSHA1", new ASN1ObjectIdentifier("1.2.840.113549.1.1.5"));
         // BEGIN android-removed
         // algorithms.put("RIPEMD128WITHRSAENCRYPTION", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
         // algorithms.put("RIPEMD128WITHRSA", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
@@ -117,8 +117,8 @@ public class PKCS10CertificationRequest
         // algorithms.put("RIPEMD256WITHRSAENCRYPTION", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
         // algorithms.put("RIPEMD256WITHRSA", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
         // END android-removed
-        algorithms.put("SHA1WITHDSA", new DERObjectIdentifier("1.2.840.10040.4.3"));
-        algorithms.put("DSAWITHSHA1", new DERObjectIdentifier("1.2.840.10040.4.3"));
+        algorithms.put("SHA1WITHDSA", new ASN1ObjectIdentifier("1.2.840.10040.4.3"));
+        algorithms.put("DSAWITHSHA1", new ASN1ObjectIdentifier("1.2.840.10040.4.3"));
         algorithms.put("SHA224WITHDSA", NISTObjectIdentifiers.dsa_with_sha224);
         algorithms.put("SHA256WITHDSA", NISTObjectIdentifiers.dsa_with_sha256);
         algorithms.put("SHA384WITHDSA", NISTObjectIdentifiers.dsa_with_sha384);
@@ -140,7 +140,7 @@ public class PKCS10CertificationRequest
         //
         // reverse mappings
         //
-        oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.5"), "SHA1WITHRSA");
+        oids.put(new ASN1ObjectIdentifier("1.2.840.113549.1.1.5"), "SHA1WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha256WithRSAEncryption, "SHA256WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha384WithRSAEncryption, "SHA384WITHRSA");
@@ -150,12 +150,11 @@ public class PKCS10CertificationRequest
         // oids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001, "GOST3411WITHECGOST3410");
         // END android-removed
         
-        oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.4"), "MD5WITHRSA");
+        oids.put(new ASN1ObjectIdentifier("1.2.840.113549.1.1.4"), "MD5WITHRSA");
         // BEGIN android-removed
-        // Dropping MD2
-        // oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.2"), "MD2WITHRSA");
+        // oids.put(new ASN1ObjectIdentifier("1.2.840.113549.1.1.2"), "MD2WITHRSA");
         // END android-removed
-        oids.put(new DERObjectIdentifier("1.2.840.10040.4.3"), "SHA1WITHDSA");
+        oids.put(new ASN1ObjectIdentifier("1.2.840.10040.4.3"), "SHA1WITHDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA1, "SHA1WITHECDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA224, "SHA224WITHECDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA256, "SHA256WITHECDSA");
@@ -324,13 +323,13 @@ public class PKCS10CertificationRequest
                 InvalidKeyException, SignatureException
     {
         String algorithmName = Strings.toUpperCase(signatureAlgorithm);
-        DERObjectIdentifier sigOID = (DERObjectIdentifier)algorithms.get(algorithmName);
+        ASN1ObjectIdentifier sigOID = (ASN1ObjectIdentifier)algorithms.get(algorithmName);
 
         if (sigOID == null)
         {
             try
             {
-                sigOID = new DERObjectIdentifier(algorithmName);
+                sigOID = new ASN1ObjectIdentifier(algorithmName);
             }
             catch (Exception e)
             {
@@ -364,7 +363,7 @@ public class PKCS10CertificationRequest
         try
         {
             ASN1Sequence seq = (ASN1Sequence)ASN1Primitive.fromByteArray(key.getEncoded());
-            this.reqInfo = new CertificationRequestInfo(subject, new SubjectPublicKeyInfo(seq), attributes);
+            this.reqInfo = new CertificationRequestInfo(subject, SubjectPublicKeyInfo.getInstance(seq), attributes);
         }
         catch (IOException e)
         {
@@ -415,7 +414,7 @@ public class PKCS10CertificationRequest
         
         try
         {
-            X509EncodedKeySpec      xspec = new X509EncodedKeySpec(new DERBitString(subjectPKInfo).getBytes());
+            X509EncodedKeySpec      xspec = new X509EncodedKeySpec(new DERBitString(subjectPKInfo).getOctets());
             AlgorithmIdentifier     keyAlg = subjectPKInfo.getAlgorithm();
             try
             {
@@ -433,9 +432,9 @@ public class PKCS10CertificationRequest
                 //
                 // try an alternate
                 //
-                if (keyAlgorithms.get(keyAlg.getObjectId()) != null)
+                if (keyAlgorithms.get(keyAlg.getAlgorithm()) != null)
                 {
-                    String  keyAlgorithm = (String)keyAlgorithms.get(keyAlg.getObjectId());
+                    String  keyAlgorithm = (String)keyAlgorithms.get(keyAlg.getAlgorithm());
                     
                     if (provider == null)
                     {
@@ -508,9 +507,9 @@ public class PKCS10CertificationRequest
             //
             // try an alternate
             //
-            if (oids.get(sigAlgId.getObjectId()) != null)
+            if (oids.get(sigAlgId.getAlgorithm()) != null)
             {
-                String  signatureAlgorithm = (String)oids.get(sigAlgId.getObjectId());
+                String  signatureAlgorithm = (String)oids.get(sigAlgId.getAlgorithm());
 
                 if (provider == null)
                 {
@@ -540,7 +539,7 @@ public class PKCS10CertificationRequest
             throw new SignatureException("exception encoding TBS cert request - " + e);
         }
 
-        return sig.verify(sigBits.getBytes());
+        return sig.verify(sigBits.getOctets());
     }
 
     /**
@@ -597,18 +596,18 @@ public class PKCS10CertificationRequest
 
         if (params != null && !DERNull.INSTANCE.equals(params))
         {
-            if (sigAlgId.getObjectId().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
+            if (sigAlgId.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
             {
                 RSASSAPSSparams rsaParams = RSASSAPSSparams.getInstance(params);
-                return getDigestAlgName(rsaParams.getHashAlgorithm().getObjectId()) + "withRSAandMGF1";
+                return getDigestAlgName(rsaParams.getHashAlgorithm().getAlgorithm()) + "withRSAandMGF1";
             }
         }
 
-        return sigAlgId.getObjectId().getId();
+        return sigAlgId.getAlgorithm().getId();
     }
 
     private static String getDigestAlgName(
-        DERObjectIdentifier digestAlgOID)
+        ASN1ObjectIdentifier digestAlgOID)
     {
         if (PKCSObjectIdentifiers.md5.equals(digestAlgOID))
         {

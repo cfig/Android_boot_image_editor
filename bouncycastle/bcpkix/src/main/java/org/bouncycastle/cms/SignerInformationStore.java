@@ -7,13 +7,37 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.bouncycastle.util.Iterable;
+
 public class SignerInformationStore
+    implements Iterable<SignerInformation>
 {
     private List all = new ArrayList();
     private Map table = new HashMap();
 
+    /**
+     * Create a store containing a single SignerInformation object.
+     *
+     * @param signerInfo the signer information to contain.
+     */
     public SignerInformationStore(
-        Collection  signerInfos)
+        SignerInformation  signerInfo)
+    {
+        this.all = new ArrayList(1);
+        this.all.add(signerInfo);
+
+        SignerId sid = signerInfo.getSID();
+
+        table.put(sid, all);
+    }
+
+    /**
+     * Create a store containing a collection of SignerInformation objects.
+     *
+     * @param signerInfos a collection signer information objects to contain.
+     */
+    public SignerInformationStore(
+        Collection<SignerInformation>  signerInfos)
     {
         Iterator    it = signerInfos.iterator();
 
@@ -65,7 +89,7 @@ public class SignerInformationStore
      * 
      * @return a collection of signers.
      */
-    public Collection getSigners()
+    public Collection<SignerInformation> getSigners()
     {
         return new ArrayList(all);
     }
@@ -76,7 +100,7 @@ public class SignerInformationStore
      * @param selector a signer id to select against.
      * @return a collection of SignerInformation objects.
      */
-    public Collection getSigners(
+    public Collection<SignerInformation> getSigners(
         SignerId selector)
     {
         if (selector.getIssuer() != null && selector.getSubjectKeyIdentifier() != null)
@@ -105,5 +129,13 @@ public class SignerInformationStore
 
             return list == null ? new ArrayList() : new ArrayList(list);
         }
+    }
+
+    /**
+     * Support method for Iterable where available.
+     */
+    public Iterator<SignerInformation> iterator()
+    {
+        return getSigners().iterator();
     }
 }

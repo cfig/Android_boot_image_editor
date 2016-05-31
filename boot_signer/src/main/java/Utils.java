@@ -258,10 +258,10 @@ public class Utils {
 
     static boolean verify(PublicKey key, byte[] input, byte[] signature,
             AlgorithmIdentifier algId) throws Exception {
-        String algName = ID_TO_ALG.get(algId.getObjectId().getId());
+        String algName = ID_TO_ALG.get(algId.getAlgorithm().getId());
 
         if (algName == null) {
-            throw new IllegalArgumentException("Unsupported algorithm " + algId.getObjectId());
+            throw new IllegalArgumentException("Unsupported algorithm " + algId.getAlgorithm());
         }
 
         Signature verifier = Signature.getInstance(algName);

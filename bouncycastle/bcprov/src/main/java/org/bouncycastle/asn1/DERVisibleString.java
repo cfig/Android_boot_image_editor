@@ -6,18 +6,23 @@ import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Strings;
 
 /**
- * DER VisibleString object.
+ * DER VisibleString object encoding ISO 646 (ASCII) character code points 32 to 126.
+ * <p>
+ * Explicit character set escape sequences are not allowed.
+ * </p>
  */
 public class DERVisibleString
     extends ASN1Primitive
     implements ASN1String
 {
-    private byte[]  string;
+    private final byte[]  string;
 
     /**
-     * return a Visible String from the passed in object.
+     * Return a Visible String from the passed in object.
      *
+     * @param obj a DERVisibleString or an object that can be converted into one.
      * @exception IllegalArgumentException if the object cannot be converted.
+     * @return a DERVisibleString instance, or null
      */
     public static DERVisibleString getInstance(
         Object  obj)
@@ -43,13 +48,14 @@ public class DERVisibleString
     }
 
     /**
-     * return a Visible String from a tagged object.
+     * Return a Visible String from a tagged object.
      *
      * @param obj the tagged object holding the object we want
      * @param explicit true if the object is meant to be explicitly
      *              tagged false otherwise.
      * @exception IllegalArgumentException if the tagged object cannot
      *               be converted.
+     * @return a DERVisibleString instance, or null
      */
     public static DERVisibleString getInstance(
         ASN1TaggedObject obj,
@@ -67,8 +73,8 @@ public class DERVisibleString
         }
     }
 
-    /**
-     * basic constructor - byte encoded string.
+    /*
+     * Basic constructor - byte encoded string.
      */
     DERVisibleString(
         byte[]   string)
@@ -77,7 +83,9 @@ public class DERVisibleString
     }
 
     /**
-     * basic constructor
+     * Basic constructor
+     *
+     * @param string the string to be carried in the VisibleString object,
      */
     public DERVisibleString(
         String   string)

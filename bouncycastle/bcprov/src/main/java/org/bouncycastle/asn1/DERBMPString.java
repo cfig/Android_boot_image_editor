@@ -5,19 +5,20 @@ import java.io.IOException;
 import org.bouncycastle.util.Arrays;
 
 /**
- * DER BMPString object.
+ * Carrier class for DER encoding BMPString object.
  */
 public class DERBMPString
     extends ASN1Primitive
     implements ASN1String
 {
-    private char[]  string;
+    private final char[]  string;
 
     /**
      * return a BMP String from the given object.
      *
      * @param obj the object we want converted.
      * @exception IllegalArgumentException if the object cannot be converted.
+     * @return a DERBMPString instance, or null.
      */
     public static DERBMPString getInstance(
         Object  obj)
@@ -50,6 +51,7 @@ public class DERBMPString
      *              tagged false otherwise.
      * @exception IllegalArgumentException if the tagged object cannot
      *              be converted.
+     * @return a DERBMPString instance.
      */
     public static DERBMPString getInstance(
         ASN1TaggedObject obj,
@@ -69,6 +71,7 @@ public class DERBMPString
 
     /**
      * basic constructor - byte encoded string.
+     * @param string the encoded BMP STRING to wrap.
      */
     DERBMPString(
         byte[]   string)
@@ -90,6 +93,7 @@ public class DERBMPString
 
     /**
      * basic constructor
+     * @param string a String to wrap as a BMP STRING.
      */
     public DERBMPString(
         String   string)
