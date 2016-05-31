@@ -15,6 +15,12 @@ So the recommended OS is Linux.
 
 (2) These utilities are known to work for Nexus (or Nexus compatible) boot.img for the following Android releases:
 
+Branch: master
+
+ - Android AOSP master
+
+Branch: Marshmallow
+
  - Marshmallow (API Level 23)
  - Lollipop (API Level 21,22)
 
@@ -46,6 +52,20 @@ Now, pack the boot.img again
 You get the repacked boot.img at $(CURDIR):
 
     boot.img.signed
+
+## Advanced usage for ROM developers
+If you have full Android source code, and have set up environment by envsetup/lunch, then the "pack" task will use $ANDROID\_PRODUCT\_OUT/root as rootfs.
+
+    . build/envsetup.sh
+    lunch xx-userdebug
+    cd <path_to_Nexus_boot_image_editor>
+    ./gradew pack
+
+If you have a rooted Android device connected via adb, you can also flash it with "flash" task:
+
+    ./gradew flash
+
+This will update the updated boot.img to /dev/block/by-name/boot.
 
 ## example & test
 An example boot.img has been placed at **src/test/resources/boot.img**, which is extracted from Nexus 5x(code: bullhead) factory images from [Google](https://dl.google.com/dl/android/aosp/bullhead-mda89e-factory-29247942.tgz), you can take it as a quick start.
