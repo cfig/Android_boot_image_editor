@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 def workdir='build/unzip_boot'
+def defaultRootDir = workdir + "/root"
 
 model {
     buildTypes {
@@ -70,10 +71,21 @@ task unpack(type: Delete, dependsOn: unpack_cpio) {
 }
 
 task pack_ramdisk_and_gz { Task task ->
+    def rootDir = defaultRootDir
+    if (null != System.getenv("ANDROID_PRODUCT_OUT")) {
+        rootDir = System.getenv("ANDROID_PRODUCT_OUT") + "/root"
+    }
     doLast {
+        if (!rootDir.equals(defaultRootDir)) {
+            println("Warning:")
+            println("Warning:")
+            println("Warning:\tUsing [" + rootDir + "] for target root")
+            println("Warning:")
+            println("Warning:")
+        }
         ByteArrayOutputStream mkbootfs_out = new ByteArrayOutputStream()
         task.project.exec {
-            commandLine = [ 'build/exe/mkbootfs/mkbootfs', workdir + "/root" ]
+            commandLine = [ 'build/exe/mkbootfs/mkbootfs', rootDir ]
             standardOutput = mkbootfs_out
         }
         def ByteArrayInputStream gzip_in = new ByteArrayInputStream(mkbootfs_out.buf)
@@ -223,6 +235,8 @@ void updateBootImage() {
     Run("adb root")
     Run("adb push boot.img.signed /cache/")
     List<String> cmd2 = ["adb", "shell", "dd if=/cache/boot.img.signed of=/dev/block/by-name/boot"];
+    Run(cmd2)
+    cmd2 = ["adb", "shell", "rm -f /cache/boot.img.signed"];
     Run(cmd2)
 }
 
