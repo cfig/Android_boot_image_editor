@@ -4,6 +4,7 @@ apply plugin: 'java'
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.RuntimeException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.regex.Matcher;
@@ -14,6 +15,7 @@ def defaultRootDir = workdir + "/root"
 String[] bins = [ "sh", "logcat", "logd", "linker", "toolbox", "toybox", "applypatch_static" ]
 String[] libs = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so" ]
 boolean gDebug=true
+String activeImg = null;
 
 model {
     buildTypes {
@@ -60,7 +62,7 @@ task unpack_bootimg(type: Exec, dependsOn: 'abootimgExecutable') {
     }
     workingDir '.'
     executable 'build/exe/abootimg/abootimg'
-    args = ['-x', 'boot.img', workdir+'/bootimg.cfg', workdir+'/kernel', workdir+'/ramdisk.img.gz']
+    args = ['-x', activeImg, workdir+'/bootimg.cfg', workdir+'/kernel', workdir+'/ramdisk.img.gz']
 }
 
 task unpack_ramdisk_gz << {
@@ -82,8 +84,9 @@ task unpack_cpio(type: Exec, dependsOn: unpack_ramdisk_gz) {
 }
 
 task unpack(type: Delete, dependsOn: unpack_cpio) {
-  delete workdir + "/ramdisk.img.gz"
-  delete workdir + "/ramdisk.img"
+    description "extract boot.img or recovery.img"
+    delete workdir + "/ramdisk.img.gz"
+    delete workdir + "/ramdisk.img"
 }
 
 task pack_ramdisk_and_gz { Task task ->
@@ -123,7 +126,7 @@ task pack_clear(type: Exec, dependsOn: [pack_ramdisk_and_gz, 'mkbootimgExecutabl
         '--ramdisk', workdir + "/ramdisk.img.gz",
         '--cmdline', theCmdLine,
         '--base', theBaseAddr,
-        '--output', 'boot.img.clear']
+        '--output', activeImg + '.clear']
 }
 if (!new File(workdir + "/bootimg.cfg").exists()) {
     pack_clear.enabled = false;
@@ -226,8 +229,21 @@ task pack(type: JavaExec, dependsOn: [pack_clear, 'boot_signer:jar']) {
     main = 'com.android.verity.BootSignature'
     classpath = files("boot_signer/build/libs/boot_signer.jar")
     maxHeapSize '512m'
-    args '/boot','boot.img.clear', 'security/verity.pk8', 'security/verity.x509.pem', 'boot.img.signed'
+    args '/boot', activeImg + '.clear', 'security/verity.pk8', 'security/verity.x509.pem', activeImg + '.signed'
 }
+
+if (new File("boot.img").exists()) {
+    activeImg = "boot.img";
+} else if (new File("recovery.img").exists()) {
+    activeImg = "recovery.img";
+} else {
+    pack.enabled = false
+    unpack.enabled = false
+    unpack_cpio.enabled = false
+    unpack_bootimg.enabled = false
+    unpack_ramdisk_gz.enabled = false
+}
+println("Active image target: " + activeImg);
 
 task _setup(type: Copy) {
     from 'src/test/resources/boot.img'
@@ -271,12 +287,20 @@ void RunFunc(String inCmd, String inWorkdir = null) {
 }
 
 void updateBootImage() {
-    String flashTarget = "/dev/block/by-name/" + System.getProperty("img", "boot")
+    String flashTarget = null;
+    switch (activeImg) {
+        case "boot.img":
+            flashTarget = "/dev/block/by-name/boot";
+            break;
+        case "recovery.img":
+            flashTarget = "/dev/block/by-name/recovery";
+            break;
+    }
     Run("adb root")
-    Run("adb push boot.img.signed /cache/")
-    List<String> cmd2 = ["adb", "shell", "dd if=/cache/boot.img.signed of=" + flashTarget];
+    Run("adb push " + activeImg + ".signed /cache/")
+    List<String> cmd2 = ["adb", "shell", "dd if=/cache/" + activeImg + ".signed of=" + flashTarget];
     Run(cmd2)
-    cmd2 = ["adb", "shell", "rm -f /cache/boot.img.signed"];
+    cmd2 = ["adb", "shell", "rm -f /cache/" + activeImg + ".signed"];
     Run(cmd2)
 }
 
