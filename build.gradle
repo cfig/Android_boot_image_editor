@@ -10,13 +10,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-def workdir='build/unzip_boot'
-def defaultRootDir = workdir + "/root"
-String[] bins = [ "sh", "logcat", "logd", "linker", "toolbox", "toybox", "applypatch_static" ]
-String[] libs = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so" ]
-boolean gDebug=true
-String activeImg = null;
-
+// ----------------------------------------------------------------------------
 model {
     buildTypes {
         release
@@ -52,6 +46,26 @@ model {
     }
 }
 
+
+// ----------------------------------------------------------------------------
+//                       global
+// ----------------------------------------------------------------------------
+def workdir='build/unzip_boot'
+def defaultRootDir = workdir + "/root"
+String[] bins = [ "sh", "logcat", "logd", "linker", "toolbox", "toybox", "applypatch" ]
+String[] libs = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libz.so", "libstdc++.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so" ]
+boolean gDebug=true
+String activeImg = null;
+if (new File("boot.img").exists()) {
+    activeImg = "boot.img";
+} else if (new File("recovery.img").exists()) {
+    activeImg = "recovery.img";
+}
+println("Active image target: " + activeImg);
+
+// ----------------------------------------------------------------------------
+//                       tasks
+// ----------------------------------------------------------------------------
 task unpack_bootimg(type: Exec, dependsOn: 'abootimgExecutable') {
     doFirst {
         def rootdir = new File(workdir)
@@ -127,9 +141,6 @@ task pack_clear(type: Exec, dependsOn: [pack_ramdisk_and_gz, 'mkbootimgExecutabl
         '--cmdline', theCmdLine,
         '--base', theBaseAddr,
         '--output', activeImg + '.clear']
-}
-if (!new File(workdir + "/bootimg.cfg").exists()) {
-    pack_clear.enabled = false;
 }
 
 void unGnuzipFile(String compressedFile, String decompressedFile) throws IOException {
@@ -232,19 +243,6 @@ task pack(type: JavaExec, dependsOn: [pack_clear, 'boot_signer:jar']) {
     args '/boot', activeImg + '.clear', 'security/verity.pk8', 'security/verity.x509.pem', activeImg + '.signed'
 }
 
-if (new File("boot.img").exists()) {
-    activeImg = "boot.img";
-} else if (new File("recovery.img").exists()) {
-    activeImg = "recovery.img";
-} else {
-    pack.enabled = false
-    unpack.enabled = false
-    unpack_cpio.enabled = false
-    unpack_bootimg.enabled = false
-    unpack_ramdisk_gz.enabled = false
-}
-println("Active image target: " + activeImg);
-
 task _setup(type: Copy) {
     from 'src/test/resources/boot.img'
     into '.'
@@ -336,7 +334,7 @@ void updateLinks(String inWorkdir) {
 }
 
 task debug(dependsOn: ['addSystemBin', 'addSystemLib']) {
-    description "add debug tools into recovery rootfs"
+    description "add debug tools into recovery rootfs from ANDROID_PRODUCT_OUT"
     doLast {
         updateLinks(workdir);
     }
@@ -365,4 +363,19 @@ boolean inTargetList(String file, String[] inArray) {
         }
     }
     return false;
+}
+
+// ----------------------------------------------------------------------------
+//                      post configs
+// ----------------------------------------------------------------------------
+if (null == activeImg) {
+    pack.enabled = false
+    unpack.enabled = false
+    unpack_cpio.enabled = false
+    unpack_bootimg.enabled = false
+    unpack_ramdisk_gz.enabled = false
+}
+
+if (!new File(workdir + "/bootimg.cfg").exists()) {
+    pack_clear.enabled = false;
 }
