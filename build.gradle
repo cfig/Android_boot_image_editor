@@ -284,7 +284,7 @@ void RunFunc(String inCmd, String inWorkdir = null) {
     RunFunc(Arrays.asList(inCmd.split()), inWorkdir);
 }
 
-void updateBootImage() {
+void updateBootImage(String activeImg) {
     String flashTarget = null;
     switch (activeImg) {
         case "boot.img":
@@ -303,7 +303,7 @@ void updateBootImage() {
 }
 
 task flash << {
-    updateBootImage()
+    updateBootImage(activeImg)
 }
 
 void rebootRecovery() {
