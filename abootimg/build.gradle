@@ -1,0 +1,34 @@
+apply plugin: 'groovy'
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.3.11'
+    compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '5.0.2'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+task abootimg(type: Jar, dependsOn:['build']) {
+    from files(sourceSets.main.output.classesDir)
+    from configurations.runtime.asFileTree.files.collect { zipTree(it) }
+
+    baseName = 'abootimg'
+    manifest {
+        attributes 'Main-Class': 'cfig.bootimg.abootimg'
+    }
+}
+
+task mkbootimg(type: Jar, dependsOn:['build']) {
+    from files(sourceSets.main.output.classesDir)
+    from configurations.runtime.asFileTree.files.collect { zipTree(it) }
+
+    baseName = 'mkbootimg'
+    manifest {
+        attributes 'Main-Class': 'cfig.bootimg.mkbootimg'
+    }
+}

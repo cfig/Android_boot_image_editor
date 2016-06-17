@@ -1,5 +1,6 @@
 apply plugin: 'c'
 apply plugin: 'java'
+apply plugin: 'groovy'
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,15 +15,6 @@ import java.util.regex.Pattern;
 model {
     buildTypes {
         release
-    }
-
-    components {
-        abootimg(NativeExecutableSpec) {
-            binaries.all {
-                cppCompiler.define 'HAS_BLKID'
-                linker.args "-lblkid"
-            }
-        }
     }
 
     components {
@@ -53,7 +45,7 @@ println("Active image target: " + activeImg);
 // ----------------------------------------------------------------------------
 //                       tasks
 // ----------------------------------------------------------------------------
-task unpack_bootimg(type: Exec, dependsOn: 'abootimgExecutable') {
+task unpack_bootimg(type: JavaExec, dependsOn: ['abootimg:abootimg']) {
     doFirst {
         def rootdir = new File(workdir)
         if (rootdir.exists()) {
@@ -61,9 +53,10 @@ task unpack_bootimg(type: Exec, dependsOn: 'abootimgExecutable') {
         }
         rootdir.mkdirs()
     }
-    workingDir '.'
-    executable 'build/exe/abootimg/abootimg'
-    args = ['-x', activeImg, workdir+'/bootimg.cfg', workdir+'/kernel', workdir+'/ramdisk.img.gz']
+    main = 'cfig.bootimg.abootimg'
+    classpath = files("abootimg/build/libs/abootimg.jar")
+    maxHeapSize '512m'
+    args String.format("%s", activeImg), workdir
 }
 
 task unpack_ramdisk_gz << {

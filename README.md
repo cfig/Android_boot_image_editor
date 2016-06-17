@@ -33,7 +33,7 @@ Then put your boot.img at **$(CURDIR)/boot.img**, then start gradle 'unpack' tas
 Your get the flattened kernel and /root filesystem under **$(CURDIR)/build/unzip\_boot**:
 
     build/unzip_boot/
-    ├── bootimg.cfg
+    ├── bootimg.json
     ├── kernel
     └── root
 
