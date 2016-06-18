@@ -30,6 +30,7 @@ model {
 //                       global
 // ----------------------------------------------------------------------------
 def workdir='build/unzip_boot'
+project.ext.rootWorkDir = new File(workdir).getAbsolutePath()
 def defaultRootDir = workdir + "/root"
 String[] bins = [ "sh", "logcat", "logd", "linker", "toolbox", "toybox", "applypatch" ]
 String[] libs = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libz.so", "libstdc++.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so" ]
@@ -40,6 +41,8 @@ if (new File("boot.img").exists()) {
 } else if (new File("recovery.img").exists()) {
     activeImg = "recovery.img";
 }
+project.ext.outClearIMg = new File(String.format("%s.clear", activeImg)).getAbsolutePath()
+project.ext.mkbootimgBin = new File("src/mkbootimg/mkbootimg").getAbsolutePath()
 println("Active image target: " + activeImg);
 
 // ----------------------------------------------------------------------------
@@ -107,20 +110,16 @@ task pack_ramdisk_and_gz { Task task ->
 }
 pack_ramdisk_and_gz.dependsOn('mkbootfsExecutable')
 
-task pack_clear(type: Exec, dependsOn: [pack_ramdisk_and_gz]) {
-    def theCmdLine = getRamdiskConfig(workdir, 'cmdline')
-    if (gDebug) {
-        theCmdLine = "androidboot.selinux=disabled " + theCmdLine
-    }
-    def theBaseAddr = getBaseAddress(workdir)
-    workingDir '.'
-    executable 'src/mkbootimg/mkbootimg'
-    args = [
-        '--kernel', workdir + "/kernel",
-        '--ramdisk', workdir + "/ramdisk.img.gz",
-        '--cmdline', theCmdLine,
-        '--base', theBaseAddr,
-        '--output', activeImg + '.clear']
+task pack_clear2(type: JavaExec, dependsOn: ['abootimg:repack', pack_ramdisk_and_gz]) {
+    main = 'cfig.bootimg.repack'
+    classpath = files("abootimg/build/libs/repack.jar")
+    maxHeapSize '512m'
+    args String.format("%s.clear2", activeImg), workdir
+}
+
+String[] getMkbootimgArgs(String inWorkdir, String outFile) {
+    return "good day".split();
+    //args = getMkbootimgArgs(workdir, String.format("%s.clear", activeImg))
 }
 
 void unGnuzipFile(String compressedFile, String decompressedFile) throws IOException {
@@ -179,44 +178,7 @@ void gnuZipFile(String compressedFile, String decompressedFile) throws IOExcepti
     }
 }
 
-String getBaseAddress(String inWorkdir) {
-    Long ret;
-    try {
-        ret = Long.parseLong(getRamdiskConfig(inWorkdir, "kerneladdr").substring(2), 16) - 0x8000L;
-    } catch (NumberFormatException e) {
-        throw new RuntimeException("NumberFormatException: invalid kerneladdr value")
-    }
-    return Long.toHexString(ret);
-}
-
-String getRamdiskConfig(String inWorkdir, String inKey) {
-    String ret;
-    if (!new File(inWorkdir+ "/bootimg.cfg").exists()) {
-        return "0x0";
-    }
-    try {
-        BufferedReader br = new BufferedReader(new FileReader(inWorkdir + "/bootimg.cfg"));
-        String item;
-        while (true) {
-            item = br.readLine();
-            if (null == item) {
-                break;
-            }
-            Pattern r = Pattern.compile("(?<=" + inKey + " = ).*");
-            Matcher m = r.matcher(item);
-            if (m.find()) {
-                ret = m.group(0)
-            }
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
-        throw new RuntimeException("Fatal Error");
-    }
-
-    return ret;
-}
-
-task pack(type: JavaExec, dependsOn: [pack_clear, 'boot_signer:jar']) {
+task pack(type: JavaExec, dependsOn: ['abootimg:pack_clear', 'boot_signer:jar', pack_clear2]) {
     main = 'com.android.verity.BootSignature'
     classpath = files("boot_signer/build/libs/boot_signer.jar")
     maxHeapSize '512m'
@@ -354,8 +316,4 @@ if (null == activeImg) {
     unpack_cpio.enabled = false
     unpack_bootimg.enabled = false
     unpack_ramdisk_gz.enabled = false
-}
-
-if (!new File(workdir + "/bootimg.cfg").exists()) {
-    pack_clear.enabled = false;
 }
