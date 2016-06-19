@@ -4,6 +4,7 @@ import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.StreamBlockCipher;
 
 /**
  * A Cipher Text Stealing (CTS) mode cipher. CTS allows block ciphers to
@@ -22,9 +23,8 @@ public class CTSBlockCipher
     public CTSBlockCipher(
         BlockCipher     cipher)
     {
-        if ((cipher instanceof OFBBlockCipher) || (cipher instanceof CFBBlockCipher) || (cipher instanceof SICBlockCipher))
+        if (cipher instanceof StreamBlockCipher)
         {
-            // TODO: This is broken - need to introduce marker interface to differentiate block cipher primitive from mode?
             throw new IllegalArgumentException("CTSBlockCipher can only accept ECB, or CBC ciphers");
         }
 

@@ -6,6 +6,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Principal;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
@@ -41,6 +42,7 @@ import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
 
 /**
@@ -62,7 +64,7 @@ public class X509CRLObject
     private boolean isHashCodeSet = false;
     private int     hashCodeValue;
 
-    static boolean isIndirectCRL(X509CRL crl)
+    public static boolean isIndirectCRL(X509CRL crl)
         throws CRLException
     {
         try
@@ -201,21 +203,27 @@ public class X509CRLObject
     }
 
     public void verify(PublicKey key)
-        throws CRLException,  NoSuchAlgorithmException,
-            InvalidKeyException, NoSuchProviderException, SignatureException
+        throws CRLException, NoSuchAlgorithmException,
+        InvalidKeyException, NoSuchProviderException, SignatureException
     {
-        verify(key, BouncyCastleProvider.PROVIDER_NAME);
+        Signature sig;
+
+        try
+        {
+            sig = Signature.getInstance(getSigAlgName(), BouncyCastleProvider.PROVIDER_NAME);
+        }
+        catch (Exception e)
+        {
+            sig = Signature.getInstance(getSigAlgName());
+        }
+
+        doVerify(key, sig);
     }
 
     public void verify(PublicKey key, String sigProvider)
         throws CRLException, NoSuchAlgorithmException,
-            InvalidKeyException, NoSuchProviderException, SignatureException
+        InvalidKeyException, NoSuchProviderException, SignatureException
     {
-        if (!c.getSignatureAlgorithm().equals(c.getTBSCertList().getSignature()))
-        {
-            throw new CRLException("Signature algorithm on CertificateList does not match TBSCertList.");
-        }
-
         Signature sig;
 
         if (sigProvider != null)
@@ -225,6 +233,36 @@ public class X509CRLObject
         else
         {
             sig = Signature.getInstance(getSigAlgName());
+        }
+
+        doVerify(key, sig);
+    }
+
+    public void verify(PublicKey key, Provider sigProvider)
+        throws CRLException, NoSuchAlgorithmException,
+        InvalidKeyException, SignatureException
+    {
+        Signature sig;
+
+        if (sigProvider != null)
+        {
+            sig = Signature.getInstance(getSigAlgName(), sigProvider);
+        }
+        else
+        {
+            sig = Signature.getInstance(getSigAlgName());
+        }
+
+        doVerify(key, sig);
+    }
+
+    private void doVerify(PublicKey key, Signature sig)
+        throws CRLException, NoSuchAlgorithmException,
+        InvalidKeyException, SignatureException
+    {
+        if (!c.getSignatureAlgorithm().equals(c.getTBSCertList().getSignature()))
+        {
+            throw new CRLException("Signature algorithm on CertificateList does not match TBSCertList.");
         }
 
         sig.initVerify(key);
@@ -353,7 +391,7 @@ public class X509CRLObject
 
     public byte[] getSignature()
     {
-        return c.getSignature().getBytes();
+        return c.getSignature().getOctets();
     }
 
     public String getSigAlgName()
@@ -388,7 +426,7 @@ public class X509CRLObject
     public String toString()
     {
         StringBuffer buf = new StringBuffer();
-        String nl = System.getProperty("line.separator");
+        String nl = Strings.lineSeparator();
 
         buf.append("              Version: ").append(this.getVersion()).append(
             nl);

@@ -11,9 +11,9 @@ import java.security.spec.PSSParameterSpec;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Null;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 // BEGIN android-removed
 // import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 // END android-removed
@@ -69,22 +69,22 @@ class X509SignatureUtil
         if (params != null && !derNull.equals(params))
         {
             // BEGIN android-removed
-            // if (sigAlgId.getObjectId().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
+            // if (sigAlgId.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
             // {
             //     RSASSAPSSparams rsaParams = RSASSAPSSparams.getInstance(params);
-            //
-            //     return getDigestAlgName(rsaParams.getHashAlgorithm().getObjectId()) + "withRSAandMGF1";
+            //     
+            //     return getDigestAlgName(rsaParams.getHashAlgorithm().getAlgorithm()) + "withRSAandMGF1";
             // }
             // END android-removed
-            if (sigAlgId.getObjectId().equals(X9ObjectIdentifiers.ecdsa_with_SHA2))
+            if (sigAlgId.getAlgorithm().equals(X9ObjectIdentifiers.ecdsa_with_SHA2))
             {
                 ASN1Sequence ecDsaParams = ASN1Sequence.getInstance(params);
                 
-                return getDigestAlgName((DERObjectIdentifier)ecDsaParams.getObjectAt(0)) + "withECDSA";
+                return getDigestAlgName(ASN1ObjectIdentifier.getInstance(ecDsaParams.getObjectAt(0))) + "withECDSA";
             }
         }
 
-        return sigAlgId.getObjectId().getId();
+        return sigAlgId.getAlgorithm().getId();
     }
     
     /**
@@ -92,7 +92,7 @@ class X509SignatureUtil
      * representations rather the the algorithm identifier (if possible).
      */
     private static String getDigestAlgName(
-        DERObjectIdentifier digestAlgOID)
+        ASN1ObjectIdentifier digestAlgOID)
     {
         if (PKCSObjectIdentifiers.md5.equals(digestAlgOID))
         {

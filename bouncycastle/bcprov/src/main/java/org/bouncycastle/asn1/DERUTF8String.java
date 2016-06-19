@@ -12,13 +12,15 @@ public class DERUTF8String
     extends ASN1Primitive
     implements ASN1String
 {
-    private byte[]  string;
+    private final byte[]  string;
 
     /**
-     * return an UTF8 string from the passed in object.
-     * 
+     * Return an UTF8 string from the passed in object.
+     *
+     * @param obj a DERUTF8String or an object that can be converted into one.
      * @exception IllegalArgumentException
      *                if the object cannot be converted.
+     * @return a DERUTF8String instance, or null
      */
     public static DERUTF8String getInstance(Object obj)
     {
@@ -44,7 +46,7 @@ public class DERUTF8String
     }
 
     /**
-     * return an UTF8 String from a tagged object.
+     * Return an UTF8 String from a tagged object.
      * 
      * @param obj
      *            the tagged object holding the object we want
@@ -53,6 +55,7 @@ public class DERUTF8String
      *            otherwise.
      * @exception IllegalArgumentException
      *                if the tagged object cannot be converted.
+     * @return a DERUTF8String instance, or null
      */
     public static DERUTF8String getInstance(
         ASN1TaggedObject obj,
@@ -70,8 +73,8 @@ public class DERUTF8String
         }
     }
 
-    /**
-     * basic constructor - byte encoded string.
+    /*
+     * Basic constructor - byte encoded string.
      */
     DERUTF8String(byte[] string)
     {
@@ -79,7 +82,9 @@ public class DERUTF8String
     }
 
     /**
-     * basic constructor
+     * Basic constructor
+     *
+     * @param string the string to be carried in the UTF8String object,
      */
     public DERUTF8String(String string)
     {

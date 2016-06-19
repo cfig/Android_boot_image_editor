@@ -5,14 +5,13 @@ import java.math.BigInteger;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
 
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
+import org.bouncycastle.util.Strings;
 
 public class JCERSAPublicKey
     implements RSAPublicKey
@@ -48,7 +47,7 @@ public class JCERSAPublicKey
     {
         try
         {
-            RSAPublicKeyStructure   pubKey = new RSAPublicKeyStructure((ASN1Sequence)info.parsePublicKey());
+            org.bouncycastle.asn1.pkcs.RSAPublicKey   pubKey = org.bouncycastle.asn1.pkcs.RSAPublicKey.getInstance(info.parsePublicKey());
 
             this.modulus = pubKey.getModulus();
             this.publicExponent = pubKey.getPublicExponent();
@@ -91,7 +90,7 @@ public class JCERSAPublicKey
 
     public byte[] getEncoded()
     {
-        return KeyUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPublicKeyStructure(getModulus(), getPublicExponent()));
+        return KeyUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new org.bouncycastle.asn1.pkcs.RSAPublicKey(getModulus(), getPublicExponent()));
     }
 
     public int hashCode()
@@ -120,7 +119,7 @@ public class JCERSAPublicKey
     public String toString()
     {
         StringBuffer    buf = new StringBuffer();
-        String          nl = System.getProperty("line.separator");
+        String          nl = Strings.lineSeparator();
 
         buf.append("RSA Public Key").append(nl);
         buf.append("            modulus: ").append(this.getModulus().toString(16)).append(nl);

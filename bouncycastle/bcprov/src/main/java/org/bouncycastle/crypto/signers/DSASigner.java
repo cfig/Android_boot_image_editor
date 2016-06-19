@@ -45,18 +45,19 @@ public class DSASigner
         boolean                 forSigning,
         CipherParameters        param)
     {
+        SecureRandom providedRandom = null;
+
         if (forSigning)
         {
             if (param instanceof ParametersWithRandom)
             {
-                ParametersWithRandom    rParam = (ParametersWithRandom)param;
+                ParametersWithRandom rParam = (ParametersWithRandom)param;
 
-                this.random = rParam.getRandom();
                 this.key = (DSAPrivateKeyParameters)rParam.getParameters();
+                providedRandom = rParam.getRandom();
             }
             else
             {
-                this.random = new SecureRandom();
                 this.key = (DSAPrivateKeyParameters)param;
             }
         }
@@ -64,6 +65,8 @@ public class DSASigner
         {
             this.key = (DSAPublicKeyParameters)param;
         }
+
+        this.random = initSecureRandom(forSigning && !kCalculator.isDeterministic(), providedRandom);
     }
 
     /**
@@ -77,32 +80,28 @@ public class DSASigner
         byte[] message)
     {
         DSAParameters   params = key.getParameters();
-        BigInteger      m = calculateE(params.getQ(), message);
+        BigInteger      q = params.getQ();
+        BigInteger      m = calculateE(q, message);
+        BigInteger      x = ((DSAPrivateKeyParameters)key).getX();
 
         if (kCalculator.isDeterministic())
         {
-            kCalculator.init(params.getQ(), ((DSAPrivateKeyParameters)key).getX(), message);
+            kCalculator.init(q, x, message);
         }
         else
         {
-            kCalculator.init(params.getQ(), random);
+            kCalculator.init(q, random);
         }
 
         BigInteger  k = kCalculator.nextK();
 
-        BigInteger  r = params.getG().modPow(k, params.getP()).mod(params.getQ());
+        BigInteger  r = params.getG().modPow(k, params.getP()).mod(q);
 
-        k = k.modInverse(params.getQ()).multiply(
-                    m.add(((DSAPrivateKeyParameters)key).getX().multiply(r)));
+        k = k.modInverse(q).multiply(m.add(x.multiply(r)));
 
-        BigInteger  s = k.mod(params.getQ());
+        BigInteger  s = k.mod(q);
 
-        BigInteger[]  res = new BigInteger[2];
-
-        res[0] = r;
-        res[1] = s;
-
-        return res;
+        return new BigInteger[]{ r, s };
     }
 
     /**
@@ -116,28 +115,30 @@ public class DSASigner
         BigInteger  s)
     {
         DSAParameters   params = key.getParameters();
-        BigInteger      m = calculateE(params.getQ(), message);
+        BigInteger      q = params.getQ();
+        BigInteger      m = calculateE(q, message);
         BigInteger      zero = BigInteger.valueOf(0);
 
-        if (zero.compareTo(r) >= 0 || params.getQ().compareTo(r) <= 0)
+        if (zero.compareTo(r) >= 0 || q.compareTo(r) <= 0)
         {
             return false;
         }
 
-        if (zero.compareTo(s) >= 0 || params.getQ().compareTo(s) <= 0)
+        if (zero.compareTo(s) >= 0 || q.compareTo(s) <= 0)
         {
             return false;
         }
 
-        BigInteger  w = s.modInverse(params.getQ());
+        BigInteger  w = s.modInverse(q);
 
-        BigInteger  u1 = m.multiply(w).mod(params.getQ());
-        BigInteger  u2 = r.multiply(w).mod(params.getQ());
+        BigInteger  u1 = m.multiply(w).mod(q);
+        BigInteger  u2 = r.multiply(w).mod(q);
 
-        u1 = params.getG().modPow(u1, params.getP());
-        u2 = ((DSAPublicKeyParameters)key).getY().modPow(u2, params.getP());
+        BigInteger p = params.getP();
+        u1 = params.getG().modPow(u1, p);
+        u2 = ((DSAPublicKeyParameters)key).getY().modPow(u2, p);
 
-        BigInteger  v = u1.multiply(u2).mod(params.getP()).mod(params.getQ());
+        BigInteger  v = u1.multiply(u2).mod(p).mod(q);
 
         return v.equals(r);
     }
@@ -156,5 +157,10 @@ public class DSASigner
 
             return new BigInteger(1, trunc);
         }
+    }
+
+    protected SecureRandom initSecureRandom(boolean needed, SecureRandom provided)
+    {
+        return !needed ? null : (provided != null) ? provided : new SecureRandom();
     }
 }

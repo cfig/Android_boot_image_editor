@@ -1,5 +1,6 @@
 apply plugin: 'c'
 apply plugin: 'java'
+apply plugin: 'groovy'
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,40 +18,18 @@ model {
     }
 
     components {
-        abootimg(NativeExecutableSpec) {
-            binaries.all {
-                cppCompiler.define 'HAS_BLKID'
-                linker.args "-lblkid"
-            }
-        }
-    }
-
-    components {
         mkbootfs(NativeExecutableSpec) {
             binaries.all {
             }
         }
     }
-
-    components {
-        libmincrypt(NativeLibrarySpec) {
-            binaries.all {
-            }
-        }
-        mkbootimg(NativeExecutableSpec) {
-            binaries.all {
-                cCompiler.args '-std=c11'
-                lib library: "libmincrypt", linkage: 'static'
-            }
-        }
-    }
 }
-
 
 // ----------------------------------------------------------------------------
 //                       global
 // ----------------------------------------------------------------------------
 def workdir='build/unzip_boot'
+project.ext.rootWorkDir = new File(workdir).getAbsolutePath()
 def defaultRootDir = workdir + "/root"
 String[] bins = [ "sh", "logcat", "logd", "linker", "toolbox", "toybox", "applypatch" ]
 String[] libs = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libz.so", "libstdc++.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so" ]
@@ -61,12 +40,14 @@ if (new File("boot.img").exists()) {
 } else if (new File("recovery.img").exists()) {
     activeImg = "recovery.img";
 }
+project.ext.outClearIMg = new File(String.format("%s.clear", activeImg)).getAbsolutePath()
+project.ext.mkbootimgBin = new File("src/mkbootimg/mkbootimg").getAbsolutePath()
 println("Active image target: " + activeImg);
 
 // ----------------------------------------------------------------------------
 //                       tasks
 // ----------------------------------------------------------------------------
-task unpack_bootimg(type: Exec, dependsOn: 'abootimgExecutable') {
+task unpack_bootimg(type: JavaExec, dependsOn: ['abootimg:abootimg']) {
     doFirst {
         def rootdir = new File(workdir)
         if (rootdir.exists()) {
@@ -74,9 +55,10 @@ task unpack_bootimg(type: Exec, dependsOn: 'abootimgExecutable') {
         }
         rootdir.mkdirs()
     }
-    workingDir '.'
-    executable 'build/exe/abootimg/abootimg'
-    args = ['-x', activeImg, workdir+'/bootimg.cfg', workdir+'/kernel', workdir+'/ramdisk.img.gz']
+    main = 'cfig.bootimg.abootimg'
+    classpath = files("abootimg/build/libs/abootimg.jar")
+    maxHeapSize '512m'
+    args String.format("%s", activeImg), workdir
 }
 
 task unpack_ramdisk_gz << {
@@ -126,22 +108,6 @@ task pack_ramdisk_and_gz { Task task ->
     }
 }
 pack_ramdisk_and_gz.dependsOn('mkbootfsExecutable')
-
-task pack_clear(type: Exec, dependsOn: [pack_ramdisk_and_gz, 'mkbootimgExecutable']) {
-    def theCmdLine = getRamdiskConfig(workdir, 'cmdline')
-    if (gDebug) {
-        theCmdLine = "androidboot.selinux=disabled " + theCmdLine
-    }
-    def theBaseAddr = getBaseAddress(workdir)
-    workingDir '.'
-    executable 'build/exe/mkbootimg/mkbootimg'
-    args = [
-        '--kernel', workdir + "/kernel",
-        '--ramdisk', workdir + "/ramdisk.img.gz",
-        '--cmdline', theCmdLine,
-        '--base', theBaseAddr,
-        '--output', activeImg + '.clear']
-}
 
 void unGnuzipFile(String compressedFile, String decompressedFile) throws IOException {
     byte[] buffer = new byte[1024];
@@ -199,44 +165,7 @@ void gnuZipFile(String compressedFile, String decompressedFile) throws IOExcepti
     }
 }
 
-String getBaseAddress(String inWorkdir) {
-    Long ret;
-    try {
-        ret = Long.parseLong(getRamdiskConfig(inWorkdir, "kerneladdr").substring(2), 16) - 0x8000L;
-    } catch (NumberFormatException e) {
-        throw new RuntimeException("NumberFormatException: invalid kerneladdr value")
-    }
-    return Long.toHexString(ret);
-}
-
-String getRamdiskConfig(String inWorkdir, String inKey) {
-    String ret;
-    if (!new File(inWorkdir+ "/bootimg.cfg").exists()) {
-        return "0x0";
-    }
-    try {
-        BufferedReader br = new BufferedReader(new FileReader(inWorkdir + "/bootimg.cfg"));
-        String item;
-        while (true) {
-            item = br.readLine();
-            if (null == item) {
-                break;
-            }
-            Pattern r = Pattern.compile("(?<=" + inKey + " = ).*");
-            Matcher m = r.matcher(item);
-            if (m.find()) {
-                ret = m.group(0)
-            }
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
-        throw new RuntimeException("Fatal Error");
-    }
-
-    return ret;
-}
-
-task pack(type: JavaExec, dependsOn: [pack_clear, 'boot_signer:jar']) {
+task pack(type: JavaExec, dependsOn: ['abootimg:pack_clear', 'abootimg:pack_clear2', 'abootimg:pack_clear3', 'boot_signer:jar']) {
     main = 'com.android.verity.BootSignature'
     classpath = files("boot_signer/build/libs/boot_signer.jar")
     maxHeapSize '512m'
@@ -374,8 +303,4 @@ if (null == activeImg) {
     unpack_cpio.enabled = false
     unpack_bootimg.enabled = false
     unpack_ramdisk_gz.enabled = false
-}
-
-if (!new File(workdir + "/bootimg.cfg").exists()) {
-    pack_clear.enabled = false;
 }

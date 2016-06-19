@@ -11,7 +11,10 @@ import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.math.ec.ECConstants;
+import org.bouncycastle.math.ec.ECMultiplier;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.FixedPointCombMultiplier;
+import org.bouncycastle.math.ec.WNafUtil;
 
 public class ECKeyPairGenerator
     implements AsymmetricCipherKeyPairGenerator, ECConstants
@@ -40,19 +43,36 @@ public class ECKeyPairGenerator
     public AsymmetricCipherKeyPair generateKeyPair()
     {
         BigInteger n = params.getN();
-        int        nBitLength = n.bitLength();
-        BigInteger d;
+        int nBitLength = n.bitLength();
+        int minWeight = nBitLength >>> 2;
 
-        do
+        BigInteger d;
+        for (;;)
         {
             d = new BigInteger(nBitLength, random);
-        }
-        while (d.equals(ZERO)  || (d.compareTo(n) >= 0));
 
-        ECPoint Q = params.getG().multiply(d);
+            if (d.compareTo(TWO) < 0  || (d.compareTo(n) >= 0))
+            {
+                continue;
+            }
+
+            if (WNafUtil.getNafWeight(d) < minWeight)
+            {
+                continue;
+            }
+
+            break;
+        }
+
+        ECPoint Q = createBasePointMultiplier().multiply(params.getG(), d);
 
         return new AsymmetricCipherKeyPair(
             new ECPublicKeyParameters(Q, params),
             new ECPrivateKeyParameters(d, params));
+    }
+
+    protected ECMultiplier createBasePointMultiplier()
+    {
+        return new FixedPointCombMultiplier();
     }
 }

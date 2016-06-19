@@ -3,8 +3,13 @@ package org.bouncycastle.asn1;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.bouncycastle.util.Encodable;
+
+/**
+ * Base class for defining an ASN.1 object.
+ */
 public abstract class ASN1Object
-    implements ASN1Encodable
+    implements ASN1Encodable, Encodable
 {
     /**
      * Return the default BER or DER encoding for this object.
@@ -88,10 +93,21 @@ public abstract class ASN1Object
         return this.toASN1Primitive();
     }
 
+    /**
+     * Return true if obj is a byte array and represents an object with the given tag value.
+     *
+     * @param obj object of interest.
+     * @param tagValue tag value to check for.
+     * @return  true if obj is a byte encoding starting with the given tag value, false otherwise.
+     */
     protected static boolean hasEncodedTagValue(Object obj, int tagValue)
     {
         return (obj instanceof byte[]) && ((byte[])obj)[0] == tagValue;
     }
 
+    /**
+     * Method providing a primitive representation of this object suitable for encoding.
+     * @return a primitive representation of this object.
+     */
     public abstract ASN1Primitive toASN1Primitive();
 }

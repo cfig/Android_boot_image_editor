@@ -1,6 +1,7 @@
 package org.bouncycastle.util;
 
 import java.math.BigInteger;
+import java.util.NoSuchElementException;
 
 /**
  * General array utilities.
@@ -324,6 +325,25 @@ public final class Arrays
         return hc;
     }
 
+    public static int hashCode(byte[] data, int off, int len)
+    {
+        if (data == null)
+        {
+            return 0;
+        }
+
+        int i = len;
+        int hc = i + 1;
+
+        while (--i >= 0)
+        {
+            hc *= 257;
+            hc ^= data[off + i];
+        }
+
+        return hc;
+    }
+
     public static int hashCode(char[] data)
     {
         if (data == null)
@@ -369,6 +389,69 @@ public final class Arrays
         {
             hc *= 257;
             hc ^= data[i];
+        }
+
+        return hc;
+    }
+
+    public static int hashCode(int[] data, int off, int len)
+    {
+        if (data == null)
+        {
+            return 0;
+        }
+
+        int i = len;
+        int hc = i + 1;
+
+        while (--i >= 0)
+        {
+            hc *= 257;
+            hc ^= data[off + i];
+        }
+
+        return hc;
+    }
+
+    public static int hashCode(long[] data)
+    {
+        if (data == null)
+        {
+            return 0;
+        }
+
+        int i = data.length;
+        int hc = i + 1;
+
+        while (--i >= 0)
+        {
+            long di = data[i];
+            hc *= 257;
+            hc ^= (int)di;
+            hc *= 257;
+            hc ^= (int)(di >>> 32);
+        }
+
+        return hc;
+    }
+
+    public static int hashCode(long[] data, int off, int len)
+    {
+        if (data == null)
+        {
+            return 0;
+        }
+
+        int i = len;
+        int hc = i + 1;
+
+        while (--i >= 0)
+        {
+            long di = data[off + i];
+            hc *= 257;
+            hc ^= (int)di;
+            hc *= 257;
+            hc ^= (int)(di >>> 32);
         }
 
         return hc;
@@ -443,6 +526,19 @@ public final class Arrays
             return null;
         }
         byte[] copy = new byte[data.length];
+
+        System.arraycopy(data, 0, copy, 0, data.length);
+
+        return copy;
+    }
+
+    public static char[] clone(char[] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+        char[] copy = new char[data.length];
 
         System.arraycopy(data, 0, copy, 0, data.length);
 
@@ -752,6 +848,20 @@ public final class Arrays
         return result;
     }
 
+    public static short[] append(short[] a, short b)
+    {
+        if (a == null)
+        {
+            return new short[]{ b };
+        }
+
+        int length = a.length;
+        short[] result = new short[length + 1];
+        System.arraycopy(a, 0, result, 0, length);
+        result[length] = b;
+        return result;
+    }
+
     public static int[] append(int[] a, int b)
     {
         if (a == null)
@@ -799,6 +909,10 @@ public final class Arrays
 
             return rv;
         }
+        else if (a == null)
+        {
+            return concatenate(b, c);
+        }
         else if (b == null)
         {
             return concatenate(a, c);
@@ -840,6 +954,23 @@ public final class Arrays
         }
     }
 
+    public static int[] concatenate(int[] a, int[] b)
+    {
+        if (a == null)
+        {
+            return clone(b);
+        }
+        if (b == null)
+        {
+            return clone(a);
+        }
+
+        int[] c = new int[a.length + b.length];
+        System.arraycopy(a, 0, c, 0, a.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+        return c;
+    }
+
     public static byte[] prepend(byte[] a, byte b)
     {
         if (a == null)
@@ -852,5 +983,113 @@ public final class Arrays
         System.arraycopy(a, 0, result, 1, length);
         result[0] = b;
         return result;
+    }
+
+    public static short[] prepend(short[] a, short b)
+    {
+        if (a == null)
+        {
+            return new short[]{ b };
+        }
+
+        int length = a.length;
+        short[] result = new short[length + 1];
+        System.arraycopy(a, 0, result, 1, length);
+        result[0] = b;
+        return result;
+    }
+
+    public static int[] prepend(int[] a, int b)
+    {
+        if (a == null)
+        {
+            return new int[]{ b };
+        }
+
+        int length = a.length;
+        int[] result = new int[length + 1];
+        System.arraycopy(a, 0, result, 1, length);
+        result[0] = b;
+        return result;
+    }
+
+    public static byte[] reverse(byte[] a)
+    {
+        if (a == null)
+        {
+            return null;
+        }
+
+        int p1 = 0, p2 = a.length;
+        byte[] result = new byte[p2];
+        
+        while (--p2 >= 0)
+        {
+            result[p2] = a[p1++];
+        }
+
+        return result;
+    }
+
+    public static int[] reverse(int[] a)
+    {
+        if (a == null)
+        {
+            return null;
+        }
+
+        int p1 = 0, p2 = a.length;
+        int[] result = new int[p2];
+
+        while (--p2 >= 0)
+        {
+            result[p2] = a[p1++];
+        }
+
+        return result;
+    }
+
+    /**
+     * Iterator backed by a specific array.
+     */
+    public static class Iterator<T>
+        implements java.util.Iterator<T>
+    {
+        private final T[] dataArray;
+
+        private int position = 0;
+
+        /**
+         * Base constructor.
+         * <p>
+         * Note: the array is not cloned, changes to it will affect the values returned by next().
+         * </p>
+         *
+         * @param dataArray array backing the iterator.
+         */
+        public Iterator(T[] dataArray)
+        {
+            this.dataArray = dataArray;
+        }
+
+        public boolean hasNext()
+        {
+            return position < dataArray.length;
+        }
+
+        public T next()
+        {
+            if (position == dataArray.length)
+            {
+                throw new NoSuchElementException("Out of elements: " + position);
+            }
+
+            return dataArray[position++];
+        }
+
+        public void remove()
+        {
+            throw new UnsupportedOperationException("Cannot remove element from an Array.");
+        }
     }
 }

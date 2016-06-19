@@ -34,7 +34,7 @@ import org.bouncycastle.asn1.DERTaggedObject;
  * SignerInfos ::= SET OF SignerInfo
  * </pre>
  * <p>
- * The version calculation uses following ruleset from RFC 3852 section 5.1:
+ * The version calculation uses following ruleset from RFC 5652 section 5.1:
  * <pre>
  * IF ((certificates is present) AND
  *    (any certificates with a type of other are present)) OR
@@ -54,7 +54,6 @@ import org.bouncycastle.asn1.DERTaggedObject;
  *       ELSE version MUST be 1
  * </pre>
  * <p>
- * @todo Check possible update for this to RFC 5652 level
  */
 public class SignedData
     extends ASN1Object
@@ -84,7 +83,8 @@ public class SignedData
      * </ul>
      *
      * @param o the object we want converted.
-     * @exception IllegalArgumentException if the object cannot be converted.
+     * @return a reference that can be assigned to SignedData (may be null)
+     * @throws IllegalArgumentException if the object cannot be converted.
      */
     public static SignedData getInstance(
         Object  o)

@@ -145,6 +145,11 @@ public class KeyPurposeId
         return null;
     }
 
+    public ASN1ObjectIdentifier toOID()
+    {
+        return id;
+    }
+
     public ASN1Primitive toASN1Primitive()
     {
         return id;
@@ -153,5 +158,10 @@ public class KeyPurposeId
     public String getId()
     {
         return id.getId();
+    }
+
+    public String toString()
+    {
+        return id.toString();
     }
 }

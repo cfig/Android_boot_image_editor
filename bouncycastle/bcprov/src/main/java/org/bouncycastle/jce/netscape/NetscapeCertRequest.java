@@ -86,9 +86,8 @@ public class NetscapeCertRequest
                         + spkac.size());
             }
 
-            sigAlg = new AlgorithmIdentifier((ASN1Sequence)spkac
-                    .getObjectAt(1));
-            sigBits = ((DERBitString)spkac.getObjectAt(2)).getBytes();
+            sigAlg = AlgorithmIdentifier.getInstance(spkac.getObjectAt(1));
+            sigBits = ((DERBitString)spkac.getObjectAt(2)).getOctets();
 
             //
             // PublicKeyAndChallenge ::= SEQUENCE {
@@ -110,14 +109,13 @@ public class NetscapeCertRequest
             //could potentially alter the bytes
             content = new DERBitString(pkac);
 
-            SubjectPublicKeyInfo pubkeyinfo = new SubjectPublicKeyInfo(
-                    (ASN1Sequence)pkac.getObjectAt(0));
+            SubjectPublicKeyInfo pubkeyinfo = SubjectPublicKeyInfo.getInstance(pkac.getObjectAt(0));
 
             X509EncodedKeySpec xspec = new X509EncodedKeySpec(new DERBitString(
                     pubkeyinfo).getBytes());
 
-            keyAlg = pubkeyinfo.getAlgorithmId();
-            pubkey = KeyFactory.getInstance(keyAlg.getObjectId().getId(), "BC")
+            keyAlg = pubkeyinfo.getAlgorithm();
+            pubkey = KeyFactory.getInstance(keyAlg.getAlgorithm().getId(), "BC")
                     .generatePublic(xspec);
 
         }
@@ -205,7 +203,7 @@ public class NetscapeCertRequest
         // Verify the signature .. shows the response was generated
         // by someone who knew the associated private key
         //
-        Signature sig = Signature.getInstance(sigAlg.getObjectId().getId(),
+        Signature sig = Signature.getInstance(sigAlg.getAlgorithm().getId(),
                 "BC");
         sig.initVerify(pubkey);
         sig.update(content.getBytes());

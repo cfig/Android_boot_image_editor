@@ -12,12 +12,14 @@ public class DERNumericString
     extends ASN1Primitive
     implements ASN1String
 {
-    private byte[]  string;
+    private final byte[]  string;
 
     /**
      * return a Numeric string from the passed in object
      *
+     * @param obj a DERNumericString or an object that can be converted into one.
      * @exception IllegalArgumentException if the object cannot be converted.
+     * @return a DERNumericString instance, or null
      */
     public static DERNumericString getInstance(
         Object  obj)
@@ -50,6 +52,7 @@ public class DERNumericString
      *              tagged false otherwise.
      * @exception IllegalArgumentException if the tagged object cannot
      *               be converted.
+     * @return a DERNumericString instance, or null.
      */
     public static DERNumericString getInstance(
         ASN1TaggedObject obj,

@@ -68,7 +68,7 @@ public final class ARC4
     {
         public PBEWithSHAAnd128Bit()
         {
-            super(new RC4Engine(), 0);
+            super(new RC4Engine(), 0, 128, SHA1);
         }
     }
 
@@ -80,7 +80,7 @@ public final class ARC4
     {
         public PBEWithSHAAnd40Bit()
         {
-            super(new RC4Engine(), 0);
+            super(new RC4Engine(), 0, 40, SHA1);
         }
     }
 
@@ -96,7 +96,7 @@ public final class ARC4
         public void configure(ConfigurableProvider provider)
         {
             provider.addAlgorithm("Cipher.ARC4", PREFIX + "$Base");
-            provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.rc4, "ARC4");
+            provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.rc4, "ARC4");
             provider.addAlgorithm("Alg.Alias.Cipher.ARCFOUR", "ARC4");
             provider.addAlgorithm("Alg.Alias.Cipher.RC4", "ARC4");
             provider.addAlgorithm("KeyGenerator.ARC4", PREFIX + "$KeyGen");
@@ -113,14 +113,14 @@ public final class ARC4
             provider.addAlgorithm("Cipher.PBEWITHSHAAND128BITRC4", PREFIX + "$PBEWithSHAAnd128Bit");
             provider.addAlgorithm("Cipher.PBEWITHSHAAND40BITRC4", PREFIX + "$PBEWithSHAAnd40Bit");
 
-            provider.addAlgorithm("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC4, "PBEWITHSHAAND128BITRC4");
-            provider.addAlgorithm("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithSHAAnd40BitRC4, "PBEWITHSHAAND40BITRC4");
+            provider.addAlgorithm("Alg.Alias.SecretKeyFactory", PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC4, "PBEWITHSHAAND128BITRC4");
+            provider.addAlgorithm("Alg.Alias.SecretKeyFactory", PKCSObjectIdentifiers.pbeWithSHAAnd40BitRC4, "PBEWITHSHAAND40BITRC4");
 
             provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHSHA1AND128BITRC4", "PBEWITHSHAAND128BITRC4");
             provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHSHA1AND40BITRC4", "PBEWITHSHAAND40BITRC4");
 
-            provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC4, "PBEWITHSHAAND128BITRC4");
-            provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithSHAAnd40BitRC4, "PBEWITHSHAAND40BITRC4");
+            provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC4, "PBEWITHSHAAND128BITRC4");
+            provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.pbeWithSHAAnd40BitRC4, "PBEWITHSHAAND40BITRC4");
         }
     }
 }
