@@ -78,6 +78,9 @@ class Parser {
             inImgInfo.os_patch_level = unparse_os_patch_level(os_and_patch & 0x7ff)
         }
         inImgInfo.board = new String(readBytes(is, 16), "UTF-8").trim();
+        if (0 == inImgInfo.board.length()) {
+            inImgInfo.board = null;
+        }
         inImgInfo.cmdline = new String(readBytes(is, 512), "UTF-8")
         inImgInfo.hash = readBytes(is, 32); //hash
         inImgInfo.cmdline += new String(readBytes(is, 1024), "UTF-8")

@@ -8,7 +8,7 @@ void Run(List<String> inCmd, String inWorkdir = null) {
     ProcessBuilder pb = new ProcessBuilder(inCmd)
             .directory(new File(inWorkdir))
             .redirectErrorStream(true);
-    Process p = pb.start()
+    Process p = pb.start();
     p.inputStream.eachLine {println it}
     p.waitFor();
     assert 0 == p.exitValue()

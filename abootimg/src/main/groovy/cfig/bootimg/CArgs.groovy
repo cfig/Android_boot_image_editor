@@ -56,6 +56,8 @@ class CArgs {
             ret.add("--board");
             ret.add(board);
         }
+        ret.add("--pagesize");
+        ret.add(Integer.toString(pagesize));
         ret.add("--cmdline");
         ret.add(cmdline);
         if (null != os_version) {

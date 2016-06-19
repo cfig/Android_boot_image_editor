@@ -6,7 +6,7 @@ Utilies for editing Nexus(or Nexus compatible) devices boot.img , then you don't
 ## Prerequisite
 #### Host OS requirement:
 
-The recommended OS is Linux.
+Linux or Mac.
 
 #### Target Android requirement:
 
@@ -16,6 +16,7 @@ The recommended OS is Linux.
 
  - Marshmallow (API Level 23)
  - Lollipop (API Level 21,22)
+ - AOSP master
 
 You can get a full [Android version list](https://source.android.com/source/build-numbers.html) here.
 
@@ -35,6 +36,7 @@ Your get the flattened kernel and /root filesystem under **$(CURDIR)/build/unzip
     build/unzip_boot/
     ├── bootimg.json
     ├── kernel
+    ├── second
     └── root
 
 Then you can edit the actual file contents, like rootfs or kernel.

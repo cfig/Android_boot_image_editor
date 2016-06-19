@@ -145,8 +145,13 @@ class Packer {
         bf.putInt(0);
         bf.putInt((parse_os_version(inArgs.os_version) << 11) | parse_os_patch_level(inArgs.os_patch_level))
 
-        bf.put(inArgs.board.getBytes())
-        bf.put(new byte[16 - inArgs.board.length()])
+        if (null == inArgs.board) {
+            bf.put(new byte[16]);
+        } else {
+            bf.put(inArgs.board.getBytes())
+            bf.put(new byte[16 - inArgs.board.length()])
+        }
+
         bf.put(inArgs.cmdline.substring(0, Math.min(512, inArgs.cmdline.length())).getBytes())
         bf.put(new byte[512 - Math.min(512, inArgs.cmdline.length())])
         byte[] img_id = hashFile(inArgs.kernel, inArgs.ramdisk, inArgs.second)
