@@ -43,9 +43,25 @@ task repack(type: Jar, dependsOn:['build']) {
     }
 }
 
+//call Google's 'mkbootimg' program
 task pack_clear(type: JavaExec, dependsOn:[':pack_ramdisk_and_gz', 'build']) {
     classpath = sourceSets.main.runtimeClasspath
     main = "cfig.bootimg.repack_with_cmd"
     args rootProject.outClearIMg, rootProject.rootWorkDir, rootProject.mkbootimgBin
+}
+
+//call our 'mkbootimg.groovy'
+task pack_clear2(type: JavaExec, dependsOn:[':pack_ramdisk_and_gz', 'mkbootimg']) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = "cfig.bootimg.repack_with_cmd"
+    args rootProject.outClearIMg + "2" , rootProject.rootWorkDir, "java -jar build/libs/mkbootimg.jar"
+}
+
+//directly calls engine of 'mkbootimg.groovy' from 'repack'
+task pack_clear3(type: JavaExec, dependsOn: [':pack_ramdisk_and_gz', 'repack']) {
+    classpath = files("build/libs/repack.jar")
+    main = 'cfig.bootimg.repack'
+    maxHeapSize '512m'
+    args rootProject.outClearIMg + "3", rootProject.rootWorkDir
 }
 

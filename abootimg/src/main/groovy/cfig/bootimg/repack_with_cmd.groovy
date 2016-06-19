@@ -24,5 +24,9 @@ if (3 != args.length) {
 
 CImgInfo aInfo = CImgInfo.fromJson(args[0], args[1]);
 List<String> cmdArgs = aInfo.toCommandList();
-cmdArgs.add(0, args[2]);
+int i = 0;
+for (String item : args[2].split()) {
+    cmdArgs.add(i, item);
+    i++;
+}
 Run(cmdArgs);

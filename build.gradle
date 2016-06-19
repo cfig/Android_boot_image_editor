@@ -25,7 +25,6 @@ model {
     }
 }
 
-
 // ----------------------------------------------------------------------------
 //                       global
 // ----------------------------------------------------------------------------
@@ -110,18 +109,6 @@ task pack_ramdisk_and_gz { Task task ->
 }
 pack_ramdisk_and_gz.dependsOn('mkbootfsExecutable')
 
-task pack_clear2(type: JavaExec, dependsOn: ['abootimg:repack', pack_ramdisk_and_gz]) {
-    main = 'cfig.bootimg.repack'
-    classpath = files("abootimg/build/libs/repack.jar")
-    maxHeapSize '512m'
-    args String.format("%s.clear2", activeImg), workdir
-}
-
-String[] getMkbootimgArgs(String inWorkdir, String outFile) {
-    return "good day".split();
-    //args = getMkbootimgArgs(workdir, String.format("%s.clear", activeImg))
-}
-
 void unGnuzipFile(String compressedFile, String decompressedFile) throws IOException {
     byte[] buffer = new byte[1024];
     try {
@@ -178,7 +165,7 @@ void gnuZipFile(String compressedFile, String decompressedFile) throws IOExcepti
     }
 }
 
-task pack(type: JavaExec, dependsOn: ['abootimg:pack_clear', 'boot_signer:jar', pack_clear2]) {
+task pack(type: JavaExec, dependsOn: ['abootimg:pack_clear', 'abootimg:pack_clear2', 'abootimg:pack_clear3', 'boot_signer:jar']) {
     main = 'com.android.verity.BootSignature'
     classpath = files("boot_signer/build/libs/boot_signer.jar")
     maxHeapSize '512m'

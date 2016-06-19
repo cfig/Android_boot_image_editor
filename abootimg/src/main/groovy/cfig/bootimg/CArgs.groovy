@@ -43,15 +43,15 @@ class CArgs {
         if (null != ramdisk) {
             ret.add("--ramdisk");
             ret.add(ramdisk);
-            ret.add("--ramdisk_offset");
-            ret.add("0x" + Integer.toHexString(ramdisk_offset));
         }
+        ret.add("--ramdisk_offset");
+        ret.add("0x" + Integer.toHexString(ramdisk_offset));
         if (null != second) {
             ret.add("--second");
             ret.add(second);
-            ret.add("--second_offset");
-            ret.add("0x" + Integer.toHexString(second_offset));
         }
+        ret.add("--second_offset");
+        ret.add("0x" + Integer.toHexString(second_offset));
         if (null != board) {
             ret.add("--board");
             ret.add(board);
