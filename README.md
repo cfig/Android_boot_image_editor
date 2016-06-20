@@ -1,7 +1,7 @@
-# Nexus_boot_image_editor
-[![Build Status](https://travis-ci.org/cfig/Nexus_boot_image_editor.svg?branch=master)](https://travis-ci.org/cfig/Nexus_boot_image_editor)
+# Android_boot_image_editor
+[![Build Status](https://travis-ci.org/cfig/Android_boot_image_editor.svg?branch=master)](https://travis-ci.org/cfig/Android_boot_image_editor)
 
-Utilies for editing Nexus(or Nexus compatible) devices boot.img , then you don't need full Android source code to edit your boot images.
+Utilies for editing Android boot.img.
 
 ## Prerequisite
 #### Host OS requirement:
@@ -10,7 +10,7 @@ Linux or Mac.
 
 #### Target Android requirement:
 
-(1) Targeted boot.img MUST follows AOSP [verified boot flow](https://source.android.com/security/verifiedboot/index.html), which means it packs linux kernel and rootfs together, then sign it with OEM/USER keys.
+(1) Targeted boot.img MUST follows AOSP [verified boot flow](https://source.android.com/security/verifiedboot/index.html), which means it packs linux kernel, rootfs , and a optional second state bootloader, then sign it with OEM/USER keys.
 
 (2) These utilities are known to work for Nexus (or Nexus compatible) boot.img for the following Android releases:
 
@@ -23,8 +23,8 @@ You can get a full [Android version list](https://source.android.com/source/buil
 ## Usage
 Get tools via git:
 
-    git clone https://github.com/cfig/Nexus_boot_image_editor.git
-    cd Nexus_boot_image_editor
+    git clone https://github.com/cfig/Android_boot_image_editor.git
+    cd Android_boot_image_editor
 
 Then put your boot.img at **$(CURDIR)/boot.img**, then start gradle 'unpack' task:
 
@@ -50,3 +50,7 @@ You get the repacked boot.img at $(CURDIR):
 
 ## example & test
 An example boot.img has been placed at **src/test/resources/boot.img**, which is extracted from Nexus 5x(code: bullhead) factory images from [Google](https://dl.google.com/dl/android/aosp/bullhead-mda89e-factory-29247942.tgz), you can take it as a quick start.
+
+## boot.img layout
+Read [layout](https://github.com/cfig/Android_boot_image_editor/blob/master/README.expert.md) of Android boot.img.
+We now support **os\_version** and **os\_patch\_level**.
