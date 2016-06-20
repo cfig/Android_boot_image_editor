@@ -8,7 +8,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.3.11'
+    compile 'org.codehaus.groovy:groovy-all:2.4.7'
     compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '5.0.2'
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
