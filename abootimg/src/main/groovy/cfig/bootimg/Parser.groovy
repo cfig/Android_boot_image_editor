@@ -1,13 +1,13 @@
 package cfig.bootimg
 
 import groovy.json.JsonBuilder
-
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 /**
  * Created by yu at 10:58 on 2016-06-18
  */
+@groovy.transform.CompileStatic
 class Parser {
 
     int readInt(InputStream is) {
@@ -52,14 +52,6 @@ class Parser {
         return (pagesize - (position & (pagesize - 1))) & (pagesize - 1);
     }
 
-    String bytes2String(byte[] inData) {
-        StringBuilder sb = new StringBuilder("");
-        for (int i = 0; i < inData.length; i++) {
-            sb.append(Integer.toString((inData[i] & 0xff) + 0x100, 16).substring(1));
-        }
-        return sb.toString();
-    }
-
     void parse_header(String fileName, CImgInfo inImgInfo) {
         InputStream is = new FileInputStream(new File(fileName))
         assert Arrays.equals(readBytes(is, 8), "ANDROID!".getBytes())
@@ -100,43 +92,6 @@ class Parser {
             inImgInfo.second_offset -= inImgInfo.base;
             inImgInfo.tags_offset -= inImgInfo.base;
         }
-    }
-
-    void extract_img_header(CImgInfo inImgInfo) {
-        JsonBuilder jb = new JsonBuilder();
-        String hashString = bytes2String(inImgInfo.hash);
-        jb.bootimg {
-            args {
-//            kernel inImgInfo.kernel;
-//            ramdisk inImgInfo.ramdisk;
-//            second inImgInfo.second;
-//            output inImgInfo.output;
-                base "0x" + Integer.toHexString(inImgInfo.base);
-                kernel_offset "0x" + Integer.toHexString(inImgInfo.kernel_offset);
-                ramdisk_offset "0x" + Integer.toHexString(inImgInfo.ramdisk_offset);
-                second_offset "0x" + Integer.toHexString(inImgInfo.second_offset);
-                tags_offset "0x" + Integer.toHexString(inImgInfo.tags_offset);
-                pagesize inImgInfo.pagesize;
-                board inImgInfo.board;
-                cmdline inImgInfo.cmdline;
-                os_version inImgInfo.os_version;
-                os_patch_level inImgInfo.os_patch_level;
-                id inImgInfo.id;
-            }
-            img {
-                kernel_pos inImgInfo.kernel_pos;
-                kernel_len inImgInfo.kernel_len;
-                ramdisk_pos inImgInfo.ramdisk_pos;
-                ramdisk_len inImgInfo.ramdisk_len;
-                second_pos inImgInfo.second_pos;
-                second_len inImgInfo.second_len;
-                hash hashString;
-            }
-        }
-        FileWriter fw = new FileWriter(inImgInfo.cfg);
-        fw.write(jb.toPrettyString());
-        fw.flush();
-        fw.close();
     }
 
     void extract_img_data(String inBootImg, String outImgName, int offset, int length) {
@@ -180,6 +135,6 @@ class Parser {
         extract_img_data(fileName, imgInfo.kernel, imgInfo.kernel_pos, imgInfo.kernel_len)
         extract_img_data(fileName, imgInfo.ramdisk, imgInfo.ramdisk_pos, imgInfo.ramdisk_len)
         extract_img_data(fileName, imgInfo.second, imgInfo.second_pos, imgInfo.second_len)
-        extract_img_header(imgInfo);
+        imgInfo.toJson();
     }
 }

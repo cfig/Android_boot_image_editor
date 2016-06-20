@@ -5,11 +5,14 @@ apply plugin: 'groovy'
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.lang.RuntimeException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.security.MessageDigest;
 
 // ----------------------------------------------------------------------------
 model {
@@ -165,7 +168,11 @@ void gnuZipFile(String compressedFile, String decompressedFile) throws IOExcepti
     }
 }
 
-task pack(type: JavaExec, dependsOn: ['abootimg:pack_clear', 'abootimg:pack_clear2', 'abootimg:pack_clear3', 'boot_signer:jar']) {
+task verify_clear(dependsOn: ['abootimg:pack_clear', 'abootimg:pack_clear2', 'abootimg:pack_clear3']) << {
+    verifyClearImages(activeImg + ".clear", activeImg + ".clear2", activeImg + ".clear3");
+}
+
+task pack(type: JavaExec, dependsOn: [verify_clear, 'boot_signer:jar']) {
     main = 'com.android.verity.BootSignature'
     classpath = files("boot_signer/build/libs/boot_signer.jar")
     maxHeapSize '512m'
@@ -303,4 +310,44 @@ if (null == activeImg) {
     unpack_cpio.enabled = false
     unpack_bootimg.enabled = false
     unpack_ramdisk_gz.enabled = false
+}
+
+if (!new File(workdir + File.separator + "root").exists()) {
+    pack_ramdisk_and_gz.enabled = false
+}
+
+byte[] hashFile(String inFile) {
+    MessageDigest md = MessageDigest.getInstance("SHA1")
+    ByteBuffer itemBF = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+    InputStream is = new FileInputStream(new File(inFile))
+    int byteRead;
+    byte[] dataRead = new byte[128]
+    while (true) {
+        byteRead = is.read(dataRead)
+        if (-1 == byteRead) {
+            break;
+        }
+        md.update(dataRead, 0, byteRead)
+    }
+    is.close();
+    md.update(itemBF.putInt((int) new File(inFile).length()).array())
+
+    return md.digest();
+}
+
+void verifyClearImages(String... inFiles) {
+    assert (inFiles.length > 1)
+    byte[] ref;
+    for (String item : inFiles) {
+        if (null == ref) {
+            print(" Hashing  " + item + "...");
+            ref = hashFile(item);
+            println("DONE");
+        } else {
+            print("Verifying " + item + "...");
+            byte[] tgt = hashFile(item);
+            assert Arrays.equals(ref, tgt);
+            println("PASSED");
+        }
+    }
 }

@@ -5,6 +5,7 @@ import groovy.transform.ToString
 /**
  * Created by yu at 09:57 on 2016-06-17
  */
+@groovy.transform.TypeChecked
 @ToString(includeNames = true, includeFields = true, excludes = "toCommandLine, CArgs")
 class CArgs {
     public String kernel;

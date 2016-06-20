@@ -1,6 +1,7 @@
 package cfig.bootimg
 
 import groovy.json.JsonSlurper
+import groovy.json.JsonBuilder
 import groovy.transform.ToString
 
 /**
@@ -16,7 +17,7 @@ class CImgInfo  extends CArgs {
     public int second_pos;
     public byte[] hash;
 
-    static CImgInfo fromJson(String outFile, String workDir) {
+    public static CImgInfo fromJson(String outFile, String workDir) {
         CImgInfo aArg = new CImgInfo();
         //preset info
         aArg.kernel = workDir + File.separator + aArg.kernel;
@@ -53,5 +54,46 @@ class CImgInfo  extends CArgs {
         }
 
         return aArg;
+    }
+
+    private String bytes2String(byte[] inData) {
+        StringBuilder sb = new StringBuilder("");
+        for (int i = 0; i < inData.length; i++) {
+            sb.append(Integer.toString((inData[i] & 0xff) + 0x100, 16).substring(1));
+        }
+        return sb.toString();
+    }
+
+    public void toJson() {
+        JsonBuilder jb = new JsonBuilder();
+        String hashString = bytes2String(this.hash);
+        jb.bootimg {
+            args {
+                base "0x" + Integer.toHexString(this.base);
+                kernel_offset "0x" + Integer.toHexString(this.kernel_offset);
+                ramdisk_offset "0x" + Integer.toHexString(this.ramdisk_offset);
+                second_offset "0x" + Integer.toHexString(this.second_offset);
+                tags_offset "0x" + Integer.toHexString(this.tags_offset);
+                pagesize this.pagesize;
+                board this.board;
+                cmdline this.cmdline;
+                os_version this.os_version;
+                os_patch_level this.os_patch_level;
+                id this.id;
+            }
+            img {
+                kernel_pos this.kernel_pos;
+                kernel_len this.kernel_len;
+                ramdisk_pos this.ramdisk_pos;
+                ramdisk_len this.ramdisk_len;
+                second_pos this.second_pos;
+                second_len this.second_len;
+                hash hashString;
+            }
+        }
+        FileWriter fw = new FileWriter(this.cfg);
+        fw.write(jb.toPrettyString());
+        fw.flush();
+        fw.close();
     }
 }
