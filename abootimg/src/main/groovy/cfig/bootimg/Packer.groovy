@@ -12,6 +12,7 @@ import java.security.MessageDigest;
 /**
  * Created by yu at 10:52 on 2016-06-18
  */
+@groovy.transform.CompileStatic
 class Packer {
     CArgs parse_cmdline(String[] inArgs) {
         OptionParser parser = new OptionParser();
@@ -51,19 +52,19 @@ class Packer {
         ret.id = options.has("id")
 
         if (options.has("base")) {
-            ret.base = Integer.decode(options.valueOf("base"))
+            ret.base = Integer.decode(String.valueOf(options.valueOf("base")))
         } else {
             ret.base = 0x10000000;
         }
 
         if (options.has("kernel_offset")) {
-            ret.kernel_offset = Integer.decode(options.valueOf("kernel_offset"))
+            ret.kernel_offset = Integer.decode(String.valueOf(options.valueOf("kernel_offset")))
         } else {
             ret.kernel_offset = 0x00008000;
         }
 
         if (options.has("ramdisk_offset")) {
-            ret.ramdisk_offset = Integer.decode(options.valueOf("ramdisk_offset"))
+            ret.ramdisk_offset = Integer.decode(String.valueOf(options.valueOf("ramdisk_offset")))
         } else {
             ret.ramdisk_offset = 0x01000000
         }
@@ -73,25 +74,25 @@ class Packer {
         ret.os_patch_level = options.valueOf("os_patch_level")
 
         if (options.has("second_offset")) {
-            ret.second_offset = Integer.decode(options.valueOf("second_offset"))
+            ret.second_offset = Integer.decode(String.valueOf(options.valueOf("second_offset")))
         } else {
             ret.second_offset = 0x00f00000
         }
 
         if (options.has("tags_offset")) {
-            ret.tags_offset = Integer.decode(options.valueOf("tags_offset"))
+            ret.tags_offset = Integer.decode(String.valueOf(options.valueOf("tags_offset")))
         } else {
             ret.tags_offset = 0x00000100
         }
 
         if (options.has("pagesize")) {
-            ret.pagesize = Integer.decode(options.valueOf("pagesize"))
+            ret.pagesize = Integer.decode(String.valueOf(options.valueOf("pagesize")))
         } else {
             ret.pagesize = 2048
         }
 
         if (options.has("cmdline")) {
-            ret.cmdline = options.valueOf("cmdline")
+            ret.cmdline = String.valueOf(options.valueOf("cmdline"))
         } else {
             ret.cmdline = ""
         }
