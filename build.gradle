@@ -35,7 +35,8 @@ def workdir='build/unzip_boot'
 project.ext.rootWorkDir = new File(workdir).getAbsolutePath()
 def defaultRootDir = workdir + "/root"
 String[] bins = [ "sh", "logcat", "logd", "linker", "toolbox", "toybox", "applypatch" ]
-String[] libs = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libz.so", "libstdc++.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so" ]
+//String[] libs = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libz.so", "libstdc++.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so" ]
+String[] libs = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libz.so", "libstdc++.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so", "libcrypto.so", "libpackagelistparser.so" ]
 boolean gDebug=true
 String activeImg = null;
 if (new File("boot.img").exists()) {
@@ -43,6 +44,7 @@ if (new File("boot.img").exists()) {
 } else if (new File("recovery.img").exists()) {
     activeImg = "recovery.img";
 }
+def sdkVersion = 7;
 project.ext.outClearIMg = new File(String.format("%s.clear", activeImg)).getAbsolutePath()
 project.ext.mkbootimgBin = new File("src/mkbootimg/mkbootimg").getAbsolutePath()
 println("Active image target: " + activeImg);
@@ -251,28 +253,45 @@ task rr << {
 }
 
 void updateLinks(String inWorkdir) {
+    updateLinks(inWorkdir, 6);
+}
+
+void updateLinks(String inWorkdir, int sdkVersion) {
     String sysBinDir = inWorkdir + "/root/system/bin";
     String[] toolboxLinks = [ "df", "getevent", "iftop", "ioctl", "ionice", "log", "ls", "lsof", "mount", "nandread", "newfs_msdos", "ps", "prlimit", "renice", "sendevent", "start", "stop", "top", "uptime", "watchprops", "dd", "du" ];
-    String[] toyboxLinks = [ "acpi", "basename", "blockdev", "bzcat", "cal", "cat", "chcon", "chgrp", "chmod", "chown", "chroot", "cksum", "clear", "comm", "cmp", "cp", "cpio", "cut", "date", "dirname", "dmesg", "dos2unix", "echo", "env", "expand", "expr", "fallocate", "false", "find", "free", "getenforce", "getprop", "groups", "head", "hostname", "hwclock", "id", "ifconfig", "inotifyd", "insmod", "kill", "load_policy", "ln", "logname", "losetup", "lsmod", "lsusb", "md5sum", "mkdir", "mknod", "mkswap", "mktemp", "modinfo", "more", "mountpoint", "mv", "netstat", "nice", "nl", "nohup", "od", "paste", "patch", "pgrep", "pidof", "pkill", "pmap", "printenv", "printf", "pwd", "readlink", "realpath", "restorecon", "rm", "rmdir", "rmmod", "route", "runcon", "sed", "seq", "setenforce", "setprop", "setsid", "sha1sum", "sleep", "sort", "split", "stat", "strings", "swapoff", "swapon", "sync", "sysctl", "tac", "tail", "tar", "taskset", "tee", "time", "timeout", "touch", "tr", "true", "truncate", "umount", "uname", "uniq", "unix2dos", "usleep", "vmstat", "wc", "which", "whoami", "xargs", "yes" ];
+    String[] toyboxLinks = [ "acpi", "basename", "blockdev", "bzcat", "cal", "cat", "chcon", "chgrp", "chmod", "chown", "chroot", "cksum", "clear", "comm", "cmp", "cp", "cpio", "cut", "date", "dirname", "dmesg", "dos2unix", "echo", "env", "expand", "expr", "fallocate", "false", "find", "free", "getenforce", "getprop", "groups", "head", "hostname", "hwclock", "id", "ifconfig", "inotifyd", "insmod", "kill", "load_policy", "ln", "logname", "losetup", "lsmod", "lsusb", "md5sum", "mkdir", "mknod", "mkswap", "mktemp", "modinfo", "more", "mountpoint", "mv", "netstat", "nice", "nl", "nohup", "od", "paste", "patch", "grep", "pidof", "pkill", "pmap", "printenv", "printf", "pwd", "readlink", "realpath", "restorecon", "rm", "rmdir", "rmmod", "route", "runcon", "sed", "seq", "setenforce", "setprop", "setsid", "sha1sum", "sleep", "sort", "split", "stat", "strings", "swapoff", "swapon", "sync", "sysctl", "tac", "tail", "tar", "taskset", "tee", "time", "timeout", "touch", "tr", "true", "truncate", "umount", "uname", "uniq", "unix2dos", "usleep", "vmstat", "wc", "which", "whoami", "xargs", "yes" ];
+    String[] toolboxLinks_7 = [ "df", "getevent", "iftop", "ioctl", "ionice", "log", "lsof", "mount", "nandread", "newfs_msdos", "ps", "prlimit", "renice", "sendevent", "start", "stop", "top", "uptime", "watchprops", "dd", "du" ];
+    String[] toyboxLinks_7 = [ "ls", "acpi", "basename", "blockdev", "bzcat", "cal", "cat", "chcon", "chgrp", "chmod", "chown", "chroot", "cksum", "clear", "comm", "cmp", "cp", "cpio", "cut", "date", "dirname", "dmesg", "dos2unix", "echo", "env", "expand", "expr", "fallocate", "false", "find", "free", "getenforce", "getprop", "groups", "head", "hostname", "hwclock", "id", "ifconfig", "inotifyd", "insmod", "kill", "load_policy", "ln", "logname", "losetup", "lsmod", "lsusb", "md5sum", "mkdir", "mknod", "mkswap", "mktemp", "modinfo", "more", "mountpoint", "mv", "netstat", "nice", "nl", "nohup", "od", "paste", "patch", "grep", "pidof", "pkill", "pmap", "printenv", "printf", "pwd", "readlink", "realpath", "restorecon", "rm", "rmdir", "rmmod", "route", "runcon", "sed", "seq", "setenforce", "setprop", "setsid", "sha1sum", "sleep", "sort", "split", "stat", "strings", "swapoff", "swapon", "sync", "sysctl", "tac", "tail", "tar", "taskset", "tee", "time", "timeout", "touch", "tr", "true", "truncate", "umount", "uname", "uniq", "unix2dos", "usleep", "vmstat", "wc", "which", "whoami", "xargs", "yes" ];
 
-    for (String item : toolboxLinks) {
-        RunFunc("unlink " + item, sysBinDir);
-    }
-    for (String item : toyboxLinks) {
-        RunFunc("unlink " + item, sysBinDir);
-    }
-    for (String item : toolboxLinks) {
-	    Run("/bin/ln -s toolbox " + item, sysBinDir);
-    }
-    for (String item : toyboxLinks) {
-	    Run("/bin/ln -s toybox " + item, sysBinDir);
+    if (sdkVersion <= 6) {
+        //Android Marshmallow (6)
+        for (String item : toolboxLinks) {
+            RunFunc("unlink " + item, sysBinDir);
+            Run("/bin/ln -s toolbox " + item, sysBinDir);
+        }
+        //Android Marshmallow (6)
+        for (String item : toyboxLinks) {
+            RunFunc("unlink " + item, sysBinDir);
+            Run("/bin/ln -s toybox " + item, sysBinDir);
+        }
+    } else {
+        //Android Nougat (7)
+        for (String item : toolboxLinks_7) {
+            RunFunc("unlink " + item, sysBinDir);
+            Run("/bin/ln -s toolbox " + item, sysBinDir);
+        }
+        //Android Nougat (7)
+        for (String item : toyboxLinks_7) {
+            RunFunc("unlink " + item, sysBinDir);
+            Run("/bin/ln -s toybox " + item, sysBinDir);
+        }
     }
 }
 
 task debug(dependsOn: ['addSystemBin', 'addSystemLib']) {
     description "add debug tools into recovery rootfs from ANDROID_PRODUCT_OUT"
     doLast {
-        updateLinks(workdir);
+        updateLinks(workdir, sdkVersion);
     }
 }
 

@@ -231,8 +231,8 @@ class Packer {
         Pattern pattern = Pattern.compile("^(\\d{4})-(\\d{2})-(\\d{2})")
         Matcher matcher = pattern.matcher(x)
         if (matcher.find()) {
-            int y = Integer.decode(matcher.group(1)) - 2000
-            int m = Integer.decode(matcher.group(2))
+            int y = Integer.parseInt(matcher.group(1), 10) - 2000
+            int m = Integer.parseInt(matcher.group(2), 10)
             // 7 bits allocated for the year, 4 bits for the month
             assert y >= 0 && y < 128
             assert m > 0 && m <= 12
