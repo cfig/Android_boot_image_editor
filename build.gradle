@@ -313,9 +313,9 @@ task addSystemLib(type: Copy) {
 
 boolean inTargetList(String file, String inType) {
     switch (inType) {
-        "bin":
+        case "bin":
             return inArray(file, bins);
-        "lib":
+        case "lib":
             if (sdkVersion <= 6) {
                 return inArray(file, libs_6);
             } else {
