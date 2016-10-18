@@ -35,9 +35,6 @@ def workdir='build/unzip_boot'
 project.ext.rootWorkDir = new File(workdir).getAbsolutePath()
 def defaultRootDir = workdir + "/root"
 def sdkVersion = 7;
-String[] bins = [ "sh", "logcat", "logd", "linker", "toolbox", "toybox", "applypatch", "debuggerd",  "reboot" ]
-String[] libs_6 = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libz.so", "libstdc++.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so" ]
-String[] libs = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libz.so", "libstdc++.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so", "libcrypto.so", "libpackagelistparser.so", "libpcrecpp.so", "liblzma.so" ]
 boolean gDebug=true
 String activeImg = null;
 if (new File("boot.img").exists()) {
@@ -299,7 +296,7 @@ task addSystemBin(type: Copy) {
     from System.getProperty("ANDROID_PRODUCT_OUT") + '/system/bin'
     into workdir + "/root/system/bin"
     include { details ->
-        inTargetList(details.file.name, "bin")
+        inTargetList(details.file.name, "bin", sdkVersion)
     }
 }
 
@@ -307,11 +304,14 @@ task addSystemLib(type: Copy) {
     from System.getProperty("ANDROID_PRODUCT_OUT") + '/system/lib'
     into workdir + "/root/system/lib"
     include { details ->
-        inTargetList(details.file.name, "lib")
+        inTargetList(details.file.name, "lib", sdkVersion)
     }
 }
 
-boolean inTargetList(String file, String inType) {
+boolean inTargetList(String file, String inType, int sdkVersion) {
+    String[] bins = [ "sh", "logcat", "logd", "linker", "toolbox", "toybox", "applypatch", "debuggerd",  "reboot" ]
+    String[] libs_6 = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libz.so", "libstdc++.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so" ]
+    String[] libs = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libz.so", "libstdc++.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so", "libcrypto.so", "libpackagelistparser.so", "libpcrecpp.so", "liblzma.so" ]
     switch (inType) {
         case "bin":
             return inArray(file, bins);
