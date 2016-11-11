@@ -10,7 +10,6 @@ on property:persist.logd.logpersistd=logcatd
     # logd for write to /data/misc/logd, log group for read from pstore (-L)
     # exec - logd log -- /system/bin/logcat -L -b all -v threadtime -v usec -v printable -D -f /data/misc/logd/logcat -r 1024 -n 256
     start logcatd
-    seclabel u:r:recovery:s0
 
 service logcatd /system/bin/logcat -b all -v threadtime -v usec -v printable -D -f /data/misc/logd/logcat -r 1024 -n 256
     class late_start
