@@ -139,7 +139,15 @@ public class KeyAgreementSpi
             // TODO Validate that all the keys are using the same parameters?
         }
 
+        // BEGIN android-added
+        try {
+        // END android-added
         result = agreement.calculateAgreement(pubKey);
+        // BEGIN android-added
+        } catch (IllegalStateException e) {
+          throw new InvalidKeyException("Invalid public key");
+        }
+        // END android-added
 
         return null;
     }
