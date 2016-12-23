@@ -42,9 +42,9 @@ class CImgInfo  extends CArgs {
         aArg.os_version = result.bootimg.args.os_version;
         aArg.os_patch_level = result.bootimg.args.os_patch_level;
         //image info
-        aArg.kernel_len = result.bootimg.img.kernel_len;
-        aArg.ramdisk_len = result.bootimg.img.ramdisk_len;
-        aArg.second_len = result.bootimg.img.second_len;
+        aArg.kernel_len = Integer.decode(result.bootimg.img.kernel_len);
+        aArg.ramdisk_len = Integer.decode(result.bootimg.img.ramdisk_len);
+        aArg.second_len = Integer.decode(result.bootimg.img.second_len);
         //adjust preset info
         if (0 == aArg.ramdisk_len) {
             aArg.ramdisk = null;
