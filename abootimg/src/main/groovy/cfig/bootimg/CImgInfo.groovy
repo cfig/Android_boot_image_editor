@@ -82,12 +82,12 @@ class CImgInfo  extends CArgs {
                 id this.id;
             }
             img {
-                kernel_pos this.kernel_pos;
-                kernel_len this.kernel_len;
-                ramdisk_pos this.ramdisk_pos;
-                ramdisk_len this.ramdisk_len;
-                second_pos this.second_pos;
-                second_len this.second_len;
+                kernel_pos "0x" + Integer.toHexString(this.kernel_pos);
+                kernel_len "0x" + Integer.toHexString(this.kernel_len);
+                ramdisk_pos "0x" + Integer.toHexString(this.ramdisk_pos);
+                ramdisk_len "0x" + Integer.toHexString(this.ramdisk_len);
+                second_pos "0x" + Integer.toHexString(this.second_pos);
+                second_len "0x" + Integer.toHexString(this.second_len);
                 hash hashString;
             }
         }
