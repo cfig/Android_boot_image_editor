@@ -1,7 +1,7 @@
 # Android_boot_image_editor
 [![Build Status](https://travis-ci.org/cfig/Android_boot_image_editor.svg?branch=master)](https://travis-ci.org/cfig/Android_boot_image_editor)
 
-Utilies for editing Android boot.img.
+Utilies for editing Android boot.img or recovery.img.
 
 ## Prerequisite
 #### Host OS requirement:
@@ -10,9 +10,9 @@ Linux or Mac.
 
 #### Target Android requirement:
 
-(1) Targeted boot.img MUST follows AOSP [verified boot flow](https://source.android.com/security/verifiedboot/index.html), which means it packs linux kernel, rootfs , and a optional second state bootloader, then sign it with OEM/USER keys.
+(1) Targeted boot.img(or recovery.img) MUST follows AOSP [verified boot flow](https://source.android.com/security/verifiedboot/index.html), which means it packs linux kernel, rootfs , and a optional second state bootloader, then sign it with OEM/USER keys.
 
-(2) These utilities are known to work for Nexus (or Nexus compatible) boot.img for the following Android releases:
+(2) These utilities are known to work for Nexus (or Nexus compatible) boot.img(or recovery.img) for the following Android releases:
 
  - Marshmallow (API Level 23)
  - Lollipop (API Level 21,22)
@@ -47,6 +47,16 @@ Now, pack the boot.img again
 You get the repacked boot.img at $(CURDIR):
 
     boot.img.signed
+
+#### If you are working with recovery.img
+If you are working with recovery.img, the steps are similar:
+
+    cp <original_recovery_image> recovery.img
+    ./gradew unpack
+    ./gradew pack
+
+And you get recovery.img.signed
+
 
 ## example & test
 An example boot.img has been placed at **src/test/resources/boot.img**, which is extracted from Nexus 5x(code: bullhead) factory images from [Google](https://dl.google.com/dl/android/aosp/bullhead-mda89e-factory-29247942.tgz), you can take it as a quick start.
