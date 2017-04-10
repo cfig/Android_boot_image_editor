@@ -84,7 +84,7 @@ task unpack_cpio(type: Exec, dependsOn: unpack_ramdisk_gz) {
     }
     workingDir workdir + "/root"
     executable 'cpio'
-    args = ['-i', '-F', '../ramdisk.img']
+    args = ['-i', '-m', '-F', '../ramdisk.img']
 }
 
 task unpack(type: Delete, dependsOn: unpack_cpio) {
