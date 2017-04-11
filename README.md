@@ -14,9 +14,8 @@ Linux or Mac.
 
 (2) These utilities are known to work for Nexus (or Nexus compatible) boot.img(or recovery.img) for the following Android releases:
 
- - Marshmallow (API Level 23)
- - Lollipop (API Level 21,22)
  - AOSP master
+ - Lollipop (API Level 21,22) - Nougat (API Level 24)
 
 You can get a full [Android version list](https://source.android.com/source/build-numbers.html) here.
 
