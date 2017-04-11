@@ -23,6 +23,7 @@ model {
     components {
         mkbootfs(NativeExecutableSpec) {
             binaries.all {
+                // cCompiler.define 'CFIG_NO_FIX_STAT'
             }
         }
     }

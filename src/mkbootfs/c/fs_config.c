@@ -33,6 +33,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#ifndef CFIG_NO_FIX_STAT
+
 #include <private/android_filesystem_config.h>
 #include <utils/Compat.h>
 
@@ -293,3 +295,4 @@ ssize_t fs_config_generate(char *buffer, size_t length, const struct fs_path_con
     strcpy(p->prefix, pc->prefix);
     return len;
 }
+#endif

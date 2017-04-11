@@ -12,7 +12,9 @@
 #include <stdarg.h>
 #include <fcntl.h>
 
+#ifndef CFIG_NO_FIX_STAT
 #include <private/android_filesystem_config.h>
+#endif
 
 /* NOTES
 **
@@ -54,6 +56,7 @@ static char *target_out_path = NULL;
 static int verbose = 0;
 static int total_size = 0;
 
+#ifndef CFIG_NO_FIX_STAT
 static void fix_stat(const char *path, struct stat *s)
 {
     uint64_t capabilities;
@@ -85,6 +88,7 @@ static void fix_stat(const char *path, struct stat *s)
         s->st_mode = (typeof(s->st_mode)) st_mode;
     }
 }
+#endif
 
 static void _eject(struct stat *s, char *out, int olen, char *data, unsigned datasize)
 {
@@ -98,7 +102,9 @@ static void _eject(struct stat *s, char *out, int olen, char *data, unsigned dat
         putchar(0);
     }
 
+#ifndef CFIG_NO_FIX_STAT
     fix_stat(out, s);
+#endif
 //    fprintf(stderr, "_eject %s: mode=0%o\n", out, s->st_mode);
 
     printf("%06x%08x%08x%08x%08x%08x%08x"
