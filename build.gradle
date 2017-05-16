@@ -70,8 +70,10 @@ task unpack_bootimg(type: JavaExec, dependsOn: ['abootimg:abootimg']) {
     args String.format("%s", activeImg), workdir
 }
 
-task unpack_ramdisk_gz << {
-    unGnuzipFile(workdir+"/ramdisk.img.gz", workdir + "/ramdisk.img")
+task unpack_ramdisk_gz {
+    doLast {
+        unGnuzipFile(workdir+"/ramdisk.img.gz", workdir + "/ramdisk.img")
+    }
 }
 unpack_ramdisk_gz.dependsOn(unpack_bootimg)
 
@@ -174,8 +176,10 @@ void gnuZipFile(String compressedFile, String decompressedFile) throws IOExcepti
     }
 }
 
-task verify_clear(dependsOn: ['abootimg:pack_clear', 'abootimg:pack_clear2', 'abootimg:pack_clear3']) << {
-    verifyClearImages(activeImg + ".clear", activeImg + ".clear2", activeImg + ".clear3");
+task verify_clear(dependsOn: ['abootimg:pack_clear', 'abootimg:pack_clear2', 'abootimg:pack_clear3']) {
+    doLast {
+        verifyClearImages(activeImg + ".clear", activeImg + ".clear2", activeImg + ".clear3");
+    }
 }
 
 task pack(type: JavaExec, dependsOn: [verify_clear, 'boot_signer:jar']) {
@@ -244,16 +248,20 @@ void updateBootImage(String activeImg) {
     Run(cmd2)
 }
 
-task flash << {
-    updateBootImage(activeImg)
+task flash {
+    doLast {
+        updateBootImage(activeImg)
+    }
 }
 
 void rebootRecovery() {
     Run("adb reboot recovery")
 }
 
-task rr << {
-    rebootRecovery()
+task rr {
+    doLast {
+        rebootRecovery()
+    }
 }
 
 void updateLinks(String inWorkdir) {
