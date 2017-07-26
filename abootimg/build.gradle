@@ -25,6 +25,7 @@ task abootimg(type: Jar, dependsOn:['build']) {
 
 task mkbootimg(type: Jar, dependsOn:['build']) {
     from files(sourceSets.main.output.classesDir)
+    from files("build/classes/groovy/main")
     from configurations.runtime.asFileTree.files.collect { zipTree(it) }
 
     baseName = 'mkbootimg'
@@ -35,6 +36,7 @@ task mkbootimg(type: Jar, dependsOn:['build']) {
 
 task repack(type: Jar, dependsOn:['build']) {
     from files(sourceSets.main.output.classesDir)
+    from files("build/classes/groovy/main")
     from configurations.runtime.asFileTree.files.collect { zipTree(it) }
 
     baseName = 'repack'
