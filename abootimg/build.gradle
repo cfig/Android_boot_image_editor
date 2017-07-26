@@ -1,5 +1,4 @@
 apply plugin: 'groovy'
-apply plugin: 'java'
 
 sourceCompatibility = 1.7
 
@@ -15,6 +14,7 @@ dependencies {
 
 task abootimg(type: Jar, dependsOn:['build']) {
     from files(sourceSets.main.output.classesDir)
+    from files("build/classes/groovy/main")
     from configurations.runtime.asFileTree.files.collect { zipTree(it) }
 
     baseName = 'abootimg'
