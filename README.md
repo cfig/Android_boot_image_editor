@@ -1,7 +1,7 @@
 # Android_boot_image_editor
 [![Build Status](https://travis-ci.org/cfig/Android_boot_image_editor.svg?branch=master)](https://travis-ci.org/cfig/Android_boot_image_editor)
 
-Utilies for editing Android boot.img or recovery.img.
+Utilies for editing Android boot.img or recovery.img or recovery-two-step.img.
 
 ## Prerequisite
 #### Host OS requirement:
@@ -10,9 +10,9 @@ Linux or Mac.
 
 #### Target Android requirement:
 
-(1) Targeted boot.img(or recovery.img) MUST follows AOSP [verified boot flow](https://source.android.com/security/verifiedboot/index.html), which means it packs linux kernel, rootfs , and a optional second state bootloader, then sign it with OEM/USER keys.
+(1) Targeted boot.img(or recovery.img / recovery-two-step.img) MUST follows AOSP [verified boot flow](https://source.android.com/security/verifiedboot/index.html), which means it packs linux kernel, rootfs , and a optional second state bootloader, then sign it with OEM/USER keys.
 
-(2) These utilities are known to work for Nexus (or Nexus compatible) boot.img(or recovery.img) for the following Android releases:
+(2) These utilities are known to work for Nexus (or Nexus compatible) boot.img(or recovery.img/recovery-two-step.img) for the following Android releases:
 
  - AOSP master
  - Lollipop (API Level 21,22) - Nougat (API Level 24)
