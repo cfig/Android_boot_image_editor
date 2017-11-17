@@ -43,11 +43,17 @@ project.ext.rootWorkDir = new File(workdir).getAbsolutePath()
 def defaultRootDir = workdir + "/root"
 def sdkVersion = 7;
 boolean gDebug=true
-String activeImg = null;
+String activeImg = null
+String activePath = null
 if (new File("boot.img").exists()) {
     activeImg = "boot.img";
+    activePath = "/boot"
 } else if (new File("recovery.img").exists()) {
     activeImg = "recovery.img";
+    activePath = "/recovery"
+} else if (new File("recovery-two-step.img").exists()) {
+    activeImg = "recovery-two-step.img";
+    activePath = "/boot"
 }
 project.ext.outClearIMg = new File(String.format("%s.clear", activeImg)).getAbsolutePath()
 project.ext.mkbootimgBin = new File("src/mkbootimg/mkbootimg").getAbsolutePath()
@@ -186,7 +192,7 @@ task pack(type: JavaExec, dependsOn: [verify_clear, 'boot_signer:jar']) {
     main = 'com.android.verity.BootSignature'
     classpath = files("boot_signer/build/libs/boot_signer.jar")
     maxHeapSize '512m'
-    args '/boot', activeImg + '.clear', 'security/verity.pk8', 'security/verity.x509.pem', activeImg + '.signed'
+    args activePath, activeImg + '.clear', 'security/verity.pk8', 'security/verity.x509.pem', activeImg + '.signed'
 }
 
 task _setup(type: Copy) {
@@ -234,6 +240,7 @@ void updateBootImage(String activeImg) {
     String flashTarget = null;
     switch (activeImg) {
         case "boot.img":
+        case "recovery-two-step.img":
             flashTarget = "/dev/block/by-name/boot";
             break;
         case "recovery.img":
