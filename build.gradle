@@ -1,5 +1,6 @@
 apply plugin: 'c'
 apply plugin: 'java'
+
 apply plugin: 'groovy'
 
 import java.io.FileInputStream;
@@ -43,8 +44,8 @@ project.ext.rootWorkDir = new File(workdir).getAbsolutePath()
 def defaultRootDir = workdir + "/root"
 def sdkVersion = 7;
 boolean gDebug=true
-String activeImg = null
-String activePath = null
+String activeImg = "boot.img"
+String activePath = "/boot"
 if (new File("boot.img").exists()) {
     activeImg = "boot.img";
     activePath = "/boot"
@@ -409,5 +410,5 @@ void verifyClearImages(String... inFiles) {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.0'
+    gradleVersion = '4.4'
 }

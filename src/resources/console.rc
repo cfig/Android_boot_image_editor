@@ -1,0 +1,12 @@
+service console /system/bin/sh
+    console
+    disabled
+    user root
+    group root shell log readproc
+    seclabel u:r:shell:s0
+
+on property:ro.debuggable=*
+    # Give writes to anyone for the trace folder on debug builds.
+    # The folder is used to store method traces.
+    chmod 0773 /data/misc/trace
+    start console

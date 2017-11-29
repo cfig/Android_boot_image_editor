@@ -59,3 +59,11 @@ initrcFiles.forEach { it ->
     Files.deleteIfExists(File(binTgt).toPath())
     File(bin).copyTo(File(binTgt), true)
 }
+
+fun enableShell() {
+    val bin = "src/resources/console.rc"
+    val binTgt = workdir + "/root/system/etc/init/" + "console.rc"
+    Files.deleteIfExists(File(binTgt).toPath())
+    File(bin).copyTo(File(binTgt), true)
+}
+enableShell()
