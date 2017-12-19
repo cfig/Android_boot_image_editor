@@ -13,6 +13,9 @@ import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.util.DigestFactory;
+// END android-removed
 import org.bouncycastle.util.Arrays;
 
 /**

@@ -59,6 +59,11 @@ public class ECDHBasicAgreement
         // Explicitly construct a public key using the private key's curve.
         ECPoint pubPoint = myCurve.createPoint(peerPoint.getXCoord().toBigInteger(),
             peerPoint.getYCoord().toBigInteger());
+        ECPublicKeyParameters pub = (ECPublicKeyParameters)pubKey;
+        if (!pub.getParameters().equals(key.getParameters()))
+        {
+            throw new IllegalStateException("ECDH public key has wrong domain parameters");
+        }
         ECPoint P = pubPoint.multiply(key.getD()).normalize();
         // END android-changed
 

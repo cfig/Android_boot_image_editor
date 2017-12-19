@@ -3,6 +3,10 @@ package org.bouncycastle.util;
 import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * Utility method for accessing system properties.
@@ -32,5 +36,20 @@ public class Properties
         {
             return false;
         }
+    }
+
+    public static Set<String> asKeySet(final String propertyName)
+    {
+        Set<String> set = new HashSet<String>();
+        String p = System.getProperty(propertyName);
+        if (p != null)
+        {
+            StringTokenizer sTok = new StringTokenizer(p, ",");
+            while (sTok.hasMoreElements())
+            {
+                set.add(Strings.toLowerCase(sTok.nextToken()).trim());
+            }
+        }
+        return Collections.unmodifiableSet(set);
     }
 }

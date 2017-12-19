@@ -1,4 +1,3 @@
-apply plugin: 'c'
 apply plugin: 'java'
 
 apply plugin: 'groovy'
@@ -14,21 +13,6 @@ import java.util.zip.GZIPOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.security.MessageDigest;
-
-// ----------------------------------------------------------------------------
-model {
-    buildTypes {
-        release
-    }
-
-    components {
-        mkbootfs(NativeExecutableSpec) {
-            binaries.all {
-                // cCompiler.define 'CFIG_NO_FIX_STAT'
-            }
-        }
-    }
-}
 
 subprojects {
     tasks.withType(JavaCompile) {
@@ -118,14 +102,14 @@ task pack_ramdisk_and_gz { Task task ->
         }
         ByteArrayOutputStream mkbootfs_out = new ByteArrayOutputStream()
         task.project.exec {
-            commandLine = [ 'build/exe/mkbootfs/mkbootfs', rootDir ]
+            commandLine = [ 'mkbootfs/build/exe/mkbootfs/mkbootfs', rootDir ]
             standardOutput = mkbootfs_out
         }
         def ByteArrayInputStream gzip_in = new ByteArrayInputStream(mkbootfs_out.buf)
         gnuZipFile(workdir + "/ramdisk.img.gz", gzip_in)
     }
 }
-pack_ramdisk_and_gz.dependsOn('mkbootfsExecutable')
+pack_ramdisk_and_gz.dependsOn('mkbootfs:mkbootfsExecutable')
 
 void unGnuzipFile(String compressedFile, String decompressedFile) throws IOException {
     byte[] buffer = new byte[1024];

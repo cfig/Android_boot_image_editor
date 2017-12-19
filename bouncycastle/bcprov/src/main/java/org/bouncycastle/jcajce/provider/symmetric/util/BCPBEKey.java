@@ -152,4 +152,10 @@ public class BCPBEKey
     {
         return tryWrong;
     }
+
+    // BEGIN android-added
+    public PBEKeySpec getPbeKeySpec() {
+        return pbeKeySpec;
+    }
+    // END android-added
 }

@@ -102,7 +102,7 @@ public abstract class BaseWrapCipher
     protected int engineGetKeySize(
         Key     key)
     {
-        return key.getEncoded().length;
+        return key.getEncoded().length * 8;
     }
 
     protected int engineGetOutputSize(

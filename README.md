@@ -63,3 +63,14 @@ An example boot.img has been placed at **src/test/resources/boot.img**, which is
 ## boot.img layout
 Read [layout](https://github.com/cfig/Android_boot_image_editor/blob/master/README.expert.md) of Android boot.img.
 We now support **os\_version** and **os\_patch\_level**.
+
+## References
+
+boot\_signer
+https://android.googlesource.com/platform/system/extras
+
+bouncycastle
+https://android.googlesource.com/platform/external/bouncycastle
+
+cpio / fs\_config
+https://android.googlesource.com/platform/system/core

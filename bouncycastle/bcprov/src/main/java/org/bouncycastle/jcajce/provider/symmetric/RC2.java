@@ -215,7 +215,7 @@ public final class RC2
     //     extends BaseAlgorithmParameterGenerator
     // {
     //     RC2ParameterSpec spec = null;
-    // 
+
     //     protected void engineInit(
     //         AlgorithmParameterSpec genParamSpec,
     //         SecureRandom random)
@@ -226,25 +226,25 @@ public final class RC2
     //             spec = (RC2ParameterSpec)genParamSpec;
     //             return;
     //         }
-    // 
+
     //         throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for RC2 parameter generation.");
     //     }
-    // 
+
     //     protected AlgorithmParameters engineGenerateParameters()
     //     {
     //         AlgorithmParameters params;
-    // 
+
     //         if (spec == null)
     //         {
     //             byte[] iv = new byte[8];
-    // 
+
     //             if (random == null)
     //             {
     //                 random = new SecureRandom();
     //             }
-    // 
+
     //             random.nextBytes(iv);
-    // 
+
     //             try
     //             {
     //                 params = createParametersInstance("RC2");
@@ -267,11 +267,11 @@ public final class RC2
     //                 throw new RuntimeException(e.getMessage());
     //             }
     //         }
-    // 
+
     //         return params;
     //     }
     // }
-    // 
+
     // public static class KeyGenerator
     //     extends BaseKeyGenerator
     // {
@@ -280,7 +280,7 @@ public final class RC2
     //         super("RC2", 128, new CipherKeyGenerator());
     //     }
     // }
-    // 
+
     // public static class AlgParams
     //     extends BaseAlgorithmParameters
     // {
@@ -302,7 +302,7 @@ public final class RC2
     //         0x64, 0x6d, 0x7a, 0xd4, 0x10, 0x81, 0x44, 0xef, 0x49, 0xd6, 0xae, 0x2e, 0xdd, 0x76, 0x5c, 0x2f,
     //         0xa7, 0x1c, 0xc9, 0x09, 0x69, 0x9a, 0x83, 0xcf, 0x29, 0x39, 0xb9, 0xe9, 0x4c, 0xff, 0x43, 0xab
     //     };
-    // 
+
     //     private static final short[] ekb = {
     //         0x5d, 0xbe, 0x9b, 0x8b, 0x11, 0x99, 0x6e, 0x4d, 0x59, 0xf3, 0x85, 0xa6, 0x3f, 0xb7, 0x83, 0xc5,
     //         0xe4, 0x73, 0x6b, 0x3a, 0x68, 0x5a, 0xc0, 0x47, 0xa0, 0x64, 0x34, 0x0c, 0xf1, 0xd0, 0x52, 0xa5,
@@ -321,15 +321,15 @@ public final class RC2
     //         0xbd, 0x22, 0xbf, 0x9f, 0x7e, 0xa9, 0x51, 0x4b, 0x4c, 0xfb, 0x02, 0xd3, 0x70, 0x86, 0x31, 0xe7,
     //         0x3b, 0x05, 0x03, 0x54, 0x60, 0x48, 0x65, 0x18, 0xd2, 0xcd, 0x5f, 0x32, 0x88, 0x0e, 0x35, 0xfd
     //     };
-    // 
+
     //     private byte[] iv;
     //     private int parameterVersion = 58;
-    // 
+
     //     protected byte[] engineGetEncoded()
     //     {
     //         return Arrays.clone(iv);
     //     }
-    // 
+
     //     protected byte[] engineGetEncoded(
     //         String format)
     //         throws IOException
@@ -345,20 +345,20 @@ public final class RC2
     //                 return new RC2CBCParameter(parameterVersion, engineGetEncoded()).getEncoded();
     //             }
     //         }
-    // 
+
     //         if (format.equals("RAW"))
     //         {
     //             return engineGetEncoded();
     //         }
-    // 
+
     //         return null;
     //     }
-    // 
+
     //     protected AlgorithmParameterSpec localEngineGetParameterSpec(
     //         Class paramSpec)
     //         throws InvalidParameterSpecException
     //     {
-    //         if (paramSpec == RC2ParameterSpec.class)
+    //         if (paramSpec == RC2ParameterSpec.class || paramSpec == AlgorithmParameterSpec.class)
     //         {
     //             if (parameterVersion != -1)
     //             {
@@ -372,15 +372,15 @@ public final class RC2
     //                 }
     //             }
     //         }
-    // 
-    //         if (paramSpec == IvParameterSpec.class)
+
+    //         if (paramSpec == IvParameterSpec.class || paramSpec == AlgorithmParameterSpec.class)
     //         {
     //             return new IvParameterSpec(iv);
     //         }
-    // 
+
     //         throw new InvalidParameterSpecException("unknown parameter spec passed to RC2 parameters object.");
     //     }
-    // 
+
     //     protected void engineInit(
     //         AlgorithmParameterSpec paramSpec)
     //         throws InvalidParameterSpecException
@@ -403,7 +403,7 @@ public final class RC2
     //                     parameterVersion = effKeyBits;
     //                 }
     //             }
-    // 
+
     //             this.iv = ((RC2ParameterSpec)paramSpec).getIV();
     //         }
     //         else
@@ -411,14 +411,14 @@ public final class RC2
     //             throw new InvalidParameterSpecException("IvParameterSpec or RC2ParameterSpec required to initialise a RC2 parameters algorithm parameters object");
     //         }
     //     }
-    // 
+
     //     protected void engineInit(
     //         byte[] params)
     //         throws IOException
     //     {
     //         this.iv = Arrays.clone(params);
     //     }
-    // 
+
     //     protected void engineInit(
     //         byte[] params,
     //         String format)
@@ -427,26 +427,26 @@ public final class RC2
     //         if (this.isASN1FormatString(format))
     //         {
     //             RC2CBCParameter p = RC2CBCParameter.getInstance(ASN1Primitive.fromByteArray(params));
-    // 
+
     //             if (p.getRC2ParameterVersion() != null)
     //             {
     //                 parameterVersion = p.getRC2ParameterVersion().intValue();
     //             }
-    // 
+
     //             iv = p.getIV();
-    // 
+
     //             return;
     //         }
-    // 
+
     //         if (format.equals("RAW"))
     //         {
     //             engineInit(params);
     //             return;
     //         }
-    // 
+
     //         throw new IOException("Unknown parameters format in IV parameters object");
     //     }
-    // 
+
     //     protected String engineToString()
     //     {
     //         return "RC2 Parameters";

@@ -4,12 +4,13 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.Digest;
-// BEGIN android-changed
-import org.bouncycastle.crypto.digests.AndroidDigestFactory;
-// END android-changed
 import org.bouncycastle.crypto.params.DSAParameterGenerationParameters;
 import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAValidationParameters;
+// BEGIN android-changed
+// Was: import org.bouncycastle.crypto.util.DigestFactory;
+import org.bouncycastle.crypto.digests.AndroidDigestFactory;
+// END android-added
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.encoders.Hex;

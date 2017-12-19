@@ -1,5 +1,6 @@
 package org.bouncycastle.jcajce.provider.symmetric.util;
 
+import java.lang.reflect.Method;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -13,15 +14,20 @@ import javax.crypto.SecretKey;
 import javax.crypto.interfaces.PBEKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
+import javax.crypto.spec.RC2ParameterSpec;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Mac;
+import org.bouncycastle.crypto.macs.HMac;
+import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 // BEGIN android-removed
+// import org.bouncycastle.crypto.params.RC2Parameters;
 // import org.bouncycastle.crypto.params.SkeinParameters;
 // END android-removed
 import org.bouncycastle.jcajce.PKCS12Key;
+import org.bouncycastle.jcajce.spec.AEADParameterSpec;
 // BEGIN android-removed
 // import org.bouncycastle.jcajce.spec.SkeinParameterSpec;
 // END android-removed
@@ -29,11 +35,13 @@ import org.bouncycastle.jcajce.PKCS12Key;
 public class BaseMac
     extends MacSpi implements PBE
 {
+    private static final Class gcmSpecClass = lookup("javax.crypto.spec.GCMParameterSpec");
+
     private Mac macEngine;
 
     private int scheme = PKCS12;
-    private int                     pbeHash = SHA1;
-    private int                     keySize = 160;
+    private int pbeHash = SHA1;
+    private int keySize = 160;
 
     protected BaseMac(
         Mac macEngine)
@@ -102,12 +110,44 @@ public class BaseMac
             //      keySize = 256;
             // }
             // BEGIN android-changed
-            // Was: else if (macEngine.getAlgorithmName().startsWith("SHA256"))
-            if (macEngine.getAlgorithmName().startsWith("SHA256"))
+            // Was: else if (macEngine instanceof HMac)
+            if (macEngine instanceof HMac)
             // END android-changed
             {
-                digest = SHA256;
-                keySize = 256;
+                if (!macEngine.getAlgorithmName().startsWith("SHA-1"))
+                {
+                    if (macEngine.getAlgorithmName().startsWith("SHA-224"))
+                    {
+                        digest = SHA224;
+                        keySize = 224;
+                    }
+                    else if (macEngine.getAlgorithmName().startsWith("SHA-256"))
+                    {
+                        digest = SHA256;
+                        keySize = 256;
+                    }
+                    else if (macEngine.getAlgorithmName().startsWith("SHA-384"))
+                    {
+                        digest = SHA384;
+                        keySize = 384;
+                    }
+                    else if (macEngine.getAlgorithmName().startsWith("SHA-512"))
+                    {
+                        digest = SHA512;
+                        keySize = 512;
+                    }
+                    // BEGIN android-removed
+                    // else if (macEngine.getAlgorithmName().startsWith("RIPEMD160"))
+                    // {
+                    //     digest = RIPEMD160;
+                    //     keySize = 160;
+                    // }
+                    // END android-removed
+                    else
+                    {
+                        throw new InvalidAlgorithmParameterException("no PKCS12 mapping for HMAC: " + macEngine.getAlgorithmName());
+                    }
+                }
             }
             // TODO: add correct handling for other digests
             param = PBE.Util.makePBEMacParameters(k, PKCS12, digest, keySize, pbeSpec);
@@ -129,26 +169,77 @@ public class BaseMac
                 throw new InvalidAlgorithmParameterException("PBE requires PBE parameters to be set.");
             }
         }
+        else
+        {
+            if (params instanceof PBEParameterSpec)
+            {
+                throw new InvalidAlgorithmParameterException("inappropriate parameter type: " + params.getClass().getName());
+            }
+            param = new KeyParameter(key.getEncoded());
+        }
+
+        KeyParameter keyParam;
+        if (param instanceof ParametersWithIV)
+        {
+            keyParam = (KeyParameter)((ParametersWithIV)param).getParameters();
+        }
+        else
+        {
+            keyParam = (KeyParameter)param;
+        }
+
+        if (params instanceof AEADParameterSpec)
+        {
+            AEADParameterSpec aeadSpec = (AEADParameterSpec)params;
+
+            param = new AEADParameters(keyParam, aeadSpec.getMacSizeInBits(), aeadSpec.getNonce(), aeadSpec.getAssociatedData());
+        }
         else if (params instanceof IvParameterSpec)
         {
-            param = new ParametersWithIV(new KeyParameter(key.getEncoded()), ((IvParameterSpec)params).getIV());
+            param = new ParametersWithIV(keyParam, ((IvParameterSpec)params).getIV());
         }
         // BEGIN android-removed
+        // else if (params instanceof RC2ParameterSpec)
+        // {
+        //     param = new ParametersWithIV(new RC2Parameters(keyParam.getKey(), ((RC2ParameterSpec)params).getEffectiveKeyBits()), ((RC2ParameterSpec)params).getIV());
+        // }
+
         // else if (params instanceof SkeinParameterSpec)
         // {
-        //     param = new SkeinParameters.Builder(copyMap(((SkeinParameterSpec)params).getParameters())).setKey(key.getEncoded()).build();
+        //     param = new SkeinParameters.Builder(copyMap(((SkeinParameterSpec)params).getParameters())).setKey(keyParam.getKey()).build();
         // }
         // END android-removed
         else if (params == null)
         {
             param = new KeyParameter(key.getEncoded());
         }
-        else
+        else if (gcmSpecClass != null && gcmSpecClass.isAssignableFrom(params.getClass()))
         {
-            throw new InvalidAlgorithmParameterException("unknown parameter type.");
+            try
+            {
+                Method tLen = gcmSpecClass.getDeclaredMethod("getTLen", new Class[0]);
+                Method iv= gcmSpecClass.getDeclaredMethod("getIV", new Class[0]);
+
+                param = new AEADParameters(keyParam, ((Integer)tLen.invoke(params, new Object[0])).intValue(), (byte[])iv.invoke(params, new Object[0]));
+            }
+            catch (Exception e)
+            {
+                throw new InvalidAlgorithmParameterException("Cannot process GCMParameterSpec.");
+            }
+        }
+        else if (!(params instanceof PBEParameterSpec))
+        {
+            throw new InvalidAlgorithmParameterException("unknown parameter type: " + params.getClass().getName());
         }
 
-        macEngine.init(param);
+        try
+        {
+            macEngine.init(param);
+        }
+        catch (Exception e)
+        {
+            throw new InvalidAlgorithmParameterException("cannot initialize MAC: " + e.getMessage());
+        }
     }
 
     protected int engineGetMacLength() 
@@ -196,5 +287,19 @@ public class BaseMac
         }
 
         return newTable;
+    }
+
+    private static Class lookup(String className)
+    {
+        try
+        {
+            Class def = BaseBlockCipher.class.getClassLoader().loadClass(className);
+
+            return def;
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 }

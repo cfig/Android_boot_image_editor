@@ -1,4 +1,4 @@
-
+#include <cstdint>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -12,10 +12,8 @@
 #include <stdarg.h>
 #include <fcntl.h>
 
-#ifndef CFIG_NO_FIX_STAT
 #include <private/android_filesystem_config.h>
-#endif
-
+#include <private/fs_config.h>
 /* NOTES
 **
 ** - see buffer-format.txt from the linux kernel docs for
@@ -53,10 +51,11 @@ static char *target_out_path = NULL;
 #define CANNED_LINE_LENGTH  (1024)
 #endif
 
+#define TRAILER "TRAILER!!!"
+
 static int verbose = 0;
 static int total_size = 0;
 
-#ifndef CFIG_NO_FIX_STAT
 static void fix_stat(const char *path, struct stat *s)
 {
     uint64_t capabilities;
@@ -83,12 +82,11 @@ static void fix_stat(const char *path, struct stat *s)
     } else {
         // Use the compiled-in fs_config() function.
         unsigned st_mode = s->st_mode;
-        fs_config(path, S_ISDIR(s->st_mode), target_out_path,
-                       &s->st_uid, &s->st_gid, &st_mode, &capabilities);
+        int is_dir = S_ISDIR(s->st_mode) || strcmp(path, TRAILER) == 0;
+        fs_config(path, is_dir, target_out_path, &s->st_uid, &s->st_gid, &st_mode, &capabilities);
         s->st_mode = (typeof(s->st_mode)) st_mode;
     }
 }
-#endif
 
 static void _eject(struct stat *s, char *out, int olen, char *data, unsigned datasize)
 {
@@ -102,7 +100,9 @@ static void _eject(struct stat *s, char *out, int olen, char *data, unsigned dat
         putchar(0);
     }
 
-#ifndef CFIG_NO_FIX_STAT
+#ifdef CFIG_NO_FIX_STAT
+#warning CFIG_NO_FIX_STAT defined, will not fix_stat() defined in Android
+#else
     fix_stat(out, s);
 #endif
 //    fprintf(stderr, "_eject %s: mode=0%o\n", out, s->st_mode);
@@ -146,7 +146,7 @@ static void _eject_trailer()
 {
     struct stat s;
     memset(&s, 0, sizeof(s));
-    _eject(&s, "TRAILER!!!", 10, 0, 0);
+    _eject(&s, TRAILER, 10, 0, 0);
 
     while(total_size & 0xff) {
         total_size++;
@@ -176,7 +176,7 @@ static void _archive_dir(char *in, char *out, int ilen, int olen)
 
     int size = 32;
     int entries = 0;
-    char** names = malloc(size * sizeof(char*));
+    char** names = (char**) malloc(size * sizeof(char*));
     if (names == NULL) {
       fprintf(stderr, "failed to allocate dir names array (size %d)\n", size);
       exit(1);
@@ -191,7 +191,7 @@ static void _archive_dir(char *in, char *out, int ilen, int olen)
 
         if (entries >= size) {
           size *= 2;
-          names = realloc(names, size * sizeof(char*));
+          names = (char**) realloc(names, size * sizeof(char*));
           if (names == NULL) {
             fprintf(stderr, "failed to reallocate dir names array (size %d)\n",
                     size);
@@ -305,6 +305,7 @@ static void read_canned_config(char* filename)
             allocated *= 2;
             canned_config = (struct fs_config_entry*)realloc(
                 canned_config, allocated * sizeof(struct fs_config_entry));
+            if (canned_config == NULL) die("failed to reallocate memory");
         }
 
         struct fs_config_entry* cc = canned_config + used;
@@ -324,6 +325,7 @@ static void read_canned_config(char* filename)
         ++allocated;
         canned_config = (struct fs_config_entry*)realloc(
             canned_config, allocated * sizeof(struct fs_config_entry));
+        if (canned_config == NULL) die("failed to reallocate memory");
     }
     canned_config[used].name = NULL;
 

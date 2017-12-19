@@ -12,11 +12,16 @@ import org.bouncycastle.crypto.generators.DSAParametersGenerator;
 import org.bouncycastle.crypto.params.DSAParameterGenerationParameters;
 import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.util.BaseAlgorithmParameterGeneratorSpi;
+import org.bouncycastle.jcajce.provider.asymmetric.util.PrimeCertaintyCalculator;
 
 public class AlgorithmParameterGeneratorSpi
     extends BaseAlgorithmParameterGeneratorSpi
 {
     protected SecureRandom random;
+    // Android-changed: Change default strength to 1024
+    // In 1.57, the default strength was changed to 2048.  We keep it at 1024 for app
+    // compatibility, particularly because the default digest (SHA-1) doesn't have
+    // a sufficiently long digest to work with 2048-bit keys.
     protected int strength = 1024;
     protected DSAParameterGenerationParameters params;
 
@@ -69,19 +74,21 @@ public class AlgorithmParameterGeneratorSpi
             random = new SecureRandom();
         }
 
+        int certainty = PrimeCertaintyCalculator.getDefaultCertainty(strength);
+
         if (strength == 1024)
         {
-            params = new DSAParameterGenerationParameters(1024, 160, 80, random);
+            params = new DSAParameterGenerationParameters(1024, 160, certainty, random);
             pGen.init(params);
         }
         else if (strength > 1024)
         {
-            params = new DSAParameterGenerationParameters(strength, 256, 80, random);
+            params = new DSAParameterGenerationParameters(strength, 256, certainty, random);
             pGen.init(params);
         }
         else
         {
-            pGen.init(strength, 20, random);
+            pGen.init(strength, certainty, random);
         }
 
         DSAParameters p = pGen.generateParameters();

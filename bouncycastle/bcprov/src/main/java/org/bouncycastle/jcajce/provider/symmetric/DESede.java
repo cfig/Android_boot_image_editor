@@ -18,6 +18,7 @@ import javax.crypto.spec.DESedeKeySpec;
 // END android-removed
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.engines.DESedeEngine;
@@ -433,16 +434,18 @@ public final class DESede
             provider.addAlgorithm("SecretKeyFactory.DESEDE", PREFIX + "$KeyFactory");
 
             // BEGIN android-removed
+            // provider.addAlgorithm("SecretKeyFactory", OIWObjectIdentifiers.desEDE, PREFIX + "$KeyFactory");
+
             // provider.addAlgorithm("Mac.DESEDECMAC", PREFIX + "$CMAC");
             // provider.addAlgorithm("Mac.DESEDEMAC", PREFIX + "$CBCMAC");
             // provider.addAlgorithm("Alg.Alias.Mac.DESEDE", "DESEDEMAC");
-            //
+
             // provider.addAlgorithm("Mac.DESEDEMAC/CFB8", PREFIX + "$DESedeCFB8");
             // provider.addAlgorithm("Alg.Alias.Mac.DESEDE/CFB8", "DESEDEMAC/CFB8");
-            //
+
             // provider.addAlgorithm("Mac.DESEDEMAC64", PREFIX + "$DESede64");
             // provider.addAlgorithm("Alg.Alias.Mac.DESEDE64", "DESEDEMAC64");
-            //
+
             // provider.addAlgorithm("Mac.DESEDEMAC64WITHISO7816-4PADDING", PREFIX + "$DESede64with7816d4");
             // provider.addAlgorithm("Alg.Alias.Mac.DESEDE64WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
             // provider.addAlgorithm("Alg.Alias.Mac.DESEDEISO9797ALG1MACWITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");

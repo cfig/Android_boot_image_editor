@@ -28,6 +28,9 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.digests.SHA224Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA384Digest;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.digests.SHA3Digest;
+// END android-removed
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.operator.OperatorCreationException;
 
@@ -75,14 +78,42 @@ public class BcDefaultDigestProvider
                 return new SHA512Digest();
             }
         });
-        table.put(PKCSObjectIdentifiers.md5, new BcDigestProvider()
-        {
-            public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
-            {
-                return new MD5Digest();
-            }
-        });
         // BEGIN android-removed
+        // table.put(NISTObjectIdentifiers.id_sha3_224, new BcDigestProvider()
+        // {
+        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+        //     {
+        //         return new SHA3Digest(224);
+        //     }
+        // });
+        // table.put(NISTObjectIdentifiers.id_sha3_256, new BcDigestProvider()
+        // {
+        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+        //     {
+        //         return new SHA3Digest(256);
+        //     }
+        // });
+        // table.put(NISTObjectIdentifiers.id_sha3_384, new BcDigestProvider()
+        // {
+        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+        //     {
+        //         return new SHA3Digest(384);
+        //     }
+        // });
+        // table.put(NISTObjectIdentifiers.id_sha3_512, new BcDigestProvider()
+        // {
+        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+        //     {
+        //         return new SHA3Digest(512);
+        //     }
+        // });
+        // table.put(PKCSObjectIdentifiers.md5, new BcDigestProvider()
+        // {
+        //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)
+        //     {
+        //         return new MD5Digest();
+        //     }
+        // });
         // table.put(PKCSObjectIdentifiers.md4, new BcDigestProvider()
         // {
         //     public ExtendedDigest get(AlgorithmIdentifier digestAlgorithmIdentifier)

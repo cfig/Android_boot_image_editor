@@ -41,7 +41,7 @@ public class DefaultCMSSignatureEncryptionAlgorithmFinder
 
     public AlgorithmIdentifier findEncryptionAlgorithm(AlgorithmIdentifier signatureAlgorithm)
     {
-               // RFC3370 section 3.2
+               // RFC3370 section 3.2 with RFC 5754 update
         if (RSA_PKCS1d5.contains(signatureAlgorithm.getAlgorithm()))
         {
             return new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE);

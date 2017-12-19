@@ -1,6 +1,10 @@
 package org.bouncycastle.jcajce.provider.asymmetric;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 // BEGIN android-removed
@@ -15,6 +19,14 @@ import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
 public class RSA
 {
     private static final String PREFIX = "org.bouncycastle.jcajce.provider.asymmetric" + ".rsa.";
+
+    private static final Map<String, String> generalRsaAttributes = new HashMap<String, String>();
+
+    static
+    {
+        generalRsaAttributes.put("SupportedKeyClasses", "javax.crypto.interfaces.RSAPublicKey|javax.crypto.interfaces.RSAPrivateKey");
+        generalRsaAttributes.put("SupportedKeyFormats", "PKCS#8|X.509");
+    }
 
     public static class Mappings
         extends AsymmetricAlgorithmProvider
@@ -47,6 +59,7 @@ public class RSA
             // provider.addAlgorithm("Alg.Alias.AlgorithmParameters.NONEWITHRSAANDMGF1", "PSS");
             // END android-removed
 
+            provider.addAttributes("Cipher.RSA", generalRsaAttributes);
             provider.addAlgorithm("Cipher.RSA", PREFIX + "CipherSpi$NoPadding");
             // BEGIN android-changed
             provider.addAlgorithm("Alg.Alias.Cipher.RSA/RAW", "RSA");
@@ -108,6 +121,11 @@ public class RSA
             // addPSSSignature(provider, "SHA512(224)", PREFIX + "PSSSignatureSpi$SHA512_224withRSA");
             // addPSSSignature(provider, "SHA512(256)", PREFIX + "PSSSignatureSpi$SHA512_256withRSA");
             //
+            // addPSSSignature(provider, "SHA3-224", PREFIX + "PSSSignatureSpi$SHA3_224withRSA");
+            // addPSSSignature(provider, "SHA3-256", PREFIX + "PSSSignatureSpi$SHA3_256withRSA");
+            // addPSSSignature(provider, "SHA3-384", PREFIX + "PSSSignatureSpi$SHA3_384withRSA");
+            // addPSSSignature(provider, "SHA3-512", PREFIX + "PSSSignatureSpi$SHA3_512withRSA");
+            //
             // if (provider.hasAlgorithm("MessageDigest", "MD2"))
             // {
             //     addDigestSignature(provider, "MD2", PREFIX + "DigestSignatureSpi$MD2", PKCSObjectIdentifiers.md2WithRSAEncryption);
@@ -152,11 +170,15 @@ public class RSA
             addDigestSignature(provider, "SHA256", PREFIX + "DigestSignatureSpi$SHA256", PKCSObjectIdentifiers.sha256WithRSAEncryption);
             addDigestSignature(provider, "SHA384", PREFIX + "DigestSignatureSpi$SHA384", PKCSObjectIdentifiers.sha384WithRSAEncryption);
             addDigestSignature(provider, "SHA512", PREFIX + "DigestSignatureSpi$SHA512", PKCSObjectIdentifiers.sha512WithRSAEncryption);
-
             // BEGIN android-removed
-            // addDigestSignature(provider, "SHA512(224)", PREFIX + "DigestSignatureSpi$SHA512_224", null);
-            // addDigestSignature(provider, "SHA512(256)", PREFIX + "DigestSignatureSpi$SHA512_256", null);
-
+            // addDigestSignature(provider, "SHA512(224)", PREFIX + "DigestSignatureSpi$SHA512_224", PKCSObjectIdentifiers.sha512_224WithRSAEncryption);
+            // addDigestSignature(provider, "SHA512(256)", PREFIX + "DigestSignatureSpi$SHA512_256", PKCSObjectIdentifiers.sha512_256WithRSAEncryption);
+            //
+            // addDigestSignature(provider, "SHA3-224", PREFIX + "DigestSignatureSpi$SHA3_224", NISTObjectIdentifiers.id_rsassa_pkcs1_v1_5_with_sha3_224);
+            // addDigestSignature(provider, "SHA3-256", PREFIX + "DigestSignatureSpi$SHA3_256", NISTObjectIdentifiers.id_rsassa_pkcs1_v1_5_with_sha3_256);
+            // addDigestSignature(provider, "SHA3-384", PREFIX + "DigestSignatureSpi$SHA3_384", NISTObjectIdentifiers.id_rsassa_pkcs1_v1_5_with_sha3_384);
+            // addDigestSignature(provider, "SHA3-512", PREFIX + "DigestSignatureSpi$SHA3_512", NISTObjectIdentifiers.id_rsassa_pkcs1_v1_5_with_sha3_512);
+            //
             // addISO9796Signature(provider, "SHA224", PREFIX + "ISOSignatureSpi$SHA224WithRSAEncryption");
             // addISO9796Signature(provider, "SHA256", PREFIX + "ISOSignatureSpi$SHA256WithRSAEncryption");
             // addISO9796Signature(provider, "SHA384", PREFIX + "ISOSignatureSpi$SHA384WithRSAEncryption");
@@ -173,38 +195,24 @@ public class RSA
             //
             // if (provider.hasAlgorithm("MessageDigest", "RIPEMD128"))
             // {
-            //     addDigestSignature(provider, "RIPEMD128", PREFIX + "DigestSignatureSpi$RIPEMD128", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
-            //     addDigestSignature(provider, "RMD128", PREFIX + "DigestSignatureSpi$RIPEMD128", null);
-            //     provider.addAlgorithm("Alg.Alias.Signature.RIPEMD128withRSA/X9.31", "RIPEMD128WITHRSA/X9.31");
-            //     provider.addAlgorithm("Alg.Alias.Signature.RIPEMD128WithRSA/X9.31", "RIPEMD128WITHRSA/X9.31");
-            //     provider.addAlgorithm("Signature.RIPEMD128WITHRSA/X9.31", PREFIX + "X931SignatureSpi$RIPEMD128WithRSAEncryption");
+            //    addDigestSignature(provider, "RIPEMD128", PREFIX + "DigestSignatureSpi$RIPEMD128", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
+            //    addDigestSignature(provider, "RMD128", PREFIX + "DigestSignatureSpi$RIPEMD128", null);
+            //
+            //    addX931Signature(provider, "RMD128", PREFIX + "X931SignatureSpi$RIPEMD128WithRSAEncryption");
+            //    addX931Signature(provider, "RIPEMD128", PREFIX + "X931SignatureSpi$RIPEMD128WithRSAEncryption");
             // }
-	    //
+            //
             // if (provider.hasAlgorithm("MessageDigest", "RIPEMD160"))
             // {
-            //     addDigestSignature(provider, "RIPEMD160", PREFIX + "DigestSignatureSpi$RIPEMD160", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
-            //     addDigestSignature(provider, "RMD160", PREFIX + "DigestSignatureSpi$RIPEMD160", null);
-            //     provider.addAlgorithm("Alg.Alias.Signature.RIPEMD160WithRSA/ISO9796-2", "RIPEMD160withRSA/ISO9796-2");
-            //     provider.addAlgorithm("Signature.RIPEMD160withRSA/ISO9796-2", PREFIX + "ISOSignatureSpi$RIPEMD160WithRSAEncryption");
-            //     provider.addAlgorithm("Alg.Alias.Signature.RIPEMD160withRSA/X9.31", "RIPEMD160WITHRSA/X9.31");
-            //     provider.addAlgorithm("Alg.Alias.Signature.RIPEMD160WithRSA/X9.31", "RIPEMD160WITHRSA/X9.31");
-            //     provider.addAlgorithm("Signature.RIPEMD160WITHRSA/X9.31", PREFIX + "X931SignatureSpi$RIPEMD160WithRSAEncryption");
+            //    addDigestSignature(provider, "RIPEMD160", PREFIX + "DigestSignatureSpi$RIPEMD160", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
+            //    addDigestSignature(provider, "RMD160", PREFIX + "DigestSignatureSpi$RIPEMD160", null);
+            //    provider.addAlgorithm("Alg.Alias.Signature.RIPEMD160WithRSA/ISO9796-2", "RIPEMD160withRSA/ISO9796-2");
+            //    provider.addAlgorithm("Signature.RIPEMD160withRSA/ISO9796-2", PREFIX + "ISOSignatureSpi$RIPEMD160WithRSAEncryption");
+            //
+            //    addX931Signature(provider, "RMD160", PREFIX + "X931SignatureSpi$RIPEMD160WithRSAEncryption");
+            //    addX931Signature(provider, "RIPEMD160", PREFIX + "X931SignatureSpi$RIPEMD160WithRSAEncryption");
             // }
-	    //
-            // if (provider.hasAlgorithm("MessageDigest", "RIPEMD256"))
-            // {
-            //     addDigestSignature(provider, "RIPEMD256", PREFIX + "DigestSignatureSpi$RIPEMD256", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
-            //     addDigestSignature(provider, "RMD256", PREFIX + "DigestSignatureSpi$RIPEMD256", null);
-            // }
-	    //
-            // if (provider.hasAlgorithm("MessageDigest", "WHIRLPOOL"))
-            // {
-            //     provider.addAlgorithm("Alg.Alias.Signature.WhirlpoolWithRSA/X9.31", "WHIRLPOOLWITHRSA/X9.31");
-            //     provider.addAlgorithm("Alg.Alias.Signature.WHIRLPOOLwithRSA/X9.31", "WHIRLPOOLWITHRSA/X9.31");
-            //     provider.addAlgorithm("Alg.Alias.Signature.WHIRLPOOLWithRSA/X9.31", "WHIRLPOOLWITHRSA/X9.31");
-            //     provider.addAlgorithm("Signature.WHIRLPOOLWITHRSA/X9.31", PREFIX + "X931SignatureSpi$WhirlpoolWithRSAEncryption");
-            // }
-	    // END android-removed
+            // END android-removed
         }
 
         private void addDigestSignature(

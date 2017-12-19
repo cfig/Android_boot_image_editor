@@ -11,6 +11,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.spec.IvParameterSpec;
 
@@ -26,9 +28,14 @@ import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherKeyGenerator;
-import org.bouncycastle.crypto.engines.AESFastEngine;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.DataLengthException;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.Mac;
+import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.AESWrapEngine;
 // BEGIN android-removed
+// import org.bouncycastle.crypto.engines.AESWrapPadEngine;
 // import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
 // import org.bouncycastle.crypto.engines.RFC5649WrapEngine;
 // import org.bouncycastle.crypto.generators.Poly1305KeyGenerator;
@@ -51,15 +58,25 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 // BEGIN android-removed
 // import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
+// import org.bouncycastle.jcajce.provider.symmetric.util.BaseSecretKeyFactory;
 // END android-removed
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseWrapCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BlockCipherProvider;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
 import org.bouncycastle.jcajce.provider.symmetric.util.PBESecretKeyFactory;
+import org.bouncycastle.jcajce.spec.AEADParameterSpec;
 
 public final class AES
 {
     private static final Class gcmSpecClass = lookup("javax.crypto.spec.GCMParameterSpec");
+
+    private static final Map<String, String> generalAesAttributes = new HashMap<String, String>();
+
+    static
+    {
+        generalAesAttributes.put("SupportedKeyClasses", "javax.crypto.SecretKey");
+        generalAesAttributes.put("SupportedKeyFormats", "RAW");
+    }
 
     private AES()
     {
@@ -74,7 +91,7 @@ public final class AES
             {
                 public BlockCipher get()
                 {
-                    return new AESFastEngine();
+                    return new AESEngine();
                 }
             });
         }
@@ -85,7 +102,7 @@ public final class AES
     {
         public CBC()
         {
-            super(new CBCBlockCipher(new AESFastEngine()), 128);
+            super(new CBCBlockCipher(new AESEngine()), 128);
         }
     }
 
@@ -94,7 +111,7 @@ public final class AES
     {
         public CFB()
         {
-            super(new BufferedBlockCipher(new CFBBlockCipher(new AESFastEngine(), 128)), 128);
+            super(new BufferedBlockCipher(new CFBBlockCipher(new AESEngine(), 128)), 128);
         }
     }
 
@@ -103,7 +120,7 @@ public final class AES
     {
         public OFB()
         {
-            super(new BufferedBlockCipher(new OFBBlockCipher(new AESFastEngine(), 128)), 128);
+            super(new BufferedBlockCipher(new OFBBlockCipher(new AESEngine(), 128)), 128);
         }
     }
 
@@ -112,7 +129,7 @@ public final class AES
     {
         public GCM()
         {
-            super(new GCMBlockCipher(new AESFastEngine()));
+            super(new GCMBlockCipher(new AESEngine()));
             // BEGIN android-added
             try {
                 engineSetMode("GCM");
@@ -131,37 +148,111 @@ public final class AES
     // {
     //     public CCM()
     //     {
-    //         super(new CCMBlockCipher(new AESFastEngine()), false, 16);
+    //         super(new CCMBlockCipher(new AESEngine()), false, 16);
     //     }
     // }
-    //
+
     // public static class AESCMAC
     //     extends BaseMac
     // {
     //     public AESCMAC()
     //     {
-    //         super(new CMac(new AESFastEngine()));
+    //         super(new CMac(new AESEngine()));
     //     }
     // }
-    //
+
     // public static class AESGMAC
     //     extends BaseMac
     // {
     //     public AESGMAC()
     //     {
-    //         super(new GMac(new GCMBlockCipher(new AESFastEngine())));
+    //         super(new GMac(new GCMBlockCipher(new AESEngine())));
     //     }
     // }
-    //
+
+    // public static class AESCCMMAC
+    //     extends BaseMac
+    // {
+    //     public AESCCMMAC()
+    //     {
+    //         super(new CCMMac());
+    //     }
+
+    //     private static class CCMMac
+    //         implements Mac
+    //     {
+    //         private final CCMBlockCipher ccm = new CCMBlockCipher(new AESEngine());
+
+    //         private int macLength = 8;
+
+    //         public void init(CipherParameters params)
+    //             throws IllegalArgumentException
+    //         {
+    //             ccm.init(true, params);
+
+    //             this.macLength = ccm.getMac().length;
+    //         }
+
+    //         public String getAlgorithmName()
+    //         {
+    //             return ccm.getAlgorithmName() + "Mac";
+    //         }
+
+    //         public int getMacSize()
+    //         {
+    //             return macLength;
+    //         }
+
+    //         public void update(byte in)
+    //             throws IllegalStateException
+    //         {
+    //             ccm.processAADByte(in);
+    //         }
+
+    //         public void update(byte[] in, int inOff, int len)
+    //             throws DataLengthException, IllegalStateException
+    //         {
+    //             ccm.processAADBytes(in, inOff, len);
+    //         }
+
+    //         public int doFinal(byte[] out, int outOff)
+    //             throws DataLengthException, IllegalStateException
+    //         {
+    //             try
+    //             {
+    //                 return ccm.doFinal(out, 0);
+    //             }
+    //             catch (InvalidCipherTextException e)
+    //             {
+    //                 throw new IllegalStateException("exception on doFinal(): " + e.toString());
+    //             }
+    //         }
+
+    //         public void reset()
+    //         {
+    //             ccm.reset();
+    //         }
+    //     }
+    // }
+
+    // static public class KeyFactory
+    //      extends BaseSecretKeyFactory
+    // {
+    //     public KeyFactory()
+    //     {
+    //         super("AES", null);
+    //     }
+    // }
+
     // public static class Poly1305
     //     extends BaseMac
     // {
     //     public Poly1305()
     //     {
-    //         super(new org.bouncycastle.crypto.macs.Poly1305(new AESFastEngine()));
+    //         super(new org.bouncycastle.crypto.macs.Poly1305(new AESEngine()));
     //     }
     // }
-    //
+
     // public static class Poly1305KeyGen
     //     extends BaseKeyGenerator
     // {
@@ -182,21 +273,30 @@ public final class AES
     }
 
     // BEGIN android-removed
+    // public static class WrapPad
+    //         extends BaseWrapCipher
+    // {
+    //     public WrapPad()
+    //     {
+    //         super(new AESWrapPadEngine());
+    //     }
+    // }
+
     // public static class RFC3211Wrap
     //     extends BaseWrapCipher
     // {
     //     public RFC3211Wrap()
     //     {
-    //         super(new RFC3211WrapEngine(new AESFastEngine()), 16);
+    //         super(new RFC3211WrapEngine(new AESEngine()), 16);
     //     }
     // }
-    //
+
     // public static class RFC5649Wrap
     //     extends BaseWrapCipher
     // {
     //     public RFC5649Wrap()
     //     {
-    //         super(new RFC5649WrapEngine(new AESFastEngine()));
+    //         super(new RFC5649WrapEngine(new AESEngine()));
     //     }
     // }
     // END android-removed
@@ -209,7 +309,7 @@ public final class AES
     {
         public PBEWithAESCBC()
         {
-            super(new CBCBlockCipher(new AESFastEngine()));
+            super(new CBCBlockCipher(new AESEngine()));
         }
     }
 
@@ -221,7 +321,7 @@ public final class AES
     {
         public PBEWithSHA1AESCBC128()
         {
-            super(new CBCBlockCipher(new AESFastEngine()), PKCS12, SHA1, 128, 16);
+            super(new CBCBlockCipher(new AESEngine()), PKCS12, SHA1, 128, 16);
         }
     }
 
@@ -230,7 +330,7 @@ public final class AES
     {
         public PBEWithSHA1AESCBC192()
         {
-            super(new CBCBlockCipher(new AESFastEngine()), PKCS12, SHA1, 192, 16);
+            super(new CBCBlockCipher(new AESEngine()), PKCS12, SHA1, 192, 16);
         }
     }
 
@@ -239,7 +339,7 @@ public final class AES
     {
         public PBEWithSHA1AESCBC256()
         {
-            super(new CBCBlockCipher(new AESFastEngine()), PKCS12, SHA1, 256, 16);
+            super(new CBCBlockCipher(new AESEngine()), PKCS12, SHA1, 256, 16);
         }
     }
 
@@ -251,7 +351,7 @@ public final class AES
     {
         public PBEWithSHA256AESCBC128()
         {
-            super(new CBCBlockCipher(new AESFastEngine()), PKCS12, SHA256, 128, 16);
+            super(new CBCBlockCipher(new AESEngine()), PKCS12, SHA256, 128, 16);
         }
     }
 
@@ -260,7 +360,7 @@ public final class AES
     {
         public PBEWithSHA256AESCBC192()
         {
-            super(new CBCBlockCipher(new AESFastEngine()), PKCS12, SHA256, 192, 16);
+            super(new CBCBlockCipher(new AESEngine()), PKCS12, SHA256, 192, 16);
         }
     }
 
@@ -269,7 +369,7 @@ public final class AES
     {
         public PBEWithSHA256AESCBC256()
         {
-            super(new CBCBlockCipher(new AESFastEngine()), PKCS12, SHA256, 256, 16);
+            super(new CBCBlockCipher(new AESEngine()), PKCS12, SHA256, 256, 16);
         }
     }
 
@@ -425,7 +525,7 @@ public final class AES
             super("PBEWithMD5And256BitAES-CBC-OpenSSL", null, true, OPENSSL, MD5, 256, 128);
         }
     }
-    
+
     // BEGIN android-removed
     // public static class AlgParamGen
     //     extends BaseAlgorithmParameterGenerator
@@ -437,20 +537,20 @@ public final class AES
     //     {
     //         throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for AES parameter generation.");
     //     }
-    //
+
     //     protected AlgorithmParameters engineGenerateParameters()
     //     {
     //         byte[]  iv = new byte[16];
-    //
+
     //         if (random == null)
     //         {
     //             random = new SecureRandom();
     //         }
-    //
+
     //         random.nextBytes(iv);
-    //
+
     //         AlgorithmParameters params;
-    //
+
     //         try
     //         {
     //             params = createParametersInstance("AES");
@@ -460,11 +560,11 @@ public final class AES
     //         {
     //             throw new RuntimeException(e.getMessage());
     //         }
-    //
+
     //         return params;
     //     }
     // }
-    //
+
     // public static class AlgParamGenCCM
     //     extends BaseAlgorithmParameterGenerator
     // {
@@ -473,22 +573,23 @@ public final class AES
     //         SecureRandom random)
     //         throws InvalidAlgorithmParameterException
     //     {
+    //         // TODO: add support for GCMParameterSpec as a template.
     //         throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for AES parameter generation.");
     //     }
-    //
+
     //     protected AlgorithmParameters engineGenerateParameters()
     //     {
     //         byte[]  iv = new byte[12];
-    //
+
     //         if (random == null)
     //         {
     //             random = new SecureRandom();
     //         }
-    //
+
     //         random.nextBytes(iv);
-    //
+
     //         AlgorithmParameters params;
-    //
+
     //         try
     //         {
     //             params = createParametersInstance("CCM");
@@ -498,11 +599,11 @@ public final class AES
     //         {
     //             throw new RuntimeException(e.getMessage());
     //         }
-    //
+
     //         return params;
     //     }
     // }
-    //
+
     // public static class AlgParamGenGCM
     //     extends BaseAlgorithmParameterGenerator
     // {
@@ -511,32 +612,33 @@ public final class AES
     //         SecureRandom random)
     //         throws InvalidAlgorithmParameterException
     //     {
+    //         // TODO: add support for GCMParameterSpec as a template.
     //         throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for AES parameter generation.");
     //     }
-    //
+
     //     protected AlgorithmParameters engineGenerateParameters()
     //     {
     //         byte[]  nonce = new byte[12];
-    //
+
     //         if (random == null)
     //         {
     //             random = new SecureRandom();
     //         }
-    //
+
     //         random.nextBytes(nonce);
-    //
+
     //         AlgorithmParameters params;
-    //
+
     //         try
     //         {
     //             params = createParametersInstance("GCM");
-    //             params.init(new GCMParameters(nonce, 12).getEncoded());
+    //             params.init(new GCMParameters(nonce, 16).getEncoded());
     //         }
     //         catch (Exception e)
     //         {
     //             throw new RuntimeException(e.getMessage());
     //         }
-    //
+
     //         return params;
     //     }
     // }
@@ -562,6 +664,10 @@ public final class AES
             if (GcmSpecUtil.isGcmSpec(paramSpec))
             {
                 gcmParams = GcmSpecUtil.extractGcmParameters(paramSpec);
+            }
+            else if (paramSpec instanceof AEADParameterSpec)
+            {
+                gcmParams = new GCMParameters(((AEADParameterSpec)paramSpec).getNonce(), ((AEADParameterSpec)paramSpec).getMacSizeInBits() / 8);
             }
             else
             {
@@ -617,7 +723,11 @@ public final class AES
                 {
                     return GcmSpecUtil.extractGcmSpec(gcmParams.toASN1Primitive());
                 }
-                return new IvParameterSpec(gcmParams.getNonce());
+                return new AEADParameterSpec(gcmParams.getNonce(), gcmParams.getIcvLen() * 8);
+            }
+            if (paramSpec == AEADParameterSpec.class)
+            {
+                return new AEADParameterSpec(gcmParams.getNonce(), gcmParams.getIcvLen() * 8);
             }
             if (paramSpec == IvParameterSpec.class)
             {
@@ -633,7 +743,7 @@ public final class AES
     //     extends BaseAlgorithmParameters
     // {
     //     private CCMParameters ccmParams;
-    //
+
     //     protected void engineInit(AlgorithmParameterSpec paramSpec)
     //         throws InvalidParameterSpecException
     //     {
@@ -641,18 +751,22 @@ public final class AES
     //         {
     //             ccmParams = CCMParameters.getInstance(GcmSpecUtil.extractGcmParameters(paramSpec));
     //         }
+    //         else if (paramSpec instanceof AEADParameterSpec)
+    //         {
+    //             ccmParams = new CCMParameters(((AEADParameterSpec)paramSpec).getNonce(), ((AEADParameterSpec)paramSpec).getMacSizeInBits() / 8);
+    //         }
     //         else
     //         {
     //             throw new InvalidParameterSpecException("AlgorithmParameterSpec class not recognized: " + paramSpec.getClass().getName());
     //         }
     //     }
-    //
+
     //     protected void engineInit(byte[] params)
     //         throws IOException
     //     {
     //         ccmParams = CCMParameters.getInstance(params);
     //     }
-    //
+
     //     protected void engineInit(byte[] params, String format)
     //         throws IOException
     //     {
@@ -660,16 +774,16 @@ public final class AES
     //         {
     //             throw new IOException("unknown format specified");
     //         }
-    //
+
     //         ccmParams = CCMParameters.getInstance(params);
     //     }
-    //
+
     //     protected byte[] engineGetEncoded()
     //         throws IOException
     //     {
     //         return ccmParams.getEncoded();
     //     }
-    //
+
     //     protected byte[] engineGetEncoded(String format)
     //         throws IOException
     //     {
@@ -677,15 +791,15 @@ public final class AES
     //         {
     //             throw new IOException("unknown format specified");
     //         }
-    //
+
     //         return ccmParams.getEncoded();
     //     }
-    //
+
     //     protected String engineToString()
     //     {
     //         return "CCM";
     //     }
-    //
+
     //     protected AlgorithmParameterSpec localEngineGetParameterSpec(Class paramSpec)
     //         throws InvalidParameterSpecException
     //     {
@@ -695,13 +809,17 @@ public final class AES
     //             {
     //                 return GcmSpecUtil.extractGcmSpec(ccmParams.toASN1Primitive());
     //             }
-    //             return new IvParameterSpec(ccmParams.getNonce());
+    //             return new AEADParameterSpec(ccmParams.getNonce(), ccmParams.getIcvLen() * 8);
+    //         }
+    //         if (paramSpec == AEADParameterSpec.class)
+    //         {
+    //             return new AEADParameterSpec(ccmParams.getNonce(), ccmParams.getIcvLen() * 8);
     //         }
     //         if (paramSpec == IvParameterSpec.class)
     //         {
     //             return new IvParameterSpec(ccmParams.getNonce());
     //         }
-    //
+
     //         throw new InvalidParameterSpecException("AlgorithmParameterSpec not recognized: " + paramSpec.getName());
     //     }
     // }
@@ -754,6 +872,7 @@ public final class AES
             // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_CBC, "AES");
             // END android-removed
 
+            provider.addAttributes("Cipher.AES", generalAesAttributes);
             provider.addAlgorithm("Cipher.AES", PREFIX + "$ECB");
             provider.addAlgorithm("Alg.Alias.Cipher." + wrongAES128, "AES");
             provider.addAlgorithm("Alg.Alias.Cipher." + wrongAES192, "AES");
@@ -772,6 +891,8 @@ public final class AES
             // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes192_CFB, PREFIX + "$CFB");
             // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes256_CFB, PREFIX + "$CFB");
             // END android-removed
+
+            provider.addAttributes("Cipher.AESWRAP", generalAesAttributes);
             provider.addAlgorithm("Cipher.AESWRAP", PREFIX + "$Wrap");
             provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes128_wrap, "AESWRAP");
             provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes192_wrap, "AESWRAP");
@@ -779,6 +900,13 @@ public final class AES
             provider.addAlgorithm("Alg.Alias.Cipher.AESKW", "AESWRAP");
 
             // BEGIN android-removed
+            // provider.addAttributes("Cipher.AESWRAPPAD", generalAesAttributes);
+            // provider.addAlgorithm("Cipher.AESWRAPPAD", PREFIX + "$WrapPad");
+            // provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes128_wrap_pad, "AESWRAPPAD");
+            // provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes192_wrap_pad, "AESWRAPPAD");
+            // provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes256_wrap_pad, "AESWRAPPAD");
+            // provider.addAlgorithm("Alg.Alias.Cipher.AESKWP", "AESWRAPPAD");
+            //
             // provider.addAlgorithm("Cipher.AESRFC3211WRAP", PREFIX + "$RFC3211Wrap");
             // provider.addAlgorithm("Cipher.AESRFC5649WRAP", PREFIX + "$RFC5649Wrap");
             //
@@ -787,6 +915,7 @@ public final class AES
             // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes192_CCM, "CCM");
             // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_CCM, "CCM");
             //
+            // provider.addAttributes("Cipher.CCM", generalAesAttributes);
             // provider.addAlgorithm("Cipher.CCM", PREFIX + "$CCM");
             // provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes128_CCM, "CCM");
             // provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes192_CCM, "CCM");
@@ -799,6 +928,7 @@ public final class AES
             // END android-removed
 
             // BEGIN android-changed
+            provider.addAttributes("Cipher.AES/GCM/NOPADDING", generalAesAttributes);
             provider.addAlgorithm("Cipher.AES/GCM/NOPADDING", PREFIX + "$GCM");
             provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_GCM, "AES/GCM/NOPADDING");
             provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes192_GCM, "AES/GCM/NOPADDING");
@@ -832,10 +962,19 @@ public final class AES
             // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_CCM, PREFIX + "$KeyGen128");
             // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_CCM, PREFIX + "$KeyGen192");
             // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_CCM, PREFIX + "$KeyGen256");
-            //
+            // provider.addAlgorithm("KeyGenerator.AESWRAPPAD", PREFIX + "$KeyGen");
+            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_wrap_pad, PREFIX + "$KeyGen128");
+            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_wrap_pad, PREFIX + "$KeyGen192");
+            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_wrap_pad, PREFIX + "$KeyGen256");
+
             // provider.addAlgorithm("Mac.AESCMAC", PREFIX + "$AESCMAC");
+
+            // provider.addAlgorithm("Mac.AESCCMMAC", PREFIX + "$AESCCMMAC");
+            // provider.addAlgorithm("Alg.Alias.Mac." + NISTObjectIdentifiers.id_aes128_CCM.getId(), "AESCCMMAC");
+            // provider.addAlgorithm("Alg.Alias.Mac." + NISTObjectIdentifiers.id_aes192_CCM.getId(), "AESCCMMAC");
+            // provider.addAlgorithm("Alg.Alias.Mac." + NISTObjectIdentifiers.id_aes256_CCM.getId(), "AESCCMMAC");
             // END android-removed
-            
+
             provider.addAlgorithm("Alg.Alias.Cipher", BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes128_cbc, "PBEWITHSHAAND128BITAES-CBC-BC");
             provider.addAlgorithm("Alg.Alias.Cipher", BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes192_cbc, "PBEWITHSHAAND192BITAES-CBC-BC");
             provider.addAlgorithm("Alg.Alias.Cipher", BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes256_cbc, "PBEWITHSHAAND256BITAES-CBC-BC");
@@ -878,7 +1017,12 @@ public final class AES
             provider.addAlgorithm("Cipher.PBEWITHMD5AND128BITAES-CBC-OPENSSL", PREFIX + "$PBEWithAESCBC");
             provider.addAlgorithm("Cipher.PBEWITHMD5AND192BITAES-CBC-OPENSSL", PREFIX + "$PBEWithAESCBC");
             provider.addAlgorithm("Cipher.PBEWITHMD5AND256BITAES-CBC-OPENSSL", PREFIX + "$PBEWithAESCBC");
-            
+
+            // BEGIN android-removed
+            // provider.addAlgorithm("SecretKeyFactory.AES", PREFIX + "$KeyFactory");
+            // provider.addAlgorithm("SecretKeyFactory", NISTObjectIdentifiers.aes, PREFIX + "$KeyFactory");
+            // END android-removed
+
             provider.addAlgorithm("SecretKeyFactory.PBEWITHMD5AND128BITAES-CBC-OPENSSL", PREFIX + "$PBEWithMD5And128BitAESCBCOpenSSL");
             provider.addAlgorithm("SecretKeyFactory.PBEWITHMD5AND192BITAES-CBC-OPENSSL", PREFIX + "$PBEWithMD5And192BitAESCBCOpenSSL");
             provider.addAlgorithm("SecretKeyFactory.PBEWITHMD5AND256BITAES-CBC-OPENSSL", PREFIX + "$PBEWithMD5And256BitAESCBCOpenSSL");

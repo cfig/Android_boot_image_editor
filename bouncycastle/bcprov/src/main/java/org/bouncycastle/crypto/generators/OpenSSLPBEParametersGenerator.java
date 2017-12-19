@@ -5,9 +5,11 @@ import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.PBEParametersGenerator;
 // BEGIN android-changed
 import org.bouncycastle.crypto.digests.AndroidDigestFactory;
-// END android-changed
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.util.DigestFactory;
+// END android-removed
 
 /**
  * Generator for PBE derived keys and ivs as usd by OpenSSL.

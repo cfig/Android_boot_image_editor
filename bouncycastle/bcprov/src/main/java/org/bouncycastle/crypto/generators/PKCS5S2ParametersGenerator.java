@@ -10,6 +10,9 @@ import org.bouncycastle.crypto.digests.AndroidDigestFactory;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.util.DigestFactory;
+// END android-removed
 import org.bouncycastle.util.Arrays;
 
 /**

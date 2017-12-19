@@ -31,20 +31,16 @@ import org.bouncycastle.crypto.digests.AndroidDigestFactory;
 // BEGIN android-removed
 // import org.bouncycastle.crypto.digests.MD2Digest;
 // import org.bouncycastle.crypto.digests.MD4Digest;
-// import org.bouncycastle.crypto.digests.MD5Digest;
 // import org.bouncycastle.crypto.digests.NullDigest;
 // import org.bouncycastle.crypto.digests.RIPEMD128Digest;
 // import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 // import org.bouncycastle.crypto.digests.RIPEMD256Digest;
-// import org.bouncycastle.crypto.digests.SHA1Digest;
-// import org.bouncycastle.crypto.digests.SHA224Digest;
-// import org.bouncycastle.crypto.digests.SHA256Digest;
-// import org.bouncycastle.crypto.digests.SHA384Digest;
-// import org.bouncycastle.crypto.digests.SHA512Digest;
-// import org.bouncycastle.crypto.digests.SHA512tDigest;
 // END android-removed
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
+// BEGIN android-removed
+// import org.bouncycastle.crypto.util.DigestFactory;
+// END android-removed
 import org.bouncycastle.util.Arrays;
 
 public class DigestSignatureSpi
@@ -318,7 +314,7 @@ public class DigestSignatureSpi
     // {
     //     public SHA512_224()
     //     {
-    //         super(NISTObjectIdentifiers.id_sha512_224, new SHA512tDigest(224), new PKCS1Encoding(new RSABlindedEngine()));
+    //         super(NISTObjectIdentifiers.id_sha512_224, DigestFactory.createSHA512_224(), new PKCS1Encoding(new RSABlindedEngine()));
     //     }
     // }
 
@@ -327,7 +323,43 @@ public class DigestSignatureSpi
     // {
     //     public SHA512_256()
     //     {
-    //         super(NISTObjectIdentifiers.id_sha512_256, new SHA512tDigest(256), new PKCS1Encoding(new RSABlindedEngine()));
+    //         super(NISTObjectIdentifiers.id_sha512_256, DigestFactory.createSHA512_256(), new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+
+    // static public class SHA3_224
+    //     extends DigestSignatureSpi
+    // {
+    //     public SHA3_224()
+    //     {
+    //         super(NISTObjectIdentifiers.id_sha3_224, DigestFactory.createSHA3_224(), new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+
+    // static public class SHA3_256
+    //     extends DigestSignatureSpi
+    // {
+    //     public SHA3_256()
+    //     {
+    //         super(NISTObjectIdentifiers.id_sha3_256, DigestFactory.createSHA3_256(), new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+
+    // static public class SHA3_384
+    //     extends DigestSignatureSpi
+    // {
+    //     public SHA3_384()
+    //     {
+    //         super(NISTObjectIdentifiers.id_sha3_384, DigestFactory.createSHA3_384(), new PKCS1Encoding(new RSABlindedEngine()));
+    //     }
+    // }
+
+    // static public class SHA3_512
+    //     extends DigestSignatureSpi
+    // {
+    //     public SHA3_512()
+    //     {
+    //         super(NISTObjectIdentifiers.id_sha3_512, DigestFactory.createSHA3_512(), new PKCS1Encoding(new RSABlindedEngine()));
     //     }
     // }
 
@@ -339,7 +371,7 @@ public class DigestSignatureSpi
     //         super(PKCSObjectIdentifiers.md2, new MD2Digest(), new PKCS1Encoding(new RSABlindedEngine()));
     //     }
     // }
-    //
+
     // static public class MD4
     //     extends DigestSignatureSpi
     // {

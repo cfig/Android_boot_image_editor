@@ -1,6 +1,5 @@
 package org.bouncycastle.jcajce.provider.asymmetric.util;
 
-import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -145,7 +144,6 @@ public abstract class BaseAgreementSpi
     private final String kaAlgorithm;
     private final DerivationFunction kdf;
 
-    protected BigInteger result;
     protected byte[]     ukmParameters;
 
     public BaseAgreementSpi(String kaAlgorithm, DerivationFunction kdf)
@@ -186,7 +184,7 @@ public abstract class BaseAgreementSpi
     {
         if (algDetails.indexOf('[') > 0)
         {
-            return (Integer.parseInt(algDetails.substring(algDetails.indexOf('[') + 1, algDetails.indexOf(']'))) + 7) / 8;
+            return Integer.parseInt(algDetails.substring(algDetails.indexOf('[') + 1, algDetails.indexOf(']')));
         }
 
         String algKey = Strings.toUpperCase(algDetails);
@@ -229,7 +227,7 @@ public abstract class BaseAgreementSpi
                 "KDF can only be used when algorithm is known");
         }
 
-        return bigIntToBytes(result);
+        return calcSecret();
     }
 
     protected int engineGenerateSecret(
@@ -253,7 +251,7 @@ public abstract class BaseAgreementSpi
         String algorithm)
         throws NoSuchAlgorithmException
     {
-        byte[] secret = bigIntToBytes(result);
+        byte[] secret = calcSecret();
         String algKey = Strings.toUpperCase(algorithm);
         String oidAlgorithm = algorithm;
 
@@ -311,13 +309,15 @@ public abstract class BaseAgreementSpi
             }
         }
 
-        if (des.containsKey(oidAlgorithm))
+        String algName = getAlgorithm(algorithm);
+
+        if (des.containsKey(algName))
         {
             DESParameters.setOddParity(secret);
         }
 
-        return new SecretKeySpec(secret, getAlgorithm(algorithm));
+        return new SecretKeySpec(secret, algName);
     }
 
-    protected abstract byte[] bigIntToBytes(BigInteger result);
+    protected abstract byte[] calcSecret();
 }
