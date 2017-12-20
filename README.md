@@ -1,5 +1,6 @@
 # Android_boot_image_editor
 [![Build Status](https://travis-ci.org/cfig/Android_boot_image_editor.svg?branch=master)](https://travis-ci.org/cfig/Android_boot_image_editor)
+[![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 Utilies for editing Android boot.img or recovery.img or recovery-two-step.img.
 
