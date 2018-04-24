@@ -29,7 +29,7 @@ Get tools via git:
 Then put your boot.img at **$(CURDIR)/boot.img**, then start gradle 'unpack' task:
 
     cp <original_boot_image> boot.img
-    ./gradew unpack
+    ./gradlew unpack
 
 Your get the flattened kernel and /root filesystem under **$(CURDIR)/build/unzip\_boot**:
 
@@ -42,7 +42,7 @@ Your get the flattened kernel and /root filesystem under **$(CURDIR)/build/unzip
 Then you can edit the actual file contents, like rootfs or kernel.
 Now, pack the boot.img again
 
-    ./gradew pack
+    ./gradlew pack
 
 You get the repacked boot.img at $(CURDIR):
 
@@ -52,8 +52,8 @@ You get the repacked boot.img at $(CURDIR):
 If you are working with recovery.img, the steps are similar:
 
     cp <original_recovery_image> recovery.img
-    ./gradew unpack
-    ./gradew pack
+    ./gradlew unpack
+    ./gradlew pack
 
 And you get recovery.img.signed
 
