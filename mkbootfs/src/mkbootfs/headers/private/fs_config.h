@@ -24,6 +24,7 @@
 
 #include <stdint.h>
 #include <sys/cdefs.h>
+#include <sys/types.h>
 
 #if defined(__BIONIC__)
 #include <linux/capability.h>

@@ -1,4 +1,4 @@
-#include <cstdint>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -13,7 +13,7 @@
 #include <fcntl.h>
 
 #include <private/android_filesystem_config.h>
-#include <private/fs_config.h>
+
 /* NOTES
 **
 ** - see buffer-format.txt from the linux kernel docs for
@@ -100,11 +100,7 @@ static void _eject(struct stat *s, char *out, int olen, char *data, unsigned dat
         putchar(0);
     }
 
-#ifdef CFIG_NO_FIX_STAT
-#warning CFIG_NO_FIX_STAT defined, will not fix_stat() defined in Android
-#else
     fix_stat(out, s);
-#endif
 //    fprintf(stderr, "_eject %s: mode=0%o\n", out, s->st_mode);
 
     printf("%06x%08x%08x%08x%08x%08x%08x"
@@ -176,7 +172,7 @@ static void _archive_dir(char *in, char *out, int ilen, int olen)
 
     int size = 32;
     int entries = 0;
-    char** names = (char**) malloc(size * sizeof(char*));
+    char** names = malloc(size * sizeof(char*));
     if (names == NULL) {
       fprintf(stderr, "failed to allocate dir names array (size %d)\n", size);
       exit(1);
@@ -191,7 +187,7 @@ static void _archive_dir(char *in, char *out, int ilen, int olen)
 
         if (entries >= size) {
           size *= 2;
-          names = (char**) realloc(names, size * sizeof(char*));
+          names = realloc(names, size * sizeof(char*));
           if (names == NULL) {
             fprintf(stderr, "failed to reallocate dir names array (size %d)\n",
                     size);
