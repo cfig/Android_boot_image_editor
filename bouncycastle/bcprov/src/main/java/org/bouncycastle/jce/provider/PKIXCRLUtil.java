@@ -88,24 +88,26 @@ class PKIXCRLUtil
         {
             Object obj = iter.next();
 
-            // BEGIN android-removed
-	    // if (obj instanceof Store)
-            // {
-            //     Store store = (Store)obj;
+            // BEGIN Android-removed: Unknown reason
+            /*
+            if (obj instanceof Store)
+            {
+                Store store = (Store)obj;
 
-            //     try
-            //     {
-            //         crls.addAll(store.getMatches(crlSelect));
-            //         foundValidStore = true;
-            //     }
-            //     catch (StoreException e)
-            //     {
-            //         lastException = new AnnotatedException(
-            //             "Exception searching in X.509 CRL store.", e);
-            //     }
-            // }
-            // else
-            // END android-removed
+                try
+                {
+                    crls.addAll(store.getMatches(crlSelect));
+                    foundValidStore = true;
+                }
+                catch (StoreException e)
+                {
+                    lastException = new AnnotatedException(
+                        "Exception searching in X.509 CRL store.", e);
+                }
+            }
+            else
+            */
+            // END Android-removed: Unknown reason
             {
                 CertStore store = (CertStore)obj;
 

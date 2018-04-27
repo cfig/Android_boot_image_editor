@@ -255,10 +255,10 @@ public class X509Name
      */
     public static final Hashtable SymbolLookUp = DefaultLookUp;
 
-    // BEGIN android-changed
+    // BEGIN Android-changed: Use Boolean class constants instead of Boolean constructor
     private static final Boolean TRUE = Boolean.TRUE;
     private static final Boolean FALSE = Boolean.FALSE;
-    // END android-changed
+    // END Android-changed: Use Boolean class constants instead of Boolean constructor
 
     static
     {
@@ -448,9 +448,7 @@ public class X509Name
                            throw new IllegalArgumentException("cannot encode value");
                        }
                    }
-                   // BEGIN android-changed
-                   added.addElement(Boolean.valueOf(i != 0));
-                   // END android-changed
+                   added.addElement((i != 0) ? TRUE : FALSE);  // to allow earlier JDK compatibility
             }
         }
     }

@@ -155,13 +155,8 @@ public class ASN1ObjectIdentifier
             }
         }
 
-        // BEGIN android-changed
-        /*
-         * Intern the identifier so there aren't hundreds of duplicates
-         * (in practice).
-         */
+        // Android-changed: Intern the identifier so there aren't hundreds of duplicates in practice.
         this.identifier = objId.toString().intern();
-        // END android-changed
         this.body = Arrays.clone(bytes);
     }
 
@@ -182,13 +177,8 @@ public class ASN1ObjectIdentifier
             throw new IllegalArgumentException("string " + identifier + " not an OID");
         }
 
-        // BEGIN android-changed
-        /*
-         * Intern the identifier so there aren't hundreds of duplicates
-         * (in practice).
-         */
+        // Android-changed: Intern the identifier so there aren't hundreds of duplicates in practice.
         this.identifier = identifier.intern();
-        // END android-changed
     }
 
     /**

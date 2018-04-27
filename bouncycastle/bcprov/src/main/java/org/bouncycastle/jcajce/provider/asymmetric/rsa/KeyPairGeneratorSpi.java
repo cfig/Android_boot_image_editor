@@ -43,10 +43,9 @@ public class KeyPairGeneratorSpi
         SecureRandom random)
     {
         param = new RSAKeyGenerationParameters(defaultPublicExponent,
-            // BEGIN android-changed
-            // Was: random, strength, PrimeCertaintyCalculator.getDefaultCertainty(strength));
+            // Android-changed: Replace null random with default implementation.
+            // random, strength, PrimeCertaintyCalculator.getDefaultCertainty(strength));
             (random != null) ? random : new SecureRandom(), strength, PrimeCertaintyCalculator.getDefaultCertainty(strength));
-            // END android-changed
 
         engine.init(param);
     }
@@ -64,10 +63,9 @@ public class KeyPairGeneratorSpi
 
         param = new RSAKeyGenerationParameters(
             rsaParams.getPublicExponent(),
-            // BEGIN android-changed
-            // Was: random, rsaParams.getKeysize(), PrimeCertaintyCalculator.getDefaultCertainty(2048));
+            // Android-changed: Replace null random with default implementation.
+            // random, rsaParams.getKeysize(), PrimeCertaintyCalculator.getDefaultCertainty(2048));
             (random != null) ? random : new SecureRandom(), rsaParams.getKeysize(), PrimeCertaintyCalculator.getDefaultCertainty(2048));
-            // END android-changed
 
         engine.init(param);
     }

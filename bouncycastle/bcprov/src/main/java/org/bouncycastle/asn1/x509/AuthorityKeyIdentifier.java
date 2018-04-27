@@ -14,9 +14,9 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.crypto.Digest;
-// BEGIN android-changed
+// Android-changed: Use Android digests
+// import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.digests.AndroidDigestFactory;
-// END android-changed
 
 /**
  * The AuthorityKeyIdentifier object.
@@ -108,9 +108,9 @@ public class AuthorityKeyIdentifier
     public AuthorityKeyIdentifier(
         SubjectPublicKeyInfo    spki)
     {
-        // BEGIN android-changed
+        // Android-changed: Use Android digests
+        // Digest  digest = new SHA1Digest();
         Digest  digest = AndroidDigestFactory.getSHA1();
-        // END android-changed
         byte[]  resBuf = new byte[digest.getDigestSize()];
 
         byte[] bytes = spki.getPublicKeyData().getBytes();
@@ -129,9 +129,9 @@ public class AuthorityKeyIdentifier
         GeneralNames            name,
         BigInteger              serialNumber)
     {
-        // BEGIN android-changed
+        // Android-changed: Use Android digests
+        // Digest  digest = new SHA1Digest();
         Digest  digest = AndroidDigestFactory.getSHA1();
-        // END android-changed
         byte[]  resBuf = new byte[digest.getDigestSize()];
 
         byte[] bytes = spki.getPublicKeyData().getBytes();

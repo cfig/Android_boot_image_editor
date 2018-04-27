@@ -4,15 +4,13 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-// BEGIN android-removed
+// Android-removed: Unsupported curves
 // import org.bouncycastle.asn1.anssi.ANSSINamedCurves;
 // import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
-// END android-removed
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
-// BEGIN android-removed
+// Android-removed: Unsupported curves
 // import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
-// END android-removed
 
 /**
  * A general class that reads all X9.62 style EC curve tables.
@@ -41,17 +39,19 @@ public class ECNamedCurveTable
             ecP = NISTNamedCurves.getByName(name);
         }
 
-        // BEGIN android-removed
-        // if (ecP == null)
-        // {
-        //     ecP = TeleTrusTNamedCurves.getByName(name);
-        // }
-        //
-        // if (ecP == null)
-        // {
-        //     ecP = ANSSINamedCurves.getByName(name);
-        // }
-        // END android-removed
+        // BEGIN Android-removed: Unsupported curves
+        /*
+        if (ecP == null)
+        {
+            ecP = TeleTrusTNamedCurves.getByName(name);
+        }
+
+        if (ecP == null)
+        {
+            ecP = ANSSINamedCurves.getByName(name);
+        }
+        */
+        // END Android-removed: Unsupported curves
 
         return ecP;
     }
@@ -77,17 +77,19 @@ public class ECNamedCurveTable
             oid = NISTNamedCurves.getOID(name);
         }
 
-        // BEGIN android-removed
-        // if (oid == null)
-        // {
-        //     oid = TeleTrusTNamedCurves.getOID(name);
-        // }
-        //
-        // if (oid == null)
-        // {
-        //     oid = ANSSINamedCurves.getOID(name);
-        // }
-        // END android-removed
+        // BEGIN Android-removed: Unsupported curves
+        /*
+        if (oid == null)
+        {
+            oid = TeleTrusTNamedCurves.getOID(name);
+        }
+
+        if (oid == null)
+        {
+            oid = ANSSINamedCurves.getOID(name);
+        }
+        */
+        // END Android-removed: Unsupported curves
 
         return oid;
     }
@@ -109,24 +111,28 @@ public class ECNamedCurveTable
             name = SECNamedCurves.getName(oid);
         }
 
-        // BEGIN android-removed
-        // if (name == null)
-        // {
-        //     name = TeleTrusTNamedCurves.getName(oid);
-        // }
-        // END android-removed
+        // BEGIN Android-removed: Unsupported curves
+        /*
+        if (name == null)
+        {
+            name = TeleTrusTNamedCurves.getName(oid);
+        }
+        */
+        // END Android-removed: Unsupported curves
 
         if (name == null)
         {
             name = X962NamedCurves.getName(oid);
         }
 
-        // BEGIN android-removed
-        // if (name == null)
-        // {
-        //    name = ECGOST3410NamedCurves.getName(oid);
-        // }
-        // END android-removed
+        // BEGIN Android-removed: Unsupported curves
+        /*
+        if (name == null)
+        {
+            name = ECGOST3410NamedCurves.getName(oid);
+        }
+        */
+        // END Android-removed: Unsupported curves
 
         return name;
     }
@@ -150,17 +156,19 @@ public class ECNamedCurveTable
 
         // NOTE: All the NIST curves are currently from SEC, so no point in redundant OID lookup
 
-        // BEGIN android-removed
-        // if (ecP == null)
-        // {
-        //     ecP = TeleTrusTNamedCurves.getByOID(oid);
-        // }
-        //
-        // if (ecP == null)
-        // {
-        //     ecP = ANSSINamedCurves.getByOID(oid);
-        // }
-        // END android-removed
+        // BEGIN Android-removed: Unsupported curves
+        /*
+        if (ecP == null)
+        {
+            ecP = TeleTrusTNamedCurves.getByOID(oid);
+        }
+
+        if (ecP == null)
+        {
+            ecP = ANSSINamedCurves.getByOID(oid);
+        }
+        */
+        // END Android-removed: Unsupported curves
 
         return ecP;
     }
@@ -177,10 +185,10 @@ public class ECNamedCurveTable
         addEnumeration(v, X962NamedCurves.getNames());
         addEnumeration(v, SECNamedCurves.getNames());
         addEnumeration(v, NISTNamedCurves.getNames());
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported curves
         // addEnumeration(v, TeleTrusTNamedCurves.getNames());
         // addEnumeration(v, ANSSINamedCurves.getNames());
-        // END android-removed
+        // END Android-removed: Unsupported curves
 
         return v.elements();
     }

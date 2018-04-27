@@ -30,18 +30,16 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERNull;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-// END android-removed
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.CertificationRequest;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-// END android-removed
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
@@ -85,11 +83,10 @@ public class PKCS10CertificationRequest
 
     static
     {
-        // BEGIN android-removed
-        // Dropping MD2
+        // Android-removed: Unsupported algorithms
         // algorithms.put("MD2WITHRSAENCRYPTION", new ASN1ObjectIdentifier("1.2.840.113549.1.1.2"));
         // algorithms.put("MD2WITHRSA", new ASN1ObjectIdentifier("1.2.840.113549.1.1.2"));
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
         algorithms.put("MD5WITHRSAENCRYPTION", new ASN1ObjectIdentifier("1.2.840.113549.1.1.4"));
         algorithms.put("MD5WITHRSA", new ASN1ObjectIdentifier("1.2.840.113549.1.1.4"));
         algorithms.put("RSAWITHMD5", new ASN1ObjectIdentifier("1.2.840.113549.1.1.4"));
@@ -109,14 +106,14 @@ public class PKCS10CertificationRequest
         algorithms.put("SHA384WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("SHA512WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("RSAWITHSHA1", new ASN1ObjectIdentifier("1.2.840.113549.1.1.5"));
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported algorithms
         // algorithms.put("RIPEMD128WITHRSAENCRYPTION", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
         // algorithms.put("RIPEMD128WITHRSA", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
         // algorithms.put("RIPEMD160WITHRSAENCRYPTION", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
         // algorithms.put("RIPEMD160WITHRSA", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
         // algorithms.put("RIPEMD256WITHRSAENCRYPTION", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
         // algorithms.put("RIPEMD256WITHRSA", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
         algorithms.put("SHA1WITHDSA", new ASN1ObjectIdentifier("1.2.840.10040.4.3"));
         algorithms.put("DSAWITHSHA1", new ASN1ObjectIdentifier("1.2.840.10040.4.3"));
         algorithms.put("SHA224WITHDSA", NISTObjectIdentifiers.dsa_with_sha224);
@@ -129,13 +126,13 @@ public class PKCS10CertificationRequest
         algorithms.put("SHA384WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA384);
         algorithms.put("SHA512WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA512);
         algorithms.put("ECDSAWITHSHA1", X9ObjectIdentifiers.ecdsa_with_SHA1);
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported algorithms
         // algorithms.put("GOST3411WITHGOST3410", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
         // algorithms.put("GOST3410WITHGOST3411", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
         // algorithms.put("GOST3411WITHECGOST3410", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
         // algorithms.put("GOST3411WITHECGOST3410-2001", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
         // algorithms.put("GOST3411WITHGOST3410-2001", CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
 
         //
         // reverse mappings
@@ -145,15 +142,15 @@ public class PKCS10CertificationRequest
         oids.put(PKCSObjectIdentifiers.sha256WithRSAEncryption, "SHA256WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha384WithRSAEncryption, "SHA384WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha512WithRSAEncryption, "SHA512WITHRSA");
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported algorithms
         // oids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94, "GOST3411WITHGOST3410");
         // oids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001, "GOST3411WITHECGOST3410");
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
         
         oids.put(new ASN1ObjectIdentifier("1.2.840.113549.1.1.4"), "MD5WITHRSA");
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported algorithms
         // oids.put(new ASN1ObjectIdentifier("1.2.840.113549.1.1.2"), "MD2WITHRSA");
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
         oids.put(new ASN1ObjectIdentifier("1.2.840.10040.4.3"), "SHA1WITHDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA1, "SHA1WITHECDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA224, "SHA224WITHECDSA");
@@ -187,10 +184,10 @@ public class PKCS10CertificationRequest
         //
         // RFC 4491
         //
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported algorithms
         // noParams.add(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94);
         // noParams.add(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001);
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
         //
         // explicit params
         //
@@ -633,24 +630,26 @@ public class PKCS10CertificationRequest
         {
             return "SHA512";
         }
-        // BEGIN android-removed
-        // else if (TeleTrusTObjectIdentifiers.ripemd128.equals(digestAlgOID))
-        // {
-        //     return "RIPEMD128";
-        // }
-        // else if (TeleTrusTObjectIdentifiers.ripemd160.equals(digestAlgOID))
-        // {
-        //     return "RIPEMD160";
-        // }
-        // else if (TeleTrusTObjectIdentifiers.ripemd256.equals(digestAlgOID))
-        // {
-        //     return "RIPEMD256";
-        // }
-        // else if (CryptoProObjectIdentifiers.gostR3411.equals(digestAlgOID))
-        // {
-        //     return "GOST3411";
-        // }
-        // END android-removed
+        // BEGIN Android-removed: Unsupported algorithms
+        /*
+        else if (TeleTrusTObjectIdentifiers.ripemd128.equals(digestAlgOID))
+        {
+            return "RIPEMD128";
+        }
+        else if (TeleTrusTObjectIdentifiers.ripemd160.equals(digestAlgOID))
+        {
+            return "RIPEMD160";
+        }
+        else if (TeleTrusTObjectIdentifiers.ripemd256.equals(digestAlgOID))
+        {
+            return "RIPEMD256";
+        }
+        else if (CryptoProObjectIdentifiers.gostR3411.equals(digestAlgOID))
+        {
+            return "GOST3411";
+        }
+        */
+        // END Android-removed: Unsupported algorithms
         else
         {
             return digestAlgOID.getId();            

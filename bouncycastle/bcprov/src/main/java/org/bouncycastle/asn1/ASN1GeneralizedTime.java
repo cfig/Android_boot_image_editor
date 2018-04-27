@@ -3,6 +3,7 @@ package org.bouncycastle.asn1;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+// Android-added: Localization support
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -110,10 +111,9 @@ public class ASN1GeneralizedTime
     public ASN1GeneralizedTime(
         Date time)
     {
-        // BEGIN android-changed
-        // Was: SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
+        // Android-changed: Use localized version
+        // SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
         SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'", Locale.US);
-        // END android-changed
 
         dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
 
@@ -131,11 +131,11 @@ public class ASN1GeneralizedTime
         Date time,
         Locale locale)
     {
-        // BEGIN android-changed
-        // Was: SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'", locale);
+        // BEGIN Android-changed: Use localized version
+        // SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'", locale);
         SimpleDateFormat dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'", Locale.US);
         dateF.setCalendar(Calendar.getInstance(Locale.US));
-        // END android-changed
+        // END Android-changed: Use localized version
 
         dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
 
@@ -260,17 +260,15 @@ public class ASN1GeneralizedTime
         {
             if (hasFractionalSeconds())
             {
-                // BEGIN android-changed
-                // Was: dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
+                // Android-changed: Use localized version
+                // dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
                 dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'", Locale.US);
-                // END android-changed
             }
             else
             {
-                // BEGIN android-changed
-                // Was: dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
+                // Android-changed: Use localized version
+                // dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
                 dateF = new SimpleDateFormat("yyyyMMddHHmmss'Z'", Locale.US);
-                // END android-changed
             }
 
             dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
@@ -280,17 +278,15 @@ public class ASN1GeneralizedTime
             d = this.getTime();
             if (hasFractionalSeconds())
             {
-                // BEGIN android-changed
-                // Was: dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSz");
+                // Android-changed: Use localized version
+                // dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSz");
                 dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSSz", Locale.US);
-                // END android-changed
             }
             else
             {
-                // BEGIN android-changed
-                // Was: dateF = new SimpleDateFormat("yyyyMMddHHmmssz");
+                // Android-changed: Use localized version
+                // dateF = new SimpleDateFormat("yyyyMMddHHmmssz");
                 dateF = new SimpleDateFormat("yyyyMMddHHmmssz", Locale.US);
-                // END android-changed
             }
 
             dateF.setTimeZone(new SimpleTimeZone(0, "Z"));
@@ -299,17 +295,15 @@ public class ASN1GeneralizedTime
         {
             if (hasFractionalSeconds())
             {
-                // BEGIN android-changed
+                // Android-changed: Use localized version
                 // dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSS");
                 dateF = new SimpleDateFormat("yyyyMMddHHmmss.SSS", Locale.US);
-                // END android-changed
             }
             else
             {
-                // BEGIN android-changed
-                // Was: dateF = new SimpleDateFormat("yyyyMMddHHmmss");
+                // Android-changed: Use localized version
+                // dateF = new SimpleDateFormat("yyyyMMddHHmmss");
                 dateF = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
-                // END android-changed
             }
 
             dateF.setTimeZone(new SimpleTimeZone(0, TimeZone.getDefault().getID()));

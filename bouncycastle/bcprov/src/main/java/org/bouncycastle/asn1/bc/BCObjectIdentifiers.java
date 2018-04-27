@@ -72,23 +72,25 @@ public interface BCObjectIdentifiers
      */
     public static final ASN1ObjectIdentifier bc_sig        = bc.branch("2");
 
-    // BEGIN android-removed
-    // /**
-    //  * Sphincs-256
-    //  */
-    // public static final ASN1ObjectIdentifier sphincs256                      = bc_sig.branch("1");
-    // public static final ASN1ObjectIdentifier sphincs256_with_BLAKE512        = sphincs256.branch("1");
-    // public static final ASN1ObjectIdentifier sphincs256_with_SHA512          = sphincs256.branch("2");
-    // public static final ASN1ObjectIdentifier sphincs256_with_SHA3_512        = sphincs256.branch("3");
+    // BEGIN Android-removed: Unsupported algorithms
+    /*
+    /**
+     * Sphincs-256
+     *
+    public static final ASN1ObjectIdentifier sphincs256                      = bc_sig.branch("1");
+    public static final ASN1ObjectIdentifier sphincs256_with_BLAKE512        = sphincs256.branch("1");
+    public static final ASN1ObjectIdentifier sphincs256_with_SHA512          = sphincs256.branch("2");
+    public static final ASN1ObjectIdentifier sphincs256_with_SHA3_512        = sphincs256.branch("3");
 
-    // /**
-    //  * key_exchange(3) algorithms
-    //  */
-    // public static final ASN1ObjectIdentifier bc_exch = bc.branch("3");
+    /**
+     * key_exchange(3) algorithms
+     *
+    public static final ASN1ObjectIdentifier bc_exch = bc.branch("3");
 
-    // /**
-    //  * NewHope
-    //  */
-    // public static final ASN1ObjectIdentifier newHope = bc_exch.branch("1");
-    // END android-removed
+    /**
+     * NewHope
+     *
+    public static final ASN1ObjectIdentifier newHope = bc_exch.branch("1");
+    */
+    // END Android-removed: Unsupported algorithms
 }

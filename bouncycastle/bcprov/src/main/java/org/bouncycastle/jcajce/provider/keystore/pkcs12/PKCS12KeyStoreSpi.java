@@ -64,10 +64,9 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 // import org.bouncycastle.asn1.cryptopro.GOST28147Parameters;
-// END android-removed
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.AuthenticatedSafe;
@@ -90,17 +89,17 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.crypto.Digest;
-// BEGIN android-changed
-// Was: import org.bouncycastle.crypto.digests.SHA1Digest
+// Android-changed: Use Android digests
+// import org.bouncycastle.crypto.util.DigestFactory;
 import org.bouncycastle.crypto.digests.AndroidDigestFactory;
-// END android-changed
 import org.bouncycastle.jcajce.PKCS12Key;
 import org.bouncycastle.jcajce.PKCS12StoreParameter;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.jcajce.spec.GOST28147ParameterSpec;
-// END android-removed
 import org.bouncycastle.jcajce.spec.PBKDF2KeySpec;
-import org.bouncycastle.jcajce.util.BCJcaJceHelper;
+// Android-changed: Use default provider for JCA algorithms instead of BC
+// Was: import org.bouncycastle.jcajce.util.BCJcaJceHelper;
+import org.bouncycastle.jcajce.util.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.util.JcaJceHelper;
 import org.bouncycastle.jce.interfaces.BCKeyStore;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
@@ -115,7 +114,9 @@ public class PKCS12KeyStoreSpi
     extends KeyStoreSpi
     implements PKCSObjectIdentifiers, X509ObjectIdentifiers, BCKeyStore
 {
-    private final JcaJceHelper helper = new BCJcaJceHelper();
+    // Android-changed: Use default provider for JCA algorithms instead of BC
+    // Was: private final JcaJceHelper helper = new BCJcaJceHelper();
+    private final JcaJceHelper helper = new DefaultJcaJceHelper();
 
     private static final int SALT_SIZE = 20;
     private static final int MIN_ITERATIONS = 1024;
@@ -233,6 +234,8 @@ public class PKCS12KeyStoreSpi
 
     private static byte[] getDigest(SubjectPublicKeyInfo spki)
     {
+        // Android-changed: Use Android digests
+        // Digest digest = DigestFactory.createSHA1();
         Digest digest = AndroidDigestFactory.getSHA1();
         byte[]  resBuf = new byte[digest.getDigestSize()];
 
@@ -758,15 +761,17 @@ public class PKCS12KeyStoreSpi
         {
             cipher.init(mode, key, new IvParameterSpec(ASN1OctetString.getInstance(encParams).getOctets()));
         }
-        // BEGIN android-removed
-        // else
-        // {
-        //     // TODO: at the moment it's just GOST, but...
-        //     GOST28147Parameters gParams = GOST28147Parameters.getInstance(encParams);
-        //
-        //     cipher.init(mode, key, new GOST28147ParameterSpec(gParams.getEncryptionParamSet(), gParams.getIV()));
-        // }
-        // END android-removed
+        // BEGIN Android-removed: Unsupported algorithms
+        /*
+        else
+        {
+            // TODO: at the moment it's just GOST, but...
+            GOST28147Parameters gParams = GOST28147Parameters.getInstance(encParams);
+
+            cipher.init(mode, key, new GOST28147ParameterSpec(gParams.getEncryptionParamSet(), gParams.getIV()));
+        }
+        */
+        // END Android-removed: Unsupported algorithms
         return cipher;
     }
 
@@ -1718,33 +1723,36 @@ public class PKCS12KeyStoreSpi
             super(new BouncyCastleProvider(), pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
         }
     }
-    // BEGIN android-removed
-    // public static class BCPKCS12KeyStore3DES
-    //     extends PKCS12KeyStoreSpi
-    // {
-    //     public BCPKCS12KeyStore3DES()
-    //     {
-    //         super(new BouncyCastleProvider(), pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
-    //     }
-    // }
-    // 
-    // public static class DefPKCS12KeyStore
-    //     extends PKCS12KeyStoreSpi
-    // {
-    //     public DefPKCS12KeyStore()
-    //     {
-    //         super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
-    //     }
-    // }
-    // 
-    // public static class DefPKCS12KeyStore3DES
-    //     extends PKCS12KeyStoreSpi
-    // {
-    //     public DefPKCS12KeyStore3DES()
-    //     {
-    //         super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
-    //     }
-    // }
+
+    // BEGIN Android-removed: Unsupported algorithms
+    /*
+    public static class BCPKCS12KeyStore3DES
+        extends PKCS12KeyStoreSpi
+    {
+        public BCPKCS12KeyStore3DES()
+        {
+            super(new BouncyCastleProvider(), pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
+        }
+    }
+
+    public static class DefPKCS12KeyStore
+        extends PKCS12KeyStoreSpi
+    {
+        public DefPKCS12KeyStore()
+        {
+            super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
+        }
+    }
+
+    public static class DefPKCS12KeyStore3DES
+        extends PKCS12KeyStoreSpi
+    {
+        public DefPKCS12KeyStore3DES()
+        {
+            super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
+        }
+    }
+    */
     // END android-removed
 
     private static class IgnoresCaseHashtable
@@ -1818,9 +1826,8 @@ public class PKCS12KeyStoreSpi
             keySizes.put(NTTObjectIdentifiers.id_camellia192_cbc, Integers.valueOf(192));
             keySizes.put(NTTObjectIdentifiers.id_camellia256_cbc, Integers.valueOf(256));
 
-            // BEGIN android-removed
+            // Android-removed: Unsupported algorithms
             // keySizes.put(CryptoProObjectIdentifiers.gostR28147_gcfb, Integers.valueOf(256));
-            // END android-removed
 
             KEY_SIZES = Collections.unmodifiableMap(keySizes);
         }

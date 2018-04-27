@@ -8,17 +8,15 @@ import java.util.Enumeration;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.asn1.anssi.ANSSINamedCurves;
 // import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 // import org.bouncycastle.asn1.gm.GMNamedCurves;
-// END android-removed
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
-// END android-removed
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.ECNamedCurveTable;
 import org.bouncycastle.asn1.x9.X962NamedCurves;
@@ -338,24 +336,26 @@ public class ECUtil
             {
                 oid = NISTNamedCurves.getOID(name);
             }
-            // BEGIN android-removed
-            // if (oid == null)
-            // {
-            //     oid = TeleTrusTNamedCurves.getOID(name);
-            // }
-            // if (oid == null)
-            // {
-            //     oid = ECGOST3410NamedCurves.getOID(name);
-            // }
-            // if (oid == null)
-            // {
-            //     oid = ANSSINamedCurves.getOID(name);
-            // }
-            // if (oid == null)
-            // {
-            //     oid = GMNamedCurves.getOID(name);
-            // }
-            // END android-removed
+            // BEGIN Android-removed: Unsupported algorithms
+            /*
+            if (oid == null)
+            {
+                oid = TeleTrusTNamedCurves.getOID(name);
+            }
+            if (oid == null)
+            {
+                oid = ECGOST3410NamedCurves.getOID(name);
+            }
+            if (oid == null)
+            {
+                oid = ANSSINamedCurves.getOID(name);
+            }
+            if (oid == null)
+            {
+                oid = GMNamedCurves.getOID(name);
+            }
+            */
+            // END Android-removed: Unsupported algorithms
         }
 
         return oid;
@@ -398,16 +398,18 @@ public class ECUtil
             {
                 params = NISTNamedCurves.getByOID(oid);
             }
-            // BEGIN android-removed
-            // if (params == null)
-            // {
-            //     params = TeleTrusTNamedCurves.getByOID(oid);
-            // }
-            // if (params == null)
-            // {
-            //     params = GMNamedCurves.getByOID(oid);
-            // }
-            // END android-removed
+            // BEGIN Android-removed: Unsupported algorithms
+            /*
+            if (params == null)
+            {
+                params = TeleTrusTNamedCurves.getByOID(oid);
+            }
+            if (params == null)
+            {
+                params = GMNamedCurves.getByOID(oid);
+            }
+            */
+            // END Android-removed: Unsupported algorithms
         }
 
         return params;
@@ -429,16 +431,18 @@ public class ECUtil
             {
                 params = NISTNamedCurves.getByName(curveName);
             }
-            // BEGIN android-removed
-            // if (params == null)
-            // {
-            //     params = TeleTrusTNamedCurves.getByName(curveName);
-            // }
-            // if (params == null)
-            // {
-            //     params = GMNamedCurves.getByName(curveName);
-            // }
-            // END android-removed
+            // BEGIN Android-removed: Unsupported algorithms
+            /*
+            if (params == null)
+            {
+                params = TeleTrusTNamedCurves.getByName(curveName);
+            }
+            if (params == null)
+            {
+                params = GMNamedCurves.getByName(curveName);
+            }
+            */
+            // END Android-removed: Unsupported algorithms
         }
 
         return params;
@@ -456,16 +460,18 @@ public class ECUtil
             {
                 name = NISTNamedCurves.getName(oid);
             }
-            // BEGIN android-removed
-            // if (name == null)
-            // {
-            //     name = TeleTrusTNamedCurves.getName(oid);
-            // }
-            // if (name == null)
-            // {
-            //     name = ECGOST3410NamedCurves.getName(oid);
-            // }
-            // END android-removed
+            // BEGIN Android-removed: Unsupported algorithms
+            /*
+            if (name == null)
+            {
+                name = TeleTrusTNamedCurves.getName(oid);
+            }
+            if (name == null)
+            {
+                name = ECGOST3410NamedCurves.getName(oid);
+            }
+            */
+            // END Android-removed: Unsupported algorithms
         }
 
         return name;

@@ -16,6 +16,9 @@
 
 package org.bouncycastle.crypto.digests;
 
+import java.security.Security;
+import java.util.Locale;
+
 import org.bouncycastle.crypto.Digest;
 
 /**
@@ -23,65 +26,84 @@ import org.bouncycastle.crypto.Digest;
  * for libcore but fallback to BouncyCastle ones on the RI.
  */
 public final class AndroidDigestFactory {
-    private static final String OpenSSLFactoryClassName
-            = AndroidDigestFactory.class.getName() + "OpenSSL";
-    private static final String BouncyCastleFactoryClassName
-            = AndroidDigestFactory.class.getName() + "BouncyCastle";
+    private static final AndroidDigestFactoryInterface CONSCRYPT;
+    private static final AndroidDigestFactoryInterface BC;
 
-    private static final AndroidDigestFactoryInterface FACTORY;
     static {
-        Class factoryImplementationClass;
-        try {
-            factoryImplementationClass = Class.forName(OpenSSLFactoryClassName);
-            // Double check for NativeCrypto in case we are running on RI for testing
-            Class.forName("com.android.org.conscrypt.NativeCrypto");
-        } catch (ClassNotFoundException e1) {
-            try {
-                factoryImplementationClass = Class.forName(BouncyCastleFactoryClassName);
-            } catch (ClassNotFoundException e2) {
-                AssertionError e = new AssertionError("Failed to load "
-                                         + "AndroidDigestFactoryInterface "
-                                         + "implementation. Looked for "
-                                         + OpenSSLFactoryClassName + " and "
-                                         + BouncyCastleFactoryClassName);
-                e.initCause(e1);
-                throw e;
+        BC = new AndroidDigestFactoryBouncyCastle();
+        if (Security.getProvider("AndroidOpenSSL") != null) {
+            CONSCRYPT = new AndroidDigestFactoryOpenSSL();
+        } else {
+            if (System.getProperty("java.vendor", "").toLowerCase(Locale.US).contains("android")) {
+                throw new AssertionError("Provider AndroidOpenSSL must exist");
             }
-        }
-        if (!AndroidDigestFactoryInterface.class.isAssignableFrom(factoryImplementationClass)) {
-            throw new AssertionError(factoryImplementationClass
-                                     + "does not implement AndroidDigestFactoryInterface");
-        }
-        try {
-            FACTORY = (AndroidDigestFactoryInterface) factoryImplementationClass.newInstance();
-        } catch (InstantiationException e) {
-            throw new AssertionError(e);
-        } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            CONSCRYPT = null;
         }
     }
 
     public static Digest getMD5() {
-        return FACTORY.getMD5();
+        if (CONSCRYPT != null) {
+            try {
+                return CONSCRYPT.getMD5();
+            } catch (Exception ignored) {
+            }
+        }
+
+        return BC.getMD5();
     }
 
     public static Digest getSHA1() {
-        return FACTORY.getSHA1();
+        if (CONSCRYPT != null) {
+            try {
+                return CONSCRYPT.getSHA1();
+            } catch (Exception ignored) {
+            }
+        }
+
+        return BC.getSHA1();
     }
 
     public static Digest getSHA224() {
-        return FACTORY.getSHA224();
+        if (CONSCRYPT != null) {
+            try {
+                return CONSCRYPT.getSHA224();
+            } catch (Exception ignored) {
+            }
+        }
+
+        return BC.getSHA224();
     }
 
     public static Digest getSHA256() {
-        return FACTORY.getSHA256();
+        if (CONSCRYPT != null) {
+            try {
+                return CONSCRYPT.getSHA256();
+            } catch (Exception ignored) {
+            }
+        }
+
+        return BC.getSHA256();
     }
 
     public static Digest getSHA384() {
-        return FACTORY.getSHA384();
+        if (CONSCRYPT != null) {
+            try {
+                return CONSCRYPT.getSHA384();
+            } catch (Exception ignored) {
+            }
+        }
+
+        return BC.getSHA384();
     }
 
     public static Digest getSHA512() {
-        return FACTORY.getSHA512();
+        if (CONSCRYPT != null) {
+            try {
+                return CONSCRYPT.getSHA512();
+            } catch (Exception ignored) {
+            }
+        }
+
+        return BC.getSHA512();
     }
 }

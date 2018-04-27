@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.asn1.bsi.BSIObjectIdentifiers;
 // import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-// END android-removed
 import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -36,16 +35,16 @@ public class DefaultCMSSignatureAlgorithmNameGenerator
         addEntries(NISTObjectIdentifiers.dsa_with_sha384, "SHA384", "DSA");
         addEntries(NISTObjectIdentifiers.dsa_with_sha512, "SHA512", "DSA");
         addEntries(OIWObjectIdentifiers.dsaWithSHA1, "SHA1", "DSA");
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported algorithms
         // addEntries(OIWObjectIdentifiers.md4WithRSA, "MD4", "RSA");
         // addEntries(OIWObjectIdentifiers.md4WithRSAEncryption, "MD4", "RSA");
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
         addEntries(OIWObjectIdentifiers.md5WithRSA, "MD5", "RSA");
         addEntries(OIWObjectIdentifiers.sha1WithRSA, "SHA1", "RSA");
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported algorithms
         // addEntries(PKCSObjectIdentifiers.md2WithRSAEncryption, "MD2", "RSA");
         // addEntries(PKCSObjectIdentifiers.md4WithRSAEncryption, "MD4", "RSA");
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
         addEntries(PKCSObjectIdentifiers.md5WithRSAEncryption, "MD5", "RSA");
         addEntries(PKCSObjectIdentifiers.sha1WithRSAEncryption, "SHA1", "RSA");
         addEntries(PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224", "RSA");
@@ -72,21 +71,21 @@ public class DefaultCMSSignatureAlgorithmNameGenerator
         addEntries(EACObjectIdentifiers.id_TA_RSA_v1_5_SHA_256, "SHA256", "RSA");
         addEntries(EACObjectIdentifiers.id_TA_RSA_PSS_SHA_1, "SHA1", "RSAandMGF1");
         addEntries(EACObjectIdentifiers.id_TA_RSA_PSS_SHA_256, "SHA256", "RSAandMGF1");
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported algorithms
         // addEntries(BSIObjectIdentifiers.ecdsa_plain_SHA1, "SHA1", "PLAIN-ECDSA");
         // addEntries(BSIObjectIdentifiers.ecdsa_plain_SHA224, "SHA224", "PLAIN-ECDSA");
         // addEntries(BSIObjectIdentifiers.ecdsa_plain_SHA256, "SHA256", "PLAIN-ECDSA");
         // addEntries(BSIObjectIdentifiers.ecdsa_plain_SHA384, "SHA384", "PLAIN-ECDSA");
         // addEntries(BSIObjectIdentifiers.ecdsa_plain_SHA512, "SHA512", "PLAIN-ECDSA");
         // addEntries(BSIObjectIdentifiers.ecdsa_plain_RIPEMD160, "RIPEMD160", "PLAIN-ECDSA");
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
 
         encryptionAlgs.put(X9ObjectIdentifiers.id_dsa, "DSA");
         encryptionAlgs.put(PKCSObjectIdentifiers.rsaEncryption, "RSA");
         encryptionAlgs.put(TeleTrusTObjectIdentifiers.teleTrusTRSAsignatureAlgorithm, "RSA");
         encryptionAlgs.put(X509ObjectIdentifiers.id_ea_rsa, "RSA");
         encryptionAlgs.put(PKCSObjectIdentifiers.id_RSASSA_PSS, "RSAandMGF1");
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported algorithms
         // encryptionAlgs.put(CryptoProObjectIdentifiers.gostR3410_94, "GOST3410");
         // encryptionAlgs.put(CryptoProObjectIdentifiers.gostR3410_2001, "ECGOST3410");
         // encryptionAlgs.put(new ASN1ObjectIdentifier("1.3.6.1.4.1.5849.1.6.2"), "ECGOST3410");
@@ -96,20 +95,20 @@ public class DefaultCMSSignatureAlgorithmNameGenerator
         //
         // digestAlgs.put(PKCSObjectIdentifiers.md2, "MD2");
         // digestAlgs.put(PKCSObjectIdentifiers.md4, "MD4");
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
         digestAlgs.put(PKCSObjectIdentifiers.md5, "MD5");
         digestAlgs.put(OIWObjectIdentifiers.idSHA1, "SHA1");
         digestAlgs.put(NISTObjectIdentifiers.id_sha224, "SHA224");
         digestAlgs.put(NISTObjectIdentifiers.id_sha256, "SHA256");
         digestAlgs.put(NISTObjectIdentifiers.id_sha384, "SHA384");
         digestAlgs.put(NISTObjectIdentifiers.id_sha512, "SHA512");
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported algorithms
         // digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd128, "RIPEMD128");
         // digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd160, "RIPEMD160");
         // digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd256, "RIPEMD256");
         // digestAlgs.put(CryptoProObjectIdentifiers.gostR3411,  "GOST3411");
         // digestAlgs.put(new ASN1ObjectIdentifier("1.3.6.1.4.1.5849.1.2.1"),  "GOST3411");
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
     }
 
     /**

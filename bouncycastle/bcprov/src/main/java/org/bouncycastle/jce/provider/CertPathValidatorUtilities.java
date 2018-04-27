@@ -75,9 +75,7 @@ import org.bouncycastle.util.Selector;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.StoreException;
 import org.bouncycastle.x509.X509AttributeCertificate;
-// BEGIN android-removed
-// import org.bouncycastle.x509.extension.X509ExtensionUtil;
-// END android-removed
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 class CertPathValidatorUtilities
 {
@@ -657,22 +655,24 @@ class CertPathValidatorUtilities
         {
             Object obj = iter.next();
 
-            // BEGIN android-removed
-            // if (obj instanceof X509Store)
-            // {
-            //     X509Store certStore = (X509Store)obj;
-            //     try
-            //     {
-            //         certs.addAll(certStore.getMatches(certSelect));
-            //     }
-            //     catch (StoreException e)
-            //     {
-            //         throw new AnnotatedException(
-            //                 "Problem while picking certificates from X.509 store.", e);
-            //     }
-            // }
-            // else
-            // END android-removed
+            // BEGIN Android-removed: Unknown reason
+            /*
+            if (obj instanceof Store)
+            {
+                Store certStore = (Store)obj;
+                try
+                {
+                    certs.addAll(certStore.getMatches(certSelect));
+                }
+                catch (StoreException e)
+                {
+                    throw new AnnotatedException(
+                            "Problem while picking certificates from X.509 store.", e);
+                }
+            }
+            else
+            */
+            // END Android-removed: Unknown reason
             {
                 CertStore certStore = (CertStore)obj;
 
@@ -894,7 +894,9 @@ class CertPathValidatorUtilities
             {
                 return;
             }
+
             X500Principal certificateIssuer = crl_entry.getCertificateIssuer();
+
             X500Name certIssuer;
             if (certificateIssuer == null)
             {

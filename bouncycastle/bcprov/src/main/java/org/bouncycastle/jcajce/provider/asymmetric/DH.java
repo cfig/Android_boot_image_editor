@@ -36,10 +36,10 @@ public class DH
             provider.addAttributes("KeyAgreement.DH", generalDhAttributes);
             provider.addAlgorithm("KeyAgreement.DH", PREFIX + "KeyAgreementSpi");
             provider.addAlgorithm("Alg.Alias.KeyAgreement.DIFFIEHELLMAN", "DH");
-            // BEGIN android-removed
+            // BEGIN Android-removed: Unsupported algorithms
             // provider.addAlgorithm("KeyAgreement", PKCSObjectIdentifiers.id_alg_ESDH, PREFIX + "KeyAgreementSpi$DHwithRFC2631KDF");
             // provider.addAlgorithm("KeyAgreement", PKCSObjectIdentifiers.id_alg_SSDH, PREFIX + "KeyAgreementSpi$DHwithRFC2631KDF");
-            // END android-removed
+            // END Android-removed: Unsupported algorithms
 
             provider.addAlgorithm("KeyFactory.DH", PREFIX + "KeyFactorySpi");
             provider.addAlgorithm("Alg.Alias.KeyFactory.DIFFIEHELLMAN", "DH");
@@ -51,22 +51,19 @@ public class DH
 
             provider.addAlgorithm("AlgorithmParameterGenerator.DH", PREFIX + "AlgorithmParameterGeneratorSpi");
 
-            // BEGIN android-removed
-            // provider.addAlgorithm("Cipher.IES", PREFIX + "IESCipher$IES");
-            // provider.addAlgorithm("Cipher.IESwithAES-CBC", PREFIX + "IESCipher$IESwithAES");
-            // provider.addAlgorithm("Cipher.IESWITHAES-CBC", PREFIX + "IESCipher$IESwithAES");
-            // provider.addAlgorithm("Cipher.IESWITHDESEDE-CBC", PREFIX + "IESCipher$IESwithDESede");
-            //
-            // provider.addAlgorithm("Cipher.DHIES", PREFIX + "IESCipher$IES");
-            // provider.addAlgorithm("Cipher.DHIESwithAES-CBC", PREFIX + "IESCipher$IESwithAES");
-            // provider.addAlgorithm("Cipher.DHIESWITHAES-CBC", PREFIX + "IESCipher$IESwithAES");
-            // provider.addAlgorithm("Cipher.DHIESWITHDESEDE-CBC", PREFIX + "IESCipher$IESwithDESede");
-            //
-            // provider.addAlgorithm("Cipher.OLDDHIES", PREFIX + "IESCipher$OldIES");
-            // provider.addAlgorithm("Cipher.OLDDHIESwithAES", PREFIX + "IESCipher$OldIESwithAES");
-            // provider.addAlgorithm("Cipher.OLDDHIESWITHAES", PREFIX + "IESCipher$OldIESwithAES");
-            // provider.addAlgorithm("Cipher.OLDDHIESWITHDESEDE", PREFIX + "IESCipher$OldIESwithDESede");
-            // END android-removed
+            // BEGIN Android-removed: Unsupported algorithms
+            /*
+            provider.addAlgorithm("Cipher.IES", PREFIX + "IESCipher$IES");
+            provider.addAlgorithm("Cipher.IESwithAES-CBC", PREFIX + "IESCipher$IESwithAESCBC");
+            provider.addAlgorithm("Cipher.IESWITHAES-CBC", PREFIX + "IESCipher$IESwithAESCBC");
+            provider.addAlgorithm("Cipher.IESWITHDESEDE-CBC", PREFIX + "IESCipher$IESwithDESedeCBC");
+
+            provider.addAlgorithm("Cipher.DHIES", PREFIX + "IESCipher$IES");
+            provider.addAlgorithm("Cipher.DHIESwithAES-CBC", PREFIX + "IESCipher$IESwithAESCBC");
+            provider.addAlgorithm("Cipher.DHIESWITHAES-CBC", PREFIX + "IESCipher$IESwithAESCBC");
+            provider.addAlgorithm("Cipher.DHIESWITHDESEDE-CBC", PREFIX + "IESCipher$IESwithDESedeCBC");
+            */
+            // END Android-removed: Unsupported algorithms
 
             registerOid(provider, PKCSObjectIdentifiers.dhKeyAgreement, "DH", new KeyFactorySpi());
             registerOid(provider, X9ObjectIdentifiers.dhpublicnumber, "DH", new KeyFactorySpi());

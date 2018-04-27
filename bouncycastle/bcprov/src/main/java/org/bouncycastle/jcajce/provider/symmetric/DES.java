@@ -19,16 +19,14 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.engines.DESEngine;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
-// END android-removed
 import org.bouncycastle.crypto.generators.DESKeyGenerator;
 import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
 // import org.bouncycastle.crypto.macs.CMac;
 // import org.bouncycastle.crypto.macs.ISO9797Alg3Mac;
-// END android-removed
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
 import org.bouncycastle.crypto.params.DESParameters;
@@ -69,19 +67,21 @@ public final class DES
         }
     }
 
-    // BEGIN android-removed
-    // /**
-    //  * DES   CFB8
-    //  */
-    // public static class DESCFB8
-    //     extends BaseMac
-    // {
-    //     public DESCFB8()
-    //     {
-    //         super(new CFBBlockCipherMac(new DESEngine()));
-    //     }
-    // }
-    // END android-removed
+    // BEGIN Android-removed: Unsupported algorithms
+    /*
+    /**
+     * DES   CFB8
+     *
+    public static class DESCFB8
+        extends BaseMac
+    {
+        public DESCFB8()
+        {
+            super(new CFBBlockCipherMac(new DESEngine()));
+        }
+    }
+    */
+    // END Android-removed: Unsupported algorithms
 
     /**
      * DES64
@@ -116,49 +116,49 @@ public final class DES
         }
     }
 
-    // BEGIN android-removed
-    // static public class CMAC
-    //     extends BaseMac
-    // {
-    //     public CMAC()
-    //     {
-    //         super(new CMac(new DESEngine()));
-    //     }
-    // }
-    //
-    // /**
-    //  * DES9797Alg3with7816-4Padding
-    //  */
-    // public static class DES9797Alg3with7816d4
-    //     extends BaseMac
-    // {
-    //     public DES9797Alg3with7816d4()
-    //     {
-    //         super(new ISO9797Alg3Mac(new DESEngine(), new ISO7816d4Padding()));
-    //     }
-    // }
-    //
-    // /**
-    //  * DES9797Alg3
-    //  */
-    // public static class DES9797Alg3
-    //     extends BaseMac
-    // {
-    //     public DES9797Alg3()
-    //     {
-    //         super(new ISO9797Alg3Mac(new DESEngine()));
-    //     }
-    // }
-    //
-    // public static class RFC3211
-    //     extends BaseWrapCipher
-    // {
-    //     public RFC3211()
-    //     {
-    //         super(new RFC3211WrapEngine(new DESEngine()), 8);
-    //     }
-    // }
-    // END android-removed
+    // BEGIN Android-removed: Unsupported algorithms
+    /*
+    static public class CMAC
+        extends BaseMac
+    {
+        public CMAC()
+        {
+            super(new CMac(new DESEngine()));
+        }
+    }
+
+    /**
+     * DES9797Alg3with7816-4Padding
+     *
+    public static class DES9797Alg3with7816d4
+        extends BaseMac
+    {
+        public DES9797Alg3with7816d4()
+        {
+            super(new ISO9797Alg3Mac(new DESEngine(), new ISO7816d4Padding()));
+        }
+    }
+
+    /**
+     * DES9797Alg3
+     *
+    public static class DES9797Alg3
+        extends BaseMac
+    {
+        public DES9797Alg3()
+        {
+            super(new ISO9797Alg3Mac(new DESEngine()));
+        }
+    }
+
+    public static class RFC3211
+        extends BaseWrapCipher
+    {
+        public RFC3211()
+        {
+            super(new RFC3211WrapEngine(new DESEngine()), 8);
+        }
+    }
 
     public static class AlgParamGen
         extends BaseAlgorithmParameterGenerator
@@ -197,6 +197,8 @@ public final class DES
             return params;
         }
     }
+    */
+    // END Android-removed: Unsupported algorithms
 
   /**
      * DES - the default for this is to generate a key in
@@ -358,19 +360,21 @@ public final class DES
         }
     }
 
-    // BEGIN android-removed
-    // /**
-    //  * PBEWithMD2AndDES
-    //  */
-    // static public class PBEWithMD2KeyFactory
-    //     extends DESPBEKeyFactory
-    // {
-    //     public PBEWithMD2KeyFactory()
-    //     {
-    //         super("PBEwithMD2andDES", PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, true, PKCS5S1, MD2, 64, 64);
-    //     }
-    // }
-    // END android-removed
+    // BEGIN Android-removed: Unsupported algorithms
+    /*
+    /**
+     * PBEWithMD2AndDES
+     *
+    static public class PBEWithMD2KeyFactory
+        extends DESPBEKeyFactory
+    {
+        public PBEWithMD2KeyFactory()
+        {
+            super("PBEwithMD2andDES", PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, true, PKCS5S1, MD2, 64, 64);
+        }
+    }
+    */
+    // END Android-removed: Unsupported algorithms
 
     /**
      * PBEWithMD5AndDES
@@ -396,19 +400,21 @@ public final class DES
         }
     }
 
-    // BEGIN android-removed
-    // /**
-    //  * PBEWithMD2AndDES
-    //  */
-    // static public class PBEWithMD2
-    //     extends BaseBlockCipher
-    // {
-    //     public PBEWithMD2()
-    //     {
-    //         super(new CBCBlockCipher(new DESEngine()), PKCS5S1, MD2, 64, 8);
-    //     }
-    // }
-    // END android-removed
+    // BEGIN Android-removed: Unsupported algorithms
+    /*
+    /**
+     * PBEWithMD2AndDES
+     *
+    static public class PBEWithMD2
+        extends BaseBlockCipher
+    {
+        public PBEWithMD2()
+        {
+            super(new CBCBlockCipher(new DESEngine()), PKCS5S1, MD2, 64, 8);
+        }
+    }
+    */
+    // END Android-removed: Unsupported algorithms
 
     /**
      * PBEWithMD5AndDES
@@ -448,81 +454,80 @@ public final class DES
         {
 
             provider.addAlgorithm("Cipher.DES", PREFIX + "$ECB");
-            // BEGIN android-removed
-            // provider.addAlgorithm("Cipher", OIWObjectIdentifiers.desCBC, PREFIX + "$CBC");
-            //
-            // addAlias(provider, OIWObjectIdentifiers.desCBC, "DES");
-            //
-            // provider.addAlgorithm("Cipher.DESRFC3211WRAP", PREFIX + "$RFC3211");
-            // END android-removed
+            // BEGIN Android-removed: Unsupported algorithms
+            /*
+            provider.addAlgorithm("Cipher", OIWObjectIdentifiers.desCBC, PREFIX + "$CBC");
+
+            addAlias(provider, OIWObjectIdentifiers.desCBC, "DES");
+
+            provider.addAlgorithm("Cipher.DESRFC3211WRAP", PREFIX + "$RFC3211");
+            */
+            // END Android-removed: Unsupported algorithms
 
             provider.addAlgorithm("KeyGenerator.DES", PREFIX + "$KeyGenerator");
 
             provider.addAlgorithm("SecretKeyFactory.DES", PREFIX + "$KeyFactory");
 
-            // BEGIN android-removed
-            // provider.addAlgorithm("Mac.DESCMAC", PREFIX + "$CMAC");
-            // provider.addAlgorithm("Mac.DESMAC", PREFIX + "$CBCMAC");
-            // provider.addAlgorithm("Alg.Alias.Mac.DES", "DESMAC");
-            //
-            // provider.addAlgorithm("Mac.DESMAC/CFB8", PREFIX + "$DESCFB8");
-            // provider.addAlgorithm("Alg.Alias.Mac.DES/CFB8", "DESMAC/CFB8");
-            //
-            // provider.addAlgorithm("Mac.DESMAC64", PREFIX + "$DES64");
-            // provider.addAlgorithm("Alg.Alias.Mac.DES64", "DESMAC64");
-            //
-            // provider.addAlgorithm("Mac.DESMAC64WITHISO7816-4PADDING", PREFIX + "$DES64with7816d4");
-            // provider.addAlgorithm("Alg.Alias.Mac.DES64WITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
-            // provider.addAlgorithm("Alg.Alias.Mac.DESISO9797ALG1MACWITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
-            // provider.addAlgorithm("Alg.Alias.Mac.DESISO9797ALG1WITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
-            //
-            // provider.addAlgorithm("Mac.DESWITHISO9797", PREFIX + "$DES9797Alg3");
-            // provider.addAlgorithm("Alg.Alias.Mac.DESISO9797MAC", "DESWITHISO9797");
-            //
-            // provider.addAlgorithm("Mac.ISO9797ALG3MAC", PREFIX + "$DES9797Alg3");
-            // provider.addAlgorithm("Alg.Alias.Mac.ISO9797ALG3", "ISO9797ALG3MAC");
-            // provider.addAlgorithm("Mac.ISO9797ALG3WITHISO7816-4PADDING", PREFIX + "$DES9797Alg3with7816d4");
-            // provider.addAlgorithm("Alg.Alias.Mac.ISO9797ALG3MACWITHISO7816-4PADDING", "ISO9797ALG3WITHISO7816-4PADDING");
-            // END android-removed
+            // BEGIN Android-removed: Unsupported algorithms
+            /*
+            provider.addAlgorithm("Mac.DESCMAC", PREFIX + "$CMAC");
+            provider.addAlgorithm("Mac.DESMAC", PREFIX + "$CBCMAC");
+            provider.addAlgorithm("Alg.Alias.Mac.DES", "DESMAC");
+
+            provider.addAlgorithm("Mac.DESMAC/CFB8", PREFIX + "$DESCFB8");
+            provider.addAlgorithm("Alg.Alias.Mac.DES/CFB8", "DESMAC/CFB8");
+
+            provider.addAlgorithm("Mac.DESMAC64", PREFIX + "$DES64");
+            provider.addAlgorithm("Alg.Alias.Mac.DES64", "DESMAC64");
+
+            provider.addAlgorithm("Mac.DESMAC64WITHISO7816-4PADDING", PREFIX + "$DES64with7816d4");
+            provider.addAlgorithm("Alg.Alias.Mac.DES64WITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
+            provider.addAlgorithm("Alg.Alias.Mac.DESISO9797ALG1MACWITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
+            provider.addAlgorithm("Alg.Alias.Mac.DESISO9797ALG1WITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
+
+            provider.addAlgorithm("Mac.DESWITHISO9797", PREFIX + "$DES9797Alg3");
+            provider.addAlgorithm("Alg.Alias.Mac.DESISO9797MAC", "DESWITHISO9797");
+
+            provider.addAlgorithm("Mac.ISO9797ALG3MAC", PREFIX + "$DES9797Alg3");
+            provider.addAlgorithm("Alg.Alias.Mac.ISO9797ALG3", "ISO9797ALG3MAC");
+            provider.addAlgorithm("Mac.ISO9797ALG3WITHISO7816-4PADDING", PREFIX + "$DES9797Alg3with7816d4");
+            provider.addAlgorithm("Alg.Alias.Mac.ISO9797ALG3MACWITHISO7816-4PADDING", "ISO9797ALG3WITHISO7816-4PADDING");
+            */
+            // END Android-removed: Unsupported algorithms
 
             provider.addAlgorithm("AlgorithmParameters.DES", PACKAGE + ".util.IvAlgorithmParameters");
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters", OIWObjectIdentifiers.desCBC, "DES");
 
-            // BEGIN android-removed
+            // BEGIN Android-removed: Unsupported algorithms
             // provider.addAlgorithm("AlgorithmParameterGenerator.DES",  PREFIX + "$AlgParamGen");
             // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + OIWObjectIdentifiers.desCBC, "DES");
             //
             // provider.addAlgorithm("Cipher.PBEWITHMD2ANDDES", PREFIX + "$PBEWithMD2");
-            // END android-removed
+            // END Android-removed: Unsupported algorithms
             provider.addAlgorithm("Cipher.PBEWITHMD5ANDDES", PREFIX + "$PBEWithMD5");
             provider.addAlgorithm("Cipher.PBEWITHSHA1ANDDES", PREFIX + "$PBEWithSHA1");
             
-            // BEGIN android-removed
+            // Android-removed: Unsupported algorithms
             // provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, "PBEWITHMD2ANDDES");
-            // END android-removed
             provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.pbeWithMD5AndDES_CBC, "PBEWITHMD5ANDDES");
             provider.addAlgorithm("Alg.Alias.Cipher", PKCSObjectIdentifiers.pbeWithSHA1AndDES_CBC, "PBEWITHSHA1ANDDES");
 
-            // BEGIN android-removed
+            // Android-removed: Unsupported algorithms
             // provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHMD2ANDDES-CBC", "PBEWITHMD2ANDDES");
-            // BEGIN android-removed
             provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHMD5ANDDES-CBC", "PBEWITHMD5ANDDES");
             provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHSHA1ANDDES-CBC", "PBEWITHSHA1ANDDES");
 
-            // BEGIN android-removed
-            // provider.addAlgorithm("Alg.Alias.Cipher.PBEWITHMD2ANDDES-CBC", "PBEWITHMD2ANDDES");
-            // END android-removed
+            // Android-removed: Unsupported algorithms
+            // provider.addAlgorithm("SecretKeyFactory.PBEWITHMD2ANDDES", PREFIX + "$PBEWithMD2KeyFactory");
             provider.addAlgorithm("SecretKeyFactory.PBEWITHMD5ANDDES", PREFIX + "$PBEWithMD5KeyFactory");
             provider.addAlgorithm("SecretKeyFactory.PBEWITHSHA1ANDDES", PREFIX + "$PBEWithSHA1KeyFactory");
 
-            // BEGIN android-removed
+            // Android-removed: Unsupported algorithms
             // provider.addAlgorithm("Alg.Alias.SecretKeyFactory.PBEWITHMD2ANDDES-CBC", "PBEWITHMD2ANDDES");
-            // END android-removed
             provider.addAlgorithm("Alg.Alias.SecretKeyFactory.PBEWITHMD5ANDDES-CBC", "PBEWITHMD5ANDDES");
             provider.addAlgorithm("Alg.Alias.SecretKeyFactory.PBEWITHSHA1ANDDES-CBC", "PBEWITHSHA1ANDDES");
-            // BEGIN android-removed
+            // Android-removed: Unsupported algorithms
             // provider.addAlgorithm("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, "PBEWITHMD2ANDDES");
-            // END android-removed
             provider.addAlgorithm("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD5AndDES_CBC, "PBEWITHMD5ANDDES");
             provider.addAlgorithm("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithSHA1AndDES_CBC, "PBEWITHSHA1ANDDES");
         }

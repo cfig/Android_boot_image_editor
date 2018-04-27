@@ -16,10 +16,9 @@ import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.crypto.DerivationFunction;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithm
 // import org.bouncycastle.crypto.agreement.kdf.DHKEKGenerator;
 // import org.bouncycastle.crypto.util.DigestFactory;
-// END android-removed
 import org.bouncycastle.jcajce.provider.asymmetric.util.BaseAgreementSpi;
 import org.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
 
@@ -234,14 +233,16 @@ public class KeyAgreementSpi
         return bigIntToBytes(result);
     }
 
-    // BEGIN android-removed
-    // public static class DHwithRFC2631KDF
-    //    extends KeyAgreementSpi
-    // {
-    //    public DHwithRFC2631KDF()
-    //     {
-    //         super("DHwithRFC2631KDF", new DHKEKGenerator(DigestFactory.createSHA1()));
-    //     }
-    // }
-    // END android-removed
+    // BEGIN Android-removed: Unsupported algorithm
+    /*
+    public static class DHwithRFC2631KDF
+        extends KeyAgreementSpi
+    {
+        public DHwithRFC2631KDF()
+        {
+            super("DHwithRFC2631KDF", new DHKEKGenerator(DigestFactory.createSHA1()));
+        }
+    }
+    */
+    // END Android-removed: Unsupported algorithm
 }

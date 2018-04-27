@@ -26,9 +26,8 @@ public class DSAUtil
     public static final ASN1ObjectIdentifier[] dsaOids =
     {
         X9ObjectIdentifiers.id_dsa,
-        // BEGIN android-added
+        // Android-added: Add missing OID for DSA-with-SHA1
         X9ObjectIdentifiers.id_dsa_with_sha1,
-        // END android-added
         OIWObjectIdentifiers.dsaWithSHA1
     };
 

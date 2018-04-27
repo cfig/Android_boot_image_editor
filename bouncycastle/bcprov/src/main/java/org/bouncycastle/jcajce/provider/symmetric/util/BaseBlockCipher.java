@@ -20,14 +20,13 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.interfaces.PBEKey;
 import javax.crypto.spec.IvParameterSpec;
-// BEGIN android-added
+// BEGIN Android-added: Various key-handling modifications
 import javax.crypto.spec.PBEKeySpec;
-// END android-added
+// END Android-added: Various key-handling modifications
 import javax.crypto.spec.PBEParameterSpec;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import javax.crypto.spec.RC2ParameterSpec;
 // import javax.crypto.spec.RC5ParameterSpec;
-// END android-removed
 
 import org.bouncycastle.asn1.cms.GCMParameters;
 import org.bouncycastle.crypto.BlockCipher;
@@ -41,20 +40,17 @@ import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.modes.CCMBlockCipher;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.CTSBlockCipher;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.crypto.modes.EAXBlockCipher;
 // import org.bouncycastle.crypto.modes.GCFBBlockCipher;
-// END android-removed
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.crypto.modes.GOFBBlockCipher;
 // import org.bouncycastle.crypto.modes.OCBBlockCipher;
-// END android-removed
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.crypto.modes.OpenPGPCFBBlockCipher;
 // import org.bouncycastle.crypto.modes.PGPCFBBlockCipher;
-// END android-removed
 import org.bouncycastle.crypto.modes.SICBlockCipher;
 import org.bouncycastle.crypto.paddings.BlockCipherPadding;
 import org.bouncycastle.crypto.paddings.ISO10126d2Padding;
@@ -67,22 +63,19 @@ import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.crypto.params.ParametersWithSBox;
-// END android-removed
 import org.bouncycastle.crypto.params.RC2Parameters;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.crypto.params.RC5Parameters;
 // import org.bouncycastle.jcajce.PBKDF1Key;
 // import org.bouncycastle.jcajce.PBKDF1KeyWithParameters;
-// END android-removed
 import org.bouncycastle.jcajce.PKCS12Key;
 import org.bouncycastle.jcajce.PKCS12KeyWithParameters;
 import org.bouncycastle.jcajce.spec.AEADParameterSpec;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.jcajce.spec.GOST28147ParameterSpec;
 // import org.bouncycastle.jcajce.spec.RepeatedSecretKeySpec;
-// END android-removed
 import org.bouncycastle.util.Strings;
 
 public class BaseBlockCipher
@@ -96,16 +89,14 @@ public class BaseBlockCipher
     //
     private Class[]                 availableSpecs =
                                     {
-                                        // BEGIN android-removed
+                                        // Android-removed: Unsupported algorithms
                                         // RC2ParameterSpec.class,
                                         // RC5ParameterSpec.class,
-                                        // END android-removed
                                         gcmSpecClass,
                                         IvParameterSpec.class,
                                         PBEParameterSpec.class,
-                                        // BEGIN android-removed
+                                        // Android-removed: Unsupported algorithms
                                         // GOST28147ParameterSpec.class
-                                        // END android-removed
                                     };
 
     private BlockCipher             baseEngine;
@@ -281,7 +272,12 @@ public class BaseBlockCipher
                 try
                 {
                     engineParams = createParametersInstance(name);
-                    engineParams.init(ivParam.getIV());
+                    // Android-changed: Use IvParameterSpec instead of passing raw bytes.
+                    // The documentation of init() says that a byte array should be decoded
+                    // as ASN.1, and Conscrypt's implementations follow that requirement,
+                    // even though Bouncy Castle's implementations don't.  Wrapping it in
+                    // an IvParameterSpec makes the interpretation unambiguous to both.
+                    engineParams.init(new IvParameterSpec(ivParam.getIV()));
                 }
                 catch (Exception e)
                 {
@@ -342,33 +338,35 @@ public class BaseBlockCipher
                         new CFBBlockCipher(baseEngine, 8 * baseEngine.getBlockSize()));
             }
         }
-        // BEGIN android-removed
-        // else if (modeName.startsWith("PGP"))
-        // {
-        //     boolean inlineIV = modeName.equalsIgnoreCase("PGPCFBwithIV");
-        //
-        //     ivLength = baseEngine.getBlockSize();
-        //     cipher = new BufferedGenericBlockCipher(
-        //         new PGPCFBBlockCipher(baseEngine, inlineIV));
-        // }
-        // else if (modeName.equalsIgnoreCase("OpenPGPCFB"))
-        // {
-        //     ivLength = 0;
-        //     cipher = new BufferedGenericBlockCipher(
-        //         new OpenPGPCFBBlockCipher(baseEngine));
-        // }
-        // else if (modeName.startsWith("SIC"))
-        // {
-        //     ivLength = baseEngine.getBlockSize();
-        //     if (ivLength < 16)
-        //     {
-        //         throw new IllegalArgumentException("Warning: SIC-Mode can become a twotime-pad if the blocksize of the cipher is too small. Use a cipher with a block size of at least 128 bits (e.g. AES)");
-        //     }
-        //     fixedIv = false;
-        //     cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
-        //                 new SICBlockCipher(baseEngine)));
-        // }
-        // END android-removed
+        // BEGIN Android-removed: Unsupported modes
+        /*
+        else if (modeName.startsWith("PGP"))
+        {
+            boolean inlineIV = modeName.equalsIgnoreCase("PGPCFBwithIV");
+
+            ivLength = baseEngine.getBlockSize();
+            cipher = new BufferedGenericBlockCipher(
+                new PGPCFBBlockCipher(baseEngine, inlineIV));
+        }
+        else if (modeName.equalsIgnoreCase("OpenPGPCFB"))
+        {
+            ivLength = 0;
+            cipher = new BufferedGenericBlockCipher(
+                new OpenPGPCFBBlockCipher(baseEngine));
+        }
+        else if (modeName.startsWith("SIC"))
+        {
+            ivLength = baseEngine.getBlockSize();
+            if (ivLength < 16)
+            {
+                throw new IllegalArgumentException("Warning: SIC-Mode can become a twotime-pad if the blocksize of the cipher is too small. Use a cipher with a block size of at least 128 bits (e.g. AES)");
+            }
+            fixedIv = false;
+            cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
+                        new SICBlockCipher(baseEngine)));
+        }
+        */
+        // END Android-removed: Unsupported modes
         else if (modeName.startsWith("CTR"))
         {
             ivLength = baseEngine.getBlockSize();
@@ -376,20 +374,22 @@ public class BaseBlockCipher
             cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
                         new SICBlockCipher(baseEngine)));
         }
-        // BEGIN android-removed
-        // else if (modeName.startsWith("GOFB"))
-        // {
-        //     ivLength = baseEngine.getBlockSize();
-        //     cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
-        //                 new GOFBBlockCipher(baseEngine)));
-        // }
-        // else if (modeName.startsWith("GCFB"))
-        // {
-        //     ivLength = baseEngine.getBlockSize();
-        //     cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
-        //                 new GCFBBlockCipher(baseEngine)));
-        // }
-        // END android-removed
+        // BEGIN Android-removed: Unsupported modes
+        /*
+        else if (modeName.startsWith("GOFB"))
+        {
+            ivLength = baseEngine.getBlockSize();
+            cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
+                        new GOFBBlockCipher(baseEngine)));
+        }
+        else if (modeName.startsWith("GCFB"))
+        {
+            ivLength = baseEngine.getBlockSize();
+            cipher = new BufferedGenericBlockCipher(new BufferedBlockCipher(
+                        new GCFBBlockCipher(baseEngine)));
+        }
+        */
+        // END Android-removed: Unsupported modes
         else if (modeName.startsWith("CTS"))
         {
             ivLength = baseEngine.getBlockSize();
@@ -400,28 +400,30 @@ public class BaseBlockCipher
             ivLength = 13; // CCM nonce 7..13 bytes
             cipher = new AEADGenericBlockCipher(new CCMBlockCipher(baseEngine));
         }
-        // BEGIN android-removed
-        // else if (modeName.startsWith("OCB"))
-        // {
-        //     if (engineProvider != null)
-        //     {
-        //         /*
-        //          * RFC 7253 4.2. Nonce is a string of no more than 120 bits
-        //          */
-        //         ivLength = 15;
-        //         cipher = new AEADGenericBlockCipher(new OCBBlockCipher(baseEngine, engineProvider.get()));
-        //     }
-        //     else
-        //     {
-        //         throw new NoSuchAlgorithmException("can't support mode " + mode);
-        //     }
-        // }
-        // else if (modeName.startsWith("EAX"))
-        // {
-        //     ivLength = baseEngine.getBlockSize();
-        //     cipher = new AEADGenericBlockCipher(new EAXBlockCipher(baseEngine));
-        // }
-        // END android-removed
+        // BEGIN Android-removed: Unsupported modes
+        /*
+        else if (modeName.startsWith("OCB"))
+        {
+            if (engineProvider != null)
+            {
+                /*
+                 * RFC 7253 4.2. Nonce is a string of no more than 120 bits
+                 *
+                ivLength = 15;
+                cipher = new AEADGenericBlockCipher(new OCBBlockCipher(baseEngine, engineProvider.get()));
+            }
+            else
+            {
+                throw new NoSuchAlgorithmException("can't support mode " + mode);
+            }
+        }
+        else if (modeName.startsWith("EAX"))
+        {
+            ivLength = baseEngine.getBlockSize();
+            cipher = new AEADGenericBlockCipher(new EAXBlockCipher(baseEngine));
+        }
+        */
+        // END Android-removed: Unsupported modes
         else if (modeName.startsWith("GCM"))
         {
             ivLength = baseEngine.getBlockSize();
@@ -489,13 +491,11 @@ public class BaseBlockCipher
         }
     }
 
-    // BEGIN android-added
-    // TODO(27995180): This might need to be removed if we drop support for BCPBE keys without IV
-    // in PKCS12
+    // BEGIN Android-added: Handling missing IVs
     private boolean isBCPBEKeyWithoutIV(Key key) {
         return (key instanceof BCPBEKey) && !(((BCPBEKey)key).getParam() instanceof ParametersWithIV);
     }
-    // END android-added
+    // END Android-added: Handling missing IVs
 
     protected void engineInit(
         int                     opmode,
@@ -530,12 +530,11 @@ public class BaseBlockCipher
         //
         // a note on iv's - if ivLength is zero the IV gets ignored (we don't use it).
         //
-        // BEGIN android-changed
-        // Was: if (scheme == PKCS12 || key instanceof PKCS12Key)
+        // BEGIN Android-changed: Don't use PKCS12 with missing IV.
         // If the key is a BCPBE one without an IV, ignore the fact that the scheme is PKCS12.
-        // TODO(27995180): consider whether we want to keep support for these keys and PKCS12.
+        // if (scheme == PKCS12 || key instanceof PKCS12Key)
         if ((scheme == PKCS12 || key instanceof PKCS12Key) && !isBCPBEKeyWithoutIV(key))
-        // END android-changed
+        // END Android-changed: Don't use PKCS12 with missing IV.
         {
             SecretKey k;
             try
@@ -578,13 +577,11 @@ public class BaseBlockCipher
                 }
                 else if (pbeKeyParam == null)
                 {
-                    // BEGIN android-changed
-                    // Was: param = PBE.Util.makePBEParameters(k.getEncoded(), PKCS12, digest, keySizeInBits, ivLength * 8, pbeSpec, cipher.getAlgorithmName());
-                    // TODO(27995180): consider rejecting such keys for PKCS12
-                    // See above for the android-changed with a TODO for the same bug that makes
-                    // this code unreachable.
-                    // END android-changed
-                    throw new IllegalStateException("Unreachable code");
+                    // BEGIN Android-changed: Unreachable code
+                    // See above for the Android change that makes this code unreachable.
+                    // param = PBE.Util.makePBEParameters(k.getEncoded(), PKCS12, digest, keySizeInBits, ivLength * 8, pbeSpec, cipher.getAlgorithmName());
+                    throw new AssertionError("Unreachable code");
+                    // END Android-changed: Unreachable code
                 }
                 else
                 {
@@ -600,27 +597,29 @@ public class BaseBlockCipher
                 ivParam = (ParametersWithIV)param;
             }
         }
-        // BEGIN android-removed
-        // else if (key instanceof PBKDF1Key)
-        // {
-        //     PBKDF1Key k = (PBKDF1Key)key;
+        // BEGIN Android-removed: Unsupported algorithms
+        /*
+        else if (key instanceof PBKDF1Key)
+        {
+            PBKDF1Key k = (PBKDF1Key)key;
 
-        //     if (params instanceof PBEParameterSpec)
-        //     {
-        //         pbeSpec = (PBEParameterSpec)params;
-        //     }
-        //     if (k instanceof PBKDF1KeyWithParameters && pbeSpec == null)
-        //     {
-        //         pbeSpec = new PBEParameterSpec(((PBKDF1KeyWithParameters)k).getSalt(), ((PBKDF1KeyWithParameters)k).getIterationCount());
-        //     }
+            if (params instanceof PBEParameterSpec)
+            {
+                pbeSpec = (PBEParameterSpec)params;
+            }
+            if (k instanceof PBKDF1KeyWithParameters && pbeSpec == null)
+            {
+                pbeSpec = new PBEParameterSpec(((PBKDF1KeyWithParameters)k).getSalt(), ((PBKDF1KeyWithParameters)k).getIterationCount());
+            }
 
-        //     param = PBE.Util.makePBEParameters(k.getEncoded(), PKCS5S1, digest, keySizeInBits, ivLength * 8, pbeSpec, cipher.getAlgorithmName());
-        //     if (param instanceof ParametersWithIV)
-        //     {
-        //         ivParam = (ParametersWithIV)param;
-        //     }
-        // }
-        // END android-removed
+            param = PBE.Util.makePBEParameters(k.getEncoded(), PKCS5S1, digest, keySizeInBits, ivLength * 8, pbeSpec, cipher.getAlgorithmName());
+            if (param instanceof ParametersWithIV)
+            {
+                ivParam = (ParametersWithIV)param;
+            }
+        }
+        */
+        // END Android-removed: Unsupported algorithms
         else if (key instanceof BCPBEKey)
         {
             BCPBEKey k = (BCPBEKey)key;
@@ -641,7 +640,7 @@ public class BaseBlockCipher
             else if (params instanceof PBEParameterSpec)
             {
                 pbeSpec = (PBEParameterSpec)params;
-                // BEGIN android-added
+                // BEGIN Android-added: Allow PBE keys with only passwords.
                 // At this point, k.getParam() == null, so the key hasn't been generated.  If
                 // the parameters have non-default values, recreate the BCPBEKey from algorithm
                 // parameters as to generate the key.
@@ -653,7 +652,7 @@ public class BaseBlockCipher
                                     k.getKeySize()),
                             null /* CipherParameters */);
                 }
-                // END android-added
+                // END Android-added: Allow PBE keys with only passwords.
                 param = PBE.Util.makePBEParameters(k, params, cipher.getUnderlyingCipher().getAlgorithmName());
             }
             else
@@ -681,10 +680,10 @@ public class BaseBlockCipher
                 ivParam = (ParametersWithIV)param;
             }
         }
-        // BEGIN android-changed
-        // Was: else if (!(key instanceof RepeatedSecretKeySpec))
+        // BEGIN Android-changed: Unsupported algorithm
+        // else if (!(key instanceof RepeatedSecretKeySpec))
         else
-        // END android-changed
+        // END Android-changed: Unsupported algorithms
         {
             if (scheme == PKCS5S1 || scheme == PKCS5S1_UTF8 || scheme == PKCS5S2 || scheme == PKCS5S2_UTF8)
             {
@@ -692,12 +691,12 @@ public class BaseBlockCipher
             }
             param = new KeyParameter(key.getEncoded());
         }
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unreachable
         // else
         // {
         //    param = null;
         // }
-        // END android-removed
+        // END Android-removed: Unreachable
 
         if (params instanceof AEADParameterSpec)
         {
@@ -748,86 +747,88 @@ public class BaseBlockCipher
                 }
             }
         }
-        // BEGIN android-removed
-        // else if (params instanceof GOST28147ParameterSpec)
-        // {
-        //     GOST28147ParameterSpec    gost28147Param = (GOST28147ParameterSpec)params;
-        //
-        //     param = new ParametersWithSBox(
-        //                new KeyParameter(key.getEncoded()), ((GOST28147ParameterSpec)params).getSbox());
-        //
-        //     if (gost28147Param.getIV() != null && ivLength != 0)
-        //     {
-        //         if (param instanceof ParametersWithIV)
-        //         {
-        //             param = new ParametersWithIV(((ParametersWithIV)param).getParameters(), gost28147Param.getIV());
-        //         }
-        //         else
-        //         {
-        //             param = new ParametersWithIV(param, gost28147Param.getIV());
-        //         }
-        //         ivParam = (ParametersWithIV)param;
-        //     }
-        // }
-        // else if (params instanceof RC2ParameterSpec)
-        // {
-        //     RC2ParameterSpec    rc2Param = (RC2ParameterSpec)params;
-        //
-        //     param = new RC2Parameters(key.getEncoded(), ((RC2ParameterSpec)params).getEffectiveKeyBits());
-        //
-        //     if (rc2Param.getIV() != null && ivLength != 0)
-        //     {
-        //         if (param instanceof ParametersWithIV)
-        //         {
-        //             param = new ParametersWithIV(((ParametersWithIV)param).getParameters(), rc2Param.getIV());
-        //         }
-        //         else
-        //         {
-        //             param = new ParametersWithIV(param, rc2Param.getIV());
-        //         }
-        //         ivParam = (ParametersWithIV)param;
-        //     }
-        // }
-        // else if (params instanceof RC5ParameterSpec)
-        // {
-        //     RC5ParameterSpec    rc5Param = (RC5ParameterSpec)params;
-        //
-        //     param = new RC5Parameters(key.getEncoded(), ((RC5ParameterSpec)params).getRounds());
-        //     if (baseEngine.getAlgorithmName().startsWith("RC5"))
-        //     {
-        //         if (baseEngine.getAlgorithmName().equals("RC5-32"))
-        //         {
-        //             if (rc5Param.getWordSize() != 32)
-        //             {
-        //                 throw new InvalidAlgorithmParameterException("RC5 already set up for a word size of 32 not " + rc5Param.getWordSize() + ".");
-        //             }
-        //         }
-        //         else if (baseEngine.getAlgorithmName().equals("RC5-64"))
-        //         {
-        //             if (rc5Param.getWordSize() != 64)
-        //             {
-        //                 throw new InvalidAlgorithmParameterException("RC5 already set up for a word size of 64 not " + rc5Param.getWordSize() + ".");
-        //             }
-        //         }
-        //     }
-        //     else
-        //     {
-        //         throw new InvalidAlgorithmParameterException("RC5 parameters passed to a cipher that is not RC5.");
-        //     }
-        //     if ((rc5Param.getIV() != null) && (ivLength != 0))
-        //     {
-        //         if (param instanceof ParametersWithIV)
-        //         {
-        //             param = new ParametersWithIV(((ParametersWithIV)param).getParameters(), rc5Param.getIV());
-        //         }
-        //         else
-        //         {
-        //             param = new ParametersWithIV(param, rc5Param.getIV());
-        //         }
-        //         ivParam = (ParametersWithIV)param;
-        //     }
-        // }
-        // END android-removed
+        // BEGIN Android-removed: Unsupported algorithms
+        /*
+        else if (params instanceof GOST28147ParameterSpec)
+        {
+            GOST28147ParameterSpec    gost28147Param = (GOST28147ParameterSpec)params;
+
+            param = new ParametersWithSBox(
+                       new KeyParameter(key.getEncoded()), ((GOST28147ParameterSpec)params).getSbox());
+
+            if (gost28147Param.getIV() != null && ivLength != 0)
+            {
+                if (param instanceof ParametersWithIV)
+                {
+                    param = new ParametersWithIV(((ParametersWithIV)param).getParameters(), gost28147Param.getIV());
+                }
+                else
+                {
+                    param = new ParametersWithIV(param, gost28147Param.getIV());
+                }
+                ivParam = (ParametersWithIV)param;
+            }
+        }
+        else if (params instanceof RC2ParameterSpec)
+        {
+            RC2ParameterSpec    rc2Param = (RC2ParameterSpec)params;
+
+            param = new RC2Parameters(key.getEncoded(), ((RC2ParameterSpec)params).getEffectiveKeyBits());
+
+            if (rc2Param.getIV() != null && ivLength != 0)
+            {
+                if (param instanceof ParametersWithIV)
+                {
+                    param = new ParametersWithIV(((ParametersWithIV)param).getParameters(), rc2Param.getIV());
+                }
+                else
+                {
+                    param = new ParametersWithIV(param, rc2Param.getIV());
+                }
+                ivParam = (ParametersWithIV)param;
+            }
+        }
+        else if (params instanceof RC5ParameterSpec)
+        {
+            RC5ParameterSpec    rc5Param = (RC5ParameterSpec)params;
+
+            param = new RC5Parameters(key.getEncoded(), ((RC5ParameterSpec)params).getRounds());
+            if (baseEngine.getAlgorithmName().startsWith("RC5"))
+            {
+                if (baseEngine.getAlgorithmName().equals("RC5-32"))
+                {
+                    if (rc5Param.getWordSize() != 32)
+                    {
+                        throw new InvalidAlgorithmParameterException("RC5 already set up for a word size of 32 not " + rc5Param.getWordSize() + ".");
+                    }
+                }
+                else if (baseEngine.getAlgorithmName().equals("RC5-64"))
+                {
+                    if (rc5Param.getWordSize() != 64)
+                    {
+                        throw new InvalidAlgorithmParameterException("RC5 already set up for a word size of 64 not " + rc5Param.getWordSize() + ".");
+                    }
+                }
+            }
+            else
+            {
+                throw new InvalidAlgorithmParameterException("RC5 parameters passed to a cipher that is not RC5.");
+            }
+            if ((rc5Param.getIV() != null) && (ivLength != 0))
+            {
+                if (param instanceof ParametersWithIV)
+                {
+                    param = new ParametersWithIV(((ParametersWithIV)param).getParameters(), rc5Param.getIV());
+                }
+                else
+                {
+                    param = new ParametersWithIV(param, rc5Param.getIV());
+                }
+                ivParam = (ParametersWithIV)param;
+            }
+        }
+        */
+        // END Android-removed: Unsupported algorithms
         else if (gcmSpecClass != null && gcmSpecClass.isInstance(params))
         {
             if (!isAEADModeName(modeName) && !(cipher instanceof AEADGenericBlockCipher))
@@ -869,35 +870,61 @@ public class BaseBlockCipher
             {
                 ivRandom = new SecureRandom();
             }
+
             if ((opmode == Cipher.ENCRYPT_MODE) || (opmode == Cipher.WRAP_MODE))
             {
                 byte[]  iv = new byte[ivLength];
 
-                // BEGIN android-changed
-                // Was: ivRandom.nextBytes(iv);
-                // TODO(27995180): for such keys, consider whether we want to reject them or
-                // allow them if the IV is passed in the parameters
+                // BEGIN Android-changed: For PBE keys with no IV, log and use IV of 0
+                // These keys were accepted in BC 1.52 (and treated as having an IV of 0) but
+                // rejected outright in BC 1.54 (even if an IV was passed in params).  We
+                // want the eventual state to be that an IV can be passed in params, but the key
+                // is rejected otherwise.  For now, log that these will be rejected in a future
+                // release.  See b/27995180 for historical details.
+                // ivRandom.nextBytes(iv);
                 if (!isBCPBEKeyWithoutIV(key)) {
                     ivRandom.nextBytes(iv);
+                } else {
+                    // TODO(b/70275132): Change to rejecting these keys
+                    System.err.println(" ******** DEPRECATED FUNCTIONALITY ********");
+                    System.err.println(" * You have initialized a cipher with a PBE key with no IV and");
+                    System.err.println(" * have not provided an IV in the AlgorithmParameterSpec.  This");
+                    System.err.println(" * configuration is deprecated.  The cipher will be initialized");
+                    System.err.println(" * with an all-zero IV, but in a future release this call will");
+                    System.err.println(" * throw an exception.");
+                    new InvalidAlgorithmParameterException("No IV set when using PBE key")
+                            .printStackTrace(System.err);
                 }
-                // END android-changed
+                // END Android-changed: For PBE keys with no IV, log and use IV of 0
                 param = new ParametersWithIV(param, iv);
                 ivParam = (ParametersWithIV)param;
             }
             else if (cipher.getUnderlyingCipher().getAlgorithmName().indexOf("PGPCFB") < 0)
             {
-                // BEGIN android-changed
-                // Was: throw new InvalidAlgorithmParameterException("no IV set when one expected");
-                // TODO(27995180): for such keys, consider whether we want to reject them or
-                // allow them if the IV is passed in the parameters
+                // BEGIN Android-changed: For PBE keys with no IV, log and use IV of 0
+                // These keys were accepted in BC 1.52 (and treated as having an IV of 0) but
+                // rejected outright in BC 1.54 (even if an IV was passed in params).  We
+                // want the eventual state to be that an IV can be passed in params, but the key
+                // is rejected otherwise.  For now, log that these will be rejected in a future
+                // release.  See b/27995180 for historical details.
+                // throw new InvalidAlgorithmParameterException("no IV set when one expected");
                 if (!isBCPBEKeyWithoutIV(key)) {
                     throw new InvalidAlgorithmParameterException("no IV set when one expected");
                 } else {
+                    // TODO(b/70275132): Change to rejecting these keys
+                    System.err.println(" ******** DEPRECATED FUNCTIONALITY ********");
+                    System.err.println(" * You have initialized a cipher with a PBE key with no IV and");
+                    System.err.println(" * have not provided an IV in the AlgorithmParameterSpec.  This");
+                    System.err.println(" * configuration is deprecated.  The cipher will be initialized");
+                    System.err.println(" * with an all-zero IV, but in a future release this call will");
+                    System.err.println(" * throw an exception.");
+                    new InvalidAlgorithmParameterException("No IV set when using PBE key")
+                            .printStackTrace(System.err);
                     // Mimic behaviour in 1.52 by using an IV of 0's
                     param = new ParametersWithIV(param, new byte[ivLength]);
                     ivParam = (ParametersWithIV)param;
                 }
-                // END android-changed
+                // END Android-changed: For PBE keys with no IV, log and use IV of 0
             }
         }
 
@@ -951,21 +978,23 @@ public class BaseBlockCipher
                 ivParam = new ParametersWithIV(key, iv.getIV());
                 param = ivParam;
             }
-            // BEGIN android-removed
-            // else if (params instanceof GOST28147ParameterSpec)
-            // {
-            //     // need to pick up IV and SBox.
-            //     GOST28147ParameterSpec gost28147Param = (GOST28147ParameterSpec)params;
-            //
-            //     param = new ParametersWithSBox(param, gost28147Param.getSbox());
-            //
-            //     if (gost28147Param.getIV() != null && ivLength != 0)
-            //     {
-            //         ivParam = new ParametersWithIV(key, gost28147Param.getIV());
-            //         param = ivParam;
-            //     }
-            // }
-            // END android-removed
+            // BEGIN Android-removed: Unsupported algorithms
+            /*
+            else if (params instanceof GOST28147ParameterSpec)
+            {
+                // need to pick up IV and SBox.
+                GOST28147ParameterSpec gost28147Param = (GOST28147ParameterSpec)params;
+
+                param = new ParametersWithSBox(param, gost28147Param.getSbox());
+
+                if (gost28147Param.getIV() != null && ivLength != 0)
+                {
+                    ivParam = new ParametersWithIV(key, gost28147Param.getIV());
+                    param = ivParam;
+                }
+            }
+            */
+            // END Android-removed: Unsupported algorithms
         }
         else
         {
@@ -976,20 +1005,22 @@ public class BaseBlockCipher
                 ivParam = new ParametersWithIV(param, iv.getIV());
                 param = ivParam;
             }
-            // BEGIN android-removed
-            // else if (params instanceof GOST28147ParameterSpec)
-            // {
-            //     // need to pick up IV and SBox.
-            //     GOST28147ParameterSpec gost28147Param = (GOST28147ParameterSpec)params;
-            //
-            //     param = new ParametersWithSBox(param, gost28147Param.getSbox());
-            //
-            //     if (gost28147Param.getIV() != null && ivLength != 0)
-            //     {
-            //         param = new ParametersWithIV(param, gost28147Param.getIV());
-            //     }
-            // }
-            // END android-removed
+            // BEGIN Android-removed: Unsupported algorithms
+            /*
+            else if (params instanceof GOST28147ParameterSpec)
+            {
+                // need to pick up IV and SBox.
+                GOST28147ParameterSpec gost28147Param = (GOST28147ParameterSpec)params;
+
+                param = new ParametersWithSBox(param, gost28147Param.getSbox());
+
+                if (gost28147Param.getIV() != null && ivLength != 0)
+                {
+                    param = new ParametersWithIV(param, gost28147Param.getIV());
+                }
+            }
+            */
+            // END Android-removed: Unsupported algorithms
         }
         return param;
     }
@@ -1192,9 +1223,9 @@ public class BaseBlockCipher
     private boolean isAEADModeName(
         String modeName)
     {
-        // BEGIN android-changed
+        // Android-changed: Unsupported modes
+        // return "CCM".equals(modeName) || "EAX".equals(modeName) || "GCM".equals(modeName) || "OCB".equals(modeName);
         return "CCM".equals(modeName) || "GCM".equals(modeName);
-        // END android-changed
     }
 
     /*

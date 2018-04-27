@@ -1,13 +1,11 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
 import java.io.IOException;
-// BEGIN android-added
+// BEGIN Android-added: Needed for setting mode with GCM
 import java.security.NoSuchAlgorithmException;
-// END android-added
-// BEGIN android-removed
-// import java.security.AlgorithmParameters;
-// import java.security.InvalidAlgorithmParameterException;
-// END android-removed
+// END Android-added: Needed for setting mode with GCM
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
@@ -16,13 +14,12 @@ import java.util.Map;
 
 import javax.crypto.spec.IvParameterSpec;
 
-// BEGIN android-added
+// BEGIN Android-added: Needed for setting padding with GCM
 import javax.crypto.NoSuchPaddingException;
-// END android-added
+// END Android-added: Needed for setting padding with GCM
 import org.bouncycastle.asn1.bc.BCObjectIdentifiers;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.asn1.cms.CCMParameters;
-// END android-removed
 import org.bouncycastle.asn1.cms.GCMParameters;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.crypto.BlockCipher;
@@ -34,32 +31,28 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Mac;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.AESWrapEngine;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.crypto.engines.AESWrapPadEngine;
 // import org.bouncycastle.crypto.engines.RFC3211WrapEngine;
 // import org.bouncycastle.crypto.engines.RFC5649WrapEngine;
 // import org.bouncycastle.crypto.generators.Poly1305KeyGenerator;
 // import org.bouncycastle.crypto.macs.CMac;
 // import org.bouncycastle.crypto.macs.GMac;
-// END android-removed
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.crypto.modes.CCMBlockCipher;
-// END android-removed
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameterGenerator;
-// END android-removed
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameters;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 // import org.bouncycastle.jcajce.provider.symmetric.util.BaseSecretKeyFactory;
-// END android-removed
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseWrapCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BlockCipherProvider;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
@@ -130,7 +123,7 @@ public final class AES
         public GCM()
         {
             super(new GCMBlockCipher(new AESEngine()));
-            // BEGIN android-added
+            // BEGIN Android-added: Set mode and padding due to name change (see note in Mappings)
             try {
                 engineSetMode("GCM");
                 engineSetPadding("NoPadding");
@@ -138,130 +131,132 @@ public final class AES
                 // this should not be possible
                 throw new RuntimeException("Could not set mode or padding for GCM mode", e);
             }
-            // END android-added
+            // END Android-added: Set mode and padding due to name change (see note in Mappings)
         }
     }
 
-    // BEGIN android-removed
-    // static public class CCM
-    //     extends BaseBlockCipher
-    // {
-    //     public CCM()
-    //     {
-    //         super(new CCMBlockCipher(new AESEngine()), false, 16);
-    //     }
-    // }
+    // BEGIN Android-removed: Unsupported algorithms
+    /*
+    static public class CCM
+        extends BaseBlockCipher
+    {
+        public CCM()
+        {
+            super(new CCMBlockCipher(new AESEngine()), false, 16);
+        }
+    }
 
-    // public static class AESCMAC
-    //     extends BaseMac
-    // {
-    //     public AESCMAC()
-    //     {
-    //         super(new CMac(new AESEngine()));
-    //     }
-    // }
+    public static class AESCMAC
+        extends BaseMac
+    {
+        public AESCMAC()
+        {
+            super(new CMac(new AESEngine()));
+        }
+    }
 
-    // public static class AESGMAC
-    //     extends BaseMac
-    // {
-    //     public AESGMAC()
-    //     {
-    //         super(new GMac(new GCMBlockCipher(new AESEngine())));
-    //     }
-    // }
+    public static class AESGMAC
+        extends BaseMac
+    {
+        public AESGMAC()
+        {
+            super(new GMac(new GCMBlockCipher(new AESEngine())));
+        }
+    }
 
-    // public static class AESCCMMAC
-    //     extends BaseMac
-    // {
-    //     public AESCCMMAC()
-    //     {
-    //         super(new CCMMac());
-    //     }
+    public static class AESCCMMAC
+        extends BaseMac
+    {
+        public AESCCMMAC()
+        {
+            super(new CCMMac());
+        }
 
-    //     private static class CCMMac
-    //         implements Mac
-    //     {
-    //         private final CCMBlockCipher ccm = new CCMBlockCipher(new AESEngine());
+        private static class CCMMac
+            implements Mac
+        {
+            private final CCMBlockCipher ccm = new CCMBlockCipher(new AESEngine());
 
-    //         private int macLength = 8;
+            private int macLength = 8;
 
-    //         public void init(CipherParameters params)
-    //             throws IllegalArgumentException
-    //         {
-    //             ccm.init(true, params);
+            public void init(CipherParameters params)
+                throws IllegalArgumentException
+            {
+                ccm.init(true, params);
 
-    //             this.macLength = ccm.getMac().length;
-    //         }
+                this.macLength = ccm.getMac().length;
+            }
 
-    //         public String getAlgorithmName()
-    //         {
-    //             return ccm.getAlgorithmName() + "Mac";
-    //         }
+            public String getAlgorithmName()
+            {
+                return ccm.getAlgorithmName() + "Mac";
+            }
 
-    //         public int getMacSize()
-    //         {
-    //             return macLength;
-    //         }
+            public int getMacSize()
+            {
+                return macLength;
+            }
 
-    //         public void update(byte in)
-    //             throws IllegalStateException
-    //         {
-    //             ccm.processAADByte(in);
-    //         }
+            public void update(byte in)
+                throws IllegalStateException
+            {
+                ccm.processAADByte(in);
+            }
 
-    //         public void update(byte[] in, int inOff, int len)
-    //             throws DataLengthException, IllegalStateException
-    //         {
-    //             ccm.processAADBytes(in, inOff, len);
-    //         }
+            public void update(byte[] in, int inOff, int len)
+                throws DataLengthException, IllegalStateException
+            {
+                ccm.processAADBytes(in, inOff, len);
+            }
 
-    //         public int doFinal(byte[] out, int outOff)
-    //             throws DataLengthException, IllegalStateException
-    //         {
-    //             try
-    //             {
-    //                 return ccm.doFinal(out, 0);
-    //             }
-    //             catch (InvalidCipherTextException e)
-    //             {
-    //                 throw new IllegalStateException("exception on doFinal(): " + e.toString());
-    //             }
-    //         }
+            public int doFinal(byte[] out, int outOff)
+                throws DataLengthException, IllegalStateException
+            {
+                try
+                {
+                    return ccm.doFinal(out, 0);
+                }
+                catch (InvalidCipherTextException e)
+                {
+                    throw new IllegalStateException("exception on doFinal(): " + e.toString());
+                }
+            }
 
-    //         public void reset()
-    //         {
-    //             ccm.reset();
-    //         }
-    //     }
-    // }
+            public void reset()
+            {
+                ccm.reset();
+            }
+        }
+    }
 
-    // static public class KeyFactory
-    //      extends BaseSecretKeyFactory
-    // {
-    //     public KeyFactory()
-    //     {
-    //         super("AES", null);
-    //     }
-    // }
+    static public class KeyFactory
+         extends BaseSecretKeyFactory
+    {
+        public KeyFactory()
+        {
+            super("AES", null);
+        }
+    }
 
-    // public static class Poly1305
-    //     extends BaseMac
-    // {
-    //     public Poly1305()
-    //     {
-    //         super(new org.bouncycastle.crypto.macs.Poly1305(new AESEngine()));
-    //     }
-    // }
+    public static class Poly1305
+        extends BaseMac
+    {
+        public Poly1305()
+        {
+            super(new org.bouncycastle.crypto.macs.Poly1305(new AESEngine()));
+        }
+    }
 
-    // public static class Poly1305KeyGen
-    //     extends BaseKeyGenerator
-    // {
-    //     public Poly1305KeyGen()
-    //     {
-    //         super("Poly1305-AES", 256, new Poly1305KeyGenerator());
-    //     }
-    // }
-    // END android-removed
+    public static class Poly1305KeyGen
+        extends BaseKeyGenerator
+    {
+        public Poly1305KeyGen()
+        {
+            super("Poly1305-AES", 256, new Poly1305KeyGenerator());
+        }
+    }
+    */
+    // END Android-removed: Unsupported algorithms
 
     static public class Wrap
         extends BaseWrapCipher
@@ -272,34 +267,36 @@ public final class AES
         }
     }
 
-    // BEGIN android-removed
-    // public static class WrapPad
-    //         extends BaseWrapCipher
-    // {
-    //     public WrapPad()
-    //     {
-    //         super(new AESWrapPadEngine());
-    //     }
-    // }
+    // BEGIN Android-removed: Unsupported algorithms
+    /*
+    public static class WrapPad
+        extends BaseWrapCipher
+    {
+        public WrapPad()
+        {
+            super(new AESWrapPadEngine());
+        }
+    }
 
-    // public static class RFC3211Wrap
-    //     extends BaseWrapCipher
-    // {
-    //     public RFC3211Wrap()
-    //     {
-    //         super(new RFC3211WrapEngine(new AESEngine()), 16);
-    //     }
-    // }
+    public static class RFC3211Wrap
+        extends BaseWrapCipher
+    {
+        public RFC3211Wrap()
+        {
+            super(new RFC3211WrapEngine(new AESEngine()), 16);
+        }
+    }
 
-    // public static class RFC5649Wrap
-    //     extends BaseWrapCipher
-    // {
-    //     public RFC5649Wrap()
-    //     {
-    //         super(new RFC5649WrapEngine(new AESEngine()));
-    //     }
-    // }
-    // END android-removed
+    public static class RFC5649Wrap
+        extends BaseWrapCipher
+    {
+        public RFC5649Wrap()
+        {
+            super(new RFC5649WrapEngine(new AESEngine()));
+        }
+    }
+    */
+    // END Android-removed: Unsupported algorithms
 
     /**
      * PBEWithAES-CBC
@@ -378,9 +375,12 @@ public final class AES
     {
         public KeyGen()
         {
-            // BEGIN android-changed
+            // Android-changed: Use 128-bit keys by default.
+            // Bouncy Castle defaults to 192-bit keys, which is the worst choice: worse security
+            // than 256-bit keys, slower than 128-bit keys, narrower support than either.
+            // Use 128-bit keys by default since they're faster and should still be plenty secure.
+            // this(192);
             this(128);
-            // END android-changed
         }
 
         public KeyGen(int keySize)
@@ -389,34 +389,36 @@ public final class AES
         }
     }
 
-    // BEGIN android-removed
-    // public static class KeyGen128
-    //     extends KeyGen
-    // {
-    //     public KeyGen128()
-    //     {
-    //         super(128);
-    //     }
-    // }
-    //
-    // public static class KeyGen192
-    //     extends KeyGen
-    // {
-    //     public KeyGen192()
-    //     {
-    //         super(192);
-    //     }
-    // }
-    //
-    // public static class KeyGen256
-    //     extends KeyGen
-    // {
-    //     public KeyGen256()
-    //     {
-    //         super(256);
-    //     }
-    // }
-    // END android-removed
+    // BEGIN Android-removed: Unsupported algorithms
+    /*
+    public static class KeyGen128
+        extends KeyGen
+    {
+        public KeyGen128()
+        {
+            super(128);
+        }
+    }
+
+    public static class KeyGen192
+        extends KeyGen
+    {
+        public KeyGen192()
+        {
+            super(192);
+        }
+    }
+
+    public static class KeyGen256
+        extends KeyGen
+    {
+        public KeyGen256()
+        {
+            super(256);
+        }
+    }
+    */
+    // END Android-removed: Unsupported algorithms
     
     /**
      * PBEWithSHA1And128BitAES-BC
@@ -525,124 +527,126 @@ public final class AES
             super("PBEWithMD5And256BitAES-CBC-OpenSSL", null, true, OPENSSL, MD5, 256, 128);
         }
     }
+    
+    // BEGIN Android-removed: Unsupported algorithms
+    /*
+    public static class AlgParamGen
+        extends BaseAlgorithmParameterGenerator
+    {
+        protected void engineInit(
+            AlgorithmParameterSpec genParamSpec,
+            SecureRandom random)
+            throws InvalidAlgorithmParameterException
+        {
+            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for AES parameter generation.");
+        }
 
-    // BEGIN android-removed
-    // public static class AlgParamGen
-    //     extends BaseAlgorithmParameterGenerator
-    // {
-    //     protected void engineInit(
-    //         AlgorithmParameterSpec genParamSpec,
-    //         SecureRandom random)
-    //         throws InvalidAlgorithmParameterException
-    //     {
-    //         throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for AES parameter generation.");
-    //     }
+        protected AlgorithmParameters engineGenerateParameters()
+        {
+            byte[]  iv = new byte[16];
 
-    //     protected AlgorithmParameters engineGenerateParameters()
-    //     {
-    //         byte[]  iv = new byte[16];
+            if (random == null)
+            {
+                random = new SecureRandom();
+            }
 
-    //         if (random == null)
-    //         {
-    //             random = new SecureRandom();
-    //         }
+            random.nextBytes(iv);
 
-    //         random.nextBytes(iv);
+            AlgorithmParameters params;
 
-    //         AlgorithmParameters params;
+            try
+            {
+                params = createParametersInstance("AES");
+                params.init(new IvParameterSpec(iv));
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException(e.getMessage());
+            }
 
-    //         try
-    //         {
-    //             params = createParametersInstance("AES");
-    //             params.init(new IvParameterSpec(iv));
-    //         }
-    //         catch (Exception e)
-    //         {
-    //             throw new RuntimeException(e.getMessage());
-    //         }
+            return params;
+        }
+    }
 
-    //         return params;
-    //     }
-    // }
+    public static class AlgParamGenCCM
+        extends BaseAlgorithmParameterGenerator
+    {
+        protected void engineInit(
+            AlgorithmParameterSpec genParamSpec,
+            SecureRandom random)
+            throws InvalidAlgorithmParameterException
+        {
+            // TODO: add support for GCMParameterSpec as a template.
+            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for AES parameter generation.");
+        }
 
-    // public static class AlgParamGenCCM
-    //     extends BaseAlgorithmParameterGenerator
-    // {
-    //     protected void engineInit(
-    //         AlgorithmParameterSpec genParamSpec,
-    //         SecureRandom random)
-    //         throws InvalidAlgorithmParameterException
-    //     {
-    //         // TODO: add support for GCMParameterSpec as a template.
-    //         throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for AES parameter generation.");
-    //     }
+        protected AlgorithmParameters engineGenerateParameters()
+        {
+            byte[]  iv = new byte[12];
 
-    //     protected AlgorithmParameters engineGenerateParameters()
-    //     {
-    //         byte[]  iv = new byte[12];
+            if (random == null)
+            {
+                random = new SecureRandom();
+            }
 
-    //         if (random == null)
-    //         {
-    //             random = new SecureRandom();
-    //         }
+            random.nextBytes(iv);
 
-    //         random.nextBytes(iv);
+            AlgorithmParameters params;
 
-    //         AlgorithmParameters params;
+            try
+            {
+                params = createParametersInstance("CCM");
+                params.init(new CCMParameters(iv, 12).getEncoded());
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException(e.getMessage());
+            }
 
-    //         try
-    //         {
-    //             params = createParametersInstance("CCM");
-    //             params.init(new CCMParameters(iv, 12).getEncoded());
-    //         }
-    //         catch (Exception e)
-    //         {
-    //             throw new RuntimeException(e.getMessage());
-    //         }
+            return params;
+        }
+    }
 
-    //         return params;
-    //     }
-    // }
+    public static class AlgParamGenGCM
+        extends BaseAlgorithmParameterGenerator
+    {
+        protected void engineInit(
+            AlgorithmParameterSpec genParamSpec,
+            SecureRandom random)
+            throws InvalidAlgorithmParameterException
+        {
+            // TODO: add support for GCMParameterSpec as a template.
+            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for AES parameter generation.");
+        }
 
-    // public static class AlgParamGenGCM
-    //     extends BaseAlgorithmParameterGenerator
-    // {
-    //     protected void engineInit(
-    //         AlgorithmParameterSpec genParamSpec,
-    //         SecureRandom random)
-    //         throws InvalidAlgorithmParameterException
-    //     {
-    //         // TODO: add support for GCMParameterSpec as a template.
-    //         throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for AES parameter generation.");
-    //     }
+        protected AlgorithmParameters engineGenerateParameters()
+        {
+            byte[]  nonce = new byte[12];
 
-    //     protected AlgorithmParameters engineGenerateParameters()
-    //     {
-    //         byte[]  nonce = new byte[12];
+            if (random == null)
+            {
+                random = new SecureRandom();
+            }
 
-    //         if (random == null)
-    //         {
-    //             random = new SecureRandom();
-    //         }
+            random.nextBytes(nonce);
 
-    //         random.nextBytes(nonce);
+            AlgorithmParameters params;
 
-    //         AlgorithmParameters params;
+            try
+            {
+                params = createParametersInstance("GCM");
+                params.init(new GCMParameters(nonce, 16).getEncoded());
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException(e.getMessage());
+            }
 
-    //         try
-    //         {
-    //             params = createParametersInstance("GCM");
-    //             params.init(new GCMParameters(nonce, 16).getEncoded());
-    //         }
-    //         catch (Exception e)
-    //         {
-    //             throw new RuntimeException(e.getMessage());
-    //         }
-
-    //         return params;
-    //     }
-    // }
-    // END android-removed
+            return params;
+        }
+    }
+    */
+    // END Android-removed: Unsupported algorithms
 
     public static class AlgParams
         extends IvAlgorithmParameters
@@ -738,92 +742,94 @@ public final class AES
         }
     }
 
-    // BEGIN android-removed
-    // public static class AlgParamsCCM
-    //     extends BaseAlgorithmParameters
-    // {
-    //     private CCMParameters ccmParams;
+    // BEGIN Android-removed: Unsupported algorithms
+    /*
+    public static class AlgParamsCCM
+        extends BaseAlgorithmParameters
+    {
+        private CCMParameters ccmParams;
 
-    //     protected void engineInit(AlgorithmParameterSpec paramSpec)
-    //         throws InvalidParameterSpecException
-    //     {
-    //         if (GcmSpecUtil.isGcmSpec(paramSpec))
-    //         {
-    //             ccmParams = CCMParameters.getInstance(GcmSpecUtil.extractGcmParameters(paramSpec));
-    //         }
-    //         else if (paramSpec instanceof AEADParameterSpec)
-    //         {
-    //             ccmParams = new CCMParameters(((AEADParameterSpec)paramSpec).getNonce(), ((AEADParameterSpec)paramSpec).getMacSizeInBits() / 8);
-    //         }
-    //         else
-    //         {
-    //             throw new InvalidParameterSpecException("AlgorithmParameterSpec class not recognized: " + paramSpec.getClass().getName());
-    //         }
-    //     }
+        protected void engineInit(AlgorithmParameterSpec paramSpec)
+            throws InvalidParameterSpecException
+        {
+            if (GcmSpecUtil.isGcmSpec(paramSpec))
+            {
+                ccmParams = CCMParameters.getInstance(GcmSpecUtil.extractGcmParameters(paramSpec));
+            }
+            else if (paramSpec instanceof AEADParameterSpec)
+            {
+                ccmParams = new CCMParameters(((AEADParameterSpec)paramSpec).getNonce(), ((AEADParameterSpec)paramSpec).getMacSizeInBits() / 8);
+            }
+            else
+            {
+                throw new InvalidParameterSpecException("AlgorithmParameterSpec class not recognized: " + paramSpec.getClass().getName());
+            }
+        }
 
-    //     protected void engineInit(byte[] params)
-    //         throws IOException
-    //     {
-    //         ccmParams = CCMParameters.getInstance(params);
-    //     }
+        protected void engineInit(byte[] params)
+            throws IOException
+        {
+            ccmParams = CCMParameters.getInstance(params);
+        }
 
-    //     protected void engineInit(byte[] params, String format)
-    //         throws IOException
-    //     {
-    //         if (!isASN1FormatString(format))
-    //         {
-    //             throw new IOException("unknown format specified");
-    //         }
+        protected void engineInit(byte[] params, String format)
+            throws IOException
+        {
+            if (!isASN1FormatString(format))
+            {
+                throw new IOException("unknown format specified");
+            }
 
-    //         ccmParams = CCMParameters.getInstance(params);
-    //     }
+            ccmParams = CCMParameters.getInstance(params);
+        }
 
-    //     protected byte[] engineGetEncoded()
-    //         throws IOException
-    //     {
-    //         return ccmParams.getEncoded();
-    //     }
+        protected byte[] engineGetEncoded()
+            throws IOException
+        {
+            return ccmParams.getEncoded();
+        }
 
-    //     protected byte[] engineGetEncoded(String format)
-    //         throws IOException
-    //     {
-    //         if (!isASN1FormatString(format))
-    //         {
-    //             throw new IOException("unknown format specified");
-    //         }
+        protected byte[] engineGetEncoded(String format)
+            throws IOException
+        {
+            if (!isASN1FormatString(format))
+            {
+                throw new IOException("unknown format specified");
+            }
 
-    //         return ccmParams.getEncoded();
-    //     }
+            return ccmParams.getEncoded();
+        }
 
-    //     protected String engineToString()
-    //     {
-    //         return "CCM";
-    //     }
+        protected String engineToString()
+        {
+            return "CCM";
+        }
 
-    //     protected AlgorithmParameterSpec localEngineGetParameterSpec(Class paramSpec)
-    //         throws InvalidParameterSpecException
-    //     {
-    //         if (paramSpec == AlgorithmParameterSpec.class || GcmSpecUtil.isGcmSpec(paramSpec))
-    //         {
-    //             if (GcmSpecUtil.gcmSpecExists())
-    //             {
-    //                 return GcmSpecUtil.extractGcmSpec(ccmParams.toASN1Primitive());
-    //             }
-    //             return new AEADParameterSpec(ccmParams.getNonce(), ccmParams.getIcvLen() * 8);
-    //         }
-    //         if (paramSpec == AEADParameterSpec.class)
-    //         {
-    //             return new AEADParameterSpec(ccmParams.getNonce(), ccmParams.getIcvLen() * 8);
-    //         }
-    //         if (paramSpec == IvParameterSpec.class)
-    //         {
-    //             return new IvParameterSpec(ccmParams.getNonce());
-    //         }
+        protected AlgorithmParameterSpec localEngineGetParameterSpec(Class paramSpec)
+            throws InvalidParameterSpecException
+        {
+            if (paramSpec == AlgorithmParameterSpec.class || GcmSpecUtil.isGcmSpec(paramSpec))
+            {
+                if (GcmSpecUtil.gcmSpecExists())
+                {
+                    return GcmSpecUtil.extractGcmSpec(ccmParams.toASN1Primitive());
+                }
+                return new AEADParameterSpec(ccmParams.getNonce(), ccmParams.getIcvLen() * 8);
+            }
+            if (paramSpec == AEADParameterSpec.class)
+            {
+                return new AEADParameterSpec(ccmParams.getNonce(), ccmParams.getIcvLen() * 8);
+            }
+            if (paramSpec == IvParameterSpec.class)
+            {
+                return new IvParameterSpec(ccmParams.getNonce());
+            }
 
-    //         throw new InvalidParameterSpecException("AlgorithmParameterSpec not recognized: " + paramSpec.getName());
-    //     }
-    // }
-    // END android-removed
+            throw new InvalidParameterSpecException("AlgorithmParameterSpec not recognized: " + paramSpec.getName());
+        }
+    }
+    */
+    // END Android-removed: Unsupported algorithms
 
     public static class Mappings
         extends SymmetricAlgorithmProvider
@@ -857,40 +863,45 @@ public final class AES
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes128_GCM, "GCM");
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes192_GCM, "GCM");
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes256_GCM, "GCM");
-            // BEGIN android-removed
-            // provider.addAlgorithm("AlgorithmParameters.CCM", PREFIX + "$AlgParamsCCM");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes128_CCM, "CCM");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes192_CCM, "CCM");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes256_CCM, "CCM");
-            //
-            // provider.addAlgorithm("AlgorithmParameterGenerator.AES", PREFIX + "$AlgParamGen");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + wrongAES128, "AES");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + wrongAES192, "AES");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + wrongAES256, "AES");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes128_CBC, "AES");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes192_CBC, "AES");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_CBC, "AES");
-            // END android-removed
+
+            // BEGIN Android-removed: Unsupported algorithms
+            /*
+            provider.addAlgorithm("AlgorithmParameters.CCM", PREFIX + "$AlgParamsCCM");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes128_CCM, "CCM");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes192_CCM, "CCM");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes256_CCM, "CCM");
+
+            provider.addAlgorithm("AlgorithmParameterGenerator.AES", PREFIX + "$AlgParamGen");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + wrongAES128, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + wrongAES192, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + wrongAES256, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes128_CBC, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes192_CBC, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_CBC, "AES");
+            */
+            // END Android-removed: Unsupported algorithms
 
             provider.addAttributes("Cipher.AES", generalAesAttributes);
             provider.addAlgorithm("Cipher.AES", PREFIX + "$ECB");
             provider.addAlgorithm("Alg.Alias.Cipher." + wrongAES128, "AES");
             provider.addAlgorithm("Alg.Alias.Cipher." + wrongAES192, "AES");
             provider.addAlgorithm("Alg.Alias.Cipher." + wrongAES256, "AES");
-            // BEGIN android-removed
-            // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes128_ECB, PREFIX + "$ECB");
-            // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes192_ECB, PREFIX + "$ECB");
-            // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes256_ECB, PREFIX + "$ECB");
-            // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes128_CBC, PREFIX + "$CBC");
-            // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes192_CBC, PREFIX + "$CBC");
-            // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes256_CBC, PREFIX + "$CBC");
-            // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes128_OFB, PREFIX + "$OFB");
-            // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes192_OFB, PREFIX + "$OFB");
-            // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes256_OFB, PREFIX + "$OFB");
-            // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes128_CFB, PREFIX + "$CFB");
-            // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes192_CFB, PREFIX + "$CFB");
-            // provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes256_CFB, PREFIX + "$CFB");
-            // END android-removed
+            // BEGIN Android-removed: Unsupported algorithms
+            /*
+            provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes128_ECB, PREFIX + "$ECB");
+            provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes192_ECB, PREFIX + "$ECB");
+            provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes256_ECB, PREFIX + "$ECB");
+            provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes128_CBC, PREFIX + "$CBC");
+            provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes192_CBC, PREFIX + "$CBC");
+            provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes256_CBC, PREFIX + "$CBC");
+            provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes128_OFB, PREFIX + "$OFB");
+            provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes192_OFB, PREFIX + "$OFB");
+            provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes256_OFB, PREFIX + "$OFB");
+            provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes128_CFB, PREFIX + "$CFB");
+            provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes192_CFB, PREFIX + "$CFB");
+            provider.addAlgorithm("Cipher", NISTObjectIdentifiers.id_aes256_CFB, PREFIX + "$CFB");
+            */
+            // END Android-removed: Unsupported algorithms
 
             provider.addAttributes("Cipher.AESWRAP", generalAesAttributes);
             provider.addAlgorithm("Cipher.AESWRAP", PREFIX + "$Wrap");
@@ -899,81 +910,85 @@ public final class AES
             provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes256_wrap, "AESWRAP");
             provider.addAlgorithm("Alg.Alias.Cipher.AESKW", "AESWRAP");
 
-            // BEGIN android-removed
-            // provider.addAttributes("Cipher.AESWRAPPAD", generalAesAttributes);
-            // provider.addAlgorithm("Cipher.AESWRAPPAD", PREFIX + "$WrapPad");
-            // provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes128_wrap_pad, "AESWRAPPAD");
-            // provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes192_wrap_pad, "AESWRAPPAD");
-            // provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes256_wrap_pad, "AESWRAPPAD");
-            // provider.addAlgorithm("Alg.Alias.Cipher.AESKWP", "AESWRAPPAD");
-            //
-            // provider.addAlgorithm("Cipher.AESRFC3211WRAP", PREFIX + "$RFC3211Wrap");
-            // provider.addAlgorithm("Cipher.AESRFC5649WRAP", PREFIX + "$RFC5649Wrap");
-            //
-            // provider.addAlgorithm("AlgorithmParameterGenerator.CCM", PREFIX + "$AlgParamGenCCM");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes128_CCM, "CCM");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes192_CCM, "CCM");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_CCM, "CCM");
-            //
-            // provider.addAttributes("Cipher.CCM", generalAesAttributes);
-            // provider.addAlgorithm("Cipher.CCM", PREFIX + "$CCM");
-            // provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes128_CCM, "CCM");
-            // provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes192_CCM, "CCM");
-            // provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes256_CCM, "CCM");
-            //
-            // provider.addAlgorithm("AlgorithmParameterGenerator.GCM", PREFIX + "$AlgParamGenGCM");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes128_GCM, "GCM");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes192_GCM, "GCM");
-            // provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_GCM, "GCM");
-            // END android-removed
+            // BEGIN Android-removed: Unsupported algorithms
+            /*
+            provider.addAttributes("Cipher.AESWRAPPAD", generalAesAttributes);
+            provider.addAlgorithm("Cipher.AESWRAPPAD", PREFIX + "$WrapPad");
+            provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes128_wrap_pad, "AESWRAPPAD");
+            provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes192_wrap_pad, "AESWRAPPAD");
+            provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes256_wrap_pad, "AESWRAPPAD");
+            provider.addAlgorithm("Alg.Alias.Cipher.AESKWP", "AESWRAPPAD");
 
-            // BEGIN android-changed
+            provider.addAlgorithm("Cipher.AESRFC3211WRAP", PREFIX + "$RFC3211Wrap");
+            provider.addAlgorithm("Cipher.AESRFC5649WRAP", PREFIX + "$RFC5649Wrap");
+
+            provider.addAlgorithm("AlgorithmParameterGenerator.CCM", PREFIX + "$AlgParamGenCCM");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes128_CCM, "CCM");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes192_CCM, "CCM");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_CCM, "CCM");
+
+            provider.addAttributes("Cipher.CCM", generalAesAttributes);
+            provider.addAlgorithm("Cipher.CCM", PREFIX + "$CCM");
+            provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes128_CCM, "CCM");
+            provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes192_CCM, "CCM");
+            provider.addAlgorithm("Alg.Alias.Cipher", NISTObjectIdentifiers.id_aes256_CCM, "CCM");
+
+            provider.addAlgorithm("AlgorithmParameterGenerator.GCM", PREFIX + "$AlgParamGenGCM");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes128_GCM, "GCM");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes192_GCM, "GCM");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_GCM, "GCM");
+            */
+            // END Android-removed: Unsupported algorithms
+
+            // BEGIN Android-changed: Use standard name for AES/GCM/NOPADDING instead of "GCM"
             provider.addAttributes("Cipher.AES/GCM/NOPADDING", generalAesAttributes);
             provider.addAlgorithm("Cipher.AES/GCM/NOPADDING", PREFIX + "$GCM");
             provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_GCM, "AES/GCM/NOPADDING");
             provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes192_GCM, "AES/GCM/NOPADDING");
             provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_GCM, "AES/GCM/NOPADDING");
-            // END android-changed
+            // END Android-changed: Use standard name for AES/GCM/NOPADDING instead of "GCM"
 
             provider.addAlgorithm("KeyGenerator.AES", PREFIX + "$KeyGen");
-            // BEGIN android-removed
-            // provider.addAlgorithm("KeyGenerator." + wrongAES128, PREFIX + "$KeyGen128");
-            // provider.addAlgorithm("KeyGenerator." + wrongAES192, PREFIX + "$KeyGen192");
-            // provider.addAlgorithm("KeyGenerator." + wrongAES256, PREFIX + "$KeyGen256");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_ECB, PREFIX + "$KeyGen128");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_CBC, PREFIX + "$KeyGen128");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_OFB, PREFIX + "$KeyGen128");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_CFB, PREFIX + "$KeyGen128");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_ECB, PREFIX + "$KeyGen192");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_CBC, PREFIX + "$KeyGen192");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_OFB, PREFIX + "$KeyGen192");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_CFB, PREFIX + "$KeyGen192");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_ECB, PREFIX + "$KeyGen256");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_CBC, PREFIX + "$KeyGen256");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_OFB, PREFIX + "$KeyGen256");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_CFB, PREFIX + "$KeyGen256");
-            // provider.addAlgorithm("KeyGenerator.AESWRAP", PREFIX + "$KeyGen");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_wrap, PREFIX + "$KeyGen128");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_wrap, PREFIX + "$KeyGen192");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_wrap, PREFIX + "$KeyGen256");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_GCM, PREFIX + "$KeyGen128");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_GCM, PREFIX + "$KeyGen192");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_GCM, PREFIX + "$KeyGen256");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_CCM, PREFIX + "$KeyGen128");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_CCM, PREFIX + "$KeyGen192");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_CCM, PREFIX + "$KeyGen256");
-            // provider.addAlgorithm("KeyGenerator.AESWRAPPAD", PREFIX + "$KeyGen");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_wrap_pad, PREFIX + "$KeyGen128");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_wrap_pad, PREFIX + "$KeyGen192");
-            // provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_wrap_pad, PREFIX + "$KeyGen256");
+            // BEGIN Android-removed: Unsupported algorithms
+            /*
+            provider.addAlgorithm("KeyGenerator." + wrongAES128, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator." + wrongAES192, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator." + wrongAES256, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_ECB, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_CBC, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_OFB, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_CFB, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_ECB, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_CBC, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_OFB, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_CFB, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_ECB, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_CBC, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_OFB, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_CFB, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("KeyGenerator.AESWRAP", PREFIX + "$KeyGen");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_wrap, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_wrap, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_wrap, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_GCM, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_GCM, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_GCM, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_CCM, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_CCM, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_CCM, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("KeyGenerator.AESWRAPPAD", PREFIX + "$KeyGen");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes128_wrap_pad, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes192_wrap_pad, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator", NISTObjectIdentifiers.id_aes256_wrap_pad, PREFIX + "$KeyGen256");
 
-            // provider.addAlgorithm("Mac.AESCMAC", PREFIX + "$AESCMAC");
+            provider.addAlgorithm("Mac.AESCMAC", PREFIX + "$AESCMAC");
 
-            // provider.addAlgorithm("Mac.AESCCMMAC", PREFIX + "$AESCCMMAC");
-            // provider.addAlgorithm("Alg.Alias.Mac." + NISTObjectIdentifiers.id_aes128_CCM.getId(), "AESCCMMAC");
-            // provider.addAlgorithm("Alg.Alias.Mac." + NISTObjectIdentifiers.id_aes192_CCM.getId(), "AESCCMMAC");
-            // provider.addAlgorithm("Alg.Alias.Mac." + NISTObjectIdentifiers.id_aes256_CCM.getId(), "AESCCMMAC");
-            // END android-removed
+            provider.addAlgorithm("Mac.AESCCMMAC", PREFIX + "$AESCCMMAC");
+            provider.addAlgorithm("Alg.Alias.Mac." + NISTObjectIdentifiers.id_aes128_CCM.getId(), "AESCCMMAC");
+            provider.addAlgorithm("Alg.Alias.Mac." + NISTObjectIdentifiers.id_aes192_CCM.getId(), "AESCCMMAC");
+            provider.addAlgorithm("Alg.Alias.Mac." + NISTObjectIdentifiers.id_aes256_CCM.getId(), "AESCCMMAC");
+            */
+            // END Android-removed: Unsupported algorithms
 
             provider.addAlgorithm("Alg.Alias.Cipher", BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes128_cbc, "PBEWITHSHAAND128BITAES-CBC-BC");
             provider.addAlgorithm("Alg.Alias.Cipher", BCObjectIdentifiers.bc_pbe_sha1_pkcs12_aes192_cbc, "PBEWITHSHAAND192BITAES-CBC-BC");
@@ -1018,10 +1033,10 @@ public final class AES
             provider.addAlgorithm("Cipher.PBEWITHMD5AND192BITAES-CBC-OPENSSL", PREFIX + "$PBEWithAESCBC");
             provider.addAlgorithm("Cipher.PBEWITHMD5AND256BITAES-CBC-OPENSSL", PREFIX + "$PBEWithAESCBC");
 
-            // BEGIN android-removed
+            // BEGIN Android-removed: Unsupported algorithms
             // provider.addAlgorithm("SecretKeyFactory.AES", PREFIX + "$KeyFactory");
             // provider.addAlgorithm("SecretKeyFactory", NISTObjectIdentifiers.aes, PREFIX + "$KeyFactory");
-            // END android-removed
+            // END Android-removed: Unsupported algorithms
 
             provider.addAlgorithm("SecretKeyFactory.PBEWITHMD5AND128BITAES-CBC-OPENSSL", PREFIX + "$PBEWithMD5And128BitAESCBCOpenSSL");
             provider.addAlgorithm("SecretKeyFactory.PBEWITHMD5AND192BITAES-CBC-OPENSSL", PREFIX + "$PBEWithMD5And192BitAESCBCOpenSSL");
@@ -1075,10 +1090,10 @@ public final class AES
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes192_cbc.getId(), "PKCS12PBE");
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes256_cbc.getId(), "PKCS12PBE");
 
-            // BEGIN android-removed
+            // BEGIN Android-removed: Unsupported algorithms
             // addGMacAlgorithm(provider, "AES", PREFIX + "$AESGMAC", PREFIX + "$KeyGen128");
             // addPoly1305Algorithm(provider, "AES", PREFIX + "$Poly1305", PREFIX + "$Poly1305KeyGen");
-            // END android-removed
+            // END Android-removed: Unsupported algorithms
         }
     }
 

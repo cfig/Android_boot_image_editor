@@ -3,16 +3,14 @@ package org.bouncycastle.jcajce.provider.symmetric;
 import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.BlowfishEngine;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.crypto.macs.CMac;
-// END android-removed
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
-// END android-removed
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
 import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
 
@@ -40,16 +38,18 @@ public final class Blowfish
         }
     }
 
-    // BEGIN android-removed
-    // public static class CMAC
-    //     extends BaseMac
-    // {
-    //     public CMAC()
-    //     {
-    //         super(new CMac(new BlowfishEngine()));
-    //     }
-    // }
-    // END android-removed
+    // BEGIN Android-removed: Unsupported algorithms
+    /*
+    public static class CMAC
+        extends BaseMac
+    {
+        public CMAC()
+        {
+            super(new CMac(new BlowfishEngine()));
+        }
+    }
+    */
+    // END Android-removed: Unsupported algorithms
 
     public static class KeyGen
         extends BaseKeyGenerator
@@ -80,13 +80,11 @@ public final class Blowfish
 
         public void configure(ConfigurableProvider provider)
         {
-            // BEGIN android-removed
+            // Android-removed: Unsupported algorithms
             // provider.addAlgorithm("Mac.BLOWFISHCMAC", PREFIX + "$CMAC");
-            // END android-removed
             provider.addAlgorithm("Cipher.BLOWFISH", PREFIX + "$ECB");
-            // BEGIN android-removed
+            // Android-removed: Unsupported algorithms
             // provider.addAlgorithm("Cipher", MiscObjectIdentifiers.cryptlib_algorithm_blowfish_CBC, PREFIX + "$CBC");
-            // END android-removed
             provider.addAlgorithm("KeyGenerator.BLOWFISH", PREFIX + "$KeyGen");
             provider.addAlgorithm("Alg.Alias.KeyGenerator", MiscObjectIdentifiers.cryptlib_algorithm_blowfish_CBC, "BLOWFISH");
             provider.addAlgorithm("AlgorithmParameters.BLOWFISH", PREFIX + "$AlgParams");

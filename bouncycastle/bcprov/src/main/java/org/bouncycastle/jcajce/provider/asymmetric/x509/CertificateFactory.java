@@ -4,9 +4,8 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-// BEGIN Android-added
+// Android-added: Use PushbackInputStream
 import java.io.PushbackInputStream;
-// END Android-added
 import java.security.cert.CRL;
 import java.security.cert.CRLException;
 import java.security.cert.CertPath;
@@ -217,22 +216,21 @@ public class CertificateFactory
             }
             else
             {
-                // BEGIN android-changed
-                // Was: pis = new ByteArrayInputStream(Streams.readAll(in));
-                // Reason: we want {@code in.available()} to return the number of available bytes if
+                // Android-changed: Use PushbackInputStream instead of ByteArrayInputStream.
+                // we want {@code in.available()} to return the number of available bytes if
                 // there is trailing data (otherwise it breaks
                 // libcore.java.security.cert.X509CertificateTest#test_Provider
                 // ). Which is not possible if we read the whole stream at this point.
+                // // pis = new ByteArrayInputStream(Streams.readAll(in));
                 pis = new PushbackInputStream(in);
-                // END android-changed
             }
 
-            // BEGIN android-changed
-            // Was: pis.mark(1);
+            // BEGIN Android-changed: Use PushbackInputStream
+            // pis.mark(1);
             if (in.markSupported()) {
                 pis.mark(1);
             }
-            // END android-changed
+            // END Android-changed: Use PushbackInputStream
 
             int tag = pis.read();
 
@@ -241,8 +239,8 @@ public class CertificateFactory
                 return null;
             }
 
-            // BEGIN android-changdd
-            // Was: pis.reset
+            // BEGIN Android-changed: Use PushbackInputStream
+            // pis.reset
             if (in.markSupported()) {
                 pis.reset();
             }
@@ -250,7 +248,7 @@ public class CertificateFactory
             {
                 ((PushbackInputStream) pis).unread(tag);
             }
-            // END android-changed
+            // END Android-changed: Use PushbackInputStream
 
             if (tag != 0x30)  // assume ascii PEM encoded.
             {
@@ -276,19 +274,17 @@ public class CertificateFactory
         throws CertificateException
     {
         java.security.cert.Certificate     cert;
-        // BEGIN android-removed
-        // BufferedInputStream in = new BufferedInputStream(inStream);
-        // Reason: we want {@code in.available()} to return the number of available bytes if
+        // Android-removed: Don't read entire stream immediately.
+        // we want {@code in.available()} to return the number of available bytes if
         // there is trailing data (otherwise it breaks
         // libcore.java.security.cert.X509CertificateTest#test_Provider
         // ). Which is not possible if we read the whole stream at this point.
-        // END android-removed
+        // BufferedInputStream in = new BufferedInputStream(inStream);
         List certs = new ArrayList();
 
-        // BEGIN android-changed
-        // Was: while ((cert = engineGenerateCertificate(in)) != null)
+        // Android-changed: Read from original stream
+        // while ((cert = engineGenerateCertificate(in)) != null)
         while ((cert = engineGenerateCertificate(inStream)) != null)
-        // END android-changed
         {
             certs.add(cert);
         }

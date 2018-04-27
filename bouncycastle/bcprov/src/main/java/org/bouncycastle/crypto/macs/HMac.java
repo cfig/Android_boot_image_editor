@@ -36,29 +36,29 @@ public class HMac
     {
         blockLengths = new Hashtable();
         
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported algorithms
         // blockLengths.put("GOST3411", Integers.valueOf(32));
         //
         // blockLengths.put("MD2", Integers.valueOf(16));
         // blockLengths.put("MD4", Integers.valueOf(64));
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
         blockLengths.put("MD5", Integers.valueOf(64));
-        
-        // BEGIN android-removed
+
+        // BEGIN Android-removed: Unsupported algorithms
         // blockLengths.put("RIPEMD128", Integers.valueOf(64));
         // blockLengths.put("RIPEMD160", Integers.valueOf(64));
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
         
         blockLengths.put("SHA-1", Integers.valueOf(64));
         blockLengths.put("SHA-224", Integers.valueOf(64));
         blockLengths.put("SHA-256", Integers.valueOf(64));
         blockLengths.put("SHA-384", Integers.valueOf(128));
         blockLengths.put("SHA-512", Integers.valueOf(128));
-        
-        // BEGIN android-removed
+
+        // BEGIN Android-removed: Unsupported algorithms
         // blockLengths.put("Tiger", Integers.valueOf(64));
         // blockLengths.put("Whirlpool", Integers.valueOf(64));
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
     }
     
     private static int getByteLength(

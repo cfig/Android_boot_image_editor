@@ -29,9 +29,9 @@ public final class ARC4
     {
         public KeyGen()
         {
-            // BEGIN android-changed
+            // Android-changed: Use ARC4 for algorithm name to match name used in provider
+            // super("RC4", 128, new CipherKeyGenerator());
             super("ARC4", 128, new CipherKeyGenerator());
-            // END android-changed
         }
     }
 
