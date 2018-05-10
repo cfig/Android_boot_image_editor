@@ -52,19 +52,19 @@ class Packer {
         ret.id = options.has("id")
 
         if (options.has("base")) {
-            ret.base = Integer.decode(String.valueOf(options.valueOf("base")))
+            ret.base = Long.decode(String.valueOf(options.valueOf("base")))
         } else {
             ret.base = 0x10000000;
         }
 
         if (options.has("kernel_offset")) {
-            ret.kernel_offset = Integer.decode(String.valueOf(options.valueOf("kernel_offset")))
+            ret.kernel_offset = Long.decode(String.valueOf(options.valueOf("kernel_offset")))
         } else {
             ret.kernel_offset = 0x00008000;
         }
 
         if (options.has("ramdisk_offset")) {
-            ret.ramdisk_offset = Integer.decode(String.valueOf(options.valueOf("ramdisk_offset")))
+            ret.ramdisk_offset = Long.decode(String.valueOf(options.valueOf("ramdisk_offset")))
         } else {
             ret.ramdisk_offset = 0x01000000
         }
@@ -74,13 +74,13 @@ class Packer {
         ret.os_patch_level = options.valueOf("os_patch_level")
 
         if (options.has("second_offset")) {
-            ret.second_offset = Integer.decode(String.valueOf(options.valueOf("second_offset")))
+            ret.second_offset = Long.decode(String.valueOf(options.valueOf("second_offset")))
         } else {
             ret.second_offset = 0x00f00000
         }
 
         if (options.has("tags_offset")) {
-            ret.tags_offset = Integer.decode(String.valueOf(options.valueOf("tags_offset")))
+            ret.tags_offset = Long.decode(String.valueOf(options.valueOf("tags_offset")))
         } else {
             ret.tags_offset = 0x00000100
         }
@@ -124,7 +124,7 @@ class Packer {
         //header start
         bf.put("ANDROID!".getBytes())
         bf.putInt((int) new File(inArgs.kernel).length());
-        bf.putInt(inArgs.base + inArgs.kernel_offset)
+        bf.putInt((int)(inArgs.base + inArgs.kernel_offset));
 
         if (null == inArgs.ramdisk) {
             bf.putInt(0)
@@ -132,7 +132,7 @@ class Packer {
             bf.putInt((int) new File(inArgs.ramdisk).length());
         }
 
-        bf.putInt(inArgs.base + inArgs.ramdisk_offset)
+        bf.putInt((int)(inArgs.base + inArgs.ramdisk_offset));
 
         if (null == inArgs.second) {
             bf.putInt(0)
@@ -140,8 +140,8 @@ class Packer {
             bf.putInt((int) new File(inArgs.second).length());
         }
 
-        bf.putInt(inArgs.base + inArgs.second_offset)
-        bf.putInt(inArgs.base + inArgs.tags_offset)
+        bf.putInt((int)(inArgs.base + inArgs.second_offset));
+        bf.putInt((int)(inArgs.base + inArgs.tags_offset));
         bf.putInt(inArgs.pagesize)
         bf.putInt(0);
         bf.putInt((parse_os_version(inArgs.os_version) << 11) | parse_os_patch_level(inArgs.os_patch_level))
