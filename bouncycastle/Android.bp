@@ -1,0 +1,150 @@
+//
+// Copyright (C) 2010 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+java_defaults {
+    name: "bouncycastle-errorprone-defaults",
+    errorprone: {
+        javacflags: [
+            "-Xep:MissingOverride:OFF",  // Ignore missing @Override.
+        ],
+    },
+}
+
+// These cannot build in the PDK, because the PDK requires all libraries
+// compile against SDK versions.
+java_defaults {
+    name: "bouncycastle-defaults",
+    defaults: [
+        "bouncycastle-errorprone-defaults",
+    ],
+    host_supported: true,
+    hostdex: true,
+    target: {
+        android: {
+            product_variables: {
+                pdk: {
+                    enabled: false,
+                },
+            },
+        },
+    },
+}
+
+// non-jarjar version to build okhttp-tests
+java_library_static {
+    name: "bouncycastle-unbundled",
+    defaults: ["bouncycastle-defaults"],
+
+    srcs: ["bcprov/src/main/java/**/*.java"],
+    exclude_srcs: [
+        "bcprov/src/main/java/org/bouncycastle/asn1/ocsp/**/*.java",
+    ],
+
+    sdk_version: "9",
+    java_version: "1.7",
+}
+
+java_library {
+    name: "bouncycastle",
+    defaults: ["bouncycastle-defaults"],
+
+    static_libs: ["bouncycastle-unbundled"],
+    no_framework_libs: true,
+    java_version: "1.7",
+
+    target: {
+        android: {
+            jarjar_rules: "jarjar-rules.txt",
+        },
+    },
+}
+
+// A guaranteed unstripped version of bouncycastle.
+// The build system may or may not strip the bouncycastle jar, but this one will
+// not be stripped. See b/24535627.
+java_library {
+    name: "bouncycastle-testdex",
+    defaults: ["bouncycastle-defaults"],
+
+    static_libs: ["bouncycastle-unbundled"],
+    no_framework_libs: true,
+    jarjar_rules: "jarjar-rules.txt",
+    java_version: "1.7",
+}
+
+// PKIX classes used for testing
+java_library_static {
+    name: "bouncycastle-bcpkix",
+    defaults: ["bouncycastle-defaults"],
+
+    static_libs: ["bouncycastle-bcpkix-unbundled"],
+    no_framework_libs: true,
+    java_version: "1.7",
+
+    target: {
+        android: {
+            jarjar_rules: "jarjar-rules.txt",
+        },
+    },
+}
+
+java_library_static {
+    name: "bouncycastle-bcpkix-unbundled",
+    defaults: [
+        "bouncycastle-defaults",
+    ],
+    libs: [ "bouncycastle-unbundled" ],
+    sdk_version: "9",
+    srcs: ["bcpkix/src/main/java/**/*.java"],
+    exclude_srcs: ["bcpkix/src/main/java/org/bouncycastle/cert/ocsp/**/*.java"],
+}
+
+
+// OCSP classes used for testing
+java_library_static {
+    name: "bouncycastle-ocsp",
+    defaults: ["bouncycastle-defaults"],
+
+    static_libs: ["bouncycastle-ocsp-unbundled"],
+    jarjar_rules: "jarjar-rules.txt",
+    java_version: "1.7",
+    no_framework_libs: true,
+}
+
+java_library_static {
+    name: "bouncycastle-ocsp-unbundled",
+    defaults: [
+        "bouncycastle-defaults",
+    ],
+    libs: [ "bouncycastle-unbundled",
+            "bouncycastle-bcpkix-unbundled" ],
+    sdk_version: "9",
+    srcs: [
+        "bcpkix/src/main/java/org/bouncycastle/cert/ocsp/**/*.java",
+        "bcprov/src/main/java/org/bouncycastle/asn1/ocsp/**/*.java",
+    ],
+}
+
+// For compatibilityy with old bouncycastle-host and bouncycastle-bcpkix-host names
+java_library_host {
+    name: "bouncycastle-host",
+    static_libs: ["bouncycastle"],
+}
+
+java_library_host {
+    name: "bouncycastle-bcpkix-host",
+    static_libs: ["bouncycastle-bcpkix"],
+}

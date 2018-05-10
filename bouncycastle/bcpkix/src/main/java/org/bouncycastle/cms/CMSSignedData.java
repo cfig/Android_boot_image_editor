@@ -320,20 +320,22 @@ public class CMSSignedData
         return HELPER.getAttributeCertificates(signedData.getCertificates());
     }
 
-    // BEGIN android-removed
-    // /**
-    //  * Return any OtherRevocationInfo OtherRevInfo objects of the type indicated by otherRevocationInfoFormat in
-    //  * this SignedData structure.
-    //  *
-    //  * @param otherRevocationInfoFormat OID of the format type been looked for.
-    //  *
-    //  * @return a Store of ASN1Encodable objects representing any objects of otherRevocationInfoFormat found.
-    //  */
-    // public Store getOtherRevocationInfo(ASN1ObjectIdentifier otherRevocationInfoFormat)
-    // {
-    //     return HELPER.getOtherRevocationInfo(otherRevocationInfoFormat, signedData.getCRLs());
-    // }
-    // END android-removed
+    // BEGIN Android-removed: OtherRevocationInfoFormat isn't supported
+    /*
+    /**
+     * Return any OtherRevocationInfo OtherRevInfo objects of the type indicated by otherRevocationInfoFormat in
+     * this SignedData structure.
+     *
+     * @param otherRevocationInfoFormat OID of the format type been looked for.
+     *
+     * @return a Store of ASN1Encodable objects representing any objects of otherRevocationInfoFormat found.
+     *
+    public Store getOtherRevocationInfo(ASN1ObjectIdentifier otherRevocationInfoFormat)
+    {
+        return HELPER.getOtherRevocationInfo(otherRevocationInfoFormat, signedData.getCRLs());
+    }
+    */
+    // END Android-removed: OtherRevocationInfoFormat isn't supported
 
     /**
      * Return the digest algorithm identifiers for the SignedData object
@@ -385,92 +387,94 @@ public class CMSSignedData
         return contentInfo.getEncoded();
     }
 
-    // BEGIN android-removed
-    // /**
-    //  * Verify all the SignerInformation objects and their associated counter signatures attached
-    //  * to this CMS SignedData object.
-    //  *
-    //  * @param verifierProvider  a provider of SignerInformationVerifier objects.
-    //  * @return true if all verify, false otherwise.
-    //  * @throws CMSException  if an exception occurs during the verification process.
-    //  */
-    // public boolean verifySignatures(SignerInformationVerifierProvider verifierProvider)
-    //     throws CMSException
-    // {
-    //     return verifySignatures(verifierProvider, false);
-    // }
-    // 
-    // /**
-    //  * Verify all the SignerInformation objects and optionally their associated counter signatures attached
-    //  * to this CMS SignedData object.
-    //  *
-    //  * @param verifierProvider  a provider of SignerInformationVerifier objects.
-    //  * @param ignoreCounterSignatures if true don't check counter signatures. If false check counter signatures as well.
-    //  * @return true if all verify, false otherwise.
-    //  * @throws CMSException  if an exception occurs during the verification process.
-    //  */
-    // public boolean verifySignatures(SignerInformationVerifierProvider verifierProvider, boolean ignoreCounterSignatures)
-    //     throws CMSException
-    // {
-    //     Collection signers = this.getSignerInfos().getSigners();
-    // 
-    //     for (Iterator it = signers.iterator(); it.hasNext();)
-    //     {
-    //         SignerInformation signer = (SignerInformation)it.next();
-    // 
-    //         try
-    //         {
-    //             SignerInformationVerifier verifier = verifierProvider.get(signer.getSID());
-    // 
-    //             if (!signer.verify(verifier))
-    //             {
-    //                 return false;
-    //             }
-    // 
-    //             if (!ignoreCounterSignatures)
-    //             {
-    //                 Collection counterSigners = signer.getCounterSignatures().getSigners();
-    // 
-    //                 for  (Iterator cIt = counterSigners.iterator(); cIt.hasNext();)
-    //                 {
-    //                     if (!verifyCounterSignature((SignerInformation)cIt.next(), verifierProvider))
-    //                     {
-    //                         return false;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         catch (OperatorCreationException e)
-    //         {
-    //             throw new CMSException("failure in verifier provider: " + e.getMessage(), e);
-    //         }
-    //     }
-    // 
-    //     return true;
-    // }
-    // 
-    // private boolean verifyCounterSignature(SignerInformation counterSigner, SignerInformationVerifierProvider verifierProvider)
-    //     throws OperatorCreationException, CMSException
-    // {
-    //     SignerInformationVerifier counterVerifier = verifierProvider.get(counterSigner.getSID());
-    // 
-    //     if (!counterSigner.verify(counterVerifier))
-    //     {
-    //         return false;
-    //     }
-    // 
-    //     Collection counterSigners = counterSigner.getCounterSignatures().getSigners();
-    //     for  (Iterator cIt = counterSigners.iterator(); cIt.hasNext();)
-    //     {
-    //         if (!verifyCounterSignature((SignerInformation)cIt.next(), verifierProvider))
-    //         {
-    //             return false;
-    //         }
-    //     }
-    // 
-    //     return true;
-    // }
-    // END android-removed
+    // BEGIN Android-removed: Unknown reason
+    /*
+    /**
+     * Verify all the SignerInformation objects and their associated counter signatures attached
+     * to this CMS SignedData object.
+     *
+     * @param verifierProvider  a provider of SignerInformationVerifier objects.
+     * @return true if all verify, false otherwise.
+     * @throws CMSException  if an exception occurs during the verification process.
+     *
+    public boolean verifySignatures(SignerInformationVerifierProvider verifierProvider)
+        throws CMSException
+    {
+        return verifySignatures(verifierProvider, false);
+    }
+
+    /**
+     * Verify all the SignerInformation objects and optionally their associated counter signatures attached
+     * to this CMS SignedData object.
+     *
+     * @param verifierProvider  a provider of SignerInformationVerifier objects.
+     * @param ignoreCounterSignatures if true don't check counter signatures. If false check counter signatures as well.
+     * @return true if all verify, false otherwise.
+     * @throws CMSException  if an exception occurs during the verification process.
+     *
+    public boolean verifySignatures(SignerInformationVerifierProvider verifierProvider, boolean ignoreCounterSignatures)
+        throws CMSException
+    {
+        Collection signers = this.getSignerInfos().getSigners();
+
+        for (Iterator it = signers.iterator(); it.hasNext();)
+        {
+            SignerInformation signer = (SignerInformation)it.next();
+
+            try
+            {
+                SignerInformationVerifier verifier = verifierProvider.get(signer.getSID());
+
+                if (!signer.verify(verifier))
+                {
+                    return false;
+                }
+
+                if (!ignoreCounterSignatures)
+                {
+                    Collection counterSigners = signer.getCounterSignatures().getSigners();
+
+                    for  (Iterator cIt = counterSigners.iterator(); cIt.hasNext();)
+                    {
+                        if (!verifyCounterSignature((SignerInformation)cIt.next(), verifierProvider))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            catch (OperatorCreationException e)
+            {
+                throw new CMSException("failure in verifier provider: " + e.getMessage(), e);
+            }
+        }
+
+        return true;
+    }
+
+    private boolean verifyCounterSignature(SignerInformation counterSigner, SignerInformationVerifierProvider verifierProvider)
+        throws OperatorCreationException, CMSException
+    {
+        SignerInformationVerifier counterVerifier = verifierProvider.get(counterSigner.getSID());
+
+        if (!counterSigner.verify(counterVerifier))
+        {
+            return false;
+        }
+
+        Collection counterSigners = counterSigner.getCounterSignatures().getSigners();
+        for  (Iterator cIt = counterSigners.iterator(); cIt.hasNext();)
+        {
+            if (!verifyCounterSignature((SignerInformation)cIt.next(), verifierProvider))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    */
+    // END Android-removed: Unknown reason
 
     /**
      * Replace the SignerInformation store associated with this

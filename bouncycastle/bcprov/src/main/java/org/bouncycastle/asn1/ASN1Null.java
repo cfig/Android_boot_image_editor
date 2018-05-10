@@ -8,12 +8,6 @@ import java.io.IOException;
 public abstract class ASN1Null
     extends ASN1Primitive
 {
-    // BEGIN android-added
-    /*package*/ ASN1Null()
-    {
-    }
-
-    // END android-added
     /**
      * Return an instance of ASN.1 NULL from the passed in object.
      * <p>

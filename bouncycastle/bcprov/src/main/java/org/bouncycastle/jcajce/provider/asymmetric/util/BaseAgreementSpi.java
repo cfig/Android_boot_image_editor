@@ -11,10 +11,9 @@ import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 // import org.bouncycastle.asn1.gnu.GNUObjectIdentifiers;
-// END android-removed
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -22,10 +21,9 @@ import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.crypto.DerivationFunction;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.crypto.agreement.kdf.DHKDFParameters;
 // import org.bouncycastle.crypto.agreement.kdf.DHKEKGenerator;
-// END android-removed
 import org.bouncycastle.crypto.params.DESParameters;
 import org.bouncycastle.crypto.params.KDFParameters;
 import org.bouncycastle.util.Integers;
@@ -122,9 +120,8 @@ public abstract class BaseAgreementSpi
         nameTable.put(KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap.getId(), "SEED");
         nameTable.put(KISAObjectIdentifiers.id_seedCBC.getId(), "SEED");
         nameTable.put(KISAObjectIdentifiers.id_seedMAC.getId(), "SEED");
-        // BEGIN android-removed
+        // Android-removed: Unsupported algorithm
         // nameTable.put(CryptoProObjectIdentifiers.gostR28147_gcfb.getId(), "GOST28147");
-        // END android-removed
 
         nameTable.put(NISTObjectIdentifiers.id_aes128_wrap.getId(), "AES");
         nameTable.put(NISTObjectIdentifiers.id_aes128_CCM.getId(), "AES");
@@ -163,12 +160,12 @@ public abstract class BaseAgreementSpi
         {
             return "AES";
         }
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported algorithm
         // if (algDetails.startsWith(GNUObjectIdentifiers.Serpent.getId()))
         // {
         //     return "Serpent";
         // }
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
 
         String name = (String)nameTable.get(Strings.toUpperCase(algDetails));
 
@@ -261,6 +258,7 @@ public abstract class BaseAgreementSpi
         }
 
         int    keySize = getKeySize(oidAlgorithm);
+
         if (kdf != null)
         {
             if (keySize < 0)
@@ -269,24 +267,26 @@ public abstract class BaseAgreementSpi
             }
             byte[] keyBytes = new byte[keySize / 8];
 
-            // BEGIN android-removed
-            // if (kdf instanceof DHKEKGenerator)
-            // {
-            //     ASN1ObjectIdentifier oid;
-            //     try
-            //     {
-            //         oid = new ASN1ObjectIdentifier(oidAlgorithm);
-            //     }
-            //     catch (IllegalArgumentException e)
-            //     {
-            //         throw new NoSuchAlgorithmException("no OID for algorithm: " + oidAlgorithm);
-            //     }
-            //     DHKDFParameters params = new DHKDFParameters(oid, keySize, secret, ukmParameters);
+            // BEGIN Android-removed: Unsupported algorithm
+            /*
+            if (kdf instanceof DHKEKGenerator)
+            {
+                ASN1ObjectIdentifier oid;
+                try
+                {
+                    oid = new ASN1ObjectIdentifier(oidAlgorithm);
+                }
+                catch (IllegalArgumentException e)
+                {
+                    throw new NoSuchAlgorithmException("no OID for algorithm: " + oidAlgorithm);
+                }
+                DHKDFParameters params = new DHKDFParameters(oid, keySize, secret, ukmParameters);
 
-            //     kdf.init(params);
-            // }
-            // else
-            // END android-removed
+                kdf.init(params);
+            }
+            else
+            */
+            // END Android-removed: Unsupported algorithm
             {
                 KDFParameters params = new KDFParameters(secret, ukmParameters);
 

@@ -22,15 +22,13 @@ import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.crypto.params.RC2Parameters;
 // import org.bouncycastle.crypto.params.SkeinParameters;
-// END android-removed
 import org.bouncycastle.jcajce.PKCS12Key;
 import org.bouncycastle.jcajce.spec.AEADParameterSpec;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.jcajce.spec.SkeinParameterSpec;
-// END android-removed
 
 public class BaseMac
     extends MacSpi implements PBE
@@ -103,16 +101,16 @@ public class BaseMac
 
             int digest = SHA1;
             int keySize = 160;
-            // BEGIN android-removed
+            // BEGIN Android-removed: Unsupported algorithms
             // if (macEngine.getAlgorithmName().startsWith("GOST"))
             // {
-            //      digest = GOST3411;
-            //      keySize = 256;
+            //     digest = GOST3411;
+            //     keySize = 256;
             // }
-            // BEGIN android-changed
-            // Was: else if (macEngine instanceof HMac)
+            // END Android-removed: Unsupported algorithms
+            // Android-changed: Adjust for missing if
+            // else if (macEngine instanceof HMac)
             if (macEngine instanceof HMac)
-            // END android-changed
             {
                 if (!macEngine.getAlgorithmName().startsWith("SHA-1"))
                 {
@@ -136,13 +134,13 @@ public class BaseMac
                         digest = SHA512;
                         keySize = 512;
                     }
-                    // BEGIN android-removed
+                    // BEGIN Android-removed: Unsupported algorithms
                     // else if (macEngine.getAlgorithmName().startsWith("RIPEMD160"))
                     // {
                     //     digest = RIPEMD160;
                     //     keySize = 160;
                     // }
-                    // END android-removed
+                    // END Android-removed: Unsupported algorithms
                     else
                     {
                         throw new InvalidAlgorithmParameterException("no PKCS12 mapping for HMAC: " + macEngine.getAlgorithmName());
@@ -198,17 +196,18 @@ public class BaseMac
         {
             param = new ParametersWithIV(keyParam, ((IvParameterSpec)params).getIV());
         }
-        // BEGIN android-removed
-        // else if (params instanceof RC2ParameterSpec)
-        // {
-        //     param = new ParametersWithIV(new RC2Parameters(keyParam.getKey(), ((RC2ParameterSpec)params).getEffectiveKeyBits()), ((RC2ParameterSpec)params).getIV());
-        // }
-
-        // else if (params instanceof SkeinParameterSpec)
-        // {
-        //     param = new SkeinParameters.Builder(copyMap(((SkeinParameterSpec)params).getParameters())).setKey(keyParam.getKey()).build();
-        // }
-        // END android-removed
+        // BEGIN Android-removed: Unsupported algorithms
+        /*
+        else if (params instanceof RC2ParameterSpec)
+        {
+            param = new ParametersWithIV(new RC2Parameters(keyParam.getKey(), ((RC2ParameterSpec)params).getEffectiveKeyBits()), ((RC2ParameterSpec)params).getIV());
+        }
+        else if (params instanceof SkeinParameterSpec)
+        {
+            param = new SkeinParameters.Builder(copyMap(((SkeinParameterSpec)params).getParameters())).setKey(keyParam.getKey()).build();
+        }
+        */
+        // END Android-removed: Unsupported algorithms
         else if (params == null)
         {
             param = new KeyParameter(key.getEncoded());

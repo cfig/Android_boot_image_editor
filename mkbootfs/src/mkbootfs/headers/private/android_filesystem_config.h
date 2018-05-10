@@ -55,6 +55,9 @@
  */
 
 #define AID_ROOT 0 /* traditional unix root user */
+/* The following are for LTP and should only be used for testing */
+#define AID_DAEMON 1 /* traditional unix daemon owner */
+#define AID_BIN 2    /* traditional unix binaries owner */
 
 #define AID_SYSTEM 1000 /* system server */
 
@@ -120,6 +123,14 @@
 #define AID_ESE 1060             /* embedded secure element (eSE) subsystem */
 #define AID_OTA_UPDATE 1061      /* resource tracking UID for OTA updates */
 #define AID_AUTOMOTIVE_EVS 1062  /* Automotive rear and surround view system */
+#define AID_LOWPAN 1063          /* LoWPAN subsystem */
+#define AID_HSM 1064             /* hardware security module subsystem */
+#define AID_RESERVED_DISK 1065   /* GID that has access to reserved disk space */
+#define AID_STATSD 1066          /* statsd daemon */
+#define AID_INCIDENTD 1067       /* incidentd daemon */
+#define AID_SECURE_ELEMENT 1068  /* secure element subsystem */
+#define AID_LMKD 1069            /* low memory killer daemon */
+#define AID_LLKD 1070            /* live lock daemon */
 /* Changes to this file must be made in AOSP, *not* in internal branches. */
 
 #define AID_SHELL 2000 /* adb and debug shell user */
@@ -167,6 +178,14 @@
 
 #define AID_SHARED_GID_START 50000 /* start of gids for apps in each user to share */
 #define AID_SHARED_GID_END 59999   /* end of gids for apps in each user to share */
+
+/*
+ * This is a magic number in the kernel and not something that was picked
+ * arbitrarily. This value is returned whenever a uid that has no mapping in the
+ * user namespace is returned to userspace:
+ * https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/linux/highuid.h?h=v4.4#n40
+ */
+#define AID_OVERFLOWUID 65534 /* unmapped user in the user namespace */
 
 #define AID_ISOLATED_START 99000 /* start of uids for fully isolated sandboxed processes */
 #define AID_ISOLATED_END 99999   /* end of uids for fully isolated sandboxed processes */

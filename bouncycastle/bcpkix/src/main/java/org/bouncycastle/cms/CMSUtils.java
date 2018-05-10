@@ -23,13 +23,12 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
 // import org.bouncycastle.asn1.ocsp.OCSPResponse;
 // import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
 // import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 // import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-// END android-removed
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CRLHolder;
@@ -49,12 +48,12 @@ class CMSUtils
     {
         des.add("DES");
         des.add("DESEDE");
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported algorithms
         // des.add(OIWObjectIdentifiers.desCBC.getId());
         // des.add(PKCSObjectIdentifiers.des_EDE3_CBC.getId());
         // des.add(PKCSObjectIdentifiers.des_EDE3_CBC.getId());
         // des.add(PKCSObjectIdentifiers.id_alg_CMS3DESwrap.getId());
-        // END android-removed
+        // END Android-removed: Unsupported algorithms
     }
 
     static boolean isDES(String algorithmID)
@@ -164,7 +163,7 @@ class CMSUtils
 
                     crls.add(c.toASN1Structure());
                 }
-                // BEGIN android-removed
+                // BEGIN Android-removed: OtherRevocationInfoFormat isn't supported
                 // else if (rev instanceof OtherRevocationInfoFormat)
                 // {
                 //     OtherRevocationInfoFormat infoFormat = OtherRevocationInfoFormat.getInstance(rev);
@@ -173,7 +172,7 @@ class CMSUtils
                 //
                 //     crls.add(new DERTaggedObject(false, 1, infoFormat));
                 // }
-                // END android-removed
+                // END Android-removed: OtherRevocationInfoFormat isn't supported
                 else if (rev instanceof ASN1TaggedObject)
                 {
                     crls.add(rev);
@@ -188,36 +187,39 @@ class CMSUtils
         }
     }
 
-    // BEGIN android-removed
-    // private static void validateInfoFormat(OtherRevocationInfoFormat infoFormat)
-    // {
-    //     if (CMSObjectIdentifiers.id_ri_ocsp_response.equals(infoFormat.getInfoFormat()))
-    //     {
-    //         OCSPResponse resp = OCSPResponse.getInstance(infoFormat.getInfo());
-    //
-    //         if (resp.getResponseStatus().getValue().intValue() != OCSPResponseStatus.SUCCESSFUL)
-    //         {
-    //             throw new IllegalArgumentException("cannot add unsuccessful OCSP response to CMS SignedData");
-    //         }
-    //     }
-    // }
-    //
-    // static Collection getOthersFromStore(ASN1ObjectIdentifier otherRevocationInfoFormat, Store otherRevocationInfos)
-    // {
-    //     List others = new ArrayList();
-    //
-    //     for (Iterator it = otherRevocationInfos.getMatches(null).iterator(); it.hasNext();)
-    //     {
-    //         ASN1Encodable info = (ASN1Encodable)it.next();
-    //         OtherRevocationInfoFormat infoFormat = new OtherRevocationInfoFormat(otherRevocationInfoFormat, info);
-    //         validateInfoFormat(infoFormat);
-    //
-    //         others.add(new DERTaggedObject(false, 1, infoFormat));
-    //     }
-    //
-    //     return others;
-    // }
-    // END android-removed
+    // BEGIN Android-removed: OtherRevocationInfoFormat isn't supported
+    /*
+    private static void validateInfoFormat(OtherRevocationInfoFormat infoFormat)
+    {
+        if (CMSObjectIdentifiers.id_ri_ocsp_response.equals(infoFormat.getInfoFormat()))
+        {
+            OCSPResponse resp = OCSPResponse.getInstance(infoFormat.getInfo());
+
+            if (resp.getResponseStatus().getValue().intValue() != OCSPResponseStatus.SUCCESSFUL)
+            {
+                throw new IllegalArgumentException("cannot add unsuccessful OCSP response to CMS SignedData");
+            }
+        }
+    }
+
+    static Collection getOthersFromStore(ASN1ObjectIdentifier otherRevocationInfoFormat, Store otherRevocationInfos)
+    {
+        List others = new ArrayList();
+
+        for (Iterator it = otherRevocationInfos.getMatches(null).iterator(); it.hasNext();)
+        {
+            ASN1Encodable info = (ASN1Encodable)it.next();
+            OtherRevocationInfoFormat infoFormat = new OtherRevocationInfoFormat(otherRevocationInfoFormat, info);
+
+            validateInfoFormat(infoFormat);
+
+            others.add(new DERTaggedObject(false, 1, infoFormat));
+        }
+
+        return others;
+    }
+    */
+    // END Android-removed: OtherRevocationInfoFormat isn't supported
 
     static ASN1Set createBerSetFromList(List derObjects)
     {

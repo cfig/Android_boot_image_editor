@@ -1,4 +1,4 @@
-#include <cstdint>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -13,7 +13,11 @@
 #include <fcntl.h>
 
 #include <private/android_filesystem_config.h>
+//XXX
+#include <cstdint>
 #include <private/fs_config.h>
+//XXX
+
 /* NOTES
 **
 ** - see buffer-format.txt from the linux kernel docs for

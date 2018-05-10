@@ -64,110 +64,112 @@ public class CustomNamedCurves
         return c.configure().setEndomorphism(new GLVTypeBEndomorphism(c, p)).create();
     }
 
-    // BEGIN android-removed
-    // /*
-    //  * curve25519
-    //  */
-    // static X9ECParametersHolder curve25519 = new X9ECParametersHolder()
-    // {
-    //    protected X9ECParameters createParameters()
-    //    {
-    //        byte[] S = null;
-    //        ECCurve curve = configureCurve(new Curve25519());
-    //
-    //        /*
-    //         * NOTE: Curve25519 was specified in Montgomery form. Rewriting in Weierstrass form
-    //         * involves substitution of variables, so the base-point x coordinate is 9 + (486662 / 3).
-    //         * 
-    //         * The Curve25519 paper doesn't say which of the two possible y values the base
-    //         * point has. The choice here is guided by language in the Ed25519 paper.
-    //         * 
-    //         * (The other possible y value is 5F51E65E475F794B1FE122D388B72EB36DC2B28192839E4DD6163A5D81312C14) 
-    //         */
-    //        X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //            + "2AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD245A"
-    //            + "20AE19A1B8A086B4E01EDD2C7748D14C923D4D7E6D7C61B229E9C5A27ECED3D9"));
-    //
-    //        return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //    }
-    // };
-    //
-    // /*
-    //  * secp128r1
-    //  */
-    // static X9ECParametersHolder secp128r1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("000E0D4D696E6768756151750CC03A4473D03679");
-    //         ECCurve curve = configureCurve(new SecP128R1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "161FF7528B899B2D0C28607CA52C5B86"
-    //             + "CF5AC8395BAFEB13C02DA292DDED7A83"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
-    //
-    // /*
-    //  * secp160k1
-    //  */
-    // static X9ECParametersHolder secp160k1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = null;
-    //         GLVTypeBParameters glv = new GLVTypeBParameters(
-    //             new BigInteger("9ba48cba5ebcb9b6bd33b92830b2a2e0e192f10a", 16),
-    //             new BigInteger("c39c6c3b3a36d7701b9c71a1f5804ae5d0003f4", 16),
-    //             new BigInteger[]{
-    //                 new BigInteger("9162fbe73984472a0a9e", 16),
-    //                 new BigInteger("-96341f1138933bc2f505", 16) },
-    //             new BigInteger[]{
-    //                 new BigInteger("127971af8721782ecffa3", 16),
-    //                 new BigInteger("9162fbe73984472a0a9e", 16) },
-    //             new BigInteger("9162fbe73984472a0a9d0590", 16),
-    //             new BigInteger("96341f1138933bc2f503fd44", 16),
-    //             176);
-    //         ECCurve curve = configureCurveGLV(new SecP160K1Curve(), glv);
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "3B4C382CE37AA192A4019E763036F4F5DD4D7EBB"
-    //             + "938CF935318FDCED6BC28286531733C3F03C4FEE"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
-    //
-    // /*
-    //  * secp160r1
-    //  */
-    // static X9ECParametersHolder secp160r1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("1053CDE42C14D696E67687561517533BF3F83345");
-    //         ECCurve curve = configureCurve(new SecP160R1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "4A96B5688EF573284664698968C38BB913CBFC82"
-    //             + "23A628553168947D59DCC912042351377AC5FB32"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
-    //
-    // /*
-    //  * secp160r2
-    //  */
-    // static X9ECParametersHolder secp160r2 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("B99B99B099B323E02709A4D696E6768756151751");
-    //         ECCurve curve = configureCurve(new SecP160R2Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "52DCB034293A117E1F4FF11B30F7199D3144CE6D"
-    //             + "FEAFFEF2E331F296E071FA0DF9982CFEA7D43F2E"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
-    // END android-removed
+    // BEGIN Android-removed: Unsupported curves
+    /*
+    /*
+     * curve25519
+     *
+    static X9ECParametersHolder curve25519 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = null;
+            ECCurve curve = configureCurve(new Curve25519());
+
+            /*
+             * NOTE: Curve25519 was specified in Montgomery form. Rewriting in Weierstrass form
+             * involves substitution of variables, so the base-point x coordinate is 9 + (486662 / 3).
+             * 
+             * The Curve25519 paper doesn't say which of the two possible y values the base
+             * point has. The choice here is guided by language in the Ed25519 paper.
+             * 
+             * (The other possible y value is 5F51E65E475F794B1FE122D388B72EB36DC2B28192839E4DD6163A5D81312C14) 
+             *
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "2AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD245A"
+                + "20AE19A1B8A086B4E01EDD2C7748D14C923D4D7E6D7C61B229E9C5A27ECED3D9"));
+
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
+
+    /*
+     * secp128r1
+     *
+    static X9ECParametersHolder secp128r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("000E0D4D696E6768756151750CC03A4473D03679");
+            ECCurve curve = configureCurve(new SecP128R1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "161FF7528B899B2D0C28607CA52C5B86"
+                + "CF5AC8395BAFEB13C02DA292DDED7A83"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
+
+    /*
+     * secp160k1
+     *
+    static X9ECParametersHolder secp160k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = null;
+            GLVTypeBParameters glv = new GLVTypeBParameters(
+                new BigInteger("9ba48cba5ebcb9b6bd33b92830b2a2e0e192f10a", 16),
+                new BigInteger("c39c6c3b3a36d7701b9c71a1f5804ae5d0003f4", 16),
+                new BigInteger[]{
+                    new BigInteger("9162fbe73984472a0a9e", 16),
+                    new BigInteger("-96341f1138933bc2f505", 16) },
+                new BigInteger[]{
+                    new BigInteger("127971af8721782ecffa3", 16),
+                    new BigInteger("9162fbe73984472a0a9e", 16) },
+                new BigInteger("9162fbe73984472a0a9d0590", 16),
+                new BigInteger("96341f1138933bc2f503fd44", 16),
+                176);
+            ECCurve curve = configureCurveGLV(new SecP160K1Curve(), glv);
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "3B4C382CE37AA192A4019E763036F4F5DD4D7EBB"
+                + "938CF935318FDCED6BC28286531733C3F03C4FEE"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
+
+    /*
+     * secp160r1
+     *
+    static X9ECParametersHolder secp160r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("1053CDE42C14D696E67687561517533BF3F83345");
+            ECCurve curve = configureCurve(new SecP160R1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "4A96B5688EF573284664698968C38BB913CBFC82"
+                + "23A628553168947D59DCC912042351377AC5FB32"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
+
+    /*
+     * secp160r2
+     *
+    static X9ECParametersHolder secp160r2 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("B99B99B099B323E02709A4D696E6768756151751");
+            ECCurve curve = configureCurve(new SecP160R2Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "52DCB034293A117E1F4FF11B30F7199D3144CE6D"
+                + "FEAFFEF2E331F296E071FA0DF9982CFEA7D43F2E"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
+    */
+    // END Android-removed: Unsupported curves
 
     /*
      * secp192k1
@@ -333,295 +335,297 @@ public class CustomNamedCurves
         }
     };
 
-    // BEGIN android-removed
-    // /*
-    //  * sect113r1
-    //  */
-    // static X9ECParametersHolder sect113r1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("10E723AB14D696E6768756151756FEBF8FCB49A9");
-    //         ECCurve curve = configureCurve(new SecT113R1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "009D73616F35F4AB1407D73562C10F"
-    //             + "00A52830277958EE84D1315ED31886"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    // BEGIN Android-removed: Unsupported curves
+    /*
+    /*
+     * sect113r1
+     *
+    static X9ECParametersHolder sect113r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("10E723AB14D696E6768756151756FEBF8FCB49A9");
+            ECCurve curve = configureCurve(new SecT113R1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "009D73616F35F4AB1407D73562C10F"
+                + "00A52830277958EE84D1315ED31886"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect113r2
-    //  */
-    // static X9ECParametersHolder sect113r2 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("10C0FB15760860DEF1EEF4D696E676875615175D");
-    //         ECCurve curve = configureCurve(new SecT113R2Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "01A57A6A7B26CA5EF52FCDB8164797"
-    //             + "00B3ADC94ED1FE674C06E695BABA1D"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect113r2
+     *
+    static X9ECParametersHolder sect113r2 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("10C0FB15760860DEF1EEF4D696E676875615175D");
+            ECCurve curve = configureCurve(new SecT113R2Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "01A57A6A7B26CA5EF52FCDB8164797"
+                + "00B3ADC94ED1FE674C06E695BABA1D"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect131r1
-    //  */
-    // static X9ECParametersHolder sect131r1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("4D696E676875615175985BD3ADBADA21B43A97E2");
-    //         ECCurve curve = configureCurve(new SecT131R1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "0081BAF91FDF9833C40F9C181343638399"
-    //             + "078C6E7EA38C001F73C8134B1B4EF9E150"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect131r1
+     *
+    static X9ECParametersHolder sect131r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("4D696E676875615175985BD3ADBADA21B43A97E2");
+            ECCurve curve = configureCurve(new SecT131R1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "0081BAF91FDF9833C40F9C181343638399"
+                + "078C6E7EA38C001F73C8134B1B4EF9E150"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect131r2
-    //  */
-    // static X9ECParametersHolder sect131r2 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("985BD3ADBAD4D696E676875615175A21B43A97E3");
-    //         ECCurve curve = configureCurve(new SecT131R2Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "0356DCD8F2F95031AD652D23951BB366A8"
-    //             + "0648F06D867940A5366D9E265DE9EB240F"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect131r2
+     *
+    static X9ECParametersHolder sect131r2 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("985BD3ADBAD4D696E676875615175A21B43A97E3");
+            ECCurve curve = configureCurve(new SecT131R2Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "0356DCD8F2F95031AD652D23951BB366A8"
+                + "0648F06D867940A5366D9E265DE9EB240F"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect163k1
-    //  */
-    // static X9ECParametersHolder sect163k1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = null;
-    //         ECCurve curve = configureCurve(new SecT163K1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "02FE13C0537BBC11ACAA07D793DE4E6D5E5C94EEE8"
-    //             + "0289070FB05D38FF58321F2E800536D538CCDAA3D9"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect163k1
+     *
+    static X9ECParametersHolder sect163k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = null;
+            ECCurve curve = configureCurve(new SecT163K1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "02FE13C0537BBC11ACAA07D793DE4E6D5E5C94EEE8"
+                + "0289070FB05D38FF58321F2E800536D538CCDAA3D9"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect163r1
-    //  */
-    // static X9ECParametersHolder sect163r1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("24B7B137C8A14D696E6768756151756FD0DA2E5C");
-    //         ECCurve curve = configureCurve(new SecT163R1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "0369979697AB43897789566789567F787A7876A654"
-    //             + "00435EDB42EFAFB2989D51FEFCE3C80988F41FF883"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect163r1
+     *
+    static X9ECParametersHolder sect163r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("24B7B137C8A14D696E6768756151756FD0DA2E5C");
+            ECCurve curve = configureCurve(new SecT163R1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "0369979697AB43897789566789567F787A7876A654"
+                + "00435EDB42EFAFB2989D51FEFCE3C80988F41FF883"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect163r2
-    //  */
-    // static X9ECParametersHolder sect163r2 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("85E25BFE5C86226CDB12016F7553F9D0E693A268");
-    //         ECCurve curve = configureCurve(new SecT163R2Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "03F0EBA16286A2D57EA0991168D4994637E8343E36"
-    //             + "00D51FBC6C71A0094FA2CDD545B11C5C0C797324F1"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect163r2
+     *
+    static X9ECParametersHolder sect163r2 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("85E25BFE5C86226CDB12016F7553F9D0E693A268");
+            ECCurve curve = configureCurve(new SecT163R2Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "03F0EBA16286A2D57EA0991168D4994637E8343E36"
+                + "00D51FBC6C71A0094FA2CDD545B11C5C0C797324F1"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect193r1
-    //  */
-    // static X9ECParametersHolder sect193r1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("103FAEC74D696E676875615175777FC5B191EF30");
-    //         ECCurve curve = configureCurve(new SecT193R1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "01F481BC5F0FF84A74AD6CDF6FDEF4BF6179625372D8C0C5E1"
-    //             + "0025E399F2903712CCF3EA9E3A1AD17FB0B3201B6AF7CE1B05"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect193r1
+     *
+    static X9ECParametersHolder sect193r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("103FAEC74D696E676875615175777FC5B191EF30");
+            ECCurve curve = configureCurve(new SecT193R1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "01F481BC5F0FF84A74AD6CDF6FDEF4BF6179625372D8C0C5E1"
+                + "0025E399F2903712CCF3EA9E3A1AD17FB0B3201B6AF7CE1B05"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect193r2
-    //  */
-    // static X9ECParametersHolder sect193r2 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("10B7B4D696E676875615175137C8A16FD0DA2211");
-    //         ECCurve curve = configureCurve(new SecT193R2Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "00D9B67D192E0367C803F39E1A7E82CA14A651350AAE617E8F"
-    //             + "01CE94335607C304AC29E7DEFBD9CA01F596F927224CDECF6C"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect193r2
+     *
+    static X9ECParametersHolder sect193r2 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("10B7B4D696E676875615175137C8A16FD0DA2211");
+            ECCurve curve = configureCurve(new SecT193R2Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "00D9B67D192E0367C803F39E1A7E82CA14A651350AAE617E8F"
+                + "01CE94335607C304AC29E7DEFBD9CA01F596F927224CDECF6C"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect233k1
-    //  */
-    // static X9ECParametersHolder sect233k1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = null;
-    //         ECCurve curve = configureCurve(new SecT233K1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "017232BA853A7E731AF129F22FF4149563A419C26BF50A4C9D6EEFAD6126"
-    //             + "01DB537DECE819B7F70F555A67C427A8CD9BF18AEB9B56E0C11056FAE6A3"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect233k1
+     *
+    static X9ECParametersHolder sect233k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = null;
+            ECCurve curve = configureCurve(new SecT233K1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "017232BA853A7E731AF129F22FF4149563A419C26BF50A4C9D6EEFAD6126"
+                + "01DB537DECE819B7F70F555A67C427A8CD9BF18AEB9B56E0C11056FAE6A3"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect233r1
-    //  */
-    // static X9ECParametersHolder sect233r1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("74D59FF07F6B413D0EA14B344B20A2DB049B50C3");
-    //         ECCurve curve = configureCurve(new SecT233R1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "00FAC9DFCBAC8313BB2139F1BB755FEF65BC391F8B36F8F8EB7371FD558B"
-    //             + "01006A08A41903350678E58528BEBF8A0BEFF867A7CA36716F7E01F81052"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect233r1
+     *
+    static X9ECParametersHolder sect233r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("74D59FF07F6B413D0EA14B344B20A2DB049B50C3");
+            ECCurve curve = configureCurve(new SecT233R1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "00FAC9DFCBAC8313BB2139F1BB755FEF65BC391F8B36F8F8EB7371FD558B"
+                + "01006A08A41903350678E58528BEBF8A0BEFF867A7CA36716F7E01F81052"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect239k1
-    //  */
-    // static X9ECParametersHolder sect239k1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = null;
-    //         ECCurve curve = configureCurve(new SecT239K1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "29A0B6A887A983E9730988A68727A8B2D126C44CC2CC7B2A6555193035DC"
-    //             + "76310804F12E549BDB011C103089E73510ACB275FC312A5DC6B76553F0CA"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect239k1
+     *
+    static X9ECParametersHolder sect239k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = null;
+            ECCurve curve = configureCurve(new SecT239K1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "29A0B6A887A983E9730988A68727A8B2D126C44CC2CC7B2A6555193035DC"
+                + "76310804F12E549BDB011C103089E73510ACB275FC312A5DC6B76553F0CA"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect283k1
-    //  */
-    // static X9ECParametersHolder sect283k1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = null;
-    //         ECCurve curve = configureCurve(new SecT283K1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "0503213F78CA44883F1A3B8162F188E553CD265F23C1567A16876913B0C2AC2458492836"
-    //             + "01CCDA380F1C9E318D90F95D07E5426FE87E45C0E8184698E45962364E34116177DD2259"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect283k1
+     *
+    static X9ECParametersHolder sect283k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = null;
+            ECCurve curve = configureCurve(new SecT283K1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "0503213F78CA44883F1A3B8162F188E553CD265F23C1567A16876913B0C2AC2458492836"
+                + "01CCDA380F1C9E318D90F95D07E5426FE87E45C0E8184698E45962364E34116177DD2259"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect283r1
-    //  */
-    // static X9ECParametersHolder sect283r1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("77E2B07370EB0F832A6DD5B62DFC88CD06BB84BE");
-    //         ECCurve curve = configureCurve(new SecT283R1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "05F939258DB7DD90E1934F8C70B0DFEC2EED25B8557EAC9C80E2E198F8CDBECD86B12053"
-    //             + "03676854FE24141CB98FE6D4B20D02B4516FF702350EDDB0826779C813F0DF45BE8112F4"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect283r1
+     *
+    static X9ECParametersHolder sect283r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("77E2B07370EB0F832A6DD5B62DFC88CD06BB84BE");
+            ECCurve curve = configureCurve(new SecT283R1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "05F939258DB7DD90E1934F8C70B0DFEC2EED25B8557EAC9C80E2E198F8CDBECD86B12053"
+                + "03676854FE24141CB98FE6D4B20D02B4516FF702350EDDB0826779C813F0DF45BE8112F4"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect409k1
-    //  */
-    // static X9ECParametersHolder sect409k1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = null;
-    //         ECCurve curve = configureCurve(new SecT409K1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "0060F05F658F49C1AD3AB1890F7184210EFD0987E307C84C27ACCFB8F9F67CC2C460189EB5AAAA62EE222EB1B35540CFE9023746"
-    //             + "01E369050B7C4E42ACBA1DACBF04299C3460782F918EA427E6325165E9EA10E3DA5F6C42E9C55215AA9CA27A5863EC48D8E0286B"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect409k1
+     *
+    static X9ECParametersHolder sect409k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = null;
+            ECCurve curve = configureCurve(new SecT409K1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "0060F05F658F49C1AD3AB1890F7184210EFD0987E307C84C27ACCFB8F9F67CC2C460189EB5AAAA62EE222EB1B35540CFE9023746"
+                + "01E369050B7C4E42ACBA1DACBF04299C3460782F918EA427E6325165E9EA10E3DA5F6C42E9C55215AA9CA27A5863EC48D8E0286B"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect409r1
-    //  */
-    // static X9ECParametersHolder sect409r1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("4099B5A457F9D69F79213D094C4BCD4D4262210B");
-    //         ECCurve curve = configureCurve(new SecT409R1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "015D4860D088DDB3496B0C6064756260441CDE4AF1771D4DB01FFE5B34E59703DC255A868A1180515603AEAB60794E54BB7996A7"
-    //             + "0061B1CFAB6BE5F32BBFA78324ED106A7636B9C5A7BD198D0158AA4F5488D08F38514F1FDF4B4F40D2181B3681C364BA0273C706"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect409r1
+     *
+    static X9ECParametersHolder sect409r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("4099B5A457F9D69F79213D094C4BCD4D4262210B");
+            ECCurve curve = configureCurve(new SecT409R1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "015D4860D088DDB3496B0C6064756260441CDE4AF1771D4DB01FFE5B34E59703DC255A868A1180515603AEAB60794E54BB7996A7"
+                + "0061B1CFAB6BE5F32BBFA78324ED106A7636B9C5A7BD198D0158AA4F5488D08F38514F1FDF4B4F40D2181B3681C364BA0273C706"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect571k1
-    //  */
-    // static X9ECParametersHolder sect571k1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = null;
-    //         ECCurve curve = configureCurve(new SecT571K1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "026EB7A859923FBC82189631F8103FE4AC9CA2970012D5D46024804801841CA44370958493B205E647DA304DB4CEB08CBBD1BA39494776FB988B47174DCA88C7E2945283A01C8972"
-    //             + "0349DC807F4FBF374F4AEADE3BCA95314DD58CEC9F307A54FFC61EFC006D8A2C9D4979C0AC44AEA74FBEBBB9F772AEDCB620B01A7BA7AF1B320430C8591984F601CD4C143EF1C7A3"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
+    /*
+     * sect571k1
+     *
+    static X9ECParametersHolder sect571k1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = null;
+            ECCurve curve = configureCurve(new SecT571K1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "026EB7A859923FBC82189631F8103FE4AC9CA2970012D5D46024804801841CA44370958493B205E647DA304DB4CEB08CBBD1BA39494776FB988B47174DCA88C7E2945283A01C8972"
+                + "0349DC807F4FBF374F4AEADE3BCA95314DD58CEC9F307A54FFC61EFC006D8A2C9D4979C0AC44AEA74FBEBBB9F772AEDCB620B01A7BA7AF1B320430C8591984F601CD4C143EF1C7A3"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
 
-    // /*
-    //  * sect571r1
-    //  */
-    // static X9ECParametersHolder sect571r1 = new X9ECParametersHolder()
-    // {
-    //     protected X9ECParameters createParameters()
-    //     {
-    //         byte[] S = Hex.decode("2AA058F73A0E33AB486B0F610410C53A7F132310");
-    //         ECCurve curve = configureCurve(new SecT571R1Curve());
-    //         X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
-    //             + "0303001D34B856296C16C0D40D3CD7750A93D1D2955FA80AA5F40FC8DB7B2ABDBDE53950F4C0D293CDD711A35B67FB1499AE60038614F1394ABFA3B4C850D927E1E7769C8EEC2D19"
-    //             + "037BF27342DA639B6DCCFFFEB73D69D78C6C27A6009CBBCA1980F8533921E8A684423E43BAB08A576291AF8F461BB2A8B3531D2F0485C19B16E2F1516E23DD3C1A4827AF1B8AC15B"));
-    //         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-    //     }
-    // };
-    // END android-removed
+    /*
+     * sect571r1
+     *
+    static X9ECParametersHolder sect571r1 = new X9ECParametersHolder()
+    {
+        protected X9ECParameters createParameters()
+        {
+            byte[] S = Hex.decode("2AA058F73A0E33AB486B0F610410C53A7F132310");
+            ECCurve curve = configureCurve(new SecT571R1Curve());
+            X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "0303001D34B856296C16C0D40D3CD7750A93D1D2955FA80AA5F40FC8DB7B2ABDBDE53950F4C0D293CDD711A35B67FB1499AE60038614F1394ABFA3B4C850D927E1E7769C8EEC2D19"
+                + "037BF27342DA639B6DCCFFFEB73D69D78C6C27A6009CBBCA1980F8533921E8A684423E43BAB08A576291AF8F461BB2A8B3531D2F0485C19B16E2F1516E23DD3C1A4827AF1B8AC15B"));
+            return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+        }
+    };
+    */
+    // END Android-removed: Unsupported curves
 
     
     static final Hashtable nameToCurve = new Hashtable();
@@ -662,21 +666,19 @@ public class CustomNamedCurves
 
     static
     {
-        // BEGIN android-removed
-        // defineCurve("curve25519", curve25519);
-        // END android-removed
+        // BEGIN Android-removed: Unsupported curves
+        /*
+        defineCurve("curve25519", curve25519);
 
 //        defineCurveWithOID("secp112r1", SECObjectIdentifiers.secp112r1, secp112r1);
 //        defineCurveWithOID("secp112r2", SECObjectIdentifiers.secp112r2, secp112r2);
-        // BEGIN android-removed
-        // defineCurveWithOID("secp128r1", SECObjectIdentifiers.secp128r1, secp128r1);
-        // END android-removed
+        defineCurveWithOID("secp128r1", SECObjectIdentifiers.secp128r1, secp128r1);
 //        defineCurveWithOID("secp128r2", SECObjectIdentifiers.secp128r2, secp128r2);
-        // BEGIN android-removed
-        // defineCurveWithOID("secp160k1", SECObjectIdentifiers.secp160k1, secp160k1);
-        // defineCurveWithOID("secp160r1", SECObjectIdentifiers.secp160r1, secp160r1);
-        // defineCurveWithOID("secp160r2", SECObjectIdentifiers.secp160r2, secp160r2);
-        // END android-removed
+        defineCurveWithOID("secp160k1", SECObjectIdentifiers.secp160k1, secp160k1);
+        defineCurveWithOID("secp160r1", SECObjectIdentifiers.secp160r1, secp160r1);
+        defineCurveWithOID("secp160r2", SECObjectIdentifiers.secp160r2, secp160r2);
+        */
+        // END Android-removed: Unsupported curves
         defineCurveWithOID("secp192k1", SECObjectIdentifiers.secp192k1, secp192k1);
         defineCurveWithOID("secp192r1", SECObjectIdentifiers.secp192r1, secp192r1);
         defineCurveWithOID("secp224k1", SECObjectIdentifiers.secp224k1, secp224k1);
@@ -686,38 +688,40 @@ public class CustomNamedCurves
         defineCurveWithOID("secp384r1", SECObjectIdentifiers.secp384r1, secp384r1);
         defineCurveWithOID("secp521r1", SECObjectIdentifiers.secp521r1, secp521r1);
 
-        // BEGIN android-removed
-        // defineCurveWithOID("sect113r1", SECObjectIdentifiers.sect113r1, sect113r1);
-        // defineCurveWithOID("sect113r2", SECObjectIdentifiers.sect113r2, sect113r2);
-        // defineCurveWithOID("sect131r1", SECObjectIdentifiers.sect131r1, sect131r1);
-        // defineCurveWithOID("sect131r2", SECObjectIdentifiers.sect131r2, sect131r2);
-        // defineCurveWithOID("sect163k1", SECObjectIdentifiers.sect163k1, sect163k1);
-        // defineCurveWithOID("sect163r1", SECObjectIdentifiers.sect163r1, sect163r1);
-        // defineCurveWithOID("sect163r2", SECObjectIdentifiers.sect163r2, sect163r2);
-        // defineCurveWithOID("sect193r1", SECObjectIdentifiers.sect193r1, sect193r1);
-        // defineCurveWithOID("sect193r2", SECObjectIdentifiers.sect193r2, sect193r2);
-        // defineCurveWithOID("sect233k1", SECObjectIdentifiers.sect233k1, sect233k1);
-        // defineCurveWithOID("sect233r1", SECObjectIdentifiers.sect233r1, sect233r1);
-        // defineCurveWithOID("sect239k1", SECObjectIdentifiers.sect239k1, sect239k1);
-        // defineCurveWithOID("sect283k1", SECObjectIdentifiers.sect283k1, sect283k1);
-        // defineCurveWithOID("sect283r1", SECObjectIdentifiers.sect283r1, sect283r1);
-        // defineCurveWithOID("sect409k1", SECObjectIdentifiers.sect409k1, sect409k1);
-        // defineCurveWithOID("sect409r1", SECObjectIdentifiers.sect409r1, sect409r1);
-        // defineCurveWithOID("sect571k1", SECObjectIdentifiers.sect571k1, sect571k1);
-        // defineCurveWithOID("sect571r1", SECObjectIdentifiers.sect571r1, sect571r1);
+        // BEGIN Android-removed: Unsupported curves
+        /*
+        defineCurveWithOID("sect113r1", SECObjectIdentifiers.sect113r1, sect113r1);
+        defineCurveWithOID("sect113r2", SECObjectIdentifiers.sect113r2, sect113r2);
+        defineCurveWithOID("sect131r1", SECObjectIdentifiers.sect131r1, sect131r1);
+        defineCurveWithOID("sect131r2", SECObjectIdentifiers.sect131r2, sect131r2);
+        defineCurveWithOID("sect163k1", SECObjectIdentifiers.sect163k1, sect163k1);
+        defineCurveWithOID("sect163r1", SECObjectIdentifiers.sect163r1, sect163r1);
+        defineCurveWithOID("sect163r2", SECObjectIdentifiers.sect163r2, sect163r2);
+        defineCurveWithOID("sect193r1", SECObjectIdentifiers.sect193r1, sect193r1);
+        defineCurveWithOID("sect193r2", SECObjectIdentifiers.sect193r2, sect193r2);
+        defineCurveWithOID("sect233k1", SECObjectIdentifiers.sect233k1, sect233k1);
+        defineCurveWithOID("sect233r1", SECObjectIdentifiers.sect233r1, sect233r1);
+        defineCurveWithOID("sect239k1", SECObjectIdentifiers.sect239k1, sect239k1);
+        defineCurveWithOID("sect283k1", SECObjectIdentifiers.sect283k1, sect283k1);
+        defineCurveWithOID("sect283r1", SECObjectIdentifiers.sect283r1, sect283r1);
+        defineCurveWithOID("sect409k1", SECObjectIdentifiers.sect409k1, sect409k1);
+        defineCurveWithOID("sect409r1", SECObjectIdentifiers.sect409r1, sect409r1);
+        defineCurveWithOID("sect571k1", SECObjectIdentifiers.sect571k1, sect571k1);
+        defineCurveWithOID("sect571r1", SECObjectIdentifiers.sect571r1, sect571r1);
 
-        // defineCurveAlias("B-163", SECObjectIdentifiers.sect163r2);
-        // defineCurveAlias("B-233", SECObjectIdentifiers.sect233r1);
-        // defineCurveAlias("B-283", SECObjectIdentifiers.sect283r1);
-        // defineCurveAlias("B-409", SECObjectIdentifiers.sect409r1);
-        // defineCurveAlias("B-571", SECObjectIdentifiers.sect571r1);
+        defineCurveAlias("B-163", SECObjectIdentifiers.sect163r2);
+        defineCurveAlias("B-233", SECObjectIdentifiers.sect233r1);
+        defineCurveAlias("B-283", SECObjectIdentifiers.sect283r1);
+        defineCurveAlias("B-409", SECObjectIdentifiers.sect409r1);
+        defineCurveAlias("B-571", SECObjectIdentifiers.sect571r1);
 
-        // defineCurveAlias("K-163", SECObjectIdentifiers.sect163k1);
-        // defineCurveAlias("K-233", SECObjectIdentifiers.sect233k1);
-        // defineCurveAlias("K-283", SECObjectIdentifiers.sect283k1);
-        // defineCurveAlias("K-409", SECObjectIdentifiers.sect409k1);
-        // defineCurveAlias("K-571", SECObjectIdentifiers.sect571k1);
-        // END android-removed
+        defineCurveAlias("K-163", SECObjectIdentifiers.sect163k1);
+        defineCurveAlias("K-233", SECObjectIdentifiers.sect233k1);
+        defineCurveAlias("K-283", SECObjectIdentifiers.sect283k1);
+        defineCurveAlias("K-409", SECObjectIdentifiers.sect409k1);
+        defineCurveAlias("K-571", SECObjectIdentifiers.sect571k1);
+        */
+        // END Android-removed: Unsupported curves
 
         defineCurveAlias("P-192", SECObjectIdentifiers.secp192r1);
         defineCurveAlias("P-224", SECObjectIdentifiers.secp224r1);

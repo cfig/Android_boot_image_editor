@@ -12,10 +12,9 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-// BEGIN android-removed
+// Android-removed: Unsupported algorithms
 // import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
 // import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-// END android-removed
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -41,21 +40,21 @@ public class CMSSignedGenerator
     public static final String  DIGEST_SHA384 = NISTObjectIdentifiers.id_sha384.getId();
     public static final String  DIGEST_SHA512 = NISTObjectIdentifiers.id_sha512.getId();
     public static final String  DIGEST_MD5 = PKCSObjectIdentifiers.md5.getId();
-    // BEGIN android-removed
+    // BEGIN Android-removed: Unsupported algorithms
     // public static final String  DIGEST_GOST3411 = CryptoProObjectIdentifiers.gostR3411.getId();
     // public static final String  DIGEST_RIPEMD128 = TeleTrusTObjectIdentifiers.ripemd128.getId();
     // public static final String  DIGEST_RIPEMD160 = TeleTrusTObjectIdentifiers.ripemd160.getId();
     // public static final String  DIGEST_RIPEMD256 = TeleTrusTObjectIdentifiers.ripemd256.getId();
-    // END android-removed
+    // END Android-removed: Unsupported algorithms
 
     public static final String  ENCRYPTION_RSA = PKCSObjectIdentifiers.rsaEncryption.getId();
     public static final String  ENCRYPTION_DSA = X9ObjectIdentifiers.id_dsa_with_sha1.getId();
     public static final String  ENCRYPTION_ECDSA = X9ObjectIdentifiers.ecdsa_with_SHA1.getId();
     public static final String  ENCRYPTION_RSA_PSS = PKCSObjectIdentifiers.id_RSASSA_PSS.getId();
-    // BEGIN android-removed
+    // BEGIN Android-removed: Unsupported algorithms
     // public static final String  ENCRYPTION_GOST3410 = CryptoProObjectIdentifiers.gostR3410_94.getId();
     // public static final String  ENCRYPTION_ECGOST3410 = CryptoProObjectIdentifiers.gostR3410_2001.getId();
-    // END android-removed
+    // END Android-removed: Unsupported algorithms
 
     private static final String  ENCRYPTION_ECDSA_WITH_SHA1 = X9ObjectIdentifiers.ecdsa_with_SHA1.getId();
     private static final String  ENCRYPTION_ECDSA_WITH_SHA224 = X9ObjectIdentifiers.ecdsa_with_SHA224.getId();
@@ -180,33 +179,35 @@ public class CMSSignedGenerator
         certs.addAll(CMSUtils.getAttributeCertificatesFromStore(attrStore));
     }
 
-    // BEGIN android-removed
-    // /**
-    //  * Add a single instance of otherRevocationData to the CRL set to be included with the generated SignedData message.
-    //  *
-    //  * @param otherRevocationInfoFormat the OID specifying the format of the otherRevocationInfo data.
-    //  * @param otherRevocationInfo the otherRevocationInfo ASN.1 structure.
-    //  */
-    // public void addOtherRevocationInfo(
-    //     ASN1ObjectIdentifier   otherRevocationInfoFormat,
-    //     ASN1Encodable          otherRevocationInfo)
-    // {
-    //     crls.add(new DERTaggedObject(false, 1, new OtherRevocationInfoFormat(otherRevocationInfoFormat, otherRevocationInfo)));
-    // }
-    //
-    // /**
-    //  * Add a Store of otherRevocationData to the CRL set to be included with the generated SignedData message.
-    //  *
-    //  * @param otherRevocationInfoFormat the OID specifying the format of the otherRevocationInfo data.
-    //  * @param otherRevocationInfos a Store of otherRevocationInfo data to add.
-    //  */
-    // public void addOtherRevocationInfo(
-    //     ASN1ObjectIdentifier   otherRevocationInfoFormat,
-    //     Store                  otherRevocationInfos)
-    // {
-    //     crls.addAll(CMSUtils.getOthersFromStore(otherRevocationInfoFormat, otherRevocationInfos));
-    // }
-    // END android-removed
+    // BEGIN Android-removed: OtherRevocationInfoFormat isn't supported
+    /*
+    /**
+     * Add a single instance of otherRevocationData to the CRL set to be included with the generated SignedData message.
+     *
+     * @param otherRevocationInfoFormat the OID specifying the format of the otherRevocationInfo data.
+     * @param otherRevocationInfo the otherRevocationInfo ASN.1 structure.
+     *
+    public void addOtherRevocationInfo(
+        ASN1ObjectIdentifier   otherRevocationInfoFormat,
+        ASN1Encodable          otherRevocationInfo)
+    {
+        crls.add(new DERTaggedObject(false, 1, new OtherRevocationInfoFormat(otherRevocationInfoFormat, otherRevocationInfo)));
+    }
+
+    /**
+     * Add a Store of otherRevocationData to the CRL set to be included with the generated SignedData message.
+     *
+     * @param otherRevocationInfoFormat the OID specifying the format of the otherRevocationInfo data.
+     * @param otherRevocationInfos a Store of otherRevocationInfo data to add.
+     *
+    public void addOtherRevocationInfo(
+        ASN1ObjectIdentifier   otherRevocationInfoFormat,
+        Store                  otherRevocationInfos)
+    {
+        crls.addAll(CMSUtils.getOthersFromStore(otherRevocationInfoFormat, otherRevocationInfos));
+    }
+    */
+    // END Android-removed: OtherRevocationInfoFormat isn't supported
 
     /**
      * Add a store of pre-calculated signers to the generator.

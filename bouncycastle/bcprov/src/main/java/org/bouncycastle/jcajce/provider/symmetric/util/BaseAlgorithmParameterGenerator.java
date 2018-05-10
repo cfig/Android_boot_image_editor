@@ -6,13 +6,17 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 
-import org.bouncycastle.jcajce.util.BCJcaJceHelper;
+// Android-changed: Use default provider for JCA algorithms instead of BC
+// Was: import org.bouncycastle.jcajce.util.BCJcaJceHelper;
+import org.bouncycastle.jcajce.util.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.util.JcaJceHelper;
 
 public abstract class BaseAlgorithmParameterGenerator
     extends AlgorithmParameterGeneratorSpi
 {
-    private final JcaJceHelper helper = new BCJcaJceHelper();
+    // Android-changed: Use default provider for JCA algorithms instead of BC
+    // Was: private final JcaJceHelper helper = new BCJcaJceHelper();
+    private final JcaJceHelper helper = new DefaultJcaJceHelper();
 
     protected SecureRandom  random;
     protected int           strength = 1024;

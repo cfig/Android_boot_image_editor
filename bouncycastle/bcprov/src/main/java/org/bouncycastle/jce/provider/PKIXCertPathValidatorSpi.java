@@ -1,8 +1,8 @@
 package org.bouncycastle.jce.provider;
 
-// BEGIN android-added
+// BEGIN Android-added: Blacklist support
 import java.math.BigInteger;
-// END android-added
+// END Android-added: Blacklist support
 import java.security.InvalidAlgorithmParameterException;
 import java.security.PublicKey;
 import java.security.cert.CertPath;
@@ -45,11 +45,11 @@ public class PKIXCertPathValidatorSpi
     public PKIXCertPathValidatorSpi()
     {
     }
-    // BEGIN android-added
+    // BEGIN Android-added: Avoid loading blacklist during class init
     private static class NoPreloadHolder {
         private final static CertBlacklist blacklist = new CertBlacklist();
     }
-    // END android-added
+    // END Android-added: Avoid loading blacklist during class init
 
     public CertPathValidatorResult engineValidate(
             CertPath certPath,
@@ -105,7 +105,7 @@ public class PKIXCertPathValidatorSpi
         {
             throw new CertPathValidatorException("Certification path is empty.", null, certPath, -1);
         }
-        // BEGIN android-added
+        // BEGIN Android-added: Support blacklisting known-bad certs
         {
             X509Certificate cert = (X509Certificate) certs.get(0);
 
@@ -120,7 +120,7 @@ public class PKIXCertPathValidatorSpi
                 }
             }
         }
-        // END android-added
+        // END Android-added: Support blacklisting known-bad certs
 
         //
         // (b)
@@ -300,7 +300,7 @@ public class PKIXCertPathValidatorSpi
 
         for (index = certs.size() - 1; index >= 0; index--)
         {
-            // BEGIN android-added
+            // BEGIN Android-added: Support blacklisting known-bad certs
             if (NoPreloadHolder.blacklist.isPublicKeyBlackListed(workingPublicKey)) {
                 // emulate CRL exception message in RFC3280CertPathUtilities.checkCRLs
                 String message = "Certificate revocation of public key " + workingPublicKey;
@@ -308,7 +308,7 @@ public class PKIXCertPathValidatorSpi
                 AnnotatedException e = new AnnotatedException(message);
                 throw new CertPathValidatorException(e.getMessage(), e, certPath, index);
             }
-            // END android-added
+            // END Android-added: Support blacklisting known-bad certs
             // try
             // {
             //

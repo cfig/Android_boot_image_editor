@@ -3,13 +3,11 @@ package org.bouncycastle.crypto.generators;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.PBEParametersGenerator;
-// BEGIN android-changed
-import org.bouncycastle.crypto.digests.AndroidDigestFactory;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
-// BEGIN android-removed
+// Android-changed: Use Android digests
 // import org.bouncycastle.crypto.util.DigestFactory;
-// END android-removed
+import org.bouncycastle.crypto.digests.AndroidDigestFactory;
 
 /**
  * Generator for PBE derived keys and ivs as usd by OpenSSL.
@@ -21,9 +19,9 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 public class OpenSSLPBEParametersGenerator
     extends PBEParametersGenerator
 {
-    // BEGIN android-changed
+    // Android-changed: Use Android digests
+    // private Digest  digest = DigestFactory.createMD5();
     private Digest  digest = AndroidDigestFactory.getMD5();
-    // END android-changed
 
     /**
      * Construct a OpenSSL Parameters generator. 

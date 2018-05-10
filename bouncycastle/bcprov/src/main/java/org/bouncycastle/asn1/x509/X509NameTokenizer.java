@@ -78,8 +78,10 @@ public class X509NameTokenizer
                 }
                 else
                 {
-                    // BEGIN android-added
-                    // copied from a newer version of BouncyCastle
+                    // BEGIN Android-added: Unknown reason
+                    // This was previously marked with the comment "copied from a newer version
+                    // of BouncyCastle", but I couldn't find any evidence that it ever was included
+                    // in any version of BC
                     if (c == '#' && buf.charAt(buf.length() - 1) == '=')
                     {
                         buf.append('\\');
@@ -88,7 +90,7 @@ public class X509NameTokenizer
                     {
                         buf.append('\\');
                     }
-                    // END android-added
+                    // END Android-added: Unknown reason
                     buf.append(c);
                 }
             }

@@ -15,9 +15,8 @@ public class DERNull
     /**
      * @deprecated use DERNull.INSTANCE
      */
-    // BEGIN android-changed
+    // Android-changed: Reduce visibility to protected.
     protected DERNull()
-    // END android-changed
     {
     }
 

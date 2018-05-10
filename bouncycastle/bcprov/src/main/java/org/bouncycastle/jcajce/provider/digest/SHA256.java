@@ -45,19 +45,21 @@ public class SHA256
         }
     }
 
-    // BEGIN android-removed
-    // /**
-    //  * PBEWithHmacSHA
-    //  */
-    // public static class PBEWithMacKeyFactory
-    //     extends PBESecretKeyFactory
-    // {
-    //     public PBEWithMacKeyFactory()
-    //     {
-    //         super("PBEwithHmacSHA256", null, false, PKCS12, SHA256, 256, 0);
-    //     }
-    // }
-    // END android-removed
+    // BEGIN Android-removed: Unsupported algorithms
+    /*
+    /**
+     * PBEWithHmacSHA
+     *
+    public static class PBEWithMacKeyFactory
+        extends PBESecretKeyFactory
+    {
+        public PBEWithMacKeyFactory()
+        {
+            super("PBEwithHmacSHA256", null, false, PKCS12, SHA256, 256, 0);
+        }
+    }
+    */
+    // END Android-removed: Unsupported algorithms
 
     /**
      * HMACSHA256
@@ -86,11 +88,11 @@ public class SHA256
             provider.addAlgorithm("Alg.Alias.MessageDigest.SHA256", "SHA-256");
             provider.addAlgorithm("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha256, "SHA-256");
 
-            // BEGIN android-removed
+            // BEGIN Android-removed: Unsupported algorithms
             // provider.addAlgorithm("SecretKeyFactory.PBEWITHHMACSHA256", PREFIX + "$PBEWithMacKeyFactory");
             // provider.addAlgorithm("Alg.Alias.SecretKeyFactory.PBEWITHHMACSHA-256", "PBEWITHHMACSHA256");
             // provider.addAlgorithm("Alg.Alias.SecretKeyFactory." + NISTObjectIdentifiers.id_sha256, "PBEWITHHMACSHA256");
-            // END android-removed
+            // END Android-removed: Unsupported algorithms
 
             provider.addAlgorithm("Mac.PBEWITHHMACSHA256", PREFIX + "$HashMac");
 

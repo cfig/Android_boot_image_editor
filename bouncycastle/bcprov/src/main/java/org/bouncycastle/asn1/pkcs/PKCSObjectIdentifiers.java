@@ -13,12 +13,14 @@ public interface PKCSObjectIdentifiers
     static final ASN1ObjectIdentifier    pkcs_1                    = new ASN1ObjectIdentifier("1.2.840.113549.1.1");
     /** PKCS#1: 1.2.840.113549.1.1.1 */
     static final ASN1ObjectIdentifier    rsaEncryption             = pkcs_1.branch("1");
-    // BEGIN android-removed
-    // /** PKCS#1: 1.2.840.113549.1.1.2 */
-    // static final ASN1ObjectIdentifier    md2WithRSAEncryption      = pkcs_1.branch("2");
-    // /** PKCS#1: 1.2.840.113549.1.1.3 */
-    // static final ASN1ObjectIdentifier    md4WithRSAEncryption      = pkcs_1.branch("3");
-    // END android-removed
+    // BEGIN Android-removed: MD2 and MD4 are unsupported
+    /*
+    /** PKCS#1: 1.2.840.113549.1.1.2 *
+    static final ASN1ObjectIdentifier    md2WithRSAEncryption      = pkcs_1.branch("2");
+    /** PKCS#1: 1.2.840.113549.1.1.3 *
+    static final ASN1ObjectIdentifier    md4WithRSAEncryption      = pkcs_1.branch("3");
+    */
+    // END Android-removed: MD2 and MD4 are unsupported
     /** PKCS#1: 1.2.840.113549.1.1.4 */
     static final ASN1ObjectIdentifier    md5WithRSAEncryption      = pkcs_1.branch("4");
     /** PKCS#1: 1.2.840.113549.1.1.5 */

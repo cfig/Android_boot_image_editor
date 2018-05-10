@@ -1,0 +1,82 @@
+Bouncy Castle on the Android platform.
+---
+
+The code in this directory is based on $BOUNCYCASTLE_VERSION in the
+file bouncycastle.version. See the in-file change markers for more information
+on how the code differs from $BOUNCYCASTLE_VERSION.
+
+Porting New Versions of Bouncy Castle.
+--
+
+The following steps are recommended for porting new Bouncy Castle versions.
+
+1) Retrieve the appropriate version of the Bouncy Castle source from
+   www.bouncycastle.org/latest_releases.html (both bcprov-jdk*-*.tar.gz
+   and bcpkix-jdk*-*.tar.gz files).
+
+   Check the checksum (found at http://bouncycastle.org/checksums.html) with:
+
+     md5sum bcprov-jdk*-*.tar.gz
+     sha1sum bcprov-jdk*-*.tar.gz
+     md5sum bcpkix-jdk*-*.tar.gz
+     sha1sum bcpkix-jdk*-*.tar.gz
+
+2) Submit the code to the upstream-master branch:
+
+  a) Create a new branch tracking upstream-master
+
+      git checkout -b upgrade-to-xxx --track aosp/upstream-master
+
+  b) Update the variables in bouncycastle.version.
+
+  c) Expand the source from the .tar.gz files
+
+  d) Replace bc{prov,pkix}/src/main/java/org with the equivalent source
+     directory
+
+  e) Ensure any new files are added
+
+      git add bc{prov,pkix}
+
+  f) Commit the change
+
+      git commit -a -m 'bouncycastle: Android tree with upstream code for version X.XX'
+
+  g) Get the change reviewed
+
+      repo upload . -D upstream-master
+
+3) Merge the code into the master branch
+
+  a) Create a new branch
+
+      repo start merge-xxx
+
+  b) Merge the changes in
+
+      git fetch aosp upstream-master
+      git merge aosp/upstream-master
+
+  c) Resolve any conflicts.  Some common cases:
+
+     * If upstream changed a file that's deleted locally, we probably don't
+       need it
+     * If upstream added a file to a directory we deleted, we probably don't
+       need it
+
+  d) Confirm all changes
+
+      git diff aosp/master
+
+  e) Run the tests, commonly at least
+
+      cts -m CtsLibcoreTestCases
+      cts -m CtsLibcoreFileIOTestCases
+      cts -m CtsLibcoreJsr166TestCases
+      cts -m CtsLibcoreOjTestCases
+      cts -m CtsLibcoreOkHttpTestCases
+      cts -m CtsLibcoreWycheproofBCTestCases
+
+  e) Get the change reviewed
+
+      repo upload .

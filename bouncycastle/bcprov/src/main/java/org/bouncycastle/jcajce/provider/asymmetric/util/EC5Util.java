@@ -47,14 +47,14 @@ public class EC5Util
             }
         }
 
-        // BEGIN android-removed
+        // BEGIN Android-removed: Unsupported curves
         // X9ECParameters c25519 = CustomNamedCurves.getByName("Curve25519");
 
         // customCurves.put(new ECCurve.Fp(
         //     c25519.getCurve().getField().getCharacteristic(),
         //     c25519.getCurve().getA().toBigInteger(),
-        //    c25519.getCurve().getB().toBigInteger()), c25519.getCurve());
-        // END android-removed
+        //     c25519.getCurve().getB().toBigInteger()), c25519.getCurve());
+        // END Android-removed: Unsupported curves
     }
 
     public static ECCurve getCurve(

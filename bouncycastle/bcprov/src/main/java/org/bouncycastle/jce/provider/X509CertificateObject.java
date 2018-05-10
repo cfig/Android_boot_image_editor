@@ -58,9 +58,9 @@ import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.KeyUsage;
-// BEGIN android-added
+// BEGIN Android-added: Unknown reason
 import org.bouncycastle.asn1.x509.X509Name;
-// END android-added
+// END Android-added: Unknown reason
 import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrierImpl;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
@@ -570,20 +570,20 @@ public class X509CertificateObject
         }
     }
 
-    // BEGIN android-changed
+    // BEGIN Android-added: Cache encoded certificates
     private byte[] encoded;
-    // END android-changed
+    // END Android-added: Cache encoded certificates
     public byte[] getEncoded()
         throws CertificateEncodingException
     {
         try
         {
-            // BEGIN android-changed
+            // BEGIN Android-changed: Cache encoded certificates
             if (encoded == null) {
                 encoded = c.getEncoded(ASN1Encoding.DER);
             }
             return encoded;
-            // END android-changed
+            // END Android-changed: Cache encoded certificates
         }
         catch (IOException e)
         {
@@ -904,9 +904,9 @@ public class X509CertificateObject
                     list.add(genName.getEncoded());
                     break;
                 case GeneralName.directoryName:
-                    // BEGIN android-changed
+                    // BEGIN Android-changed: Unknown reason
                     list.add(X509Name.getInstance(genName.getName()).toString(true, X509Name.DefaultSymbols));
-                    // END android-changed
+                    // END Android-changed: Unknown reason
                     break;
                 case GeneralName.dNSName:
                 case GeneralName.rfc822Name:

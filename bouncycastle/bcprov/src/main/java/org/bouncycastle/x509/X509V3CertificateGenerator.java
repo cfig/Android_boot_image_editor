@@ -38,7 +38,6 @@ import org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory;
 import org.bouncycastle.jcajce.util.BCJcaJceHelper;
 import org.bouncycastle.jcajce.util.JcaJceHelper;
 import org.bouncycastle.jce.X509Principal;
-
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 /**

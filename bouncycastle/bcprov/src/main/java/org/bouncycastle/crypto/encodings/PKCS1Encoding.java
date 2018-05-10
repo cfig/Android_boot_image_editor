@@ -390,12 +390,6 @@ public class PKCS1Encoding
         {
             badType = (type != 1);
         }
-        // BEGIN android-added
-        if ((type == 1 && forPrivateKey) || (type == 2 && !forPrivateKey))
-        {
-            throw new InvalidCipherTextException("invalid block type " + type);
-        }
-        // END android-added
 
         //
         // find and extract the message block.

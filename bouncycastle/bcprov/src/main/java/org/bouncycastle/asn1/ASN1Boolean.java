@@ -80,7 +80,7 @@ public class ASN1Boolean
         return (value != 0 ? TRUE : FALSE);
     }
 
-    // BEGIN android-added
+    // BEGIN Android-added: Unknown reason
     /**
      * return a ASN1Boolean from the passed in array.
      */
@@ -90,7 +90,7 @@ public class ASN1Boolean
         return (octets[0] != 0) ? TRUE : FALSE;
     }
 
-    // END android-added
+    // END Android-added: Unknown reason
     /**
      * return a Boolean from a tagged object.
      *
@@ -117,9 +117,7 @@ public class ASN1Boolean
         }
     }
 
-    // BEGIN android-changed
-    protected ASN1Boolean(
-    // END android-changed
+    ASN1Boolean(
         byte[] value)
     {
         if (value.length != 1)
@@ -145,10 +143,9 @@ public class ASN1Boolean
      * @deprecated use getInstance(boolean) method.
      * @param value true or false.
      */
-    // BEGIN android-changed
+    // Android-changed: Reduce visibility to protected
     protected ASN1Boolean(
         boolean     value)
-    // END android-changed
     {
         this.value = (value) ? TRUE_VALUE : FALSE_VALUE;
     }
