@@ -17,12 +17,12 @@ class CArgs {
     public String cmdline;
     public String os_version;
     public String os_patch_level;
-    public int base;
-    public int kernel_offset;
-    public int ramdisk_offset;
-    public int second_offset;
+    public long base;
+    public long kernel_offset;
+    public long ramdisk_offset;
+    public long second_offset;
     public int pagesize;
-    public int tags_offset;
+    public long tags_offset;
     public boolean id;
 
     public CArgs() {
@@ -36,23 +36,23 @@ class CArgs {
     public List<String> toCommandList() {
         List<String> ret = new ArrayList<String>();
         ret.add("--base");
-        ret.add("0x" + Integer.toHexString(base));
+        ret.add("0x" + Long.toHexString(base));
         ret.add("--kernel");
         ret.add(kernel);
         ret.add("--kernel_offset");
-        ret.add("0x" + Integer.toHexString(kernel_offset));
+        ret.add("0x" + Long.toHexString(kernel_offset));
         if (null != ramdisk) {
             ret.add("--ramdisk");
             ret.add(ramdisk);
         }
         ret.add("--ramdisk_offset");
-        ret.add("0x" + Integer.toHexString(ramdisk_offset));
+        ret.add("0x" + Long.toHexString(ramdisk_offset));
         if (null != second) {
             ret.add("--second");
             ret.add(second);
         }
         ret.add("--second_offset");
-        ret.add("0x" + Integer.toHexString(second_offset));
+        ret.add("0x" + Long.toHexString(second_offset));
         if (null != board) {
             ret.add("--board");
             ret.add(board);
@@ -70,7 +70,7 @@ class CArgs {
             ret.add(os_patch_level);
         }
         ret.add("--tags_offset");
-        ret.add("0x" + Integer.toHexString(tags_offset));
+        ret.add("0x" + Long.toHexString(tags_offset));
         if (id) {
             ret.add("--id");
         }

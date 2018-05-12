@@ -32,11 +32,11 @@ class CImgInfo  extends CArgs {
         //arg info
         aArg.board = result.bootimg.args.board;
         aArg.cmdline = result.bootimg.args.cmdline;
-        aArg.base = Integer.decode(result.bootimg.args.base);
-        aArg.kernel_offset = Integer.decode(result.bootimg.args.kernel_offset);
-        aArg.ramdisk_offset = Integer.decode(result.bootimg.args.ramdisk_offset);
-        aArg.second_offset = Integer.decode(result.bootimg.args.second_offset);
-        aArg.tags_offset = Integer.decode(result.bootimg.args.tags_offset);
+        aArg.base = Long.decode(result.bootimg.args.base);
+        aArg.kernel_offset = Long.decode(result.bootimg.args.kernel_offset);
+        aArg.ramdisk_offset = Long.decode(result.bootimg.args.ramdisk_offset);
+        aArg.second_offset = Long.decode(result.bootimg.args.second_offset);
+        aArg.tags_offset = Long.decode(result.bootimg.args.tags_offset);
         aArg.id = true;
         aArg.pagesize = result.bootimg.args.pagesize;
         aArg.os_version = result.bootimg.args.os_version;
@@ -69,11 +69,11 @@ class CImgInfo  extends CArgs {
         String hashString = bytes2String(this.hash);
         jb.bootimg {
             args {
-                base "0x" + Integer.toHexString(this.base);
-                kernel_offset "0x" + Integer.toHexString(this.kernel_offset);
-                ramdisk_offset "0x" + Integer.toHexString(this.ramdisk_offset);
-                second_offset "0x" + Integer.toHexString(this.second_offset);
-                tags_offset "0x" + Integer.toHexString(this.tags_offset);
+                base "0x" + Integer.toHexString((int)this.base);
+                kernel_offset "0x" + Integer.toHexString((int)this.kernel_offset);
+                ramdisk_offset "0x" + Integer.toHexString((int)this.ramdisk_offset);
+                second_offset "0x" + Integer.toHexString((int)this.second_offset);
+                tags_offset "0x" + Integer.toHexString((int)this.tags_offset);
                 pagesize this.pagesize;
                 board this.board;
                 cmdline this.cmdline;
