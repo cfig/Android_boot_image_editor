@@ -8,12 +8,13 @@ This tool focuses on editing Android boot.img(also recovery.img and recovery-two
 #### Host OS requirement:
 
 Linux or Mac.
+Also need python and java 8.
 
 #### Target Android requirement:
 
-(1) Targeted boot.img(or recovery.img / recovery-two-step.img) MUST follows AOSP [verified boot flow](https://source.android.com/security/verifiedboot/index.html), which means it packs linux kernel, rootfs , and a optional second state bootloader, then sign it with OEM/USER keys.
+(1) Target boot.img(or recovery.img / recovery-two-step.img) MUST follows AOSP verified boot flow, either [Boot image signature](https://source.android.com/security/verifiedboot/verified-boot#signature_format) in VBoot 1.0 or [AVB HASH footer](https://android.googlesource.com/platform/external/avb/+/master/README.md#The-VBMeta-struct) in VBoot 2.0.
 
-(2) These utilities are known to work for Nexus (or Nexus compatible) boot.img(or recovery.img/recovery-two-step.img) for the following Android releases:
+(2) These utilities are known to work for Nexus/Pixel (or Pixel compatible) boot.img(or recovery.img/recovery-two-step.img) for the following Android releases:
 
  - AOSP master
  - Lollipop (API Level 21,22) - Oreo (API Level 26,27)
@@ -62,8 +63,8 @@ And you get recovery.img.signed
 An example boot.img has been placed at **src/test/resources/boot.img**, which is extracted from Nexus 5x(code: bullhead) factory images from [Google](https://dl.google.com/dl/android/aosp/bullhead-mda89e-factory-29247942.tgz), you can take it as a quick start.
 
 ## boot.img layout
-Read [layout](https://github.com/cfig/Android_boot_image_editor/blob/master/README.expert.md) of Android boot.img.
-We now support **os\_version** and **os\_patch\_level**.
+Read [layout](README.expert.md) of Android boot.img.
+We now support **os\_version** ,**os\_patch\_level**, **header_version** and **dtbo**
 
 ## References
 

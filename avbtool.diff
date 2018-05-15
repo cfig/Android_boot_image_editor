@@ -1,0 +1,14 @@
+diff --git a/avb/avbtool b/avb/avbtool
+index b742466..2830e20 100755
+--- a/avb/avbtool
++++ b/avb/avbtool
+@@ -2142,7 +2142,8 @@ class Avb(object):
+         expected_chain_partitions_map[partition_name] = (rollback_index_location, pk_blob)
+ 
+     image_dir = os.path.dirname(image_filename)
+-    image_ext = os.path.splitext(image_filename)[1]
++    #image_ext = os.path.splitext(image_filename)[1]
++    image_ext = image_filename[image_filename.index('.'):]
+ 
+     key_blob = None
+     if key_path:

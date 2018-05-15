@@ -63,7 +63,9 @@ t:
 	cp -v system/core/libcutils/include/private/android_filesystem_capability.h $(ROOTDIR)/src/mkbootfs/headers/private/
 	cp -v system/core/libcutils/include/private/fs_config.h $(ROOTDIR)/src/mkbootfs/headers/private/
 	cp -v system/core/libutils/include/utils/Compat.h $(ROOTDIR)/src/mkbootfs/headers/utils/
-	echo "$$log_h_content" | base64 -d > $(LOG_H)
-	echo "$$build_gradle_content" | base64 -d  > $(ROOTDIR)/build.gradle
-	echo "$$mkbootfs_patch_content" | base64 -d > $(ROOTDIR)/1.diff
+	echo "$$log_h_content" | base64 --decode > $(LOG_H)
+	echo "$$build_gradle_content" | base64 --decode  > $(ROOTDIR)/build.gradle
+	echo "$$mkbootfs_patch_content" | base64 --decode > $(ROOTDIR)/1.diff
 
+tt:
+	echo "$$mkbootfs_patch_content" | base64 --decode > 1.diff
