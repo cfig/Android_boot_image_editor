@@ -1,2 +1,3 @@
 bouncycastle/* linguist-vendored
 boot_signer/*  linguist-vendored
+mkbootfs/*     linguist-vendored

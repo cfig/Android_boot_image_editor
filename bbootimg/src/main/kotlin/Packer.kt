@@ -11,7 +11,6 @@ import java.nio.ByteOrder
 import java.security.MessageDigest
 import java.util.regex.Pattern
 import org.junit.Assert.*
-import sun.nio.fs.UnixFileSystemProvider
 
 class Packer {
     private val log = LoggerFactory.getLogger("Packer")
