@@ -2,18 +2,6 @@ apply plugin: 'java'
 
 apply plugin: 'groovy'
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.lang.RuntimeException;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.security.MessageDigest;
-
 subprojects {
     tasks.withType(JavaCompile) {
         //options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
@@ -25,9 +13,6 @@ subprojects {
 // ----------------------------------------------------------------------------
 def workdir='build/unzip_boot'
 project.ext.rootWorkDir = new File(workdir).getAbsolutePath()
-def defaultRootDir = workdir + "/root"
-def sdkVersion = 7;
-boolean gDebug=true
 String activeImg = "boot.img"
 String activePath = "/boot"
 if (new File("boot.img").exists()) {
@@ -42,142 +27,48 @@ if (new File("boot.img").exists()) {
 }
 project.ext.outClearIMg = new File(String.format("%s.clear", activeImg)).getAbsolutePath()
 project.ext.mkbootimgBin = new File("src/mkbootimg/mkbootimg").getAbsolutePath()
-println("Active image target: " + activeImg);
+project.ext.avbtool = new File("avb/avbtool").getAbsolutePath()
+project.ext.bootSigner = new File("boot_signer/build/libs/boot_signer.jar").getAbsolutePath()
+println("Active image target: " + activeImg)
 
 // ----------------------------------------------------------------------------
 //                       tasks
 // ----------------------------------------------------------------------------
-task unpack_bootimg(type: JavaExec, dependsOn: ['abootimg:abootimg']) {
-    doFirst {
-        def rootdir = new File(workdir)
-        if (rootdir.exists()) {
-            rootdir.deleteDir()
-        }
-        rootdir.mkdirs()
-    }
-    main = 'cfig.bootimg.abootimg'
-    classpath = files("abootimg/build/libs/abootimg.jar")
+task unpack(type: JavaExec, dependsOn: ["bbootimg:jar"]) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = "cfig.RKt"
+    classpath = files("bbootimg/build/libs/bbootimg.jar")
     maxHeapSize '512m'
-    args String.format("%s", activeImg), workdir
+    args "unpack", activeImg, rootProject.mkbootimgBin, rootProject.avbtool, rootProject.bootSigner
 }
 
-task unpack_ramdisk_gz {
-    doLast {
-        unGnuzipFile(workdir+"/ramdisk.img.gz", workdir + "/ramdisk.img")
-    }
-}
-unpack_ramdisk_gz.dependsOn(unpack_bootimg)
-
-task unpack_cpio(type: Exec, dependsOn: unpack_ramdisk_gz) {
-    doFirst {
-        def rootdir = new File(workdir+ "/root")
-        if (rootdir.exists()) {
-            rootdir.deleteDir()
-        }
-        rootdir.mkdirs()
-    }
-    workingDir workdir + "/root"
-    executable 'cpio'
-    args = ['-i', '-m', '-F', '../ramdisk.img']
+task packClear(type: JavaExec, dependsOn: ["bbootimg:jar"]) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = "cfig.RKt"
+    classpath = files("bbootimg/build/libs/bbootimg.jar")
+    maxHeapSize '512m'
+    args "pack", activeImg, rootProject.mkbootimgBin, rootProject.avbtool, rootProject.bootSigner
 }
 
-task unpack(type: Delete, dependsOn: unpack_cpio) {
-    description "extract boot.img or recovery.img"
-    delete workdir + "/ramdisk.img.gz"
-    delete workdir + "/ramdisk.img"
+task sign(type: JavaExec, dependsOn: ["bbootimg:jar", packClear, "boot_signer:jar"]) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = "cfig.RKt"
+    classpath = files("bbootimg/build/libs/bbootimg.jar")
+    maxHeapSize '512m'
+    args "sign", activeImg, rootProject.mkbootimgBin, rootProject.avbtool, rootProject.bootSigner
 }
 
-task pack_ramdisk_and_gz { Task task ->
-    def rootDir = defaultRootDir
-    if (null != System.getProperty("ANDROID_PRODUCT_OUT")) {
-        rootDir = System.getProperty("ANDROID_PRODUCT_OUT") + "/root"
-    }
-    doLast {
-        if (!rootDir.equals(defaultRootDir)) {
-            println("Warning:")
-            println("Warning:")
-            println("Warning:\tUsing [" + rootDir + "] for target root")
-            println("Warning:")
-            println("Warning:")
-        }
-        ByteArrayOutputStream mkbootfs_out = new ByteArrayOutputStream()
-        task.project.exec {
-            commandLine = [ 'mkbootfs/build/exe/mkbootfs/mkbootfs', rootDir ]
-            standardOutput = mkbootfs_out
-        }
-        def ByteArrayInputStream gzip_in = new ByteArrayInputStream(mkbootfs_out.buf)
-        gnuZipFile(workdir + "/ramdisk.img.gz", gzip_in)
-    }
-}
-pack_ramdisk_and_gz.dependsOn('mkbootfs:mkbootfsExecutable')
-
-void unGnuzipFile(String compressedFile, String decompressedFile) throws IOException {
-    byte[] buffer = new byte[1024];
-    try {
-        FileInputStream fileIn = new FileInputStream(compressedFile);
-        GZIPInputStream gZIPInputStream = new GZIPInputStream(fileIn);
-        FileOutputStream fileOutputStream = new FileOutputStream(decompressedFile);
-        int bytes_read;
-        while ((bytes_read = gZIPInputStream.read(buffer)) > 0) {
-            fileOutputStream.write(buffer, 0, bytes_read);
-        }
-        gZIPInputStream.close();
-        fileOutputStream.close();
-        System.out.println("The file was decompressed successfully!");
-    } catch (IOException ex) {
-        throw ex;
-    }
-}
-
-void gnuZipFile(String compressedFile, InputStream fis) throws IOException {
-    byte[] buffer = new byte[1024];
-    try {
-        FileOutputStream fos = new FileOutputStream(compressedFile);
-        GZIPOutputStream gos = new GZIPOutputStream(fos);
-
-        int bytes_read;
-        while ((bytes_read = fis.read(buffer)) > 0) {
-            gos .write(buffer, 0, bytes_read);
-        }
-        gos.finish();
-        gos.close();
-        System.out.println("The file compressed successfully!");
-    } catch (IOException ex) {
-        throw ex;
-    }
-}
-
-void gnuZipFile(String compressedFile, String decompressedFile) throws IOException {
-    byte[] buffer = new byte[1024];
-    try {
-        FileOutputStream fos = new FileOutputStream(compressedFile);
-        GZIPOutputStream gos = new GZIPOutputStream(fos);
-
-        FileInputStream fis = new FileInputStream(decompressedFile);
-        int bytes_read;
-        while ((bytes_read = fis.read(buffer)) > 0) {
-            gos .write(buffer, 0, bytes_read);
-        }
-        fis.close();
-        gos.finish();
-        gos.close();
-        System.out.println("The file compressed successfully!");
-    } catch (IOException ex) {
-        throw ex;
-    }
-}
-
-task verify_clear(dependsOn: ['abootimg:pack_clear', 'abootimg:pack_clear2', 'abootimg:pack_clear3']) {
-    doLast {
-        verifyClearImages(activeImg + ".clear", activeImg + ".clear2", activeImg + ".clear3");
-    }
-}
-
-task pack(type: JavaExec, dependsOn: [verify_clear, 'boot_signer:jar']) {
+task signTest(type: JavaExec, dependsOn: ["boot_signer:jar"]) {
     main = 'com.android.verity.BootSignature'
     classpath = files("boot_signer/build/libs/boot_signer.jar")
     maxHeapSize '512m'
     args activePath, activeImg + '.clear', 'security/verity.pk8', 'security/verity.x509.pem', activeImg + '.signed'
+}
+
+task pack(dependsOn: sign) {
+    doLast {
+        println("Pack task finished: " + activeImg + ".signed")
+    }
 }
 
 task _setup(type: Copy) {
@@ -201,24 +92,6 @@ void Run(List<String> inCmd, String inWorkdir = null) {
 
 void Run(String inCmd, String inWorkdir = null) {
     Run(Arrays.asList(inCmd.split()), inWorkdir);
-}
-
-boolean RunFunc(List<String> inCmd, String inWorkdir = null) {
-    println("CMD:" + inCmd)
-    if (inWorkdir == null) {
-        inWorkdir = ".";
-    }
-    ProcessBuilder pb = new ProcessBuilder(inCmd)
-            .directory(new File(inWorkdir))
-            .redirectErrorStream(true);
-    Process p = pb.start()
-    p.inputStream.eachLine {println it}
-    p.waitFor();
-    return 0 == p.exitValue();
-}
-
-void RunFunc(String inCmd, String inWorkdir = null) {
-    RunFunc(Arrays.asList(inCmd.split()), inWorkdir);
 }
 
 void updateBootImage(String activeImg) {
@@ -256,83 +129,6 @@ task rr {
     }
 }
 
-void updateLinks(String inWorkdir) {
-    updateLinks(inWorkdir, 6);
-}
-
-void updateLinks(String inWorkdir, int sdkVersion) {
-    String sysBinDir = inWorkdir + "/root/system/bin";
-    String[] toolboxLinks = [ "df", "getevent", "iftop", "ioctl", "ionice", "log", "ls", "lsof", "mount", "nandread", "newfs_msdos", "ps", "prlimit", "renice", "sendevent", "start", "stop", "top", "uptime", "watchprops", "dd", "du" ];
-    String[] toyboxLinks = [ "acpi", "basename", "blockdev", "bzcat", "cal", "cat", "chcon", "chgrp", "chmod", "chown", "chroot", "cksum", "clear", "comm", "cmp", "cp", "cpio", "cut", "date", "dirname", "dmesg", "dos2unix", "echo", "env", "expand", "expr", "fallocate", "false", "find", "free", "getenforce", "getprop", "groups", "head", "hostname", "hwclock", "id", "ifconfig", "inotifyd", "insmod", "kill", "load_policy", "ln", "logname", "losetup", "lsmod", "lsusb", "md5sum", "mkdir", "mknod", "mkswap", "mktemp", "modinfo", "more", "mountpoint", "mv", "netstat", "nice", "nl", "nohup", "od", "paste", "patch", "grep", "pidof", "pkill", "pmap", "printenv", "printf", "pwd", "readlink", "realpath", "restorecon", "rm", "rmdir", "rmmod", "route", "runcon", "sed", "seq", "setenforce", "setprop", "setsid", "sha1sum", "sleep", "sort", "split", "stat", "strings", "swapoff", "swapon", "sync", "sysctl", "tac", "tail", "tar", "taskset", "tee", "time", "timeout", "touch", "tr", "true", "truncate", "umount", "uname", "uniq", "unix2dos", "usleep", "vmstat", "wc", "which", "whoami", "xargs", "yes" ];
-    String[] toolboxLinks_7 = [ "df", "getevent", "iftop", "ioctl", "ionice", "log", "lsof", "nandread", "newfs_msdos", "ps", "prlimit", "renice", "sendevent", "start", "stop", "top", "uptime", "watchprops", "dd", "du" ];
-    String[] toyboxLinks_7 = [ "ls", "acpi", "basename", "blockdev", "bzcat", "cal", "cat", "chcon", "chgrp", "chmod", "chown", "chroot", "cksum", "clear", "comm", "cmp", "cp", "cpio", "cut", "date", "dirname", "dmesg", "dos2unix", "echo", "env", "expand", "expr", "fallocate", "false", "find", "free", "getenforce", "getprop", "groups", "head", "hostname", "hwclock", "id", "ifconfig", "inotifyd", "insmod", "kill", "load_policy", "ln", "logname", "losetup", "lsmod", "lsusb", "md5sum", "mkdir", "mknod", "mkswap", "mktemp", "modinfo", "more", "mount", "mountpoint", "mv", "netstat", "nice", "nl", "nohup", "od", "paste", "patch", "grep", "pidof", "pkill", "pmap", "printenv", "printf", "pwd", "readlink", "realpath", "restorecon", "rm", "rmdir", "rmmod", "route", "runcon", "sed", "seq", "setenforce", "setprop", "setsid", "sha1sum", "sleep", "sort", "split", "stat", "strings", "swapoff", "swapon", "sync", "sysctl", "tac", "tail", "tar", "taskset", "tee", "time", "timeout", "touch", "tr", "true", "truncate", "umount", "uname", "uniq", "unix2dos", "usleep", "vmstat", "wc", "which", "whoami", "xargs", "yes" ];
-
-    if (sdkVersion <= 6) {
-        //Android Marshmallow (6)
-        for (String item : toolboxLinks) {
-            RunFunc("unlink " + item, sysBinDir);
-            Run("/bin/ln -s toolbox " + item, sysBinDir);
-        }
-        //Android Marshmallow (6)
-        for (String item : toyboxLinks) {
-            RunFunc("unlink " + item, sysBinDir);
-            Run("/bin/ln -s toybox " + item, sysBinDir);
-        }
-    } else {
-        //Android Nougat (7)
-        for (String item : toolboxLinks_7) {
-            RunFunc("unlink " + item, sysBinDir);
-            Run("/bin/ln -s toolbox " + item, sysBinDir);
-        }
-        //Android Nougat (7)
-        for (String item : toyboxLinks_7) {
-            RunFunc("unlink " + item, sysBinDir);
-            Run("/bin/ln -s toybox " + item, sysBinDir);
-        }
-    }
-}
-
-task debug(dependsOn: ['addSystemBin', 'addSystemLib']) {
-    description "add debug tools into recovery rootfs from ANDROID_PRODUCT_OUT"
-    doLast {
-        updateLinks(workdir, sdkVersion);
-    }
-}
-
-task addSystemBin(type: Copy) {
-    from System.getProperty("ANDROID_PRODUCT_OUT") + '/system/bin'
-    into workdir + "/root/system/bin"
-    include { details ->
-        inTargetList(details.file.name, "bin", sdkVersion)
-    }
-}
-
-task addSystemLib(type: Copy) {
-    from System.getProperty("ANDROID_PRODUCT_OUT") + '/system/lib'
-    into workdir + "/root/system/lib"
-    include { details ->
-        inTargetList(details.file.name, "lib", sdkVersion)
-    }
-}
-
-boolean inTargetList(String file, String inType, int sdkVersion) {
-    String[] bins = [ "sh", "logcat", "logd", "linker", "toolbox", "toybox", "applypatch", "debuggerd",  "reboot" ]
-    String[] libs_6 = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libz.so", "libstdc++.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so" ]
-    String[] libs = [ "libdl.so", "libutils.so", "libc++.so", "libc.so", "libm.so", "libz.so", "libstdc++.so", "libcutils.so", "libselinux.so", "liblog.so", "libpcre.so", "libsysutils.so", "libnl.so", "libbase.so", "libbacktrace.so", "libunwind.so", "libcrypto.so", "libpackagelistparser.so", "libpcrecpp.so", "liblzma.so" ]
-    switch (inType) {
-        case "bin":
-            return inArray(file, bins);
-        case "lib":
-            if (sdkVersion <= 6) {
-                return inArray(file, libs_6);
-            } else {
-                return inArray(file, libs);
-            }
-        default:
-            throw new RuntimeException("illegal type");
-    }
-}
-
 boolean inArray(String file, String[] inArray) {
     for (String item : inArray) {
         if (item.equals(file)) {
@@ -340,59 +136,4 @@ boolean inArray(String file, String[] inArray) {
         }
     }
     return false;
-}
-
-// ----------------------------------------------------------------------------
-//                      post configs
-// ----------------------------------------------------------------------------
-if (null == activeImg) {
-    pack.enabled = false
-    unpack.enabled = false
-    unpack_cpio.enabled = false
-    unpack_bootimg.enabled = false
-    unpack_ramdisk_gz.enabled = false
-}
-
-if (!new File(workdir + File.separator + "root").exists()) {
-    pack_ramdisk_and_gz.enabled = false
-}
-
-byte[] hashFile(String inFile) {
-    MessageDigest md = MessageDigest.getInstance("SHA1")
-    ByteBuffer itemBF = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
-    InputStream is = new FileInputStream(new File(inFile))
-    int byteRead;
-    byte[] dataRead = new byte[128]
-    while (true) {
-        byteRead = is.read(dataRead)
-        if (-1 == byteRead) {
-            break;
-        }
-        md.update(dataRead, 0, byteRead)
-    }
-    is.close();
-    md.update(itemBF.putInt((int) new File(inFile).length()).array())
-
-    return md.digest();
-}
-
-void verifyClearImages(String... inFiles) {
-    assert (inFiles.length > 1)
-    byte[] ref;
-    for (String item : inFiles) {
-        if (null == ref) {
-            print(" Hashing  " + item + "...");
-            ref = hashFile(item);
-            println("DONE");
-        } else {
-            print("Verifying " + item + "...");
-            byte[] tgt = hashFile(item);
-            assert Arrays.equals(ref, tgt);
-            println("PASSED");
-        }
-    }
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.4'
 }

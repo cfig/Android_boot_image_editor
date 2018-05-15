@@ -1,0 +1,56 @@
+buildscript {
+    ext {
+        kotlinVersion = '1.2.41'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+    }
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'application'
+
+sourceCompatibility = 1.8
+compileKotlin {
+    kotlinOptions {
+        freeCompilerArgs = ["-Xjsr305=strict"]
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        freeCompilerArgs = ["-Xjsr305=strict"]
+        jvmTarget = "1.8"
+    }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    compile("org.jetbrains.kotlin:kotlin-reflect")
+    compile("org.slf4j:slf4j-simple:1.7.25")
+    compile("org.slf4j:slf4j-api:1.7.25")
+    compile("com.fasterxml.jackson.core:jackson-annotations:2.9.4")
+    compile("com.fasterxml.jackson.core:jackson-databind:2.9.4")
+    compile("org.apache.commons:commons-exec:1.3")
+    compile("junit:junit:4.12")
+}
+
+mainClassName = "cfig.RKt"
+
+jar {
+    from files("build/classes/kotlin/main")
+    from configurations.runtime.asFileTree.files.collect { zipTree(it) }
+
+    manifest {
+        attributes "Main-Class": "cfig.RKt"
+    }
+}
