@@ -3,6 +3,7 @@ package cfig
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
+import org.apache.commons.exec.PumpStreamHandler
 import org.slf4j.LoggerFactory
 import java.io.*
 import java.nio.ByteBuffer
@@ -10,6 +11,7 @@ import java.nio.ByteOrder
 import java.security.MessageDigest
 import java.util.regex.Pattern
 import org.junit.Assert.*
+import sun.nio.fs.UnixFileSystemProvider
 
 class Packer {
     private val log = LoggerFactory.getLogger("Packer")
@@ -209,7 +211,29 @@ class Packer {
         return imageId
     }
 
-    fun pack(mkbootimgBin: String) {
+    fun packRootfs(args: ImgArgs, mkbootfs: String) {
+        log.info("Packing rootfs ${UnifiedConfig.workDir}root ...")
+        val outputStream = ByteArrayOutputStream()
+        val exec = DefaultExecutor()
+        exec.streamHandler = PumpStreamHandler(outputStream)
+        val cmdline = "$mkbootfs ${UnifiedConfig.workDir}root"
+        log.info(cmdline)
+        exec.execute(CommandLine.parse(cmdline))
+        Helper.gnuZipFile2(args.ramdisk!!, ByteArrayInputStream(outputStream.toByteArray()))
+        log.info("${args.ramdisk} is ready")
+    }
+
+    private fun File.deleleIfExists() {
+        if (this.exists()) {
+            if (!this.isFile) {
+                throw IllegalStateException("${this.canonicalPath} should be regular file")
+            }
+            log.info("Deleting ${this.path} ...")
+            this.delete()
+        }
+    }
+
+    fun pack(mkbootimgBin: String, mkbootfsBin: String) {
         log.info("Loading config from ${workDir}bootimg.json")
         val cfg = ObjectMapper().readValue(File(workDir + "bootimg.json"), UnifiedConfig::class.java)
         val readBack = cfg.toArgs()
@@ -220,9 +244,20 @@ class Packer {
         log.debug(info.toString())
 
         //clean
-        if (File(args.output + ".google").exists()) File(args.output + ".google").delete()
-        if (File(args.output + ".clear").exists()) File(args.output + ".clear").delete()
-        if (File(args.output + ".signed").exists()) File(args.output + ".signed").delete()
+        File(args.output + ".google").deleleIfExists()
+        File(args.output + ".clear").deleleIfExists()
+        File(args.output + ".signed").deleleIfExists()
+        File("${UnifiedConfig.workDir}ramdisk.img").deleleIfExists()
+
+        args.ramdisk?.let {
+            if (File(it).exists() && !File(UnifiedConfig.workDir + "root").exists()) {
+                //do nothing if we have ramdisk.img.gz but no /root
+                log.warn("Use prebuilt ramdisk file: $it")
+            } else {
+                File(it).deleleIfExists()
+                packRootfs(args, mkbootfsBin)
+            }
+        }
 
         writeHeader(args)
         writeData(args)
@@ -261,11 +296,12 @@ class Packer {
                         mapToJson(info.signature as LinkedHashMap<*, *>), ImgInfo.AvbSignature::class.java)
                 File(args.output + ".clear").copyTo(File(args.output + ".signed"))
                 DefaultExecutor().execute(CommandLine.parse(
-                                "$avbtool add_hash_footer " +
-                                        "--image ${args.output}.signed " +
-                                        "--partition_size ${sig.imageSize} " +
-                                        "--partition_name ${sig.partName}"))
-                verifyAVBIntegrity(args, info, avbtool)
+                        "$avbtool add_hash_footer " +
+                                "--image ${args.output}.signed " +
+                                "--partition_size ${sig.imageSize} " +
+                                "--salt ${sig.salt} " +
+                                "--partition_name ${sig.partName}"))
+                verifyAVBIntegrity(args, avbtool)
             }
         }
     }
@@ -293,7 +329,7 @@ class Packer {
         assertTrue(0 == p.exitValue())
     }
 
-    private fun verifyAVBIntegrity(args: ImgArgs, info: ImgInfo, avbtool: String) {
+    private fun verifyAVBIntegrity(args: ImgArgs, avbtool: String) {
         val tgt = args.output + ".signed"
         log.info("Verifying AVB: $tgt")
         DefaultExecutor().execute(CommandLine.parse("$avbtool verify_image --image $tgt"))

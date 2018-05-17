@@ -24,7 +24,8 @@ data class ImgInfo(
             var type: String = "avb",
             var originalImageSize: Int? = null,
             var imageSize: Int? = null,
-            var partName: String? = null)
+            var partName: String? = null,
+            var salt: String = "")
 
     data class VeritySignature(
             var type: String = "dm-verity",

@@ -41,6 +41,7 @@ dependencies {
     compile("com.fasterxml.jackson.core:jackson-annotations:2.9.4")
     compile("com.fasterxml.jackson.core:jackson-databind:2.9.4")
     compile("org.apache.commons:commons-exec:1.3")
+    compile("org.apache.commons:commons-compress:1.16.1")
     compile("junit:junit:4.12")
 }
 

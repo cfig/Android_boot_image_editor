@@ -27,6 +27,7 @@ if (new File("boot.img").exists()) {
 }
 project.ext.outClearIMg = new File(String.format("%s.clear", activeImg)).getAbsolutePath()
 project.ext.mkbootimgBin = new File("src/mkbootimg/mkbootimg").getAbsolutePath()
+project.ext.mkbootfsBin = new File("mkbootfs/build/exe/mkbootfs/mkbootfs").getAbsolutePath()
 project.ext.avbtool = new File("avb/avbtool").getAbsolutePath()
 project.ext.bootSigner = new File("boot_signer/build/libs/boot_signer.jar").getAbsolutePath()
 println("Active image target: " + activeImg)
@@ -39,15 +40,15 @@ task unpack(type: JavaExec, dependsOn: ["bbootimg:jar"]) {
     main = "cfig.RKt"
     classpath = files("bbootimg/build/libs/bbootimg.jar")
     maxHeapSize '512m'
-    args "unpack", activeImg, rootProject.mkbootimgBin, rootProject.avbtool, rootProject.bootSigner
+    args "unpack", activeImg, rootProject.mkbootimgBin, rootProject.avbtool, rootProject.bootSigner, rootProject.mkbootfsBin
 }
 
-task packClear(type: JavaExec, dependsOn: ["bbootimg:jar"]) {
+task packClear(type: JavaExec, dependsOn: ["bbootimg:jar", "mkbootfs:mkbootfsExecutable"]) {
     classpath = sourceSets.main.runtimeClasspath
     main = "cfig.RKt"
     classpath = files("bbootimg/build/libs/bbootimg.jar")
     maxHeapSize '512m'
-    args "pack", activeImg, rootProject.mkbootimgBin, rootProject.avbtool, rootProject.bootSigner
+    args "pack", activeImg, rootProject.mkbootimgBin, rootProject.avbtool, rootProject.bootSigner, rootProject.mkbootfsBin
 }
 
 task sign(type: JavaExec, dependsOn: ["bbootimg:jar", packClear, "boot_signer:jar"]) {
@@ -55,14 +56,14 @@ task sign(type: JavaExec, dependsOn: ["bbootimg:jar", packClear, "boot_signer:ja
     main = "cfig.RKt"
     classpath = files("bbootimg/build/libs/bbootimg.jar")
     maxHeapSize '512m'
-    args "sign", activeImg, rootProject.mkbootimgBin, rootProject.avbtool, rootProject.bootSigner
+    args "sign", activeImg, rootProject.mkbootimgBin, rootProject.avbtool, rootProject.bootSigner, rootProject.mkbootfsBin
 }
 
 task signTest(type: JavaExec, dependsOn: ["boot_signer:jar"]) {
     main = 'com.android.verity.BootSignature'
     classpath = files("boot_signer/build/libs/boot_signer.jar")
     maxHeapSize '512m'
-    args activePath, activeImg + '.clear', 'security/verity.pk8', 'security/verity.x509.pem', activeImg + '.signed'
+    args activePath, activeImg + '.clear', 'security/verity.pk8', 'security/verity.x509.pem', activeImg + '.signed', rootProject.mkbootfsBin
 }
 
 task pack(dependsOn: sign) {

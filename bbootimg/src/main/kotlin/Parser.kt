@@ -149,15 +149,19 @@ class Parser {
         }
     }
 
-    private fun verifyAVBIntegrity(args: ImgArgs, info: ImgInfo, avbtool: String) {
-        DefaultExecutor().execute(CommandLine.parse("$avbtool verify_image --image ${args.output}"))
+    private fun verifyAVBIntegrity(args: ImgArgs, avbtool: String) {
+        val cmdline = "$avbtool verify_image --image ${args.output}"
+        log.info(cmdline)
+        DefaultExecutor().execute(CommandLine.parse(cmdline))
     }
 
     private fun parseAVBInfo(args: ImgArgs, info: ImgInfo, avbtool: String) {
         val outputStream = ByteArrayOutputStream()
         val exec = DefaultExecutor()
         exec.streamHandler = PumpStreamHandler(outputStream)
-        exec.execute(CommandLine.parse("$avbtool info_image --image ${args.output}"))
+        val cmdline = "$avbtool info_image --image ${args.output}"
+        log.info(cmdline)
+        exec.execute(CommandLine.parse(cmdline))
         val lines = outputStream.toString().split("\n")
         lines.forEach {
             val m = Pattern.compile("^Original image size:\\s+(\\d+)\\s*bytes").matcher(it)
@@ -175,11 +179,19 @@ class Parser {
                 (info.signature as ImgInfo.AvbSignature).partName = m3.group(1)
 
             }
+
+            val m4 = Pattern.compile("^\\s*Salt:\\s+(\\S+)$").matcher(it)
+            if (m4.find()) {
+                (info.signature as ImgInfo.AvbSignature).salt = m4.group(1)
+
+            }
+
             log.debug("[" + it + "]")
         }
         assertNotNull((info.signature as ImgInfo.AvbSignature).imageSize)
         assertNotNull((info.signature as ImgInfo.AvbSignature).originalImageSize)
         assertTrue(!(info.signature as ImgInfo.AvbSignature).partName.isNullOrBlank())
+        assertTrue(!(info.signature as ImgInfo.AvbSignature).salt.isNullOrBlank())
     }
 
     private fun unpackRamdisk(imgArgs: ImgArgs) {
@@ -208,7 +220,7 @@ class Parser {
         if (verifiedWithAVB(imgArgs)) {
             imgArgs.verifyType = ImgArgs.VerifyType.AVB
             imgInfo.signature = ImgInfo.AvbSignature()
-            verifyAVBIntegrity(imgArgs, imgInfo, avbtool)
+            verifyAVBIntegrity(imgArgs, avbtool)
             parseAVBInfo(imgArgs, imgInfo, avbtool)
         } else {
             imgArgs.verifyType = ImgArgs.VerifyType.VERIFY
