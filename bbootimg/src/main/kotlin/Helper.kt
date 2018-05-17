@@ -1,16 +1,15 @@
 package cfig
 
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
+import org.apache.commons.compress.compressors.gzip.GzipParameters
 import org.slf4j.LoggerFactory
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.RandomAccessFile
 import java.nio.charset.StandardCharsets
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import org.junit.Assert.*
+import java.io.*
 
-class Helper{
+class Helper {
     companion object {
         fun toHexString(inData: ByteArray): String {
             val sb = StringBuilder()
@@ -47,7 +46,7 @@ class Helper{
             val buffer = ByteArray(1024)
             FileOutputStream(compressedFile).use { fos ->
                 GZIPOutputStream(fos).use { gos ->
-                    FileInputStream(decompressedFile).use { fis->
+                    FileInputStream(decompressedFile).use { fis ->
                         var bytesRead: Int
                         while (true) {
                             bytesRead = fis.read(buffer)
@@ -75,8 +74,52 @@ class Helper{
                             if (bytesRead <= 0) break
                             fileOutputStream.write(buffer, 0, bytesRead)
                         }
-                        log.info("un-gzip done: $compressedFile -> $decompressedFile")
+                        log.info("decompress(gz) done: $compressedFile -> $decompressedFile")
                     }
+                }
+            }
+        }
+
+        /*
+            caution: about gzip header - OS (Operating System)
+
+            According to https://docs.oracle.com/javase/8/docs/api/java/util/zip/package-summary.html and
+            GZIP spec RFC-1952(http://www.ietf.org/rfc/rfc1952.txt), gzip files created from java.util.zip.GZIPOutputStream
+            will mark the OS field with
+                0 - FAT filesystem (MS-DOS, OS/2, NT/Win32)
+            But default image built from Android source code has the OS field:
+                3 - Unix
+            This MAY not be a problem, at least we didn't find it till now.
+         */
+        @Throws(IOException::class)
+        fun gnuZipFile(compressedFile: String, fis: InputStream) {
+            val buffer = ByteArray(1024)
+            FileOutputStream(compressedFile).use {fos ->
+                GZIPOutputStream(fos).use {gos ->
+                    var bytesRead: Int
+                    while (true) {
+                        bytesRead = fis.read(buffer)
+                        if (bytesRead <= 0) break
+                        gos.write(buffer, 0, bytesRead)
+                    }
+                    log.info("compress(gz) done: $compressedFile")
+                }
+            }
+        }
+
+        fun gnuZipFile2(compressedFile: String, fis: InputStream) {
+            val buffer = ByteArray(1024)
+            val p = GzipParameters()
+            p.operatingSystem = 3
+            FileOutputStream(compressedFile).use {fos ->
+                GzipCompressorOutputStream(fos, p).use {gos ->
+                    var bytesRead: Int
+                    while (true) {
+                        bytesRead = fis.read(buffer)
+                        if (bytesRead <= 0) break
+                        gos.write(buffer, 0, bytesRead)
+                    }
+                    log.info("compress(gz) done: $compressedFile")
                 }
             }
         }

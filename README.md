@@ -8,7 +8,7 @@ This tool focuses on editing Android boot.img(also recovery.img and recovery-two
 #### Host OS requirement:
 
 Linux or Mac.
-Also need python and java 8.
+Also need python 2.x(required by avbtool) and java 8.
 
 #### Target Android requirement:
 
