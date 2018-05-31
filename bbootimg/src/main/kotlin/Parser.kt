@@ -15,48 +15,8 @@ import org.apache.commons.exec.PumpStreamHandler
 import java.io.ByteArrayOutputStream
 import java.util.regex.Pattern
 
-
 class Parser {
     private val workDir = UnifiedConfig.workDir
-    private fun readInt(iS: InputStream): Int {
-        val bf = ByteBuffer.allocate(128)
-        bf.order(ByteOrder.LITTLE_ENDIAN)
-        val data4 = ByteArray(4)
-        assertTrue(4 == iS.read(data4))
-        bf.clear()
-        bf.put(data4)
-        bf.flip()
-        return bf.int
-    }
-
-    private fun readUnsignedAsLong(iS: InputStream): Long {
-        val bf = ByteBuffer.allocate(128)
-        bf.order(ByteOrder.LITTLE_ENDIAN)
-        val data4 = ByteArray(4)
-        assertTrue(4 == iS.read(data4))
-        bf.clear()
-        bf.put(data4)
-        bf.put(ByteArray(4)) //complete high bits with 0
-        bf.flip()
-        return bf.long
-    }
-
-    private fun readLong(iS: InputStream): Long {
-        val bf = ByteBuffer.allocate(128)
-        bf.order(ByteOrder.LITTLE_ENDIAN)
-        val data4 = ByteArray(8)
-        assertTrue(8 == iS.read(data4))
-        bf.clear()
-        bf.put(data4)
-        bf.flip()
-        return bf.long
-    }
-
-    private fun readBytes(iS: InputStream, len: Int): ByteArray {
-        val data4 = ByteArray(len)
-        assertTrue(len == iS.read(data4))
-        return data4
-    }
 
     private fun parseOsVersion(x: Int): String {
         val a = x shr 14
@@ -102,14 +62,14 @@ class Parser {
                 args.osPatchLevel = parseOsPatchLevel(osNPatch and 0x7ff)
             }
 
-            args.board = Helper.byteArray2CString(readBytes(iS, 16))
+            args.board = Helper.toCString(readBytes(iS, 16))
             if (args.board.isBlank()) {
                 args.board = ""
             }
 
-            val cmd1 = Helper.byteArray2CString(readBytes(iS, 512))
+            val cmd1 = Helper.toCString(readBytes(iS, 512))
             info.hash = readBytes(iS, 32) //hash
-            val cmd2 = Helper.byteArray2CString(readBytes(iS, 1024))
+            val cmd2 = Helper.toCString(readBytes(iS, 1024))
             args.cmdline = cmd1 + cmd2
 
             info.recoveryDtboLength = readInt(iS)
@@ -189,6 +149,16 @@ class Parser {
 
             }
 
+            val m5 = Pattern.compile("^\\s*Algorithm:\\s+(\\S+)$").matcher(it)
+            if (m5.find()) {
+                (info.signature as ImgInfo.AvbSignature).algorithm = m5.group(1)
+            }
+
+            val m6 = Pattern.compile("^\\s*Hash Algorithm:\\s+(\\S+)$").matcher(it)
+            if (m6.find()) {
+                (info.signature as ImgInfo.AvbSignature).hashAlgorithm = m6.group(1)
+            }
+
             log.debug("[" + it + "]")
         }
         assertNotNull((info.signature as ImgInfo.AvbSignature).imageSize)
@@ -210,8 +180,6 @@ class Parser {
     fun parseAndExtract(fileName: String?, avbtool: String) {
         val imgArgs = ImgArgs(output = fileName ?: "boot.img")
         val imgInfo = ImgInfo()
-        if (File(workDir).exists()) File(workDir).deleteRecursively()
-        File(workDir).mkdirs()
         if (!fileName.isNullOrBlank()) {
             imgArgs.output = fileName!!
         }
@@ -257,5 +225,60 @@ class Parser {
 
     companion object {
         private val log = LoggerFactory.getLogger("Parser")!!
+
+        fun readValues(iS: InputStream, vararg key: Any) {
+
+        }
+
+        fun readShort(iS: InputStream): Short {
+            val bf = ByteBuffer.allocate(128)
+            bf.order(ByteOrder.LITTLE_ENDIAN)
+            val data2 = ByteArray(2)
+            assertTrue(2 == iS.read(data2))
+            bf.clear()
+            bf.put(data2)
+            bf.flip()
+            return bf.short
+        }
+
+        fun readInt(iS: InputStream): Int {
+            val bf = ByteBuffer.allocate(128)
+            bf.order(ByteOrder.LITTLE_ENDIAN)
+            val data4 = ByteArray(4)
+            assertTrue(4 == iS.read(data4))
+            bf.clear()
+            bf.put(data4)
+            bf.flip()
+            return bf.int
+        }
+
+        fun readUnsignedAsLong(iS: InputStream): Long {
+            val bf = ByteBuffer.allocate(128)
+            bf.order(ByteOrder.LITTLE_ENDIAN)
+            val data4 = ByteArray(4)
+            assertTrue(4 == iS.read(data4))
+            bf.clear()
+            bf.put(data4)
+            bf.put(ByteArray(4)) //complete high bits with 0
+            bf.flip()
+            return bf.long
+        }
+
+        fun readLong(iS: InputStream): Long {
+            val bf = ByteBuffer.allocate(128)
+            bf.order(ByteOrder.LITTLE_ENDIAN)
+            val data4 = ByteArray(8)
+            assertTrue(8 == iS.read(data4))
+            bf.clear()
+            bf.put(data4)
+            bf.flip()
+            return bf.long
+        }
+
+        fun readBytes(iS: InputStream, len: Int): ByteArray {
+            val data4 = ByteArray(len)
+            assertTrue(len == iS.read(data4))
+            return data4
+        }
     }
 }

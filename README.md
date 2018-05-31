@@ -64,7 +64,7 @@ An example boot.img has been placed at **src/test/resources/boot.img**, which is
 
 ## boot.img layout
 Read [layout](README.expert.md) of Android boot.img.
-We now support **os\_version** ,**os\_patch\_level**, **header_version** and **dtbo**
+We now support both VB 1.0 and AVB 2.0 layouts.
 
 ## References
 

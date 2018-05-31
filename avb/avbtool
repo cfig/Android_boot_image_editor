@@ -2205,6 +2205,49 @@ class Avb(object):
         raise AvbError('Error verifying descriptor.')
 
 
+  def calculate_vbmeta_digest(self, image_filename, hash_algorithm, output):
+    """Implements the 'calculate_vbmeta_digest' command.
+
+    Arguments:
+      image_filename: Image file to get information from (file object).
+      hash_algorithm: Hash algorithm used.
+      output: Output file to write human-readable information to (file object).
+    """
+
+    image_dir = os.path.dirname(image_filename)
+    image_ext = os.path.splitext(image_filename)[1]
+
+    image = ImageHandler(image_filename)
+    (footer, header, descriptors, image_size) = self._parse_image(image)
+    offset = 0
+    if footer:
+      offset = footer.vbmeta_offset
+    size = (header.SIZE + header.authentication_data_block_size +
+            header.auxiliary_data_block_size)
+    image.seek(offset)
+    vbmeta_blob = image.read(size)
+
+    hasher = hashlib.new(name=hash_algorithm)
+    hasher.update(vbmeta_blob)
+
+    for desc in descriptors:
+      if isinstance(desc, AvbChainPartitionDescriptor):
+        ch_image_filename = os.path.join(image_dir, desc.partition_name + image_ext)
+        ch_image = ImageHandler(ch_image_filename)
+        (ch_footer, ch_header, ch_descriptors, ch_image_size) = self._parse_image(ch_image)
+        ch_offset = 0
+        if ch_footer:
+          ch_offset = ch_footer.vbmeta_offset
+          ch_size = (ch_header.SIZE + ch_header.authentication_data_block_size +
+                     ch_header.auxiliary_data_block_size)
+        ch_image.seek(ch_offset)
+        ch_vbmeta_blob = ch_image.read(ch_size)
+        hasher.update(ch_vbmeta_blob)
+
+    digest = hasher.digest()
+    output.write('{}\n'.format(digest.encode('hex')))
+
+
   def _parse_image(self, image):
     """Gets information about an image.
 
@@ -3871,6 +3914,22 @@ class AvbTool(object):
                             action='append')
     sub_parser.set_defaults(func=self.verify_image)
 
+    sub_parser = subparsers.add_parser(
+        'calculate_vbmeta_digest',
+        help='Calculate vbmeta digest.')
+    sub_parser.add_argument('--image',
+                            help='Image to calculate digest for',
+                            type=argparse.FileType('rb'),
+                            required=True)
+    sub_parser.add_argument('--hash_algorithm',
+                            help='Hash algorithm to use (default: sha256)',
+                            default='sha256')
+    sub_parser.add_argument('--output',
+                            help='Write hex digest to file (default: stdout)',
+                            type=argparse.FileType('wt'),
+                            default=sys.stdout)
+    sub_parser.set_defaults(func=self.calculate_vbmeta_digest)
+
     sub_parser = subparsers.add_parser('set_ab_metadata',
                                        help='Set A/B metadata.')
     sub_parser.add_argument('--misc_image',
@@ -4114,6 +4173,11 @@ class AvbTool(object):
     """Implements the 'verify_image' sub-command."""
     self.avb.verify_image(args.image.name, args.key,
                           args.expected_chain_partition)
+
+  def calculate_vbmeta_digest(self, args):
+    """Implements the 'calculate_vbmeta_digest' sub-command."""
+    self.avb.calculate_vbmeta_digest(args.image.name, args.hash_algorithm,
+                                     args.output)
 
   def make_atx_certificate(self, args):
     """Implements the 'make_atx_certificate' sub-command."""

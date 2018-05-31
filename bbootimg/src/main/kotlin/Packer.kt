@@ -41,7 +41,7 @@ class Packer {
                     md.update(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
                             .putInt(currentFile.length().toInt())
                             .array())
-                    log.debug("update size $item: " + Helper.toHexString((md.clone() as MessageDigest).digest()))
+                    log.debug("update SIZE $item: " + Helper.toHexString((md.clone() as MessageDigest).digest()))
                 }
             }
         }
@@ -71,7 +71,7 @@ class Packer {
 
     private fun writeData(inArgs: ImgArgs) {
         log.info("Writing data ...")
-        val bf = ByteBuffer.allocate(1024 * 1024 * 64)//assume total size small than 64MB
+        val bf = ByteBuffer.allocate(1024 * 1024 * 64)//assume total SIZE small than 64MB
         bf.order(ByteOrder.LITTLE_ENDIAN)
 
         writePaddedFile(bf, inArgs.kernel, inArgs.pageSize)
@@ -246,6 +246,7 @@ class Packer {
         File(args.output + ".google").deleleIfExists()
         File(args.output + ".clear").deleleIfExists()
         File(args.output + ".signed").deleleIfExists()
+        File(args.output + ".signed2").deleleIfExists()
         File("${UnifiedConfig.workDir}ramdisk.img").deleleIfExists()
 
         args.ramdisk?.let {
@@ -273,47 +274,6 @@ class Packer {
         }
     }
 
-    fun sign(avbtool: String, bootSigner: String) {
-        log.info("Loading config from ${workDir}bootimg.json")
-        val cfg = ObjectMapper().readValue(File(workDir + "bootimg.json"), UnifiedConfig::class.java)
-        val readBack = cfg.toArgs()
-        val args = readBack[0] as ImgArgs
-        val info = readBack[1] as ImgInfo
-
-        when (args.verifyType) {
-            ImgArgs.VerifyType.VERIFY -> {
-                log.info("Signing with verified-boot 1.0 style")
-                val sig = ObjectMapper().readValue(
-                        mapToJson(info.signature as LinkedHashMap<*, *>), ImgInfo.VeritySignature::class.java)
-                DefaultExecutor().execute(CommandLine.parse("java -jar $bootSigner " +
-                        "${sig.path} ${args.output}.clear ${sig.verity_pk8} ${sig.verity_pem} ${args.output}.signed"))
-
-            }
-            ImgArgs.VerifyType.AVB -> {
-                log.info("Adding hash_footer with verified-boot 2.0 style")
-                val sig = ObjectMapper().readValue(
-                        mapToJson(info.signature as LinkedHashMap<*, *>), ImgInfo.AvbSignature::class.java)
-                File(args.output + ".clear").copyTo(File(args.output + ".signed"))
-                DefaultExecutor().execute(CommandLine.parse(
-                        "$avbtool add_hash_footer " +
-                                "--image ${args.output}.signed " +
-                                "--partition_size ${sig.imageSize} " +
-                                "--salt ${sig.salt} " +
-                                "--partition_name ${sig.partName}"))
-                verifyAVBIntegrity(args, avbtool)
-            }
-        }
-    }
-
-    private fun mapToJson(m: LinkedHashMap<*, *>): String {
-        val sb = StringBuilder()
-        m.forEach { k, v ->
-            if (sb.isNotEmpty()) sb.append(", ")
-            sb.append("\"$k\": \"$v\"")
-        }
-        return "{ $sb }"
-    }
-
     private fun runCmdList(inCmd: List<String>, inWorkdir: String? = null) {
         log.info("CMD:$inCmd")
         val pb = ProcessBuilder(inCmd)
@@ -326,12 +286,5 @@ class Packer {
         }
         p.waitFor()
         assertTrue(0 == p.exitValue())
-    }
-
-    private fun verifyAVBIntegrity(args: ImgArgs, avbtool: String) {
-        val tgt = args.output + ".signed"
-        log.info("Verifying AVB: $tgt")
-        DefaultExecutor().execute(CommandLine.parse("$avbtool verify_image --image $tgt"))
-        log.info("Verifying image passed: $tgt")
     }
 }

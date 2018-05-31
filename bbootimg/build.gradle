@@ -11,8 +11,9 @@ buildscript {
     }
 }
 
-apply plugin: 'kotlin'
-apply plugin: 'application'
+apply plugin: "java"
+apply plugin: "kotlin"
+apply plugin: "application"
 
 sourceCompatibility = 1.8
 compileKotlin {
@@ -43,6 +44,11 @@ dependencies {
     compile("org.apache.commons:commons-exec:1.3")
     compile("org.apache.commons:commons-compress:1.16.1")
     compile("junit:junit:4.12")
+    //compile("org.bouncycastle:bcprov-jdk15on:1.59")
+    compile("org.nd4j:nd4j-api:0.9.1")
+
+    compile project(':bouncycastle:bcpkix')
+    compile project(':bouncycastle:bcprov')
 }
 
 mainClassName = "cfig.RKt"
@@ -53,5 +59,11 @@ jar {
 
     manifest {
         attributes "Main-Class": "cfig.RKt"
+    }
+}
+
+test {
+    testLogging {
+        showStandardStreams = true
     }
 }

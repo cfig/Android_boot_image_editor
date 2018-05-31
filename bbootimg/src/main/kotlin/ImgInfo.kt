@@ -25,7 +25,9 @@ data class ImgInfo(
             var originalImageSize: Int? = null,
             var imageSize: Int? = null,
             var partName: String? = null,
-            var salt: String = "")
+            var salt: String = "",
+            var hashAlgorithm: String? = null,
+            var algorithm: String? = null)
 
     data class VeritySignature(
             var type: String = "dm-verity",

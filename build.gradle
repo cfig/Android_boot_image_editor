@@ -16,14 +16,17 @@ project.ext.rootWorkDir = new File(workdir).getAbsolutePath()
 String activeImg = "boot.img"
 String activePath = "/boot"
 if (new File("boot.img").exists()) {
-    activeImg = "boot.img";
+    activeImg = "boot.img"
     activePath = "/boot"
 } else if (new File("recovery.img").exists()) {
-    activeImg = "recovery.img";
+    activeImg = "recovery.img"
     activePath = "/recovery"
 } else if (new File("recovery-two-step.img").exists()) {
-    activeImg = "recovery-two-step.img";
+    activeImg = "recovery-two-step.img"
     activePath = "/boot"
+} else if (new File("vbmeta.img").exists()) {
+    activeImg = "vbmeta.img"
+    activePath = "/vbmeta"
 }
 project.ext.outClearIMg = new File(String.format("%s.clear", activeImg)).getAbsolutePath()
 project.ext.mkbootimgBin = new File("src/mkbootimg/mkbootimg").getAbsolutePath()

@@ -1,16 +1,50 @@
 package cfig
 
+import cfig.io.Struct
+import com.google.common.math.BigIntegerMath
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipParameters
+import org.apache.commons.exec.CommandLine
+import org.apache.commons.exec.DefaultExecutor
+import org.apache.commons.exec.ExecuteException
+import org.apache.commons.exec.PumpStreamHandler
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
+import org.bouncycastle.asn1.pkcs.RSAPrivateKey
+import org.bouncycastle.util.encoders.Hex
+import org.bouncycastle.util.io.pem.PemReader
+import org.junit.Assert
+import org.junit.Assert.assertTrue
 import org.slf4j.LoggerFactory
+import java.io.*
+import java.math.BigInteger
+import java.math.RoundingMode
 import java.nio.charset.StandardCharsets
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
-import org.junit.Assert.*
-import java.io.*
+import javax.crypto.EncryptedPrivateKeyInfo
+import java.security.spec.InvalidKeySpecException
+import javax.crypto.Cipher
+import javax.crypto.spec.PBEKeySpec
+import javax.crypto.SecretKeyFactory
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.security.GeneralSecurityException
+import java.security.PrivateKey
+import java.security.spec.PKCS8EncodedKeySpec
+import java.util.*
+
 
 class Helper {
     companion object {
+        fun join(vararg source: ByteArray): ByteArray {
+            val baos = ByteArrayOutputStream()
+            for (src in source) {
+                if (source.isNotEmpty()) baos.write(src)
+            }
+            return baos.toByteArray()
+        }
+
         fun toHexString(inData: ByteArray): String {
             val sb = StringBuilder()
             for (i in inData.indices) {
@@ -31,7 +65,7 @@ class Helper {
         }
 
         //similar to this.toString(StandardCharsets.UTF_8).replace("${Character.MIN_VALUE}", "")
-        fun byteArray2CString(ba: ByteArray): String {
+        fun toCString(ba: ByteArray): String {
             val str = ba.toString(StandardCharsets.UTF_8)
             val nullPos = str.indexOf(Character.MIN_VALUE)
             return if (nullPos >= 0) {
@@ -94,8 +128,8 @@ class Helper {
         @Throws(IOException::class)
         fun gnuZipFile(compressedFile: String, fis: InputStream) {
             val buffer = ByteArray(1024)
-            FileOutputStream(compressedFile).use {fos ->
-                GZIPOutputStream(fos).use {gos ->
+            FileOutputStream(compressedFile).use { fos ->
+                GZIPOutputStream(fos).use { gos ->
                     var bytesRead: Int
                     while (true) {
                         bytesRead = fis.read(buffer)
@@ -111,8 +145,8 @@ class Helper {
             val buffer = ByteArray(1024)
             val p = GzipParameters()
             p.operatingSystem = 3
-            FileOutputStream(compressedFile).use {fos ->
-                GzipCompressorOutputStream(fos, p).use {gos ->
+            FileOutputStream(compressedFile).use { fos ->
+                GzipCompressorOutputStream(fos, p).use { gos ->
                     var bytesRead: Int
                     while (true) {
                         bytesRead = fis.read(buffer)
@@ -135,6 +169,86 @@ class Helper {
                     assertTrue(length == inRaf.read(data))
                     outRaf.write(data)
                 }
+            }
+        }
+
+        fun round_to_multiple(size: Long, page: Int): Long {
+            val remainder = size % page
+            return if (remainder == 0L) {
+                size
+            } else {
+                size + page - remainder
+            }
+        }
+
+
+        /*
+            read RSA private key
+            assert exp == 65537
+            num_bits = log2(modulus)
+
+            @return: AvbRSAPublicKeyHeader formatted bytearray
+                    https://android.googlesource.com/platform/external/avb/+/master/libavb/avb_crypto.h#158
+         */
+        fun encodeRSAkey(key: ByteArray): ByteArray {
+            val p2 = PemReader(InputStreamReader(ByteArrayInputStream(key))).readPemObject()
+            Assert.assertEquals("RSA PRIVATE KEY", p2.type)
+
+            val rsa = RSAPrivateKey.getInstance(p2.content)
+            Assert.assertEquals(65537.toBigInteger(), rsa.publicExponent)
+            val numBits: Int = BigIntegerMath.log2(rsa.modulus, RoundingMode.CEILING)
+            log.debug("modulus: " + rsa.modulus)
+            log.debug("numBits: " + numBits)
+            val b = BigInteger.valueOf(2).pow(32)
+            val n0inv = (b - rsa.modulus.modInverse(b)).toLong()
+            log.debug("n0inv = " + n0inv)
+            val r = BigInteger.valueOf(2).pow(numBits)
+            val rrModn = (r * r).mod(rsa.modulus)
+            log.debug("BB: " + numBits / 8 + ", mod_len: " + rsa.modulus.toByteArray().size + ", rrmodn = " + rrModn.toByteArray().size)
+            val unsignedModulo = rsa.modulus.toByteArray().sliceArray(1..numBits/8) //remove sign byte
+            log.debug("unsigned modulo: " + String(Hex.encode(unsignedModulo)))
+            val ret = Struct("!II${numBits / 8}b${numBits / 8}b").pack(
+                    numBits,
+                    n0inv,
+                    unsignedModulo,
+                    rrModn.toByteArray())
+            log.debug("rrmodn: " + String(Hex.encode(rrModn.toByteArray())))
+            log.debug("RSA: " + String(Hex.encode(ret)))
+            return ret
+        }
+
+        fun rawSign(keyPath: String, data: ByteArray): ByteArray {
+//            openssl rsautl -sign -inkey /Users/yu/work/boot/avb/avb_test_data/testkey_rsa4096.pem -raw
+            log.debug("Raw sign data: SIZE = " + data.size)
+            var ret = byteArrayOf()
+            val exe = DefaultExecutor()
+            val stdin = ByteArrayInputStream(data)
+            val stdout = ByteArrayOutputStream()
+            val stderr = ByteArrayOutputStream()
+            exe.streamHandler = PumpStreamHandler(stdout, stderr, stdin)
+            try {
+                exe.execute(CommandLine.parse("openssl rsautl -sign -inkey $keyPath -raw"))
+                ret = stdout.toByteArray()
+            } catch (e: ExecuteException) {
+                log.error("Execute error")
+            } finally {
+                log.debug("OUT: " + String(Hex.encode(stdout.toByteArray())))
+                log.debug("ERR: " + String(stderr.toByteArray()))
+            }
+
+            if (ret.isEmpty()) throw RuntimeException("raw sign failed")
+
+            return ret
+        }
+
+        fun pyAlg2java(alg: String): String {
+            return when (alg) {
+                "sha1" -> "sha-1"
+                "sha224" -> "sha-224"
+                "sha256" -> "sha-256"
+                "sha384" -> "sha-384"
+                "sha512" -> "sha-512"
+                else -> throw IllegalArgumentException("unknown algorithm: $alg")
             }
         }
 
