@@ -123,7 +123,10 @@ class Parser {
             info.recoveryDtboPosition = info.secondBootloaderPosition + info.secondBootloaderLength + getPaddingSize(info.secondBootloaderLength, args.pageSize)
 
             //adjust args
-            if (args.kernelOffset > Int.MAX_VALUE) {
+            if (args.kernelOffset > Int.MAX_VALUE
+                    && args.ramdiskOffset > Int.MAX_VALUE
+                    && args.secondOffset > Int.MAX_VALUE
+                    && args.dtboOffset > Int.MAX_VALUE) {
                 args.base = Int.MAX_VALUE + 1L
                 args.kernelOffset -= args.base
                 args.ramdiskOffset -= args.base
