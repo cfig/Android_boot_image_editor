@@ -67,26 +67,79 @@
     |<recovery dtbo>                 | recovery dtbo length    |
     |--------------------------------+-------------------------|
     |<padding>                       |  min(n * page_zie - len)|
-    +----------------------------------------------------------+
+    +----------------------------------------------------------+    --> end of data part
 
 ### 3. signature part
 
 #### 3.1 Boot Image Signature (VBoot 1.0)
 
-    +--------------------------------+-------------------------+
+    +--------------------------------+-------------------------+    --> end of data part
     |<signature>                     | signature length        |
     |--------------------------------+-------------------------|
     |<padding>                       | defined by boot_signer  |
-    +----------------------------------------------------------+
+    +--------------------------------+-------------------------+
 
 #### 3.2 AVB Footer (VBoot 2.0)
 
+              item                        size in bytes             position
+    +--------------------------------+-------------------------+    --> end of data part (say locaton A)
+    | VBMeta Header                  | total 256               |
+    |                                |                         |
+    |   - Header Magic "AVB0"        |     4                   |
+    |   - avb_version Major          |     4                   |
+    |   - avb_version Minor          |     4                   |
+    |   - authentication blob size   |     8                   |
+    |   - auxiliary blob size        |     8                   |
+    |   - algorithm type             |     4                   |
+    |   - hash offset                |     8                   |
+    |   - hash size                  |     8                   |
+    |   - signature offset           |     8                   |
+    |   - signature size             |     8                   |
+    |   - pub key offset             |     8                   |
+    |   - pub key size               |     8                   |
+    |   - pub key metadata offset    |     8                   |
+    |   - pub key metadata size      |     8                   |
+    |   - descriptors offset         |     8                   |
+    |   - descriptors size           |     8                   |
+    |   - rollback index             |     8                   |
+    |   - flags                      |     4                   |
+    |   - RESERVED                   |     4                   |
+    |   - release string             |     47                  |
+    |   - NULL                       |     1                   |
+    |   - RESERVED                   |     80                  |
+    |--------------------------------+-------------------------+    --> (location A) + 256
+    | Authentication Blob            |                         |
+    |   - Hash of Header & Aux Blob  | alg.hash_num_bytes      |
+    |   - Signature of Hash          | alg.signature_num_bytes |
+    |   - Padding                    | align by 64             |
     +--------------------------------+-------------------------+
-    |<signature>                     | signature length        |
-    |--------------------------------+-------------------------|
-    | ...                            | ...                     |
-    |<padding>                       | defined by avbtool,     |
-    |<padding>                       | it will pad to requested|
-    |<padding>                       | image size              |
-    | ...                            | ...                     |
-    +----------------------------------------------------------+
+    | Auxiliary Blob                 |                         |
+    |   - descriptors                |                         |
+    |   - pub key                    |                         |
+    |   - pub key meta data          |                         |
+    |   - padding                    | align by 64             |
+    +--------------------------------+-------------------------+
+    | Padding                        | align by block_size     |
+    +--------------------------------+-------------------------+    --> (location A) + (block_size * n)
+
+    +--------------------------------+-------------------------+
+    |                                |                         |
+    |                                |                         |
+    | DONOT CARE CHUNK               |                         |
+    |                                |                         |
+    |                                |                         |
+    +--------------------------------+-------------------------+
+
+    +--------------------------------+-------------------------+    --> partition_size - block_size
+    | Padding                        | block_size - 64         |
+    +--------------------------------+-------------------------+    --> partition_size - 64
+    | AVB Footer                     | total 64                |
+    |                                |                         |
+    |   - Footer Magic "AVBf"        |     4                   |
+    |   - Footer Major Version       |     4                   |
+    |   - Footer Minor Version       |     4                   |
+    |   - original image size        |     8                   |
+    |   - VBMeta offset              |     8                   |
+    |   - VBMeta size                |     8                   |
+    |   - Padding                    |     28                  |
+    +--------------------------------+-------------------------+    --> partition_size
