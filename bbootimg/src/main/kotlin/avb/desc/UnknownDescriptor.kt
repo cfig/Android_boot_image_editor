@@ -101,7 +101,7 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 
         }
 
         init {
-            Assert.assertEquals(SIZE, Struct(FORMAT).calcsize())
+            Assert.assertEquals(SIZE, Struct(FORMAT).calcSize())
         }
     }
 }

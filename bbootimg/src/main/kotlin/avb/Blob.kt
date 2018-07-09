@@ -12,6 +12,18 @@ import java.security.MessageDigest
 
 class Blob {
     companion object {
+        fun encodePubKey(alg: Algorithm): ByteArray {
+            var encodedKey = byteArrayOf()
+            if (alg.public_key_num_bytes > 0) {
+                encodedKey = Helper.encodeRSAkey(Files.readAllBytes((Paths.get(alg.defaultKey))))
+                log.info("encodePubKey(): size = ${alg.public_key_num_bytes}, algorithm key size: ${encodedKey.size}")
+                Assert.assertEquals(alg.public_key_num_bytes, encodedKey.size)
+            } else {
+                log.info("encodePubKey(): No key to encode for algorithm " + alg.name)
+            }
+            return encodedKey
+        }
+
         fun encodePubKey(alg: Algorithm, key: ByteArray): ByteArray {
             var encodedKey = byteArrayOf()
             if (alg.public_key_num_bytes > 0) {
@@ -35,8 +47,7 @@ class Blob {
 
         fun getAuthBlob(header_data_blob: ByteArray,
                         aux_data_blob: ByteArray,
-                        algorithm_name: String,
-                        key_path: String?): ByteArray {
+                        algorithm_name: String): ByteArray {
             val alg = Algorithms.get(algorithm_name)!!
             val authBlockSize = Helper.round_to_multiple((alg.hash_num_bytes + alg.signature_num_bytes).toLong(), 64)
             if (authBlockSize == 0L) {
@@ -53,7 +64,7 @@ class Blob {
                     update(header_data_blob)
                     update(aux_data_blob)
                 }.digest()
-                binarySignature = Helper.rawSign(key_path!!, Helper.join(alg.padding, binaryHash))
+                binarySignature = Helper.rawSign(alg.defaultKey.replace(".pem", ".pk8"), Helper.join(alg.padding, binaryHash))
             }
             val authData = Helper.join(binaryHash, binarySignature)
             return Helper.join(authData, Struct("${authBlockSize - authData.size}x").pack(0))

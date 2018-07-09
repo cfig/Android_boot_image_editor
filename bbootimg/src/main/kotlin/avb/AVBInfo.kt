@@ -1,7 +1,7 @@
-package cfig
+package avb
 
-import avb.*
 import avb.desc.*
+import cfig.Helper
 
 /*
     a wonderfaul base64 encoder/decoder: https://cryptii.com/base64-to-hex

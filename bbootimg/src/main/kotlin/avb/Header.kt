@@ -84,7 +84,7 @@ data class Header(
         const val FORMAT_STRING = ("!4s2L2QL11QL${REVERSED0}x47sx" + "${REVERSED}x")
 
         init {
-            Assert.assertEquals(SIZE, Struct(FORMAT_STRING).calcsize())
+            Assert.assertEquals(SIZE, Struct(FORMAT_STRING).calcSize())
         }
     }
 }

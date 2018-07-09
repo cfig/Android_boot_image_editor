@@ -201,20 +201,20 @@ class Parser {
         log.info(imgArgs.toString())
         log.info(imgInfo.toString())
 
-        Helper.extractImageData(imgArgs.output, imgArgs.kernel, imgInfo.kernelPosition.toLong(), imgInfo.kernelLength)
+        Helper.extractFile(imgArgs.output, imgArgs.kernel, imgInfo.kernelPosition.toLong(), imgInfo.kernelLength)
         log.info("kernel dumped to ${imgArgs.kernel}")
         imgArgs.ramdisk?.let { ramdisk ->
             log.info("ramdisk dumped to ${imgArgs.ramdisk}")
-            Helper.extractImageData(imgArgs.output, ramdisk, imgInfo.ramdiskPosition.toLong(), imgInfo.ramdiskLength)
+            Helper.extractFile(imgArgs.output, ramdisk, imgInfo.ramdiskPosition.toLong(), imgInfo.ramdiskLength)
             Helper.unGnuzipFile(ramdisk, workDir + "ramdisk.img")
             unpackRamdisk(imgArgs)
         }
         imgArgs.second?.let { second ->
-            Helper.extractImageData(imgArgs.output, second, imgInfo.secondBootloaderPosition.toLong(), imgInfo.secondBootloaderLength)
+            Helper.extractFile(imgArgs.output, second, imgInfo.secondBootloaderPosition.toLong(), imgInfo.secondBootloaderLength)
             log.info("second bootloader dumped to ${imgArgs.second}")
         }
         imgArgs.dtbo?.let { dtbo ->
-            Helper.extractImageData(imgArgs.output, dtbo, imgInfo.recoveryDtboPosition.toLong(), imgInfo.recoveryDtboLength)
+            Helper.extractFile(imgArgs.output, dtbo, imgInfo.recoveryDtboPosition.toLong(), imgInfo.recoveryDtboLength)
             log.info("dtbo dumped to ${imgArgs.dtbo}")
         }
         val cfg = UnifiedConfig.fromArgs(imgArgs, imgInfo)
@@ -225,10 +225,6 @@ class Parser {
 
     companion object {
         private val log = LoggerFactory.getLogger("Parser")!!
-
-        fun readValues(iS: InputStream, vararg key: Any) {
-
-        }
 
         fun readShort(iS: InputStream): Short {
             val bf = ByteBuffer.allocate(128)

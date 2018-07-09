@@ -1,5 +1,6 @@
 package cfig
 
+import avb.AVBInfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -15,7 +16,7 @@ fun main(args: Array<String>) {
                     Avb().parseVbMeta(args[1])
                 }
                 "pack" -> {
-                    Avb().packVbMetaWithPadding("/Users/yu/work/boot/avb/avb_test_data/testkey_rsa4096.pem")
+                    Avb().packVbMetaWithPadding()
                 }
                 "sign" -> {
                     log.info("vbmeta is already signed")
@@ -27,10 +28,13 @@ fun main(args: Array<String>) {
                     if (File(UnifiedConfig.workDir).exists()) File(UnifiedConfig.workDir).deleteRecursively()
                     File(UnifiedConfig.workDir).mkdirs()
                     Parser().parseAndExtract(fileName = args[1], avbtool = args[3])
-                    Avb().parseVbMeta(args[1])
 
-                    if (File("vbmeta.img").exists()) {
-                        Avb().parseVbMeta("vbmeta.img")
+                    if (UnifiedConfig.readBack()[2] is ImgInfo.AvbSignature) {
+                        log.info("continue to analyze vbmeta info in " + args[1])
+                        Avb().parseVbMeta(args[1])
+                        if (File("vbmeta.img").exists()) {
+                            Avb().parseVbMeta("vbmeta.img")
+                        }
                     }
                 }
                 "pack" -> {
@@ -38,15 +42,10 @@ fun main(args: Array<String>) {
                 }
                 "sign" -> {
                     Signer.sign(avbtool = args[3], bootSigner = args[4])
-
-                    val readBack = ObjectMapper().readValue(File(UnifiedConfig.workDir + "bootimg.json"),
-                            UnifiedConfig::class.java).toArgs()
-                    val imgArgs = readBack[0] as ImgArgs
-                    val info = readBack[1] as ImgInfo
-                    if (imgArgs.verifyType == ImgArgs.VerifyType.AVB) {
+                    val readBack = UnifiedConfig.readBack()
+                    if ((readBack[0] as ImgArgs).verifyType == ImgArgs.VerifyType.AVB) {
                         if (File("vbmeta.img").exists()) {
-                            val sig = ObjectMapper().readValue(
-                                    Signer.mapToJson(info.signature as LinkedHashMap<*, *>), ImgInfo.AvbSignature::class.java)
+                            val sig = readBack[2] as ImgInfo.AvbSignature
                             val newBootImgInfo = Avb().parseVbMeta(args[1] + ".signed")
                             val hashDesc = newBootImgInfo.auxBlob!!.hashDescriptors[0]
                             val origVbMeta = ObjectMapper().readValue(File(Avb.getJsonFileName("vbmeta.img")),
@@ -60,7 +59,7 @@ fun main(args: Array<String>) {
                             }
                             ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(Avb.getJsonFileName("vbmeta.img")), origVbMeta)
                             log.info("vbmeta info updated")
-                            Avb().packVbMetaWithPadding("/Users/yu/work/boot/avb/avb_test_data/testkey_rsa4096.pem")
+                            Avb().packVbMetaWithPadding()
                         } else {
                             //no vbmeta provided
                         }

@@ -35,9 +35,10 @@ Then put your boot.img at **$(CURDIR)/boot.img**, then start gradle 'unpack' tas
 Your get the flattened kernel and /root filesystem under **$(CURDIR)/build/unzip\_boot**:
 
     build/unzip_boot/
-    ├── bootimg.json
+    ├── boot.img.avb.json (AVB only)
+    ├── bootimg.json (boot image info)
     ├── kernel
-    ├── second
+    ├── second (2nd bootloader, if exists)
     └── root
 
 Then you can edit the actual file contents, like rootfs or kernel.
@@ -76,3 +77,6 @@ https://android.googlesource.com/platform/external/bouncycastle
 
 cpio / fs\_config
 https://android.googlesource.com/platform/system/core
+
+AVB
+https://android.googlesource.com/platform/external/avb/

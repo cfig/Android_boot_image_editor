@@ -19,8 +19,8 @@ import static org.junit.Assert.assertEquals;
 public class Struct {
     private static Logger log = LoggerFactory.getLogger(Struct.class);
 
-    public ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
-    public List<Object[]> formats = new ArrayList<>();
+    private ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
+    private List<Object[]> formats = new ArrayList<>();
 
     public Struct(String formatString) {
         Matcher m = Pattern.compile("(\\d*)([a-zA-Z])").matcher(formatString);
@@ -97,11 +97,11 @@ public class Struct {
         }
     }
 
-    public Integer calcsize() {
+    public Integer calcSize() {
         Integer ret = 0;
         for (Object[] format : formats) {
             if (format[0] == Byte.class || format[0] == Character.class || format[0] == PadByte.class) {
-                ret += 1 * (int) format[1];
+                ret += (int) format[1];
                 continue;
             }
             if (format[0] == Short.class) {
@@ -145,7 +145,8 @@ public class Struct {
         for (Object[] format : this.formats) {
             //return 'null' for padding bytes
             if (format[0] == PadByte.class) {
-                iS.skip((Integer) format[1]);
+                long skipped = iS.skip((Integer) format[1]);
+                assertEquals((long) (Integer) format[1], skipped);
                 ret.add(null);
                 continue;
             }
@@ -233,7 +234,7 @@ public class Struct {
             throw new IllegalArgumentException("argument size " + args.length +
                     " doesn't match format size " + this.formats.size());
         }
-        ByteBuffer bf = ByteBuffer.allocate(this.calcsize());
+        ByteBuffer bf = ByteBuffer.allocate(this.calcSize());
         bf.order(this.byteOrder);
         for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
@@ -269,7 +270,7 @@ public class Struct {
                     log.error("container size " + size + ", value size " + ((byte[]) arg).length);
                     throw new IllegalArgumentException("Index[" + i + "] arg [" + arg + "] with type [" + format + "] size overflow");
                 } else {
-                    //perfect match
+                    log.debug("perfect match, paddingSize is zero");
                 }
                 continue;
             }
@@ -338,22 +339,21 @@ public class Struct {
                 } else {
                     throw new IllegalArgumentException("Index[" + i + "] Unsupported arg [" + arg + "] with type [" + format + "]");
                 }
-                continue;
             }
         }
         log.debug("Pack Result:" + Helper.Companion.toHexString(bf.array()));
         return bf.array();
     }
 
-    public static class UnsignedInt {
+    private static class UnsignedInt {
     }
 
-    public static class UnsignedLong {
+    private static class UnsignedLong {
     }
 
-    public static class UnsignedShort {
+    private static class UnsignedShort {
     }
 
-    public static class PadByte {
+    private static class PadByte {
     }
 }

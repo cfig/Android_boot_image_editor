@@ -1,5 +1,6 @@
 package cfig
 
+import avb.alg.Algorithms
 import cfig.io.Struct
 import com.google.common.math.BigIntegerMath
 import org.apache.commons.codec.binary.Hex
@@ -18,8 +19,14 @@ import java.io.*
 import java.math.BigInteger
 import java.math.RoundingMode
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.security.KeyFactory
+import java.security.PrivateKey
+import java.security.spec.PKCS8EncodedKeySpec
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+import javax.crypto.Cipher
 
 class Helper {
     companion object {
@@ -144,7 +151,7 @@ class Helper {
             }
         }
 
-        fun extractImageData(fileName: String, outImgName: String, offset: Long, length: Int) {
+        fun extractFile(fileName: String, outImgName: String, offset: Long, length: Int) {
             if (0 == length) {
                 return
             }
@@ -167,7 +174,6 @@ class Helper {
             }
         }
 
-
         /*
             read RSA private key
             assert exp == 65537
@@ -179,15 +185,14 @@ class Helper {
         fun encodeRSAkey(key: ByteArray): ByteArray {
             val p2 = PemReader(InputStreamReader(ByteArrayInputStream(key))).readPemObject()
             Assert.assertEquals("RSA PRIVATE KEY", p2.type)
-
             val rsa = RSAPrivateKey.getInstance(p2.content)
             Assert.assertEquals(65537.toBigInteger(), rsa.publicExponent)
             val numBits: Int = BigIntegerMath.log2(rsa.modulus, RoundingMode.CEILING)
             log.debug("modulus: " + rsa.modulus)
-            log.debug("numBits: " + numBits)
+            log.debug("numBits: $numBits")
             val b = BigInteger.valueOf(2).pow(32)
             val n0inv = (b - rsa.modulus.modInverse(b)).toLong()
-            log.debug("n0inv = " + n0inv)
+            log.debug("n0inv = $n0inv")
             val r = BigInteger.valueOf(2).pow(numBits)
             val rrModn = (r * r).mod(rsa.modulus)
             log.debug("BB: " + numBits / 8 + ", mod_len: " + rsa.modulus.toByteArray().size + ", rrmodn = " + rrModn.toByteArray().size)
@@ -203,9 +208,22 @@ class Helper {
             return ret
         }
 
+        //inspired by
+        //  https://stackoverflow.com/questions/40242391/how-can-i-sign-a-raw-message-without-first-hashing-it-in-bouncy-castle
+        // "specifying Cipher.ENCRYPT mode or Cipher.DECRYPT mode doesn't make a difference;
+        //      both simply perform modular exponentiation"
         fun rawSign(keyPath: String, data: ByteArray): ByteArray {
-//            openssl rsautl -sign -inkey /Users/yu/work/boot/avb/avb_test_data/testkey_rsa4096.pem -raw
-            log.debug("Raw sign data: SIZE = " + data.size)
+            val privk = Helper.readPrivateKey(keyPath)
+            val cipher = Cipher.getInstance("RSA/ECB/NoPadding").apply {
+                this.init(Cipher.ENCRYPT_MODE, privk)
+                this.update(data)
+            }
+            return cipher.doFinal()
+        }
+
+        fun rawSignOpenSsl(keyPath: String, data: ByteArray): ByteArray {
+            log.debug("raw input: " + Hex.encodeHexString(data))
+            log.debug("Raw sign data size = ${data.size}, key = $keyPath")
             var ret = byteArrayOf()
             val exe = DefaultExecutor()
             val stdin = ByteArrayInputStream(data)
@@ -215,6 +233,7 @@ class Helper {
             try {
                 exe.execute(CommandLine.parse("openssl rsautl -sign -inkey $keyPath -raw"))
                 ret = stdout.toByteArray()
+                log.debug("Raw signature size = " + ret.size)
             } catch (e: ExecuteException) {
                 log.error("Execute error")
             } finally {
@@ -236,6 +255,12 @@ class Helper {
                 "sha512" -> "sha-512"
                 else -> throw IllegalArgumentException("unknown algorithm: $alg")
             }
+        }
+
+        @Throws(Exception::class)
+        fun readPrivateKey(filename: String): PrivateKey {
+            val spec = PKCS8EncodedKeySpec(Files.readAllBytes(Paths.get(filename)))
+            return KeyFactory.getInstance("RSA").generatePrivate(spec)
         }
 
         private val log = LoggerFactory.getLogger("Helper")

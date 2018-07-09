@@ -1,5 +1,7 @@
 package cfig
 
+import avb.AVBInfo
+import avb.alg.Algorithms
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
@@ -13,46 +15,51 @@ class Signer {
 
         fun sign(avbtool: String, bootSigner: String) {
             log.info("Loading config from ${workDir}bootimg.json")
-            val cfg = ObjectMapper().readValue(File(workDir + "bootimg.json"), UnifiedConfig::class.java)
-            val readBack = cfg.toArgs()
+            val readBack = UnifiedConfig.readBack()
             val args = readBack[0] as ImgArgs
-            val info = readBack[1] as ImgInfo
 
             when (args.verifyType) {
                 ImgArgs.VerifyType.VERIFY -> {
                     log.info("Signing with verified-boot 1.0 style")
-                    val sig = ObjectMapper().readValue(
-                            mapToJson(info.signature as LinkedHashMap<*, *>), ImgInfo.VeritySignature::class.java)
+                    val sig = readBack[2] as ImgInfo.VeritySignature
                     DefaultExecutor().execute(CommandLine.parse("java -jar $bootSigner " +
                             "${sig.path} ${args.output}.clear ${sig.verity_pk8} ${sig.verity_pem} ${args.output}.signed"))
                 }
                 ImgArgs.VerifyType.AVB -> {
                     log.info("Adding hash_footer with verified-boot 2.0 style")
-                    val sig = ObjectMapper().readValue(
-                            mapToJson(info.signature as LinkedHashMap<*, *>), ImgInfo.AvbSignature::class.java)
+                    val sig = readBack[2] as ImgInfo.AvbSignature
                     File(args.output + ".clear").copyTo(File(args.output + ".signed"))
-                    val cmdlineStr = "$avbtool add_hash_footer " +
+                    val ai = ObjectMapper().readValue(File(Avb.getJsonFileName(args.output)), AVBInfo::class.java)
+                    val signKey = Algorithms.get(sig.algorithm!!)
+                    var cmdlineStr = "$avbtool add_hash_footer " +
                             "--image ${args.output}.signed " +
                             "--partition_size ${sig.imageSize} " +
                             "--salt ${sig.salt} " +
                             "--partition_name ${sig.partName} " +
                             "--hash_algorithm ${sig.hashAlgorithm} " +
-                            "--algorithm ${sig.algorithm} " +
-                            "--key avb/avb_test_data/testkey_rsa4096.pem"
+                            "--algorithm ${sig.algorithm}"
+                    if (signKey!!.defaultKey.isNotBlank()) {
+                        cmdlineStr += "--key $signKey"
+                    }
                     log.warn(cmdlineStr)
-                    DefaultExecutor().execute(CommandLine.parse(cmdlineStr))
+                    val cmdLine = CommandLine.parse(cmdlineStr)
+                    cmdLine.addArgument("--internal_release_string")
+                    cmdLine.addArgument(ai.header!!.release_string, false)
+                    DefaultExecutor().execute(cmdLine)
                     verifyAVBIntegrity(args, avbtool)
 
                     File(args.output + ".clear").copyTo(File(args.output + ".signed2"))
+                    val alg = Algorithms.get(ai.header!!.algorithm_type.toInt())
                     Avb().add_hash_footer(args.output + ".signed2",
                             sig.imageSize!!.toLong(),
-                            false, false,
+                            false,
+                            false,
                             salt = sig.salt,
                             hash_algorithm = sig.hashAlgorithm!!,
                             partition_name = sig.partName!!,
-                            rollback_index = 0,
+                            rollback_index = ai.header!!.rollback_index,
                             common_algorithm = sig.algorithm!!,
-                            common_key_path = "avb/avb_test_data/testkey_rsa4096.pem")
+                            inReleaseString = ai.header!!.release_string)
                 }
             }
         }

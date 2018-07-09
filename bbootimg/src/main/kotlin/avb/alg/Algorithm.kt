@@ -7,4 +7,5 @@ data class Algorithm(
         val hash_num_bytes: Int = 0,
         val signature_num_bytes: Int = 0,
         val public_key_num_bytes: Int = 0,
-        val padding: ByteArray = byteArrayOf())
+        val padding: ByteArray = byteArrayOf(),
+        val defaultKey: String ="")

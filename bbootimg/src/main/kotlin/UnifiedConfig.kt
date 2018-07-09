@@ -1,7 +1,9 @@
 package cfig
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
+import java.io.File
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class UnifiedConfig(
@@ -134,6 +136,26 @@ data class UnifiedConfig(
             ret.info.verify = args.verifyType
             ret.signature = info.signature
 
+            return ret
+        }
+
+        fun readBack(): Array<Any?> {
+            var ret: Array<Any?> = arrayOfNulls(3)
+            val readBack = ObjectMapper().readValue(File(workDir + "bootimg.json"),
+                    UnifiedConfig::class.java).toArgs()
+            val imgArgs = readBack[0] as ImgArgs
+            val info = readBack[1] as ImgInfo
+            if (imgArgs.verifyType == ImgArgs.VerifyType.AVB) {
+                val sig = ObjectMapper().readValue(
+                        Signer.mapToJson(info.signature as LinkedHashMap<*, *>), ImgInfo.AvbSignature::class.java)
+                ret[2] = sig
+            } else {
+                val sig2 = ObjectMapper().readValue(
+                        Signer.mapToJson(info.signature as LinkedHashMap<*, *>), ImgInfo.VeritySignature::class.java)
+                ret[2] = sig2
+            }
+            ret[0] = imgArgs
+            ret[1] = info
             return ret
         }
     }

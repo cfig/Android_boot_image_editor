@@ -20,7 +20,7 @@ data class Footer constructor(
         private const val FORMAT_STRING = "!4s2L3Q${RESERVED}x"
 
         init {
-            Assert.assertEquals(SIZE, Struct(FORMAT_STRING).calcsize())
+            Assert.assertEquals(SIZE, Struct(FORMAT_STRING).calcSize())
         }
     }
 

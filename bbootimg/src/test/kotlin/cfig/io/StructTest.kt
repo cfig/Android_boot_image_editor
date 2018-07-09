@@ -1,7 +1,5 @@
-import cfig.Avb
 import cfig.Helper
 import cfig.io.Struct
-import org.junit.Assert
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -10,11 +8,13 @@ import java.io.ByteArrayInputStream
 class StructTest {
     @Test
     fun constructTest() {
-        assertEquals(16, Struct("<2i4b4b").calcsize())
-        assertEquals(16, Struct("<Q8b").calcsize())
-        assertEquals(2, Struct(">h").calcsize())
-        assertEquals(3, Struct(">3s").calcsize())
-        assertEquals(4, Struct("!Hh").calcsize())
+        assertEquals(16, Struct("<2i4b4b").calcSize())
+        assertEquals(16, Struct("<Q8b").calcSize())
+        assertEquals(2, Struct(">h").calcSize())
+        assertEquals(3, Struct(">3s").calcSize())
+        assertEquals(4, Struct("!Hh").calcSize())
+
+        Struct("<2i4b4b").dump()
 
         try {
             Struct("abcd")
