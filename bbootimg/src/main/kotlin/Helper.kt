@@ -2,15 +2,14 @@ package cfig
 
 import cfig.io.Struct
 import com.google.common.math.BigIntegerMath
+import org.apache.commons.codec.binary.Hex
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipParameters
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.ExecuteException
 import org.apache.commons.exec.PumpStreamHandler
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey
-import org.bouncycastle.util.encoders.Hex
 import org.bouncycastle.util.io.pem.PemReader
 import org.junit.Assert
 import org.junit.Assert.assertTrue
@@ -21,19 +20,6 @@ import java.math.RoundingMode
 import java.nio.charset.StandardCharsets
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
-import javax.crypto.EncryptedPrivateKeyInfo
-import java.security.spec.InvalidKeySpecException
-import javax.crypto.Cipher
-import javax.crypto.spec.PBEKeySpec
-import javax.crypto.SecretKeyFactory
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.security.GeneralSecurityException
-import java.security.PrivateKey
-import java.security.spec.PKCS8EncodedKeySpec
-import java.util.*
-
 
 class Helper {
     companion object {
@@ -205,15 +191,15 @@ class Helper {
             val r = BigInteger.valueOf(2).pow(numBits)
             val rrModn = (r * r).mod(rsa.modulus)
             log.debug("BB: " + numBits / 8 + ", mod_len: " + rsa.modulus.toByteArray().size + ", rrmodn = " + rrModn.toByteArray().size)
-            val unsignedModulo = rsa.modulus.toByteArray().sliceArray(1..numBits/8) //remove sign byte
-            log.debug("unsigned modulo: " + String(Hex.encode(unsignedModulo)))
+            val unsignedModulo = rsa.modulus.toByteArray().sliceArray(1..numBits / 8) //remove sign byte
+            log.debug("unsigned modulo: " + Hex.encodeHexString(unsignedModulo))
             val ret = Struct("!II${numBits / 8}b${numBits / 8}b").pack(
                     numBits,
                     n0inv,
                     unsignedModulo,
                     rrModn.toByteArray())
-            log.debug("rrmodn: " + String(Hex.encode(rrModn.toByteArray())))
-            log.debug("RSA: " + String(Hex.encode(ret)))
+            log.debug("rrmodn: " + Hex.encodeHexString(rrModn.toByteArray()))
+            log.debug("RSA: " + Hex.encodeHexString(ret))
             return ret
         }
 
@@ -232,7 +218,7 @@ class Helper {
             } catch (e: ExecuteException) {
                 log.error("Execute error")
             } finally {
-                log.debug("OUT: " + String(Hex.encode(stdout.toByteArray())))
+                log.debug("OUT: " + Hex.encodeHexString(stdout.toByteArray()))
                 log.debug("ERR: " + String(stderr.toByteArray()))
             }
 

@@ -2,7 +2,6 @@ package cfig
 
 import avb.*
 import avb.desc.*
-import org.bouncycastle.util.encoders.Hex
 
 /*
     a wonderfaul base64 encoder/decoder: https://cryptii.com/base64-to-hex

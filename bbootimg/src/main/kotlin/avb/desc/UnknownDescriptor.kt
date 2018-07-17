@@ -2,7 +2,7 @@ package avb.desc
 
 import cfig.Helper
 import cfig.io.Struct
-import org.bouncycastle.util.encoders.Hex
+import org.apache.commons.codec.binary.Hex
 import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
@@ -27,7 +27,7 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 
     }
 
     override fun toString(): String {
-        return "UnknownDescriptor(tag=$tag, SIZE=${data.size}, data=${Hex.toHexString(data)})"
+        return "UnknownDescriptor(tag=$tag, SIZE=${data.size}, data=${Hex.encodeHexString(data)}"
     }
 
     fun analyze(): Any {

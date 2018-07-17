@@ -43,12 +43,13 @@ dependencies {
     compile("com.fasterxml.jackson.core:jackson-databind:2.9.4")
     compile("org.apache.commons:commons-exec:1.3")
     compile("org.apache.commons:commons-compress:1.16.1")
+    compile("commons-codec:commons-codec:1.11")
     compile("junit:junit:4.12")
-    //compile("org.bouncycastle:bcprov-jdk15on:1.59")
-    compile("org.nd4j:nd4j-api:0.9.1")
+    //compile("org.nd4j:nd4j-api:0.9.1")
+    compile("com.google.guava:guava:18.0")
 
-    compile project(':bouncycastle:bcpkix')
-    compile project(':bouncycastle:bcprov')
+    compile project(":bouncycastle:bcpkix")
+    compile project(":bouncycastle:bcprov")
 }
 
 mainClassName = "cfig.RKt"

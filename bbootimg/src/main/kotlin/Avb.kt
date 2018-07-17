@@ -5,7 +5,7 @@ import avb.alg.Algorithms
 import avb.desc.*
 import cfig.io.Struct
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.bouncycastle.util.encoders.Hex
+import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
 import java.io.*
 import java.nio.file.Files
@@ -79,7 +79,7 @@ class Avb {
         hd.flags = 0
         if (do_not_use_ab) hd.flags = hd.flags or 1
         if (!use_persistent_digest) hd.digest = digest
-        log.info("encoded hash descriptor:" + String(Hex.encode(hd.encode())))
+        log.info("encoded hash descriptor:" + Hex.encodeHexString(hd.encode()))
         val vbmeta_blob = generateVbMetaBlob(common_algorithm,
                 common_key_path,
                 null,
@@ -260,7 +260,7 @@ class Avb {
                 fis.skip(vbMetaHeader.public_key_offset)
                 ai.auxBlob!!.pubkey!!.pubkey = ByteArray(vbMetaHeader.public_key_size.toInt())
                 fis.read(ai.auxBlob!!.pubkey!!.pubkey)
-                log.debug("Parsed Pub Key: " + String(Hex.encode(ai.auxBlob!!.pubkey!!.pubkey)))
+                log.debug("Parsed Pub Key: " + Hex.encodeHexString(ai.auxBlob!!.pubkey!!.pubkey))
             }
         }
 
@@ -271,7 +271,7 @@ class Avb {
                 fis.skip(vbMetaHeader.public_key_metadata_offset)
                 val ba = ByteArray(vbMetaHeader.public_key_metadata_size.toInt())
                 fis.read(ba)
-                log.debug("Parsed Pub Key Metadata: " + String(Hex.encode(ba)))
+                log.debug("Parsed Pub Key Metadata: " + Hex.encodeHexString(ba))
             }
         }
 
@@ -282,16 +282,16 @@ class Avb {
                 fis.skip(vbMetaHeader.hash_offset)
                 val ba = ByteArray(vbMetaHeader.hash_size.toInt())
                 fis.read(ba)
-                log.debug("Parsed Auth Hash (Header & Aux Blob): " + Hex.encode(ba))
+                log.debug("Parsed Auth Hash (Header & Aux Blob): " + Hex.encodeHexString(ba))
                 val bb = ByteArray(vbMetaHeader.signature_size.toInt())
                 fis.read(bb)
-                log.debug("Parsed Auth Signature (of hash): " + String(Hex.encode(bb)))
+                log.debug("Parsed Auth Signature (of hash): " + Hex.encodeHexString(bb))
 
                 ai.authBlob = AVBInfo.AuthBlob()
                 ai.authBlob!!.offset = authBlockOffset
                 ai.authBlob!!.size = vbMetaHeader.authentication_data_block_size
-                ai.authBlob!!.hash = String(Hex.encode(ba))
-                ai.authBlob!!.signature = String(Hex.encode(bb))
+                ai.authBlob!!.hash = Hex.encodeHexString(ba)
+                ai.authBlob!!.signature = Hex.encodeHexString(bb)
             }
         }
 
