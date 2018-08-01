@@ -32,6 +32,9 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 
 
     fun analyze(): Any {
         return when (this.tag) {
+            0L -> {
+                PropertyDescriptor(ByteArrayInputStream(this.encode()), this.sequence)
+            }
             1L -> {
                 HashTreeDescriptor(ByteArrayInputStream(this.encode()), this.sequence)
             }

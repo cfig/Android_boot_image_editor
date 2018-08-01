@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/cfig/Android_boot_image_editor.svg?branch=master)](https://travis-ci.org/cfig/Android_boot_image_editor)
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-This tool focuses on editing Android boot.img(also recovery.img and recovery-two-step.img).
+This tool focuses on editing Android boot.img(also recovery.img, recovery-two-step.img and vbmeta.img).
 
 ## Prerequisite
 #### Host OS requirement:

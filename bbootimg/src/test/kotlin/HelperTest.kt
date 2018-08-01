@@ -1,9 +1,15 @@
 import avb.alg.Algorithms
 import cfig.Helper
+import cfig.KeyUtil
+import com.google.common.math.BigIntegerMath
 import org.apache.commons.codec.binary.Hex
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.junit.Assert.*
 import org.junit.Test
+import java.math.BigInteger
+import java.math.RoundingMode
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.security.KeyFactory
 import java.security.KeyPairGenerator
 import java.security.Security
@@ -11,6 +17,11 @@ import java.security.Signature
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
+import java.security.spec.RSAPublicKeySpec
+import java.security.PublicKey
+import java.security.spec.RSAPrivateKeySpec
+import java.security.PrivateKey
+
 
 class HelperTest {
     @Test
@@ -35,7 +46,8 @@ class HelperTest {
     fun test3() {
         val data = Hex.decodeHex("0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d0609608648016503040201050004206317a4c8d86accc8258c1ac23ef0ebd18bc3301033")
         val signature = Signature.getInstance("NONEwithRSA")
-        val k = Helper.readPrivateKey("../" + Algorithms.get("SHA256_RSA2048")!!.defaultKey.replace("pem", "pk8"))
+        val keyFile = "../" + Algorithms.get("SHA256_RSA2048")!!.defaultKey.replace("pem", "pk8")
+        val k = KeyUtil.parsePk8PrivateKey(Files.readAllBytes(Paths.get(keyFile)))
         signature.initSign(k)
         signature.update(data)
         println("data size " + data.size)
@@ -74,5 +86,47 @@ class HelperTest {
         }
         val encryptedText = Hex.encodeHexString(cipher.doFinal())
         println(encryptedText)
+    }
+
+    @Test
+    fun testRSA() {
+//        val r = BigIntegerMath.log2(BigInteger.valueOf(1024), RoundingMode.CEILING)
+//        println(r)
+//        println(BigInteger.valueOf(1024).mod(BigInteger.valueOf(2)))
+
+        val p = BigInteger.valueOf(3)
+        val q = BigInteger.valueOf(7)
+        val modulus = p.multiply(q)
+
+        val keyLength = BigIntegerMath.log2(modulus, RoundingMode.CEILING)
+        println("keyLength = $keyLength")
+
+        //r = phi(n) = phi(p) * phi(q) = (p - 1)*(q - 1)
+        val r = (p.subtract(BigInteger.ONE)).multiply(q - BigInteger.ONE)
+
+        //r ~ e
+        //e is released as the public key exponent
+        //most commonly e = 2^16 + 1 = 65,537
+        val e = BigInteger.valueOf(5)
+
+        //(d * e).mod(r) == 1
+        //d is kept as the private key exponent
+        val d = e.modInverse(r)
+
+        println("p = $p, q = $q, modulus = $modulus , r = $r, e = $e, d = $d")
+        assertEquals(1, d.multiply(e).mod(r).toInt())
+        //private key: (modulus, d), d is calculated
+        //pub key: (modulus, e) , e is chosen
+
+        val clearMsg = BigInteger.valueOf(10)
+        val encMsg = clearMsg.pow(e.toInt()).mod(modulus)
+        println("clear: $clearMsg, enc: $encMsg")
+        val decMsg = clearMsg
+    }
+
+    fun gcd(a: BigInteger, b: BigInteger): BigInteger {
+        return if (b == BigInteger.ZERO) {
+            a
+        } else gcd(b, a.mod(b))
     }
 }

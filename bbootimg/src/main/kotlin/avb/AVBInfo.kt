@@ -19,6 +19,7 @@ class AVBInfo(var header: Header? = null,
     data class AuxBlob(
             var pubkey: PubKeyInfo? = null,
             var pubkeyMeta: PubKeyMetadataInfo? = null,
+            var propertyDescriptor: MutableList<PropertyDescriptor> = mutableListOf(),
             var hashTreeDescriptor: MutableList<HashTreeDescriptor> = mutableListOf(),
             var hashDescriptors: MutableList<HashDescriptor> = mutableListOf(),
             var kernelCmdlineDescriptor: MutableList<KernelCmdlineDescriptor> = mutableListOf(),

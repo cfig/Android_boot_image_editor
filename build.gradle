@@ -108,6 +108,12 @@ void updateBootImage(String activeImg) {
         case "recovery.img":
             flashTarget = "/dev/block/by-name/recovery";
             break;
+        case "vbmeta.img":
+            flashTarget = "/dev/block/by-name/vbmeta";
+            if (!new File(activeImg + ".signed").exists()) {
+                return;
+            }
+            break;
     }
     Run("adb root")
     Run("adb push " + activeImg + ".signed /cache/")
@@ -120,6 +126,7 @@ void updateBootImage(String activeImg) {
 task flash {
     doLast {
         updateBootImage(activeImg)
+        updateBootImage("vbmeta.img")
     }
 }
 

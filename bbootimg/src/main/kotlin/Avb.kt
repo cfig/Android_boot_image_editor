@@ -285,6 +285,9 @@ class Avb {
 
         descriptors.forEach {
             when (it) {
+                is PropertyDescriptor -> {
+                    ai.auxBlob!!.propertyDescriptor.add(it)
+                }
                 is HashDescriptor -> {
                     ai.auxBlob!!.hashDescriptors.add(it)
                 }

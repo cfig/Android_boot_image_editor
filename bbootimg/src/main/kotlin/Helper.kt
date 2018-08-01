@@ -1,6 +1,5 @@
 package cfig
 
-import avb.alg.Algorithms
 import cfig.io.Struct
 import com.google.common.math.BigIntegerMath
 import org.apache.commons.codec.binary.Hex
@@ -24,6 +23,7 @@ import java.nio.file.Paths
 import java.security.KeyFactory
 import java.security.PrivateKey
 import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.RSAPrivateKeySpec
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import javax.crypto.Cipher
@@ -183,9 +183,7 @@ class Helper {
                     https://android.googlesource.com/platform/external/avb/+/master/libavb/avb_crypto.h#158
          */
         fun encodeRSAkey(key: ByteArray): ByteArray {
-            val p2 = PemReader(InputStreamReader(ByteArrayInputStream(key))).readPemObject()
-            Assert.assertEquals("RSA PRIVATE KEY", p2.type)
-            val rsa = RSAPrivateKey.getInstance(p2.content)
+            val rsa = KeyUtil.parsePemPrivateKey(ByteArrayInputStream(key))
             Assert.assertEquals(65537.toBigInteger(), rsa.publicExponent)
             val numBits: Int = BigIntegerMath.log2(rsa.modulus, RoundingMode.CEILING)
             log.debug("modulus: " + rsa.modulus)
@@ -213,7 +211,7 @@ class Helper {
         // "specifying Cipher.ENCRYPT mode or Cipher.DECRYPT mode doesn't make a difference;
         //      both simply perform modular exponentiation"
         fun rawSign(keyPath: String, data: ByteArray): ByteArray {
-            val privk = Helper.readPrivateKey(keyPath)
+            val privk = KeyUtil.parsePk8PrivateKey(Files.readAllBytes(Paths.get(keyPath)))
             val cipher = Cipher.getInstance("RSA/ECB/NoPadding").apply {
                 this.init(Cipher.ENCRYPT_MODE, privk)
                 this.update(data)
@@ -255,12 +253,6 @@ class Helper {
                 "sha512" -> "sha-512"
                 else -> throw IllegalArgumentException("unknown algorithm: $alg")
             }
-        }
-
-        @Throws(Exception::class)
-        fun readPrivateKey(filename: String): PrivateKey {
-            val spec = PKCS8EncodedKeySpec(Files.readAllBytes(Paths.get(filename)))
-            return KeyFactory.getInstance("RSA").generatePrivate(spec)
         }
 
         private val log = LoggerFactory.getLogger("Helper")
