@@ -1,0 +1,34 @@
+Enable developer debugging for AVB-enabled devices
+
+### modify build/unzip_boot/vbmeta.img.avb.json
+
+* disable dm-verity hashtree verification
+header -> flags: set to 1(AVB_VBMETA_IMAGE_FLAGS_HASHTREE_DISABLED = 1) to disable dm-verity hashtree(system/vendor etc.)
+
+```diff
+    "descriptors_size" : 1384,
+    "rollback_index" : 0,
+-   "flags" : 0,
++   "flags" : 1,
+    "release_string" : "avbtool 1.0.0"
+  },
+  "authBlob" : {
+```
+
+* disable all AVB verification
+header -> flags: set to 2(AVB_VBMETA_IMAGE_FLAGS_VERIFICATION_DISABLED = 2) to disable all verification, including AVB hash_footer(boot/recovery etc.) and dm-verity hashtree(system/vendor etc.)
+
+```diff
+    "descriptors_size" : 1384,
+    "rollback_index" : 0,
+-   "flags" : 0,
++   "flags" : 2,
+    "release_string" : "avbtool 1.0.0"
+  },
+  "authBlob" : {
+```
+
+### unlock bootloader
+'unlock' state will pass flag AVB_SLOT_VERIFY_FLAGS_ALLOW_VERIFICATION_ERROR when verifying images, then you can disable 
+
+

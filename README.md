@@ -14,10 +14,10 @@ Also need python 2.x(required by avbtool) and java 8.
 
 (1) Target boot.img(or recovery.img / recovery-two-step.img) MUST follows AOSP verified boot flow, either [Boot image signature](https://source.android.com/security/verifiedboot/verified-boot#signature_format) in VBoot 1.0 or [AVB HASH footer](https://android.googlesource.com/platform/external/avb/+/master/README.md#The-VBMeta-struct) in VBoot 2.0.
 
-(2) These utilities are known to work for Nexus/Pixel (or Pixel compatible) boot.img(or recovery.img/recovery-two-step.img) for the following Android releases:
+(2) These utilities are known to work for Nexus/Pixel boot.img(or recovery.img/recovery-two-step.img/vbmeta.img) for the following Android releases:
 
  - AOSP master
- - Lollipop (API Level 21,22) - Oreo (API Level 26,27)
+ - Lollipop (5.0) - Pi (9)
 
 You can get a full [Android version list](https://source.android.com/source/build-numbers.html) here.
 

@@ -28,11 +28,26 @@ class Signer {
                 ImgArgs.VerifyType.AVB -> {
                     log.info("Adding hash_footer with verified-boot 2.0 style")
                     val sig = readBack[2] as ImgInfo.AvbSignature
-                    File(args.output + ".clear").copyTo(File(args.output + ".signed"))
                     val ai = ObjectMapper().readValue(File(Avb.getJsonFileName(args.output)), AVBInfo::class.java)
+                    //val alg = Algorithms.get(ai.header!!.algorithm_type.toInt())
+
+                    //our signer
+                    File(args.output + ".clear").copyTo(File(args.output + ".signed"))
+                    Avb().add_hash_footer(args.output + ".signed",
+                            sig.imageSize!!.toLong(),
+                            false,
+                            false,
+                            salt = sig.salt,
+                            hash_algorithm = sig.hashAlgorithm!!,
+                            partition_name = sig.partName!!,
+                            rollback_index = ai.header!!.rollback_index,
+                            common_algorithm = sig.algorithm!!,
+                            inReleaseString = ai.header!!.release_string)
+                    //original signer
+                    File(args.output + ".clear").copyTo(File(args.output + ".signed2"))
                     val signKey = Algorithms.get(sig.algorithm!!)
                     var cmdlineStr = "$avbtool add_hash_footer " +
-                            "--image ${args.output}.signed " +
+                            "--image ${args.output}.signed2 " +
                             "--partition_size ${sig.imageSize} " +
                             "--salt ${sig.salt} " +
                             "--partition_name ${sig.partName} " +
@@ -47,19 +62,6 @@ class Signer {
                     cmdLine.addArgument(ai.header!!.release_string, false)
                     DefaultExecutor().execute(cmdLine)
                     verifyAVBIntegrity(args, avbtool)
-
-                    File(args.output + ".clear").copyTo(File(args.output + ".signed2"))
-                    val alg = Algorithms.get(ai.header!!.algorithm_type.toInt())
-                    Avb().add_hash_footer(args.output + ".signed2",
-                            sig.imageSize!!.toLong(),
-                            false,
-                            false,
-                            salt = sig.salt,
-                            hash_algorithm = sig.hashAlgorithm!!,
-                            partition_name = sig.partName!!,
-                            rollback_index = ai.header!!.rollback_index,
-                            common_algorithm = sig.algorithm!!,
-                            inReleaseString = ai.header!!.release_string)
                 }
             }
         }

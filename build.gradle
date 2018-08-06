@@ -11,7 +11,7 @@ subprojects {
 // ----------------------------------------------------------------------------
 //                       global
 // ----------------------------------------------------------------------------
-def workdir='build/unzip_boot'
+def workdir = 'build/unzip_boot'
 project.ext.rootWorkDir = new File(workdir).getAbsolutePath()
 String activeImg = "boot.img"
 String activePath = "/boot"
@@ -80,6 +80,35 @@ task _setup(type: Copy) {
     into '.'
 }
 
+task pull() {
+    doFirst {
+        println("Pulling ...")
+    }
+
+    doLast {
+        if (project.findProperty("group")) {
+            println("Pull: $group")
+        } else {
+            println("Pull /boot, /recovery, /vbmeta")
+            pullDefault()
+        }
+    }
+}
+
+void pullDefault() {
+    Run(["adb", "shell", "dd if=/dev/block/by-name/boot of=/cache/boot.img"])
+    Run(["adb", "shell", "dd if=/dev/block/by-name/recovery of=/cache/recovery.img"])
+    Run(["adb", "shell", "dd if=/dev/block/by-name/vbmeta of=/cache/vbmeta.img"])
+
+    Run(["adb", "pull", "/cache/boot.img"])
+    Run(["adb", "pull", "/cache/recovery.img"])
+    Run(["adb", "pull", "/cache/vbmeta.img"])
+
+    Run(["adb", "shell", "rm /cache/boot.img"])
+    Run(["adb", "shell", "rm /cache/recovery.img"])
+    Run(["adb", "shell", "rm /cache/vbmeta.img"])
+}
+
 void Run(List<String> inCmd, String inWorkdir = null) {
     println("CMD:" + inCmd)
     if (inWorkdir == null) {
@@ -89,7 +118,7 @@ void Run(List<String> inCmd, String inWorkdir = null) {
             .directory(new File(inWorkdir))
             .redirectErrorStream(true);
     Process p = pb.start()
-    p.inputStream.eachLine {println it}
+    p.inputStream.eachLine { println it }
     p.waitFor();
     assert 0 == p.exitValue()
 }
@@ -117,7 +146,7 @@ void updateBootImage(String activeImg) {
     }
     Run("adb root")
     Run("adb push " + activeImg + ".signed /cache/")
-    List<String> cmd2 = ["adb", "shell", "dd if=/cache/" + activeImg + ".signed of=" + flashTarget];
+    List<String> cmd2 = ["adb", "shell", "dd if=/cache/" + activeImg + ".signed of=" + flashTarget]
     Run(cmd2)
     cmd2 = ["adb", "shell", "rm -f /cache/" + activeImg + ".signed"];
     Run(cmd2)
