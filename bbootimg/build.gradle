@@ -30,7 +30,6 @@ compileTestKotlin {
 }
 
 repositories {
-    mavenCentral()
     jcenter()
 }
 
@@ -47,20 +46,22 @@ dependencies {
     compile("junit:junit:4.12")
     //compile("org.nd4j:nd4j-api:0.9.1")
     compile("com.google.guava:guava:18.0")
-
-    compile project(":bouncycastle:bcpkix")
-    compile project(":bouncycastle:bcprov")
+    compile("org.bouncycastle:bcprov-jdk15on:1.57")
 }
 
 mainClassName = "cfig.RKt"
 
 jar {
-    from files("build/classes/kotlin/main")
-    from configurations.runtime.asFileTree.files.collect { zipTree(it) }
+    //from files("build/classes/kotlin/main")
+    doFirst {
+        from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    }
 
     manifest {
         attributes "Main-Class": "cfig.RKt"
     }
+
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
 }
 
 test {

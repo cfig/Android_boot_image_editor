@@ -9,7 +9,7 @@ This tool focuses on editing Android boot.img(also recovery.img, recovery-two-st
 #### 1.1 Host OS requirement:
 
 Linux or Mac.
-Also need python 2.x(required by avbtool) and java 8.
+Also need python 2.x and jdk 8.
 
 #### 1.2 Target Android requirement:
 
@@ -24,20 +24,15 @@ Supported images:
 (2) These utilities are known to work for Nexus/Pixel boot.img for the following Android releases:
 
  - AOSP master
- - Lollipop (5.0) - Pi (9)
+ - Lollipop (5.0) - Pie (9)
 
 ## 2. Usage
-Get tools via git:
-
-    git clone https://github.com/cfig/Android_boot_image_editor.git
-    cd Android_boot_image_editor
-
-Then put your boot.img at **$(CURDIR)/boot.img**, then start gradle 'unpack' task:
+Put your boot.img to current directory, then start gradle 'unpack' task:
 
     cp <original_boot_image> boot.img
     ./gradlew unpack
 
-Your get the flattened kernel and /root filesystem under **$(CURDIR)/build/unzip\_boot**:
+Your get the flattened kernel and /root filesystem under **./build/unzip\_boot**:
 
     build/unzip_boot/
     ├── boot.img.avb.json (AVB only)
@@ -69,7 +64,7 @@ And you get recovery.img.signed
 An example boot.img has been placed at **src/test/resources/boot.img**, which is extracted from Nexus 5x(code: bullhead) factory images from [Google](https://dl.google.com/dl/android/aosp/bullhead-mda89e-factory-29247942.tgz), you can take it as a quick start.
 
 ## 4. boot.img layout
-Read [layout](README.expert.md) of Android boot.img.
+Read [layout](doc/layout.md) of Android boot.img.
 We now support both VB 1.0 and AVB 2.0 layouts.
 
 ## 5. compatible devices

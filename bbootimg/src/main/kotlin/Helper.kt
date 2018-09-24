@@ -9,8 +9,6 @@ import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.ExecuteException
 import org.apache.commons.exec.PumpStreamHandler
-import org.bouncycastle.asn1.pkcs.RSAPrivateKey
-import org.bouncycastle.util.io.pem.PemReader
 import org.junit.Assert
 import org.junit.Assert.assertTrue
 import org.slf4j.LoggerFactory

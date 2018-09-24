@@ -1,14 +1,21 @@
+repositories {
+    mavenCentral()
+}
+
 apply plugin: 'java'
 
 jar() {
     manifest {
-        attributes 'Implementation-Title': 'Gradle Quickstart',
-                   'Main-Class': 'com.android.verity.BootSignature'
-    }   
-    from {configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }} //pack dependent jar 
+        attributes "Implementation-Title": "AOSP boot signer",
+                   "Main-Class": "com.android.verity.BootSignature"
+    }
+    doFirst {
+        from {configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }} //pack dependent jar 
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
 }
 
 dependencies {
-    compile project(':bouncycastle:bcpkix')
-    compile project(':bouncycastle:bcprov')
+    compile("org.bouncycastle:bcprov-jdk15on:1.57")
+    compile("org.bouncycastle:bcpkix-jdk15on:1.57")
 }

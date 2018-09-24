@@ -1,6 +1,3 @@
-include 'bouncycastle:bcpkix'
-include 'bouncycastle:bcprov'
 include 'boot_signer'
-include 'abootimg'
 include 'mkbootfs'
 include 'bbootimg'
