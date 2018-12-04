@@ -2205,49 +2205,6 @@ class Avb(object):
         raise AvbError('Error verifying descriptor.')
 
 
-  def calculate_vbmeta_digest(self, image_filename, hash_algorithm, output):
-    """Implements the 'calculate_vbmeta_digest' command.
-
-    Arguments:
-      image_filename: Image file to get information from (file object).
-      hash_algorithm: Hash algorithm used.
-      output: Output file to write human-readable information to (file object).
-    """
-
-    image_dir = os.path.dirname(image_filename)
-    image_ext = os.path.splitext(image_filename)[1]
-
-    image = ImageHandler(image_filename)
-    (footer, header, descriptors, image_size) = self._parse_image(image)
-    offset = 0
-    if footer:
-      offset = footer.vbmeta_offset
-    size = (header.SIZE + header.authentication_data_block_size +
-            header.auxiliary_data_block_size)
-    image.seek(offset)
-    vbmeta_blob = image.read(size)
-
-    hasher = hashlib.new(name=hash_algorithm)
-    hasher.update(vbmeta_blob)
-
-    for desc in descriptors:
-      if isinstance(desc, AvbChainPartitionDescriptor):
-        ch_image_filename = os.path.join(image_dir, desc.partition_name + image_ext)
-        ch_image = ImageHandler(ch_image_filename)
-        (ch_footer, ch_header, ch_descriptors, ch_image_size) = self._parse_image(ch_image)
-        ch_offset = 0
-        if ch_footer:
-          ch_offset = ch_footer.vbmeta_offset
-          ch_size = (ch_header.SIZE + ch_header.authentication_data_block_size +
-                     ch_header.auxiliary_data_block_size)
-        ch_image.seek(ch_offset)
-        ch_vbmeta_blob = ch_image.read(ch_size)
-        hasher.update(ch_vbmeta_blob)
-
-    digest = hasher.digest()
-    output.write('{}\n'.format(digest.encode('hex')))
-
-
   def _parse_image(self, image):
     """Gets information about an image.
 
@@ -2621,7 +2578,6 @@ class Avb(object):
 
     # Add descriptors from other images.
     if include_descriptors_from_image:
-      descriptors_dict = dict()
       for image in include_descriptors_from_image:
         image_handler = ImageHandler(image.name)
         (_, image_vbmeta_header, image_descriptors, _) = self._parse_image(
@@ -2630,18 +2586,7 @@ class Avb(object):
         h.bump_required_libavb_version_minor(
             image_vbmeta_header.required_libavb_version_minor)
         for desc in image_descriptors:
-          # The --include_descriptors_from_image option is used in some setups
-          # with images A and B where both A and B contain a descriptor
-          # for a partition with the same name. Since it's not meaningful
-          # to include both descriptors, only include the last seen descriptor.
-          # See bug 76386656 for details.
-          if hasattr(desc, 'partition_name'):
-            key = type(desc).__name__ + '_' + desc.partition_name
-            descriptors_dict[key] = desc.encode()
-          else:
-            encoded_descriptors.extend(desc.encode())
-      for key in sorted(descriptors_dict.keys()):
-        encoded_descriptors.extend(descriptors_dict[key])
+          encoded_descriptors.extend(desc.encode())
 
     # Load public key metadata blob, if requested.
     pkmd_blob = []
@@ -3268,7 +3213,7 @@ class Avb(object):
 
   def make_atx_certificate(self, output, authority_key_path, subject_key_path,
                            subject_key_version, subject,
-                           is_intermediate_authority, usage, signing_helper,
+                           is_intermediate_authority, signing_helper,
                            signing_helper_with_files):
     """Implements the 'make_atx_certificate' command.
 
@@ -3290,7 +3235,6 @@ class Avb(object):
                should be the same Product ID found in the permanent attributes.
       is_intermediate_authority: True if the certificate is for an intermediate
                                  authority.
-      usage: If not empty, overrides the cert usage with a hash of this value.
       signing_helper: Program which signs a hash and returns the signature.
       signing_helper_with_files: Same as signing_helper but uses files instead.
     """
@@ -3300,10 +3244,9 @@ class Avb(object):
     hasher = hashlib.sha256()
     hasher.update(subject)
     signed_data.extend(hasher.digest())
-    if not usage:
-      usage = 'com.google.android.things.vboot'
-      if is_intermediate_authority:
-        usage += '.ca'
+    usage = 'com.google.android.things.vboot'
+    if is_intermediate_authority:
+      usage += '.ca'
     hasher = hashlib.sha256()
     hasher.update(usage)
     signed_data.extend(hasher.digest())
@@ -3378,67 +3321,6 @@ class Avb(object):
     output.write(struct.pack('<I', 1))  # Format Version
     output.write(intermediate_key_certificate)
     output.write(product_key_certificate)
-
-  def make_atx_unlock_credential(self, output, intermediate_key_certificate,
-                                 unlock_key_certificate, challenge_path,
-                                 unlock_key_path, signing_helper,
-                                 signing_helper_with_files):
-    """Implements the 'make_atx_unlock_credential' command.
-
-    Android Things unlock credentials can be used to authorize the unlock of AVB
-    on a device. These credentials are presented to an Android Things bootloader
-    via the fastboot interface in response to a 16-byte challenge. This method
-    creates all fields of the credential except the challenge signature field
-    (which is the last field) and can optionally create the challenge signature
-    field as well if a challenge and the unlock_key_path is provided.
-
-    Arguments:
-      output: The credential will be written to this file on success.
-      intermediate_key_certificate: A certificate file as output by
-                                    make_atx_certificate with
-                                    is_intermediate_authority set to true.
-      unlock_key_certificate: A certificate file as output by
-                              make_atx_certificate with
-                              is_intermediate_authority set to false and the
-                              usage set to
-                              'com.google.android.things.vboot.unlock'.
-      challenge_path: [optional] A path to the challenge to sign.
-      unlock_key_path: [optional] A PEM file path with the unlock private key.
-      signing_helper: Program which signs a hash and returns the signature.
-      signing_helper_with_files: Same as signing_helper but uses files instead.
-
-    Raises:
-      AvbError: If an argument is incorrect.
-    """
-    EXPECTED_CERTIFICATE_SIZE = 1620
-    EXPECTED_CHALLENGE_SIZE = 16
-    if len(intermediate_key_certificate) != EXPECTED_CERTIFICATE_SIZE:
-      raise AvbError('Invalid intermediate key certificate length.')
-    if len(unlock_key_certificate) != EXPECTED_CERTIFICATE_SIZE:
-      raise AvbError('Invalid product key certificate length.')
-    challenge = bytearray()
-    if challenge_path:
-      with open(challenge_path, 'r') as f:
-        challenge = f.read()
-      if len(challenge) != EXPECTED_CHALLENGE_SIZE:
-        raise AvbError('Invalid unlock challenge length.')
-    output.write(struct.pack('<I', 1))  # Format Version
-    output.write(intermediate_key_certificate)
-    output.write(unlock_key_certificate)
-    if challenge_path and unlock_key_path:
-      signature = bytearray()
-      padding_and_hash = bytearray()
-      algorithm_name = 'SHA512_RSA4096'
-      alg = ALGORITHMS[algorithm_name]
-      hasher = hashlib.sha512()
-      padding_and_hash.extend(alg.padding)
-      hasher.update(challenge)
-      padding_and_hash.extend(hasher.digest())
-      signature.extend(raw_sign(signing_helper, signing_helper_with_files,
-                                algorithm_name,
-                                alg.signature_num_bytes, unlock_key_path,
-                                padding_and_hash))
-      output.write(signature)
 
 
 def calc_hash_level_offsets(image_size, block_size, digest_size):
@@ -3914,22 +3796,6 @@ class AvbTool(object):
                             action='append')
     sub_parser.set_defaults(func=self.verify_image)
 
-    sub_parser = subparsers.add_parser(
-        'calculate_vbmeta_digest',
-        help='Calculate vbmeta digest.')
-    sub_parser.add_argument('--image',
-                            help='Image to calculate digest for',
-                            type=argparse.FileType('rb'),
-                            required=True)
-    sub_parser.add_argument('--hash_algorithm',
-                            help='Hash algorithm to use (default: sha256)',
-                            default='sha256')
-    sub_parser.add_argument('--output',
-                            help='Write hex digest to file (default: stdout)',
-                            type=argparse.FileType('wt'),
-                            default=sys.stdout)
-    sub_parser.set_defaults(func=self.calculate_vbmeta_digest)
-
     sub_parser = subparsers.add_parser('set_ab_metadata',
                                        help='Set A/B metadata.')
     sub_parser.add_argument('--misc_image',
@@ -3969,10 +3835,6 @@ class AvbTool(object):
                             help=('Generate an intermediate authority '
                                   'certificate'),
                             action='store_true')
-    sub_parser.add_argument('--usage',
-                            help=('Override usage with a hash of the provided'
-                                  'string'),
-                            required=False)
     sub_parser.add_argument('--authority_key',
                             help='Path to authority RSA private key file',
                             required=False)
@@ -4021,43 +3883,6 @@ class AvbTool(object):
                             type=argparse.FileType('rb'),
                             required=True)
     sub_parser.set_defaults(func=self.make_atx_metadata)
-
-    sub_parser = subparsers.add_parser(
-        'make_atx_unlock_credential',
-        help='Create an Android Things eXtension (ATX) unlock credential.')
-    sub_parser.add_argument('--output',
-                            help='Write credential to file',
-                            type=argparse.FileType('wb'),
-                            default=sys.stdout)
-    sub_parser.add_argument('--intermediate_key_certificate',
-                            help='Path to intermediate key certificate file',
-                            type=argparse.FileType('rb'),
-                            required=True)
-    sub_parser.add_argument('--unlock_key_certificate',
-                            help='Path to unlock key certificate file',
-                            type=argparse.FileType('rb'),
-                            required=True)
-    sub_parser.add_argument('--challenge',
-                            help='Path to the challenge to sign (optional). If '
-                                 'this is not provided the challenge signature '
-                                 'field is omitted and can be concatenated '
-                                 'later.',
-                            required=False)
-    sub_parser.add_argument('--unlock_key',
-                            help='Path to unlock key (optional). Must be '
-                                 'provided if using --challenge.',
-                            required=False)
-    sub_parser.add_argument('--signing_helper',
-                            help='Path to helper used for signing',
-                            metavar='APP',
-                            default=None,
-                            required=False)
-    sub_parser.add_argument('--signing_helper_with_files',
-                            help='Path to helper used for signing using files',
-                            metavar='APP',
-                            default=None,
-                            required=False)
-    sub_parser.set_defaults(func=self.make_atx_unlock_credential)
 
     args = parser.parse_args(argv[1:])
     try:
@@ -4174,11 +3999,6 @@ class AvbTool(object):
     self.avb.verify_image(args.image.name, args.key,
                           args.expected_chain_partition)
 
-  def calculate_vbmeta_digest(self, args):
-    """Implements the 'calculate_vbmeta_digest' sub-command."""
-    self.avb.calculate_vbmeta_digest(args.image.name, args.hash_algorithm,
-                                     args.output)
-
   def make_atx_certificate(self, args):
     """Implements the 'make_atx_certificate' sub-command."""
     self.avb.make_atx_certificate(args.output, args.authority_key,
@@ -4186,7 +4006,6 @@ class AvbTool(object):
                                   args.subject_key_version,
                                   args.subject.read(),
                                   args.subject_is_intermediate_authority,
-                                  args.usage,
                                   args.signing_helper,
                                   args.signing_helper_with_files)
 
@@ -4201,17 +4020,6 @@ class AvbTool(object):
     self.avb.make_atx_metadata(args.output,
                                args.intermediate_key_certificate.read(),
                                args.product_key_certificate.read())
-
-  def make_atx_unlock_credential(self, args):
-    """Implements the 'make_atx_unlock_credential' sub-command."""
-    self.avb.make_atx_unlock_credential(
-        args.output,
-        args.intermediate_key_certificate.read(),
-        args.unlock_key_certificate.read(),
-        args.challenge,
-        args.unlock_key,
-        args.signing_helper,
-        args.signing_helper_with_files)
 
 
 if __name__ == '__main__':
