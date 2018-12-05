@@ -297,6 +297,9 @@ class Avb {
                 is HashTreeDescriptor -> {
                     ai.auxBlob!!.hashTreeDescriptor.add(it)
                 }
+                is ChainPartitionDescriptor -> {
+                    ai.auxBlob!!.chainPartitionDescriptor.add(it)
+                }
                 is UnknownDescriptor -> {
                     ai.auxBlob!!.unknownDescriptors.add(it)
                 }

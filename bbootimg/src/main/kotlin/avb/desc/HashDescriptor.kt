@@ -9,6 +9,7 @@ import java.security.MessageDigest
 
 class HashDescriptor(var image_size: Long = 0L,
                      var hash_algorithm: ByteArray = byteArrayOf(),
+                     var hash_algorithm_str: String = "",
                      var partition_name_len: Long = 0L,
                      var salt_len: Long = 0L,
                      var digest_len: Long = 0L,
@@ -36,6 +37,7 @@ class HashDescriptor(var image_size: Long = 0L,
         this.partition_name = Helper.toCString(payload[0] as ByteArray)
         this.salt = payload[1] as ByteArray
         this.digest = payload[2] as ByteArray
+        this.hash_algorithm_str = Helper.toCString(this.hash_algorithm)
     }
 
     override fun encode(): ByteArray {

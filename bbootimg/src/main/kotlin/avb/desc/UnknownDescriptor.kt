@@ -44,6 +44,9 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 
             3L -> {
                 KernelCmdlineDescriptor(ByteArrayInputStream(this.encode()), this.sequence)
             }
+            4L -> {
+                ChainPartitionDescriptor(ByteArrayInputStream(this.encode()), this.sequence)
+            }
             else -> {
                 this
             }

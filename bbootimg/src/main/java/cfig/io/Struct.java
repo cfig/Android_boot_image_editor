@@ -151,7 +151,7 @@ public class Struct {
                 continue;
             }
 
-            if (format[0] == Byte.class || format[0] == Character.class || format[0] == PadByte.class) {
+            if (format[0] == Byte.class || format[0] == Character.class) {
                 byte[] data = new byte[(Integer) format[1]];
                 assertEquals((int) format[1], iS.read(data));
                 ret.add(data);

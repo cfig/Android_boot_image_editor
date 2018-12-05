@@ -23,6 +23,7 @@ class AVBInfo(var header: Header? = null,
             var hashTreeDescriptor: MutableList<HashTreeDescriptor> = mutableListOf(),
             var hashDescriptors: MutableList<HashDescriptor> = mutableListOf(),
             var kernelCmdlineDescriptor: MutableList<KernelCmdlineDescriptor> = mutableListOf(),
+            var chainPartitionDescriptor: MutableList<ChainPartitionDescriptor> = mutableListOf(),
             var unknownDescriptors: MutableList<UnknownDescriptor> = mutableListOf()
     ) {
         data class PubKeyInfo(
