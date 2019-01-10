@@ -52,9 +52,9 @@ class Signer {
                             "--salt ${sig.salt} " +
                             "--partition_name ${sig.partName} " +
                             "--hash_algorithm ${sig.hashAlgorithm} " +
-                            "--algorithm ${sig.algorithm}"
+                            "--algorithm ${sig.algorithm} "
                     if (signKey!!.defaultKey.isNotBlank()) {
-                        cmdlineStr += "--key $signKey"
+                        cmdlineStr += "--key ${signKey!!.defaultKey}"
                     }
                     log.warn(cmdlineStr)
                     val cmdLine = CommandLine.parse(cmdlineStr)
