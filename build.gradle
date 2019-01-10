@@ -58,7 +58,7 @@ task sign(type: JavaExec, dependsOn: ["bbootimg:jar", packClear, "boot_signer:ja
     classpath = sourceSets.main.runtimeClasspath
     main = "cfig.RKt"
     classpath = files("bbootimg/build/libs/bbootimg.jar")
-    maxHeapSize '512m'
+    maxHeapSize '4096m'
     args "sign", activeImg, rootProject.mkbootimgBin, rootProject.avbtool, rootProject.bootSigner, rootProject.mkbootfsBin
 }
 
