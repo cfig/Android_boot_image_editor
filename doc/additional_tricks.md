@@ -37,3 +37,8 @@ Now we can work with 'raw\_boot'
 
 Due to the configuration "BOARD_BUILD_SYSTEM_ROOT_IMAGE := true", the embeded ramdisk in boot.img is actually used in recovery mode.
 
+## NX606J
+
+Thanks to the work by [CallMESuper], ZTE NX606J boot.img is also verified to be compatible with this toolkit.
+
+ROM download page: [http://ui.nubia.cn/rom/detail/56](http://ui.nubia.cn/rom/detail/56)
