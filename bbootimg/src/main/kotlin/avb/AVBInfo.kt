@@ -42,7 +42,7 @@ class AVBInfo(var header: Header? = null,
             this.hashTreeDescriptor.forEach { descList.add(it) }
             this.hashDescriptors.forEach { descList.add(it) }
             this.kernelCmdlineDescriptor.forEach { descList.add(it) }
-            this.chainPartitionDescriptor.forEach{ descList.add(it) }
+            this.chainPartitionDescriptor.forEach { descList.add(it) }
             this.unknownDescriptors.forEach { descList.add(it) }
             descList.sortBy { it.sequence }
             var ret = byteArrayOf()

@@ -54,7 +54,7 @@ class Signer {
                             "--hash_algorithm ${sig.hashAlgorithm} " +
                             "--algorithm ${sig.algorithm} "
                     if (signKey!!.defaultKey.isNotBlank()) {
-                        cmdlineStr += "--key ${signKey!!.defaultKey}"
+                        cmdlineStr += "--key ${signKey.defaultKey}"
                     }
                     log.warn(cmdlineStr)
                     val cmdLine = CommandLine.parse(cmdlineStr)
