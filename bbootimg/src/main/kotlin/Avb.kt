@@ -321,7 +321,7 @@ class Avb {
         val alg = Algorithms.get(ai.header!!.algorithm_type.toInt())!!
         val encodedDesc = ai.auxBlob!!.encodeDescriptors()
         //encoded pubkey
-        val encodedKey = Blob.encodePubKey(alg, Files.readAllBytes(Paths.get(alg.defaultKey)))
+        val encodedKey = Blob.encodePubKey(alg)
 
         //3 - whole aux blob
         var auxBlob = byteArrayOf()

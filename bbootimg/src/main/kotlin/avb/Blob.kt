@@ -12,26 +12,18 @@ import java.security.MessageDigest
 
 class Blob {
     companion object {
-        fun encodePubKey(alg: Algorithm): ByteArray {
+        fun encodePubKey(alg: Algorithm, key: ByteArray? = null): ByteArray {
             var encodedKey = byteArrayOf()
+            var algKey: ByteArray? = key
             if (alg.public_key_num_bytes > 0) {
-                encodedKey = Helper.encodeRSAkey(Files.readAllBytes((Paths.get(alg.defaultKey))))
+                if (key == null) {
+                    algKey = Files.readAllBytes((Paths.get(alg.defaultKey)))
+                }
+                encodedKey = Helper.encodeRSAkey(algKey!!)
                 log.info("encodePubKey(): size = ${alg.public_key_num_bytes}, algorithm key size: ${encodedKey.size}")
                 Assert.assertEquals(alg.public_key_num_bytes, encodedKey.size)
             } else {
                 log.info("encodePubKey(): No key to encode for algorithm " + alg.name)
-            }
-            return encodedKey
-        }
-
-        fun encodePubKey(alg: Algorithm, key: ByteArray): ByteArray {
-            var encodedKey = byteArrayOf()
-            if (alg.public_key_num_bytes > 0) {
-                encodedKey = Helper.encodeRSAkey(key)
-                log.info("encodePubKey(): size = ${alg.public_key_num_bytes}, algorithm key size: ${encodedKey.size}")
-                Assert.assertEquals(alg.public_key_num_bytes, encodedKey.size)
-            } else {
-                log.info("encodePubKey(): No key to use")
             }
             return encodedKey
         }
