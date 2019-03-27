@@ -2,6 +2,7 @@ package cfig
 
 import avb.AVBInfo
 import avb.alg.Algorithms
+import cfig.bootimg.BootImgInfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
@@ -11,66 +12,61 @@ import java.io.File
 class Signer {
     companion object {
         private val log = LoggerFactory.getLogger(Signer::class.java)
-        private val workDir = UnifiedConfig.workDir
 
         fun sign(avbtool: String, bootSigner: String) {
-            log.info("Loading config from ${workDir}bootimg.json")
-            val readBack = UnifiedConfig.readBack()
-            val args = readBack[0] as ImgArgs
+            log.info("Loading config from ${ParamConfig().cfg}")
+            val info2 = UnifiedConfig.readBack2()
+            val cfg = ObjectMapper().readValue(File(ParamConfig().cfg), UnifiedConfig::class.java)
 
-            when (args.verifyType) {
-                ImgArgs.VerifyType.VERIFY -> {
+            when (info2.signatureType) {
+                BootImgInfo.VerifyType.VERIFY -> {
                     log.info("Signing with verified-boot 1.0 style")
-                    val sig = readBack[2] as ImgInfo.VeritySignature
-                    DefaultExecutor().execute(CommandLine.parse("java -jar $bootSigner " +
-                            "${sig.path} ${args.output}.clear ${sig.verity_pk8} ${sig.verity_pem} ${args.output}.signed"))
+                    val sig = ImgInfo.VeritySignature()
+                    val bootSignCmd = "java -jar $bootSigner " +
+                            "${sig.path} ${cfg.info.output}.clear " +
+                            "${sig.verity_pk8} ${sig.verity_pem} " +
+                            "${cfg.info.output}.signed"
+                    log.info(bootSignCmd)
+                    DefaultExecutor().execute(CommandLine.parse(bootSignCmd))
                 }
-                ImgArgs.VerifyType.AVB -> {
+                BootImgInfo.VerifyType.AVB -> {
                     log.info("Adding hash_footer with verified-boot 2.0 style")
-                    val sig = readBack[2] as ImgInfo.AvbSignature
-                    val ai = ObjectMapper().readValue(File(Avb.getJsonFileName(args.output)), AVBInfo::class.java)
-                    //val alg = Algorithms.get(ai.header!!.algorithm_type.toInt())
+                    val ai = ObjectMapper().readValue(File(Avb.getJsonFileName(cfg.info.output)), AVBInfo::class.java)
+                    val alg = Algorithms.get(ai.header!!.algorithm_type.toInt())
+                    val bootDesc = ai.auxBlob!!.hashDescriptors[0]
 
                     //our signer
-                    File(args.output + ".clear").copyTo(File(args.output + ".signed"))
-                    Avb().add_hash_footer(args.output + ".signed",
-                            sig.imageSize!!.toLong(),
+                    File(cfg.info.output + ".clear").copyTo(File(cfg.info.output + ".signed"))
+                    Avb().add_hash_footer(cfg.info.output + ".signed",
+                            info2.imageSize.toLong(),
                             false,
                             false,
-                            salt = sig.salt,
-                            hash_algorithm = sig.hashAlgorithm!!,
-                            partition_name = sig.partName!!,
+                            salt = Helper.toHexString(bootDesc.salt),
+                            hash_algorithm = bootDesc.hash_algorithm_str,
+                            partition_name = bootDesc.partition_name,
                             rollback_index = ai.header!!.rollback_index,
-                            common_algorithm = sig.algorithm!!,
+                            common_algorithm = alg!!.name,
                             inReleaseString = ai.header!!.release_string)
                     //original signer
-                    File(args.output + ".clear").copyTo(File(args.output + ".signed2"))
-                    val signKey = Algorithms.get(sig.algorithm!!)
+                    File(cfg.info.output + ".clear").copyTo(File(cfg.info.output + ".signed2"))
                     var cmdlineStr = "$avbtool add_hash_footer " +
-                            "--image ${args.output}.signed2 " +
-                            "--partition_size ${sig.imageSize} " +
-                            "--salt ${sig.salt} " +
-                            "--partition_name ${sig.partName} " +
-                            "--hash_algorithm ${sig.hashAlgorithm} " +
-                            "--algorithm ${sig.algorithm} "
-                    if (signKey!!.defaultKey.isNotBlank()) {
-                        cmdlineStr += "--key ${signKey.defaultKey}"
+                            "--image ${cfg.info.output}.signed2 " +
+                            "--partition_size ${info2.imageSize} " +
+                            "--salt ${Helper.toHexString(bootDesc.salt)} " +
+                            "--partition_name ${bootDesc.partition_name} " +
+                            "--hash_algorithm ${bootDesc.hash_algorithm_str} " +
+                            "--algorithm ${alg.name} "
+                    if (alg.defaultKey.isNotBlank()) {
+                        cmdlineStr += "--key ${alg.defaultKey}"
                     }
                     log.warn(cmdlineStr)
                     val cmdLine = CommandLine.parse(cmdlineStr)
                     cmdLine.addArgument("--internal_release_string")
                     cmdLine.addArgument(ai.header!!.release_string, false)
                     DefaultExecutor().execute(cmdLine)
-                    verifyAVBIntegrity(args, avbtool)
+                    Parser.verifyAVBIntegrity(cfg.info.output, avbtool)
                 }
             }
-        }
-
-        private fun verifyAVBIntegrity(args: ImgArgs, avbtool: String) {
-            val tgt = args.output + ".signed"
-            log.info("Verifying AVB: $tgt")
-            DefaultExecutor().execute(CommandLine.parse("$avbtool verify_image --image $tgt"))
-            log.info("Verifying image passed: $tgt")
         }
 
         fun mapToJson(m: LinkedHashMap<*, *>): String {

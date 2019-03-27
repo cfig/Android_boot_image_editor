@@ -1,230 +1,130 @@
 package cfig
 
+import cfig.bootimg.BootImgInfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
+import org.junit.Assert.assertTrue
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
-import java.lang.IllegalStateException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import org.junit.Assert.*
-import org.apache.commons.exec.PumpStreamHandler
-import java.io.ByteArrayOutputStream
-import java.util.regex.Pattern
 
 class Parser {
-    private val workDir = UnifiedConfig.workDir
-
-    private fun parseOsVersion(x: Int): String {
-        val a = x shr 14
-        val b = x - (a shl 14) shr 7
-        val c = x and 0x7f
-
-        return String.format("%d.%d.%d", a, b, c)
-    }
-
-    private fun parseOsPatchLevel(x: Int): String {
-        var y = x shr 4
-        val m = x and 0xf
-        y += 2000
-
-        return String.format("%d-%02d-%02d", y, m, 0)
-    }
-
-    private fun getHeaderSize(pageSize: Int): Int {
-        val pad = (pageSize - (1648 and (pageSize - 1))) and (pageSize - 1)
-        return pad + 1648
-    }
-
-    private fun getPaddingSize(position: Int, pageSize: Int): Int {
-        return (pageSize - (position and pageSize - 1)) and (pageSize - 1)
-    }
-
-    private fun parseHeader(args: ImgArgs, info: ImgInfo) {
-        FileInputStream(args.output).use { iS ->
-            assertTrue(readBytes(iS, 8).contentEquals("ANDROID!".toByteArray()))
-            info.kernelLength = readInt(iS)
-            args.kernelOffset = readUnsignedAsLong(iS)
-            info.ramdiskLength = readInt(iS)
-            args.ramdiskOffset = readUnsignedAsLong(iS)
-            info.secondBootloaderLength = readInt(iS)
-            args.secondOffset = readUnsignedAsLong(iS)
-            args.tagsOffset = readUnsignedAsLong(iS)
-            args.pageSize = readInt(iS)
-            args.headerVersion = readInt(iS)
-
-            val osNPatch = readInt(iS)
-            if (0 != osNPatch) { //treated as 'reserved' in this boot image
-                args.osVersion = parseOsVersion(osNPatch shr 11)
-                args.osPatchLevel = parseOsPatchLevel(osNPatch and 0x7ff)
-            }
-
-            args.board = Helper.toCString(readBytes(iS, 16))
-            if (args.board.isBlank()) {
-                args.board = ""
-            }
-
-            val cmd1 = Helper.toCString(readBytes(iS, 512))
-            info.hash = readBytes(iS, 32) //hash
-            val cmd2 = Helper.toCString(readBytes(iS, 1024))
-            args.cmdline = cmd1 + cmd2
-
-            info.recoveryDtboLength = readInt(iS)
-            args.dtboOffset = readLong(iS)
-            info.headerSize = readInt(iS)
-
-            //calc subimg positions
-            info.kernelPosition = getHeaderSize(args.pageSize)
-            info.ramdiskPosition = info.kernelPosition + info.kernelLength + getPaddingSize(info.kernelLength, args.pageSize)
-            info.secondBootloaderPosition = info.ramdiskPosition + info.ramdiskLength + getPaddingSize(info.ramdiskLength, args.pageSize)
-            info.recoveryDtboPosition = info.secondBootloaderPosition + info.secondBootloaderLength + getPaddingSize(info.secondBootloaderLength, args.pageSize)
-
-            //adjust args
-            if (args.kernelOffset > Int.MAX_VALUE
-                    && args.ramdiskOffset > Int.MAX_VALUE
-                    && args.secondOffset > Int.MAX_VALUE
-                    && args.dtboOffset > Int.MAX_VALUE) {
-                args.base = Int.MAX_VALUE + 1L
-                args.kernelOffset -= args.base
-                args.ramdiskOffset -= args.base
-                args.secondOffset -= args.base
-                args.tagsOffset -= args.base
-                args.dtboOffset -= args.base
-            }
-
-            if (info.ramdiskLength == 0) args.ramdisk = null
-            if (info.kernelLength == 0) throw IllegalStateException("boot image has no kernel")
-            if (info.secondBootloaderLength == 0) args.second = null
-            if (info.recoveryDtboLength == 0) args.dtbo = null
-        }
-    }//resource-closable
-
-    private fun verifiedWithAVB(args: ImgArgs): Boolean {
+    private fun verifiedWithAVB(fileName: String): Boolean {
         val expectedBf = "AVBf".toByteArray()
-        FileInputStream(args.output).use { fis ->
-            fis.skip(File(args.output).length() - 64)
+        FileInputStream(fileName).use { fis ->
+            fis.skip(File(fileName).length() - 64)
             val bf = ByteArray(4)
             fis.read(bf)
             return bf.contentEquals(expectedBf)
         }
     }
 
-    private fun verifyAVBIntegrity(args: ImgArgs, avbtool: String) {
-        val cmdline = "$avbtool verify_image --image ${args.output}"
-        log.info(cmdline)
-        DefaultExecutor().execute(CommandLine.parse(cmdline))
-    }
-
-    private fun parseAVBInfo(args: ImgArgs, info: ImgInfo, avbtool: String) {
-        val outputStream = ByteArrayOutputStream()
-        val exec = DefaultExecutor()
-        exec.streamHandler = PumpStreamHandler(outputStream)
-        val cmdline = "$avbtool info_image --image ${args.output}"
-        log.info(cmdline)
-        exec.execute(CommandLine.parse(cmdline))
-        val lines = outputStream.toString().split("\n")
-        lines.forEach {
-            val m = Pattern.compile("^Original image size:\\s+(\\d+)\\s*bytes").matcher(it)
-            if (m.find()) {
-                (info.signature as ImgInfo.AvbSignature).originalImageSize = Integer.parseInt(m.group(1))
-            }
-
-            val m2 = Pattern.compile("^Image size:\\s+(\\d+)\\s*bytes").matcher(it)
-            if (m2.find()) {
-                (info.signature as ImgInfo.AvbSignature).imageSize = Integer.parseInt(m2.group(1))
-            }
-
-            val m3 = Pattern.compile("^\\s*Partition Name:\\s+(\\S+)$").matcher(it)
-            if (m3.find()) {
-                (info.signature as ImgInfo.AvbSignature).partName = m3.group(1)
-
-            }
-
-            val m4 = Pattern.compile("^\\s*Salt:\\s+(\\S+)$").matcher(it)
-            if (m4.find()) {
-                (info.signature as ImgInfo.AvbSignature).salt = m4.group(1)
-
-            }
-
-            val m5 = Pattern.compile("^\\s*Algorithm:\\s+(\\S+)$").matcher(it)
-            if (m5.find()) {
-                (info.signature as ImgInfo.AvbSignature).algorithm = m5.group(1)
-            }
-
-            val m6 = Pattern.compile("^\\s*Hash Algorithm:\\s+(\\S+)$").matcher(it)
-            if (m6.find()) {
-                (info.signature as ImgInfo.AvbSignature).hashAlgorithm = m6.group(1)
-            }
-
-            log.debug("[" + it + "]")
-        }
-        assertNotNull((info.signature as ImgInfo.AvbSignature).imageSize)
-        assertNotNull((info.signature as ImgInfo.AvbSignature).originalImageSize)
-        assertTrue(!(info.signature as ImgInfo.AvbSignature).partName.isNullOrBlank())
-        assertTrue(!(info.signature as ImgInfo.AvbSignature).salt.isNullOrBlank())
-    }
-
-    private fun unpackRamdisk(imgArgs: ImgArgs) {
+    private fun unpackRamdisk(workDir: String, ramdiskGz: String) {
         val exe = DefaultExecutor()
         exe.workingDirectory = File(workDir + "root")
         if (exe.workingDirectory.exists()) exe.workingDirectory.deleteRecursively()
         exe.workingDirectory.mkdirs()
-        val ramdiskFile = File(imgArgs.ramdisk!!.removeSuffix(".gz"))
+        val ramdiskFile = File(ramdiskGz.removeSuffix(".gz"))
         exe.execute(CommandLine.parse("cpio -i -m -F " + ramdiskFile.canonicalPath))
-        log.info("extract ramdisk done: $ramdiskFile -> ${exe.workingDirectory.path}")
+        log.info(" ramdisk extracted : $ramdiskFile -> ${exe.workingDirectory.path}")
     }
 
-    fun parseAndExtract(fileName: String?, avbtool: String) {
-        val imgArgs = ImgArgs(output = fileName ?: "boot.img")
-        val imgInfo = ImgInfo()
-        if (!fileName.isNullOrBlank()) {
-            imgArgs.output = fileName!!
-        }
-
-        //parse header
-        parseHeader(imgArgs, imgInfo)
-
-        //parse signature
-        if (verifiedWithAVB(imgArgs)) {
-            imgArgs.verifyType = ImgArgs.VerifyType.AVB
-            imgInfo.signature = ImgInfo.AvbSignature()
-            verifyAVBIntegrity(imgArgs, avbtool)
-            parseAVBInfo(imgArgs, imgInfo, avbtool)
+    fun parseBootImgHeader(fileName: String, avbtool: String): BootImgInfo {
+        val info2 = BootImgInfo(FileInputStream(fileName))
+        val param = ParamConfig()
+        if (verifiedWithAVB(fileName)) {
+            info2.signatureType = BootImgInfo.VerifyType.AVB
+            verifyAVBIntegrity(fileName, avbtool)
         } else {
-            imgArgs.verifyType = ImgArgs.VerifyType.VERIFY
-            imgInfo.signature = ImgInfo.VeritySignature()
+            info2.signatureType = BootImgInfo.VerifyType.VERIFY
+        }
+        info2.imageSize = File(fileName).length()
+
+        val cfg = UnifiedConfig.fromBootImgInfo(info2).apply {
+            info.output = File(fileName).name
         }
 
-        log.info(imgArgs.toString())
-        log.info(imgInfo.toString())
+        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(param.cfg), cfg)
+        log.info("image info written to ${param.cfg}")
 
-        Helper.extractFile(imgArgs.output, imgArgs.kernel, imgInfo.kernelPosition.toLong(), imgInfo.kernelLength)
-        log.info("kernel dumped to ${imgArgs.kernel}")
-        imgArgs.ramdisk?.let { ramdisk ->
-            log.info("ramdisk dumped to ${imgArgs.ramdisk}")
-            Helper.extractFile(imgArgs.output, ramdisk, imgInfo.ramdiskPosition.toLong(), imgInfo.ramdiskLength)
-            Helper.unGnuzipFile(ramdisk, workDir + "ramdisk.img")
-            unpackRamdisk(imgArgs)
+        return info2
+    }
+
+    fun extractBootImg(fileName: String, info2: BootImgInfo) {
+        val param = ParamConfig()
+        if (info2.kernelLength > 0) {
+            Helper.extractFile(fileName,
+                    param.kernel,
+                    info2.kernelPosition.toLong(),
+                    info2.kernelLength.toInt())
+            log.info(" kernel  dumped  to: ${param.kernel}, size=${info2.kernelLength / 1024.0 / 1024.0}MB")
+        } else {
+            throw RuntimeException("bad boot image: no kernel found")
         }
-        imgArgs.second?.let { second ->
-            Helper.extractFile(imgArgs.output, second, imgInfo.secondBootloaderPosition.toLong(), imgInfo.secondBootloaderLength)
-            log.info("second bootloader dumped to ${imgArgs.second}")
+
+        if (info2.ramdiskLength > 0) {
+            Helper.extractFile(fileName,
+                    param.ramdisk!!,
+                    info2.ramdiskPosition.toLong(),
+                    info2.ramdiskLength.toInt())
+            log.info("ramdisk  dumped  to: ${param.ramdisk}")
+            Helper.unGnuzipFile(param.ramdisk!!, param.ramdisk!!.removeSuffix(".gz"))
+            unpackRamdisk(UnifiedConfig.workDir, param.ramdisk!!.removeSuffix(".gz"))
+        } else {
+            log.info("no ramdisk found")
         }
-        imgArgs.dtbo?.let { dtbo ->
-            Helper.extractFile(imgArgs.output, dtbo, imgInfo.recoveryDtboPosition.toLong(), imgInfo.recoveryDtboLength)
-            log.info("dtbo dumped to ${imgArgs.dtbo}")
+
+        if (info2.secondBootloaderLength > 0) {
+            Helper.extractFile(fileName,
+                    param.second!!,
+                    info2.secondBootloaderPosition.toLong(),
+                    info2.secondBootloaderLength.toInt())
+            log.info("second bootloader dumped to ${param.second}")
+        } else {
+            log.info("no second bootloader found")
         }
-        val cfg = UnifiedConfig.fromArgs(imgArgs, imgInfo)
-        log.debug(ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(cfg))
-        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(imgArgs.cfg), cfg)
-        log.info("image info written to ${imgArgs.cfg}")
+
+        if (info2.recoveryDtboLength > 0) {
+            Helper.extractFile(fileName,
+                    param.dtbo!!,
+                    info2.recoveryDtboPosition.toLong(),
+                    info2.recoveryDtboLength.toInt())
+            log.info("dtbo dumped to ${param.dtbo}")
+        } else {
+            if (info2.headerVersion > 0) {
+                log.info("no recovery dtbo found")
+            } else {
+                log.debug("no recovery dtbo for header v0")
+            }
+        }
+
+        if (info2.dtbLength > 0) {
+            Helper.extractFile(fileName,
+                    param.dtb!!,
+                    info2.dtbPosition.toLong(),
+                    info2.dtbLength.toInt())
+            log.info("dtb dumped to ${param.dtb}")
+        } else {
+            if (info2.headerVersion > 1) {
+                log.info("no dtb found")
+            } else {
+                log.debug("no dtb for header v0")
+            }
+        }
     }
 
     companion object {
         private val log = LoggerFactory.getLogger("Parser")!!
+
+        fun verifyAVBIntegrity(fileName: String, avbtool: String) {
+            val cmdline = "$avbtool verify_image --image $fileName"
+            log.info(cmdline)
+            DefaultExecutor().execute(CommandLine.parse(cmdline))
+        }
 
         fun readShort(iS: InputStream): Short {
             val bf = ByteBuffer.allocate(128)

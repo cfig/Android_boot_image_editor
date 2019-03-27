@@ -1,7 +1,5 @@
 apply plugin: 'java'
 
-apply plugin: 'groovy'
-
 subprojects {
     tasks.withType(JavaCompile) {
         //options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
@@ -11,6 +9,14 @@ subprojects {
 // ----------------------------------------------------------------------------
 //                       global
 // ----------------------------------------------------------------------------
+
+if (Float.parseFloat(gradle.gradleVersion) < 5.0) {
+    logger.error("ERROR: Gradle Version MUST >= 5.0, current is {}", gradle.gradleVersion)
+    throw new RuntimeException("ERROR: Gradle Version")
+} else {
+    logger.info("Gradle Version {}", gradle.gradleVersion)
+}
+
 def workdir = 'build/unzip_boot'
 project.ext.rootWorkDir = new File(workdir).getAbsolutePath()
 String activeImg = "boot.img"
@@ -33,7 +39,7 @@ project.ext.mkbootimgBin = new File("src/mkbootimg/mkbootimg").getAbsolutePath()
 project.ext.mkbootfsBin = new File("mkbootfs/build/exe/mkbootfs/mkbootfs").getAbsolutePath()
 project.ext.avbtool = new File("avb/avbtool").getAbsolutePath()
 project.ext.bootSigner = new File("boot_signer/build/libs/boot_signer.jar").getAbsolutePath()
-println("Active image target: " + activeImg)
+logger.warn("Active image target: " + activeImg)
 
 // ----------------------------------------------------------------------------
 //                       tasks
@@ -167,13 +173,4 @@ task rr {
     doLast {
         rebootRecovery()
     }
-}
-
-boolean inArray(String file, String[] inArray) {
-    for (String item : inArray) {
-        if (item.equals(file)) {
-            return true;
-        }
-    }
-    return false;
 }

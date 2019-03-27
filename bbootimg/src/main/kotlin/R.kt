@@ -1,7 +1,6 @@
 package cfig
 
-import avb.AVBInfo
-import com.fasterxml.jackson.databind.ObjectMapper
+import cfig.bootimg.BootImgInfo
 import org.slf4j.LoggerFactory
 import java.io.File
 
@@ -27,41 +26,41 @@ fun main(args: Array<String>) {
                 "unpack" -> {
                     if (File(UnifiedConfig.workDir).exists()) File(UnifiedConfig.workDir).deleteRecursively()
                     File(UnifiedConfig.workDir).mkdirs()
-                    Parser().parseAndExtract(fileName = args[1], avbtool = args[3])
-
-                    if (UnifiedConfig.readBack()[2] is ImgInfo.AvbSignature) {
+                    val info = Parser().parseBootImgHeader(fileName = args[1], avbtool = args[3])
+                    if (info.signatureType == BootImgInfo.VerifyType.AVB) {
                         log.info("continue to analyze vbmeta info in " + args[1])
                         Avb().parseVbMeta(args[1])
                         if (File("vbmeta.img").exists()) {
                             Avb().parseVbMeta("vbmeta.img")
                         }
                     }
+                    Parser().extractBootImg(fileName = args[1], info2 = info)
                 }
                 "pack" -> {
-                    Packer().pack(mkbootimgBin = args[2], mkbootfsBin = args[5])
+                    Packer().pack(mkbootfsBin = args[5])
                 }
                 "sign" -> {
                     Signer.sign(avbtool = args[3], bootSigner = args[4])
-                    val readBack = UnifiedConfig.readBack()
-                    if ((readBack[0] as ImgArgs).verifyType == ImgArgs.VerifyType.AVB) {
+                    val readBack2 = UnifiedConfig.readBack2()
+                    if (readBack2.signatureType == BootImgInfo.VerifyType.AVB) {
                         if (File("vbmeta.img").exists()) {
-                            val sig = readBack[2] as ImgInfo.AvbSignature
-                            val newBootImgInfo = Avb().parseVbMeta(args[1] + ".signed")
-                            val hashDesc = newBootImgInfo.auxBlob!!.hashDescriptors[0]
-                            val origVbMeta = ObjectMapper().readValue(File(Avb.getJsonFileName("vbmeta.img")),
-                                    AVBInfo::class.java)
-                            for (i in 0..(origVbMeta.auxBlob!!.hashDescriptors.size - 1)) {
-                                if (origVbMeta.auxBlob!!.hashDescriptors[i].partition_name == sig.partName) {
-                                    val seq = origVbMeta.auxBlob!!.hashDescriptors[i].sequence
-                                    origVbMeta.auxBlob!!.hashDescriptors[i] = hashDesc
-                                    origVbMeta.auxBlob!!.hashDescriptors[i].sequence = seq
-                                }
-                            }
-                            ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(Avb.getJsonFileName("vbmeta.img")), origVbMeta)
-                            log.info("vbmeta info updated")
-                            Avb().packVbMetaWithPadding()
+//                            val sig = readBack[2] as ImgInfo.AvbSignature
+//                            val newBootImgInfo = Avb().parseVbMeta(args[1] + ".signed")
+//                            val hashDesc = newBootImgInfo.auxBlob!!.hashDescriptors[0]
+//                            val origVbMeta = ObjectMapper().readValue(File(Avb.getJsonFileName("vbmeta.img")),
+//                                    AVBInfo::class.java)
+//                            for (i in 0..(origVbMeta.auxBlob!!.hashDescriptors.size - 1)) {
+//                                if (origVbMeta.auxBlob!!.hashDescriptors[i].partition_name == sig.partName) {
+//                                    val seq = origVbMeta.auxBlob!!.hashDescriptors[i].sequence
+//                                    origVbMeta.auxBlob!!.hashDescriptors[i] = hashDesc
+//                                    origVbMeta.auxBlob!!.hashDescriptors[i].sequence = seq
+//                                }
+//                            }
+//                            ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(Avb.getJsonFileName("vbmeta.img")), origVbMeta)
+//                            log.info("vbmeta.img info updated")
+//                            Avb().packVbMetaWithPadding()
                         } else {
-                            //no vbmeta provided
+                            log.info("no vbmeta.img need to update")
                         }
                     }//end-of-avb
                 }//end-of-sign

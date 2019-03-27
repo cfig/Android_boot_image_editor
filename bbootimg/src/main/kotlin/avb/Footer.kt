@@ -3,6 +3,23 @@ package avb
 import cfig.io.Struct
 import org.junit.Assert
 import java.io.InputStream
+/*
+https://github.com/cfig/Android_boot_image_editor/blob/master/doc/layout.md#32-avb-footer-vboot-20
+
++---------------------------------------+-------------------------+ --> partition_size - block_size
+| Padding                               | block_size - 64         |
++---------------------------------------+-------------------------+ --> partition_size - 64
+| AVB Footer                            | total 64                |
+|                                       |                         |
+|   - Footer Magic "AVBf"               |     4                   |
+|   - Footer Major Version              |     4                   |
+|   - Footer Minor Version              |     4                   |
+|   - Original image size               |     8                   |
+|   - VBMeta offset                     |     8                   |
+|   - VBMeta size                       |     8                   |
+|   - Padding                           |     28                  |
++---------------------------------------+-------------------------+ --> partition_size
+ */
 
 data class Footer constructor(
         var versionMajor: Long = FOOTER_VERSION_MAJOR,
@@ -14,7 +31,7 @@ data class Footer constructor(
     companion object {
         const val MAGIC = "AVBf"
         const val SIZE = 64
-        const val RESERVED = 28
+        private const val RESERVED = 28
         const val FOOTER_VERSION_MAJOR = 1L
         const val FOOTER_VERSION_MINOR = 0L
         private const val FORMAT_STRING = "!4s2L3Q${RESERVED}x"

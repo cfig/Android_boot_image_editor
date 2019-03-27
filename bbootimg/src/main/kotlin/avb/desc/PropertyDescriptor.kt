@@ -5,8 +5,8 @@ import cfig.io.Struct
 import java.io.InputStream
 
 class PropertyDescriptor(
-        var key: String = "",
-        var value: String = "") : Descriptor(TAG, 0, 0) {
+        private var key: String = "",
+        private var value: String = "") : Descriptor(TAG, 0, 0) {
     override fun encode(): ByteArray {
         if (SIZE != Struct(FORMAT_STRING).calcSize()) {
             throw RuntimeException()

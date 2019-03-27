@@ -6,6 +6,7 @@ import cfig.io.Struct
 import org.junit.Assert
 import java.io.InputStream
 
+//avbtool::AvbVBMetaHeader
 data class Header(
         var required_libavb_version_major: Int = Avb.AVB_VERSION_MAJOR,
         var required_libavb_version_minor: Int = 0,
@@ -25,10 +26,6 @@ data class Header(
         var rollback_index: Long = 0L,
         var flags: Long = 0,
         var release_string: String = "avbtool ${Avb.AVB_VERSION_MAJOR}.${Avb.AVB_VERSION_MINOR}.${Avb.AVB_VERSION_SUB}") {
-    fun bump_required_libavb_version_minor(minor: Int) {
-        this.required_libavb_version_minor = maxOf(required_libavb_version_minor, minor)
-    }
-
     @Throws(IllegalArgumentException::class)
     constructor(iS: InputStream) : this() {
         val info = Struct(FORMAT_STRING).unpack(iS)
@@ -53,7 +50,7 @@ data class Header(
         this.descriptors_size = info[15] as Long
         this.rollback_index = info[16] as Long
         this.flags = info[17] as Long
-        //padding
+        //padding: info[18]
         this.release_string = Helper.toCString(info[19] as ByteArray)
     }
 
@@ -70,17 +67,21 @@ data class Header(
                 this.descriptors_offset, this.descriptors_size,
                 this.rollback_index,
                 this.flags,
-                null,
-                this.release_string.toByteArray(),
-                null,
-                null)
+                null, //${REVERSED0}x
+                this.release_string.toByteArray(), //47s
+                null, //x
+                null) //${REVERSED}x
+    }
+
+    fun bump_required_libavb_version_minor(minor: Int) {
+        this.required_libavb_version_minor = maxOf(required_libavb_version_minor, minor)
     }
 
     companion object {
         const val magic: String = "AVB0"
         const val SIZE = 256
-        const val REVERSED0 = 4
-        const val REVERSED = 80
+        private const val REVERSED0 = 4
+        private const val REVERSED = 80
         const val FORMAT_STRING = ("!4s2L2QL11QL${REVERSED0}x47sx" + "${REVERSED}x")
 
         init {

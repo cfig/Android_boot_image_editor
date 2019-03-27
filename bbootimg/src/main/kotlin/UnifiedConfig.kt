@@ -1,5 +1,6 @@
 package cfig
 
+import cfig.bootimg.BootImgInfo
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
@@ -12,7 +13,8 @@ data class UnifiedConfig(
         var ramdisk: CommArgs? = null,
         var secondBootloader: CommArgs? = null,
         var recoveryDtbo: CommArgs? = null,
-        var signature: Any? = ImgInfo.VeritySignature()
+        var dtb: CommArgs? = null,
+        var signature: Any? = null
 ) {
     data class CommArgs(
             var file: String? = null,
@@ -31,132 +33,121 @@ data class UnifiedConfig(
             var cmdline: String = "",
             var osVersion: String? = null,
             var osPatchLevel: String? = null,
-            var hash: String = "",
-            var verify: ImgArgs.VerifyType = ImgArgs.VerifyType.VERIFY)
+            var hash: ByteArray = byteArrayOf(),
+            var verify: BootImgInfo.VerifyType = BootImgInfo.VerifyType.VERIFY,
+            var imageSize: Long = 0)
 
-    fun toArgs(): Array<Any> {
-        val args = ImgArgs()
-        val info = ImgInfo()
+    fun toBootImgInfo(): BootImgInfo {
+        val ret = BootImgInfo()
+        ret.kernelOffset = this.kernel.loadOffset.removePrefix("0x").toLong(16)
+        ret.kernelLength = Integer.decode(this.kernel.size).toLong()
 
-        args.output = this.info.output
-        args.kernel = this.kernel.file ?: workDir + "kernel"
-        args.kernelOffset = this.kernel.loadOffset.removePrefix("0x").toLong(16)
-        info.kernelPosition = Integer.decode(this.kernel.position)
-        info.kernelLength = Integer.decode(this.kernel.size)
+        ret.kernelOffset = this.kernel.loadOffset.removePrefix("0x").toLong(16)
+        ret.kernelLength = Integer.decode(this.kernel.size).toLong()
 
-        if (this.ramdisk == null) {
-            args.ramdisk = null
-        } else {
-            args.ramdisk = this.ramdisk!!.file
-            args.ramdiskOffset = this.ramdisk!!.loadOffset.removePrefix("0x").toLong(16)
-            info.ramdiskPosition = Integer.decode(this.ramdisk!!.position)
-            info.ramdiskLength = Integer.decode(this.ramdisk!!.size)
+        this.ramdisk?.let {
+            ret.ramdiskOffset = it.loadOffset.removePrefix("0x").toLong(16)
+            ret.ramdiskLength = it.size.removePrefix("0x").toLong(16)
         }
 
         this.secondBootloader?.let {
-            args.second = it.file
-            args.secondOffset = it.loadOffset.removePrefix("0x").toLong(16)
-            info.secondBootloaderPosition = Integer.decode(it.position)
-            info.secondBootloaderLength = Integer.decode(it.size)
+            ret.secondBootloaderOffset = it.loadOffset.removePrefix("0x").toLong(16)
+            ret.secondBootloaderLength = it.size.removePrefix("0x").toLong(16)
         }
-        if (this.secondBootloader == null) args.second = null
 
         this.recoveryDtbo?.let {
-            args.dtbo = it.file
-            args.dtboOffset = it.loadOffset.removePrefix("0x").toLong(16)
-            info.recoveryDtboPosition = Integer.decode(it.position)
-            info.recoveryDtboLength = Integer.decode(it.size)
+            ret.recoveryDtboOffset = it.loadOffset.removePrefix("0x").toLong(16)
+            ret.recoveryDtboLength = it.size.removePrefix("0x").toLong(16)
         }
-        if (this.recoveryDtbo == null) args.dtbo = null
 
-        info.headerSize = this.info.headerSize
-        args.headerVersion = this.info.headerVersion
-        args.base = this.info.loadBase.removePrefix("0x").toLong(16)
-        this.info.board?.let { args.board = it }
-        args.tagsOffset = this.info.tagsOffset.removePrefix("0x").toLong(16)
-        args.cmdline = this.info.cmdline
-        args.osVersion = this.info.osVersion
-        args.osPatchLevel = this.info.osPatchLevel
-        info.hash = Helper.fromHexString(this.info.hash)
-        args.pageSize = this.info.pageSize
-        args.verifyType = this.info.verify
-        info.signature = this.signature
+        this.dtb?.let {
+            ret.dtbOffset = it.loadOffset.removePrefix("0x").toLong(16)
+            ret.dtbLength = it.size.removePrefix("0x").toLong(16)
+        }
 
-        return arrayOf(args, info)
+        ret.headerSize = this.info.headerSize.toLong()
+        ret.headerVersion = this.info.headerVersion
+        this.info.board?.let { ret.board = it }
+        ret.tagsOffset = this.info.tagsOffset.removePrefix("0x").toLong(16)
+        ret.cmdline = this.info.cmdline
+        ret.osVersion = this.info.osVersion
+        ret.osPatchLevel = this.info.osPatchLevel
+        ret.hash = this.info.hash
+        ret.pageSize = this.info.pageSize
+        ret.signatureType = this.info.verify
+        ret.imageSize = this.info.imageSize
+
+        return ret
     }
 
     companion object {
         const val workDir = "build/unzip_boot/"
         private val log = LoggerFactory.getLogger(UnifiedConfig::class.java)
-        fun fromArgs(args: ImgArgs, info: ImgInfo): UnifiedConfig {
+
+        fun fromBootImgInfo(info: BootImgInfo): UnifiedConfig {
             val ret = UnifiedConfig()
-            ret.kernel.file = args.kernel
-            ret.kernel.loadOffset = "0x${java.lang.Long.toHexString(args.kernelOffset)}"
-            ret.kernel.size = "0x${Integer.toHexString(info.kernelLength)}"
+            val param = ParamConfig()
+            ret.kernel.file = param.kernel
+            ret.kernel.loadOffset = "0x${java.lang.Long.toHexString(info.kernelOffset)}"
+            ret.kernel.size = "0x${Integer.toHexString(info.kernelLength.toInt())}"
             ret.kernel.position = "0x${Integer.toHexString(info.kernelPosition)}"
 
             ret.ramdisk = CommArgs()
-            ret.ramdisk!!.loadOffset = "0x${java.lang.Long.toHexString(args.ramdiskOffset)}"
-            ret.ramdisk!!.size = "0x${Integer.toHexString(info.ramdiskLength)}"
+            ret.ramdisk!!.loadOffset = "0x${java.lang.Long.toHexString(info.ramdiskOffset)}"
+            ret.ramdisk!!.size = "0x${Integer.toHexString(info.ramdiskLength.toInt())}"
             ret.ramdisk!!.position = "0x${Integer.toHexString(info.ramdiskPosition)}"
-            args.ramdisk?.let {
-                ret.ramdisk!!.file = args.ramdisk
+            if (info.ramdiskLength > 0) {
+                ret.ramdisk!!.file = param.ramdisk
             }
 
             ret.secondBootloader = CommArgs()
-            ret.secondBootloader!!.loadOffset = "0x${java.lang.Long.toHexString(args.secondOffset)}"
-            ret.secondBootloader!!.size = "0x${Integer.toHexString(info.secondBootloaderLength)}"
+            ret.secondBootloader!!.loadOffset = "0x${java.lang.Long.toHexString(info.secondBootloaderOffset)}"
+            ret.secondBootloader!!.size = "0x${Integer.toHexString(info.secondBootloaderLength.toInt())}"
             ret.secondBootloader!!.position = "0x${Integer.toHexString(info.secondBootloaderPosition)}"
-            args.second?.let {
-                ret.secondBootloader!!.file = args.second
+            if (info.secondBootloaderLength > 0) {
+                ret.secondBootloader!!.file = param.second
             }
 
-            if (args.headerVersion > 0) {
+            if (info.headerVersion > 0) {
                 ret.recoveryDtbo = CommArgs()
-                args.dtbo?.let {
-                    ret.recoveryDtbo!!.file = args.dtbo
+                if (info.recoveryDtboLength > 0) {
+                    ret.recoveryDtbo!!.file = param.dtbo
                 }
-                ret.recoveryDtbo!!.loadOffset = "0x${java.lang.Long.toHexString(args.dtboOffset)}"
-                ret.recoveryDtbo!!.size = "0x${Integer.toHexString(info.recoveryDtboLength)}"
+                ret.recoveryDtbo!!.loadOffset = "0x${java.lang.Long.toHexString(info.recoveryDtboOffset)}"
+                ret.recoveryDtbo!!.size = "0x${Integer.toHexString(info.recoveryDtboLength.toInt())}"
                 ret.recoveryDtbo!!.position = "0x${Integer.toHexString(info.recoveryDtboPosition)}"
             }
 
-            ret.info.output = args.output
-            ret.info.headerSize = info.headerSize
-            ret.info.headerVersion = args.headerVersion
-            ret.info.loadBase = "0x${java.lang.Long.toHexString(args.base)}"
-            ret.info.board = if (args.board.isBlank()) null else args.board
-            ret.info.tagsOffset = "0x${java.lang.Long.toHexString(args.tagsOffset)}"
-            ret.info.cmdline = args.cmdline
-            ret.info.osVersion = args.osVersion
-            ret.info.osPatchLevel = args.osPatchLevel
-            ret.info.hash = Helper.toHexString(info.hash)
-            ret.info.pageSize = args.pageSize
+            if (info.headerVersion > 1) {
+                ret.dtb = CommArgs()
+                if (info.dtbLength > 0) {
+                    ret.dtb!!.file = param.dtb
+                }
+                ret.dtb!!.loadOffset = "0x${java.lang.Long.toHexString(info.dtbOffset)}"
+                ret.dtb!!.size = "0x${Integer.toHexString(info.dtbLength.toInt())}"
+                ret.dtb!!.position = "0x${Integer.toHexString(info.dtbPosition)}"
+            }
 
-            ret.info.verify = args.verifyType
-            ret.signature = info.signature
-
+            //ret.info.output = //unknown
+            ret.info.headerSize = info.headerSize.toInt()
+            ret.info.headerVersion = info.headerVersion
+            ret.info.loadBase = "0x${java.lang.Long.toHexString(0)}"
+            ret.info.board = if (info.board.isBlank()) null else info.board
+            ret.info.tagsOffset = "0x${java.lang.Long.toHexString(info.tagsOffset)}"
+            ret.info.cmdline = info.cmdline
+            ret.info.osVersion = info.osVersion
+            ret.info.osPatchLevel = info.osPatchLevel
+            ret.info.hash = info.hash!!
+            ret.info.pageSize = info.pageSize
+            ret.info.verify = info.signatureType!!
+            ret.info.imageSize = info.imageSize
             return ret
         }
 
-        fun readBack(): Array<Any?> {
-            var ret: Array<Any?> = arrayOfNulls(3)
-            val readBack = ObjectMapper().readValue(File(workDir + "bootimg.json"),
-                    UnifiedConfig::class.java).toArgs()
-            val imgArgs = readBack[0] as ImgArgs
-            val info = readBack[1] as ImgInfo
-            if (imgArgs.verifyType == ImgArgs.VerifyType.AVB) {
-                val sig = ObjectMapper().readValue(
-                        Signer.mapToJson(info.signature as LinkedHashMap<*, *>), ImgInfo.AvbSignature::class.java)
-                ret[2] = sig
-            } else {
-                val sig2 = ObjectMapper().readValue(
-                        Signer.mapToJson(info.signature as LinkedHashMap<*, *>), ImgInfo.VeritySignature::class.java)
-                ret[2] = sig2
-            }
-            ret[0] = imgArgs
-            ret[1] = info
-            return ret
+        fun readBack2(): BootImgInfo {
+            val param = ParamConfig()
+            return ObjectMapper().readValue(File(param.cfg),
+                    UnifiedConfig::class.java).toBootImgInfo()
         }
     }
 }

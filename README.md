@@ -1,7 +1,6 @@
 # Android_boot_image_editor
 [![Build Status](https://travis-ci.org/cfig/Android_boot_image_editor.svg?branch=master)](https://travis-ci.org/cfig/Android_boot_image_editor)
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
-[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/Android_boot_image_editor/lobby)
 
 This tool focuses on editing Android boot.img(also recovery.img, recovery-two-step.img and vbmeta.img).
 
@@ -38,7 +37,9 @@ Your get the flattened kernel and /root filesystem under **./build/unzip\_boot**
     ├── boot.img.avb.json (AVB only)
     ├── bootimg.json (boot image info)
     ├── kernel
-    ├── second (2nd bootloader, if exists)
+    ├── second       (2nd bootloader, if exists)
+    ├── dtb          (dtb, if exists)
+    ├── dtbo         (dtbo, if exists)
     └── root
 
 Then you can edit the actual file contents, like rootfs or kernel.

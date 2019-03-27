@@ -18,20 +18,26 @@ import java.math.RoundingMode
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.security.KeyFactory
-import java.security.PrivateKey
-import java.security.spec.PKCS8EncodedKeySpec
-import java.security.spec.RSAPrivateKeySpec
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import javax.crypto.Cipher
 
 class Helper {
     companion object {
+        fun joinWithNulls(vararg source: ByteArray?): ByteArray {
+            val baos = ByteArrayOutputStream()
+            for (src in source) {
+                src?.let {
+                    if (src.isNotEmpty()) baos.write(src)
+                }
+            }
+            return baos.toByteArray()
+        }
+
         fun join(vararg source: ByteArray): ByteArray {
             val baos = ByteArrayOutputStream()
             for (src in source) {
-                if (source.isNotEmpty()) baos.write(src)
+                if (src.isNotEmpty()) baos.write(src)
             }
             return baos.toByteArray()
         }
@@ -76,7 +82,7 @@ class Helper {
                         while (true) {
                             bytesRead = fis.read(buffer)
                             if (bytesRead <= 0) break
-                            gos.write(buffer, 0, bytesRead);
+                            gos.write(buffer, 0, bytesRead)
                         }
                         gos.finish()
                         log.info("gzip done: $decompressedFile -> $compressedFile")
@@ -179,6 +185,7 @@ class Helper {
 
             @return: AvbRSAPublicKeyHeader formatted bytearray
                     https://android.googlesource.com/platform/external/avb/+/master/libavb/avb_crypto.h#158
+            from avbtool::encode_rsa_key()
          */
         fun encodeRSAkey(key: ByteArray): ByteArray {
             val rsa = KeyUtil.parsePemPrivateKey(ByteArrayInputStream(key))
@@ -251,6 +258,14 @@ class Helper {
                 "sha512" -> "sha-512"
                 else -> throw IllegalArgumentException("unknown algorithm: $alg")
             }
+        }
+
+        fun dumpToFile(dumpFile: String, data: ByteArray) {
+            log.info("Dumping data to $dumpFile ...")
+            FileOutputStream(dumpFile, false).use { fos ->
+                fos.write(data)
+            }
+            log.info("Dumping data to $dumpFile done")
         }
 
         private val log = LoggerFactory.getLogger("Helper")

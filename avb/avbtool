@@ -65,8 +65,7 @@ class AvbError(Exception):
 class Algorithm(object):
   """Contains details about an algorithm.
 
-  See the avb_vbmeta_header.h file for more details about
-  algorithms.
+  See the avb_vbmeta_image.h file for more details about algorithms.
 
   The constant |ALGORITHMS| is a dictionary from human-readable
   names (e.g 'SHA256_RSA2048') to instances of this class.
@@ -545,13 +544,52 @@ def verify_vbmeta_signature(vbmeta_header, vbmeta_blob):
   modulus = decode_long(modulus_blob)
   exponent = 65537
 
-  # For now, just use Crypto.PublicKey.RSA to verify the signature. This
-  # is OK since 'avbtool verify_image' is not expected to run on the
-  # Android builders (see bug #36809096).
-  import Crypto.PublicKey.RSA
-  key = Crypto.PublicKey.RSA.construct((modulus, long(exponent)))
-  if not key.verify(decode_long(padding_and_digest),
-                    (decode_long(sig_blob), None)):
+  # We used to have this:
+  #
+  #  import Crypto.PublicKey.RSA
+  #  key = Crypto.PublicKey.RSA.construct((modulus, long(exponent)))
+  #  if not key.verify(decode_long(padding_and_digest),
+  #                    (decode_long(sig_blob), None)):
+  #    return False
+  #  return True
+  #
+  # but since 'avbtool verify_image' is used on the builders we don't want
+  # to rely on Crypto.PublicKey.RSA. Instead just use openssl(1) to verify.
+  asn1_str = ('asn1=SEQUENCE:pubkeyinfo\n'
+              '\n'
+              '[pubkeyinfo]\n'
+              'algorithm=SEQUENCE:rsa_alg\n'
+              'pubkey=BITWRAP,SEQUENCE:rsapubkey\n'
+              '\n'
+              '[rsa_alg]\n'
+              'algorithm=OID:rsaEncryption\n'
+              'parameter=NULL\n'
+              '\n'
+              '[rsapubkey]\n'
+              'n=INTEGER:%s\n'
+              'e=INTEGER:%s\n' % (hex(modulus).rstrip('L'), hex(exponent).rstrip('L')))
+  asn1_tmpfile = tempfile.NamedTemporaryFile()
+  asn1_tmpfile.write(asn1_str)
+  asn1_tmpfile.flush()
+  der_tmpfile = tempfile.NamedTemporaryFile()
+  p = subprocess.Popen(
+      ['openssl', 'asn1parse', '-genconf', asn1_tmpfile.name, '-out', der_tmpfile.name, '-noout'])
+  retcode = p.wait()
+  if retcode != 0:
+    raise AvbError('Error generating DER file')
+
+  p = subprocess.Popen(
+      ['openssl', 'rsautl', '-verify', '-pubin', '-inkey', der_tmpfile.name, '-keyform', 'DER', '-raw'],
+      stdin=subprocess.PIPE,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.PIPE)
+  (pout, perr) = p.communicate(str(sig_blob))
+  retcode = p.wait()
+  if retcode != 0:
+    raise AvbError('Error verifying data: {}'.format(perr))
+  recovered_data = bytearray(pout)
+  if recovered_data != padding_and_digest:
+    sys.stderr.write('Signature not correct\n')
     return False
   return True
 
@@ -632,6 +670,7 @@ class ImageHandler(object):
   of the block size.
 
   Attributes:
+    filename: Name of file.
     is_sparse: Whether the file being operated on is sparse.
     block_size: The block size, typically 4096.
     image_size: The size of the unsparsified file.
@@ -654,7 +693,7 @@ class ImageHandler(object):
     Raises:
       ValueError: If data in the file is invalid.
     """
-    self._image_filename = image_filename
+    self.filename = image_filename
     self._read_header()
 
   def _read_header(self):
@@ -669,7 +708,7 @@ class ImageHandler(object):
     self.is_sparse = False
     self.block_size = 4096
     self._file_pos = 0
-    self._image = open(self._image_filename, 'r+b')
+    self._image = open(self.filename, 'r+b')
     self._image.seek(0, os.SEEK_END)
     self.image_size = self._image.tell()
 
@@ -721,7 +760,7 @@ class ImageHandler(object):
                                        chunk_sz*self.block_size,
                                        self._image.tell(),
                                        None))
-        self._image.read(data_sz)
+        self._image.seek(data_sz, os.SEEK_CUR)
 
       elif chunk_type == ImageChunk.TYPE_FILL:
         if data_sz != 4:
@@ -1081,7 +1120,8 @@ class AvbDescriptor(object):
     ret = desc + self.data + padding
     return bytearray(ret)
 
-  def verify(self, image_dir, image_ext, expected_chain_partitions_map):
+  def verify(self, image_dir, image_ext, expected_chain_partitions_map,
+             image_containing_descriptor):
     """Verifies contents of the descriptor - used in verify_image sub-command.
 
     Arguments:
@@ -1089,6 +1129,7 @@ class AvbDescriptor(object):
       image_ext: The extension of the file being verified (e.g. '.img').
       expected_chain_partitions_map: A map from partition name to the
         tuple (rollback_index_location, key_blob).
+      image_containing_descriptor: The image the descriptor is in.
 
     Returns:
       True if the descriptor verifies, False otherwise.
@@ -1165,7 +1206,8 @@ class AvbPropertyDescriptor(AvbDescriptor):
     ret = desc + self.key + '\0' + self.value + '\0' + padding
     return bytearray(ret)
 
-  def verify(self, image_dir, image_ext, expected_chain_partitions_map):
+  def verify(self, image_dir, image_ext, expected_chain_partitions_map,
+             image_containing_descriptor):
     """Verifies contents of the descriptor - used in verify_image sub-command.
 
     Arguments:
@@ -1173,6 +1215,7 @@ class AvbPropertyDescriptor(AvbDescriptor):
       image_ext: The extension of the file being verified (e.g. '.img').
       expected_chain_partitions_map: A map from partition name to the
         tuple (rollback_index_location, key_blob).
+      image_containing_descriptor: The image the descriptor is in.
 
     Returns:
       True if the descriptor verifies, False otherwise.
@@ -1325,7 +1368,8 @@ class AvbHashtreeDescriptor(AvbDescriptor):
     ret = desc + encoded_name + self.salt + self.root_digest + padding
     return bytearray(ret)
 
-  def verify(self, image_dir, image_ext, expected_chain_partitions_map):
+  def verify(self, image_dir, image_ext, expected_chain_partitions_map,
+             image_containing_descriptor):
     """Verifies contents of the descriptor - used in verify_image sub-command.
 
     Arguments:
@@ -1333,12 +1377,16 @@ class AvbHashtreeDescriptor(AvbDescriptor):
       image_ext: The extension of the file being verified (e.g. '.img').
       expected_chain_partitions_map: A map from partition name to the
         tuple (rollback_index_location, key_blob).
+      image_containing_descriptor: The image the descriptor is in.
 
     Returns:
       True if the descriptor verifies, False otherwise.
     """
-    image_filename = os.path.join(image_dir, self.partition_name + image_ext)
-    image = ImageHandler(image_filename)
+    if self.partition_name == '':
+      image = image_containing_descriptor
+    else:
+      image_filename = os.path.join(image_dir, self.partition_name + image_ext)
+      image = ImageHandler(image_filename)
     # Generate the hashtree and checks that it matches what's in the file.
     digest_size = len(hashlib.new(name=self.hash_algorithm).digest())
     digest_padding = round_to_pow2(digest_size) - digest_size
@@ -1367,7 +1415,7 @@ class AvbHashtreeDescriptor(AvbDescriptor):
     # takes a long time; and c) is not strictly needed for
     # verification purposes as we've already verified the root hash.
     print ('{}: Successfully verified {} hashtree of {} for image of {} bytes'
-           .format(self.partition_name, self.hash_algorithm, image_filename,
+           .format(self.partition_name, self.hash_algorithm, image.filename,
                    self.image_size))
     return True
 
@@ -1477,7 +1525,8 @@ class AvbHashDescriptor(AvbDescriptor):
     ret = desc + encoded_name + self.salt + self.digest + padding
     return bytearray(ret)
 
-  def verify(self, image_dir, image_ext, expected_chain_partitions_map):
+  def verify(self, image_dir, image_ext, expected_chain_partitions_map,
+             image_containing_descriptor):
     """Verifies contents of the descriptor - used in verify_image sub-command.
 
     Arguments:
@@ -1485,12 +1534,16 @@ class AvbHashDescriptor(AvbDescriptor):
       image_ext: The extension of the file being verified (e.g. '.img').
       expected_chain_partitions_map: A map from partition name to the
         tuple (rollback_index_location, key_blob).
+      image_containing_descriptor: The image the descriptor is in.
 
     Returns:
       True if the descriptor verifies, False otherwise.
     """
-    image_filename = os.path.join(image_dir, self.partition_name + image_ext)
-    image = ImageHandler(image_filename)
+    if self.partition_name == '':
+      image = image_containing_descriptor
+    else:
+      image_filename = os.path.join(image_dir, self.partition_name + image_ext)
+      image = ImageHandler(image_filename)
     data = image.read(self.image_size)
     ha = hashlib.new(self.hash_algorithm)
     ha.update(self.salt)
@@ -1502,7 +1555,7 @@ class AvbHashDescriptor(AvbDescriptor):
                        format(self.hash_algorithm, image_filename))
       return False
     print ('{}: Successfully verified {} hash of {} for image of {} bytes'
-           .format(self.partition_name, self.hash_algorithm, image_filename,
+           .format(self.partition_name, self.hash_algorithm, image.filename,
                    self.image_size))
     return True
 
@@ -1582,7 +1635,8 @@ class AvbKernelCmdlineDescriptor(AvbDescriptor):
     ret = desc + encoded_str + padding
     return bytearray(ret)
 
-  def verify(self, image_dir, image_ext, expected_chain_partitions_map):
+  def verify(self, image_dir, image_ext, expected_chain_partitions_map,
+             image_containing_descriptor):
     """Verifies contents of the descriptor - used in verify_image sub-command.
 
     Arguments:
@@ -1590,6 +1644,7 @@ class AvbKernelCmdlineDescriptor(AvbDescriptor):
       image_ext: The extension of the file being verified (e.g. '.img').
       expected_chain_partitions_map: A map from partition name to the
         tuple (rollback_index_location, key_blob).
+      image_containing_descriptor: The image the descriptor is in.
 
     Returns:
       True if the descriptor verifies, False otherwise.
@@ -1683,7 +1738,8 @@ class AvbChainPartitionDescriptor(AvbDescriptor):
     ret = desc + encoded_name + self.public_key + padding
     return bytearray(ret)
 
-  def verify(self, image_dir, image_ext, expected_chain_partitions_map):
+  def verify(self, image_dir, image_ext, expected_chain_partitions_map,
+             image_containing_descriptor):
     """Verifies contents of the descriptor - used in verify_image sub-command.
 
     Arguments:
@@ -1691,6 +1747,7 @@ class AvbChainPartitionDescriptor(AvbDescriptor):
       image_ext: The extension of the file being verified (e.g. '.img').
       expected_chain_partitions_map: A map from partition name to the
         tuple (rollback_index_location, key_blob).
+      image_containing_descriptor: The image the descriptor is in.
 
     Returns:
       True if the descriptor verifies, False otherwise.
@@ -1699,7 +1756,7 @@ class AvbChainPartitionDescriptor(AvbDescriptor):
     if not value:
       sys.stderr.write('No expected chain partition for partition {}. Use '
                        '--expected_chain_partition to specify expected '
-                       'contents.\n'.
+                       'contents or --follow_chain_partitions.\n'.
                        format(self.partition_name))
       return False
     rollback_index_location, pk_blob = value
@@ -1820,8 +1877,8 @@ class AvbVBMetaHeader(object):
   """A class for parsing and writing AVB vbmeta images.
 
   Attributes:
-    The attributes correspond to the |AvbVBMetaHeader| struct
-    defined in avb_vbmeta_header.h.
+    The attributes correspond to the |AvbVBMetaImageHeader| struct defined in
+    avb_vbmeta_image.h.
   """
 
   SIZE = 256
@@ -1959,6 +2016,33 @@ class Avb(object):
   # conservative figures.
   MAX_VBMETA_SIZE = 64 * 1024
   MAX_FOOTER_SIZE = 4096
+
+  def extract_vbmeta_image(self, output, image_filename, padding_size):
+    """Implements the 'extract_vbmeta_image' command.
+
+    Arguments:
+      output: Write vbmeta struct to this file.
+      image_filename: File to extract vbmeta data from (with a footer).
+      padding_size: If not 0, pads output so size is a multiple of the number.
+
+    Raises:
+      AvbError: If there's no footer in the image.
+    """
+    image = ImageHandler(image_filename)
+
+    (footer, _, _, _) = self._parse_image(image)
+
+    if not footer:
+      raise AvbError('Given image does not have a footer.')
+
+    image.seek(footer.vbmeta_offset)
+    vbmeta_blob = image.read(footer.vbmeta_size)
+    output.write(vbmeta_blob)
+
+    if padding_size > 0:
+      padded_size = round_to_multiple(len(vbmeta_blob), padding_size)
+      padding_needed = padded_size - len(vbmeta_blob)
+      output.write('\0' * padding_needed)
 
   def erase_footer(self, image_filename, keep_hashtree):
     """Implements the 'erase_footer' command.
@@ -2136,15 +2220,16 @@ class Avb(object):
     if num_printed == 0:
       o.write('    (none)\n')
 
-  def verify_image(self, image_filename, key_path, expected_chain_partitions):
+  def verify_image(self, image_filename, key_path, expected_chain_partitions, follow_chain_partitions):
     """Implements the 'verify_image' command.
 
     Arguments:
       image_filename: Image file to get information from (file object).
       key_path: None or check that embedded public key matches key at given path.
       expected_chain_partitions: List of chain partitions to check or None.
+      follow_chain_partitions: If True, will follows chain partitions even when not
+                               specified with the --expected_chain_partition option
     """
-
     expected_chain_partitions_map = {}
     if expected_chain_partitions:
       used_locations = {}
@@ -2174,11 +2259,11 @@ class Avb(object):
     offset = 0
     if footer:
       offset = footer.vbmeta_offset
-    size = (header.SIZE + header.authentication_data_block_size +
-            header.auxiliary_data_block_size)
+
     image.seek(offset)
-    vbmeta_blob = image.read(size)
-    h = AvbVBMetaHeader(vbmeta_blob[0:AvbVBMetaHeader.SIZE])
+    vbmeta_blob = image.read(header.SIZE + header.authentication_data_block_size +
+                             header.auxiliary_data_block_size)
+
     alg_name, _ = lookup_algorithm_by_type(header.algorithm_type)
     if not verify_vbmeta_signature(header, vbmeta_blob):
       raise AvbError('Signature check failed for {} vbmeta struct {}'
@@ -2187,22 +2272,120 @@ class Avb(object):
     if key_blob:
       # The embedded public key is in the auxiliary block at an offset.
       key_offset = AvbVBMetaHeader.SIZE
-      key_offset += h.authentication_data_block_size
-      key_offset += h.public_key_offset
-      key_blob_in_vbmeta = vbmeta_blob[key_offset:key_offset + h.public_key_size]
+      key_offset += header.authentication_data_block_size
+      key_offset += header.public_key_offset
+      key_blob_in_vbmeta = vbmeta_blob[key_offset:key_offset + header.public_key_size]
       if key_blob != key_blob_in_vbmeta:
         raise AvbError('Embedded public key does not match given key.')
 
     if footer:
       print ('vbmeta: Successfully verified footer and {} vbmeta struct in {}'
-             .format(alg_name, image_filename))
+             .format(alg_name, image.filename))
     else:
       print ('vbmeta: Successfully verified {} vbmeta struct in {}'
-             .format(alg_name, image_filename))
+             .format(alg_name, image.filename))
 
     for desc in descriptors:
-      if not desc.verify(image_dir, image_ext, expected_chain_partitions_map):
-        raise AvbError('Error verifying descriptor.')
+      if (isinstance(desc, AvbChainPartitionDescriptor) and follow_chain_partitions and
+          expected_chain_partitions_map.get(desc.partition_name) == None):
+        # In this case we're processing a chain descriptor but don't have a
+        # --expect_chain_partition ... however --follow_chain_partitions was
+        # specified so we shouldn't error out in desc.verify().
+        print ('{}: Chained but ROLLBACK_SLOT (which is {}) and KEY (which has sha1 {}) not specified'
+              .format(desc.partition_name, desc.rollback_index_location,
+                      hashlib.sha1(desc.public_key).hexdigest()))
+      else:
+        if not desc.verify(image_dir, image_ext, expected_chain_partitions_map, image):
+          raise AvbError('Error verifying descriptor.')
+      # Honor --follow_chain_partitions - add '--' to make the output more readable.
+      if isinstance(desc, AvbChainPartitionDescriptor) and follow_chain_partitions:
+        print '--'
+        chained_image_filename = os.path.join(image_dir, desc.partition_name + image_ext)
+        self.verify_image(chained_image_filename, key_path, None, False)
+
+
+  def calculate_vbmeta_digest(self, image_filename, hash_algorithm, output):
+    """Implements the 'calculate_vbmeta_digest' command.
+
+    Arguments:
+      image_filename: Image file to get information from (file object).
+      hash_algorithm: Hash algorithm used.
+      output: Output file to write human-readable information to (file object).
+    """
+
+    image_dir = os.path.dirname(image_filename)
+    image_ext = os.path.splitext(image_filename)[1]
+
+    image = ImageHandler(image_filename)
+    (footer, header, descriptors, image_size) = self._parse_image(image)
+    offset = 0
+    if footer:
+      offset = footer.vbmeta_offset
+    size = (header.SIZE + header.authentication_data_block_size +
+            header.auxiliary_data_block_size)
+    image.seek(offset)
+    vbmeta_blob = image.read(size)
+
+    hasher = hashlib.new(name=hash_algorithm)
+    hasher.update(vbmeta_blob)
+
+    for desc in descriptors:
+      if isinstance(desc, AvbChainPartitionDescriptor):
+        ch_image_filename = os.path.join(image_dir, desc.partition_name + image_ext)
+        ch_image = ImageHandler(ch_image_filename)
+        (ch_footer, ch_header, ch_descriptors, ch_image_size) = self._parse_image(ch_image)
+        ch_offset = 0
+        ch_size = (ch_header.SIZE + ch_header.authentication_data_block_size +
+                   ch_header.auxiliary_data_block_size)
+        if ch_footer:
+          ch_offset = ch_footer.vbmeta_offset
+        ch_image.seek(ch_offset)
+        ch_vbmeta_blob = ch_image.read(ch_size)
+        hasher.update(ch_vbmeta_blob)
+
+    digest = hasher.digest()
+    output.write('{}\n'.format(digest.encode('hex')))
+
+
+  def calculate_kernel_cmdline(self, image_filename, hashtree_disabled, output):
+    """Implements the 'calculate_kernel_cmdline' command.
+
+    Arguments:
+      image_filename: Image file to get information from (file object).
+      hashtree_disabled: If True, returns the cmdline for hashtree disabled.
+      output: Output file to write human-readable information to (file object).
+    """
+
+    image = ImageHandler(image_filename)
+    _, _, descriptors, _ = self._parse_image(image)
+
+    image_dir = os.path.dirname(image_filename)
+    image_ext = os.path.splitext(image_filename)[1]
+
+    cmdline_descriptors = []
+    for desc in descriptors:
+      if isinstance(desc, AvbChainPartitionDescriptor):
+        ch_image_filename = os.path.join(image_dir, desc.partition_name + image_ext)
+        ch_image = ImageHandler(ch_image_filename)
+        _, _, ch_descriptors, _ = self._parse_image(ch_image)
+        for ch_desc in ch_descriptors:
+          if isinstance(ch_desc, AvbKernelCmdlineDescriptor):
+            cmdline_descriptors.append(ch_desc)
+      elif isinstance(desc, AvbKernelCmdlineDescriptor):
+        cmdline_descriptors.append(desc)
+
+    kernel_cmdline_snippets = []
+    for desc in cmdline_descriptors:
+      use_cmdline = True
+      if (desc.flags & AvbKernelCmdlineDescriptor.FLAGS_USE_ONLY_IF_HASHTREE_NOT_DISABLED) != 0:
+        if hashtree_disabled:
+          use_cmdline = False
+      if (desc.flags & AvbKernelCmdlineDescriptor.FLAGS_USE_ONLY_IF_HASHTREE_DISABLED) != 0:
+        if not hashtree_disabled:
+          use_cmdline = False
+      if use_cmdline:
+        kernel_cmdline_snippets.append(desc.kernel_cmdline)
+    output.write(' '.join(kernel_cmdline_snippets))
 
 
   def _parse_image(self, image):
@@ -2578,6 +2761,7 @@ class Avb(object):
 
     # Add descriptors from other images.
     if include_descriptors_from_image:
+      descriptors_dict = dict()
       for image in include_descriptors_from_image:
         image_handler = ImageHandler(image.name)
         (_, image_vbmeta_header, image_descriptors, _) = self._parse_image(
@@ -2586,7 +2770,18 @@ class Avb(object):
         h.bump_required_libavb_version_minor(
             image_vbmeta_header.required_libavb_version_minor)
         for desc in image_descriptors:
-          encoded_descriptors.extend(desc.encode())
+          # The --include_descriptors_from_image option is used in some setups
+          # with images A and B where both A and B contain a descriptor
+          # for a partition with the same name. Since it's not meaningful
+          # to include both descriptors, only include the last seen descriptor.
+          # See bug 76386656 for details.
+          if hasattr(desc, 'partition_name'):
+            key = type(desc).__name__ + '_' + desc.partition_name
+            descriptors_dict[key] = desc.encode()
+          else:
+            encoded_descriptors.extend(desc.encode())
+      for key in sorted(descriptors_dict.keys()):
+        encoded_descriptors.extend(descriptors_dict[key])
 
     # Load public key metadata blob, if requested.
     pkmd_blob = []
@@ -2878,9 +3073,10 @@ class Avb(object):
       if salt:
         salt = salt.decode('hex')
       else:
-        if salt is None:
-          # If salt is not explicitly specified, choose a hash
-          # that's the same size as the hash size.
+        if salt is None and not use_persistent_digest:
+          # If salt is not explicitly specified, choose a hash that's the same
+          # size as the hash size. Don't populate a random salt if this
+          # descriptor is being created to use a persistent digest on device.
           hash_size = digest_size
           salt = open('/dev/urandom').read(hash_size)
         else:
@@ -2986,7 +3182,7 @@ class Avb(object):
 
     Arguments:
       image_filename: File to add the footer to.
-      partition_size: Size of partition.
+      partition_size: Size of partition or 0 to put it right at the end.
       partition_name: Name of partition (without A/B suffix).
       generate_fec: If True, generate FEC codes.
       fec_num_roots: Number of roots for FEC.
@@ -3037,19 +3233,22 @@ class Avb(object):
     digest_size = len(hashlib.new(name=hash_algorithm).digest())
     digest_padding = round_to_pow2(digest_size) - digest_size
 
-    # First, calculate the maximum image size such that an image
-    # this size + the hashtree + metadata (footer + vbmeta struct)
-    # fits in |partition_size|. We use very conservative figures for
-    # metadata.
-    (_, max_tree_size) = calc_hash_level_offsets(
-        partition_size, block_size, digest_size + digest_padding)
-    max_fec_size = 0
-    if generate_fec:
-      max_fec_size = calc_fec_data_size(partition_size, fec_num_roots)
-    max_metadata_size = (max_fec_size + max_tree_size +
-                         self.MAX_VBMETA_SIZE +
-                         self.MAX_FOOTER_SIZE)
-    max_image_size = partition_size - max_metadata_size
+    # If |partition_size| is given (e.g. not 0), calculate the maximum image
+    # size such that an image this size + the hashtree + metadata (footer +
+    # vbmeta struct) fits in |partition_size|. We use very conservative figures
+    # for metadata.
+    if partition_size > 0:
+      (_, max_tree_size) = calc_hash_level_offsets(
+          partition_size, block_size, digest_size + digest_padding)
+      max_fec_size = 0
+      if generate_fec:
+        max_fec_size = calc_fec_data_size(partition_size, fec_num_roots)
+      max_metadata_size = (max_fec_size + max_tree_size +
+                           self.MAX_VBMETA_SIZE +
+                           self.MAX_FOOTER_SIZE)
+      max_image_size = partition_size - max_metadata_size
+    else:
+      max_image_size = 0
 
     # If we're asked to only calculate the maximum image size, we're done.
     if calc_max_image_size:
@@ -3058,10 +3257,16 @@ class Avb(object):
 
     image = ImageHandler(image_filename)
 
-    if partition_size % image.block_size != 0:
-      raise AvbError('Partition size of {} is not a multiple of the image '
-                     'block size {}.'.format(partition_size,
-                                             image.block_size))
+    if partition_size > 0:
+      if partition_size % image.block_size != 0:
+        raise AvbError('Partition size of {} is not a multiple of the image '
+                       'block size {}.'.format(partition_size,
+                                               image.block_size))
+    else:
+      if image.image_size % image.block_size != 0:
+        raise AvbError('File size of {} is not a multiple of the image '
+                       'block size {}.'.format(image.image_size,
+                                               image.block_size))
 
     # If there's already a footer, truncate the image to its original
     # size. This way 'avbtool add_hashtree_footer' is idempotent
@@ -3088,18 +3293,20 @@ class Avb(object):
         image.append_raw('\0' * (rounded_image_size - image.image_size))
 
       # If image size exceeds the maximum image size, fail.
-      if image.image_size > max_image_size:
-        raise AvbError('Image size of {} exceeds maximum image '
-                       'size of {} in order to fit in a partition '
-                       'size of {}.'.format(image.image_size, max_image_size,
-                                            partition_size))
+      if partition_size > 0:
+        if image.image_size > max_image_size:
+          raise AvbError('Image size of {} exceeds maximum image '
+                         'size of {} in order to fit in a partition '
+                         'size of {}.'.format(image.image_size, max_image_size,
+                                              partition_size))
 
       if salt:
         salt = salt.decode('hex')
       else:
-        if salt is None:
-          # If salt is not explicitly specified, choose a hash
-          # that's the same size as the hash size.
+        if salt is None and not use_persistent_root_digest:
+          # If salt is not explicitly specified, choose a hash that's the same
+          # size as the hash size. Don't populate a random salt if this
+          # descriptor is being created to use a persistent digest on device.
           hash_size = digest_size
           salt = open('/dev/urandom').read(hash_size)
         else:
@@ -3191,8 +3398,9 @@ class Avb(object):
 
         # Now insert a DONT_CARE chunk with enough bytes such that the
         # final Footer block is at the end of partition_size..
-        image.append_dont_care(partition_size - image.image_size -
-                               1*image.block_size)
+        if partition_size > 0:
+          image.append_dont_care(partition_size - image.image_size -
+                                 1*image.block_size)
 
         # Generate the Footer that tells where the VBMeta footer
         # is. Also put enough padding in the front of the footer since
@@ -3213,7 +3421,7 @@ class Avb(object):
 
   def make_atx_certificate(self, output, authority_key_path, subject_key_path,
                            subject_key_version, subject,
-                           is_intermediate_authority, signing_helper,
+                           is_intermediate_authority, usage, signing_helper,
                            signing_helper_with_files):
     """Implements the 'make_atx_certificate' command.
 
@@ -3235,6 +3443,7 @@ class Avb(object):
                should be the same Product ID found in the permanent attributes.
       is_intermediate_authority: True if the certificate is for an intermediate
                                  authority.
+      usage: If not empty, overrides the cert usage with a hash of this value.
       signing_helper: Program which signs a hash and returns the signature.
       signing_helper_with_files: Same as signing_helper but uses files instead.
     """
@@ -3244,9 +3453,10 @@ class Avb(object):
     hasher = hashlib.sha256()
     hasher.update(subject)
     signed_data.extend(hasher.digest())
-    usage = 'com.google.android.things.vboot'
-    if is_intermediate_authority:
-      usage += '.ca'
+    if not usage:
+      usage = 'com.google.android.things.vboot'
+      if is_intermediate_authority:
+        usage += '.ca'
     hasher = hashlib.sha256()
     hasher.update(usage)
     signed_data.extend(hasher.digest())
@@ -3321,6 +3531,67 @@ class Avb(object):
     output.write(struct.pack('<I', 1))  # Format Version
     output.write(intermediate_key_certificate)
     output.write(product_key_certificate)
+
+  def make_atx_unlock_credential(self, output, intermediate_key_certificate,
+                                 unlock_key_certificate, challenge_path,
+                                 unlock_key_path, signing_helper,
+                                 signing_helper_with_files):
+    """Implements the 'make_atx_unlock_credential' command.
+
+    Android Things unlock credentials can be used to authorize the unlock of AVB
+    on a device. These credentials are presented to an Android Things bootloader
+    via the fastboot interface in response to a 16-byte challenge. This method
+    creates all fields of the credential except the challenge signature field
+    (which is the last field) and can optionally create the challenge signature
+    field as well if a challenge and the unlock_key_path is provided.
+
+    Arguments:
+      output: The credential will be written to this file on success.
+      intermediate_key_certificate: A certificate file as output by
+                                    make_atx_certificate with
+                                    is_intermediate_authority set to true.
+      unlock_key_certificate: A certificate file as output by
+                              make_atx_certificate with
+                              is_intermediate_authority set to false and the
+                              usage set to
+                              'com.google.android.things.vboot.unlock'.
+      challenge_path: [optional] A path to the challenge to sign.
+      unlock_key_path: [optional] A PEM file path with the unlock private key.
+      signing_helper: Program which signs a hash and returns the signature.
+      signing_helper_with_files: Same as signing_helper but uses files instead.
+
+    Raises:
+      AvbError: If an argument is incorrect.
+    """
+    EXPECTED_CERTIFICATE_SIZE = 1620
+    EXPECTED_CHALLENGE_SIZE = 16
+    if len(intermediate_key_certificate) != EXPECTED_CERTIFICATE_SIZE:
+      raise AvbError('Invalid intermediate key certificate length.')
+    if len(unlock_key_certificate) != EXPECTED_CERTIFICATE_SIZE:
+      raise AvbError('Invalid product key certificate length.')
+    challenge = bytearray()
+    if challenge_path:
+      with open(challenge_path, 'r') as f:
+        challenge = f.read()
+      if len(challenge) != EXPECTED_CHALLENGE_SIZE:
+        raise AvbError('Invalid unlock challenge length.')
+    output.write(struct.pack('<I', 1))  # Format Version
+    output.write(intermediate_key_certificate)
+    output.write(unlock_key_certificate)
+    if challenge_path and unlock_key_path:
+      signature = bytearray()
+      padding_and_hash = bytearray()
+      algorithm_name = 'SHA512_RSA4096'
+      alg = ALGORITHMS[algorithm_name]
+      hasher = hashlib.sha512()
+      padding_and_hash.extend(alg.padding)
+      hasher.update(challenge)
+      padding_and_hash.extend(hasher.digest())
+      signature.extend(raw_sign(signing_helper, signing_helper_with_files,
+                                algorithm_name,
+                                alg.signature_num_bytes, unlock_key_path,
+                                padding_and_hash))
+      output.write(signature)
 
 
 def calc_hash_level_offsets(image_size, block_size, digest_size):
@@ -3692,10 +3963,11 @@ class AvbTool(object):
                             type=argparse.FileType('rab+'))
     sub_parser.add_argument('--partition_size',
                             help='Partition size',
+                            default=0,
                             type=parse_number)
     sub_parser.add_argument('--partition_name',
                             help='Partition name',
-                            default=None)
+                            default='')
     sub_parser.add_argument('--hash_algorithm',
                             help='Hash algorithm to use (default: sha1)',
                             default='sha1')
@@ -3755,6 +4027,23 @@ class AvbTool(object):
                             action='store_true')
     sub_parser.set_defaults(func=self.erase_footer)
 
+    sub_parser = subparsers.add_parser('extract_vbmeta_image',
+                                       help='Extracts vbmeta from an image with a footer.')
+    sub_parser.add_argument('--image',
+                            help='Image with footer',
+                            type=argparse.FileType('rb'),
+                            required=True)
+    sub_parser.add_argument('--output',
+                            help='Output file name',
+                            type=argparse.FileType('wb'))
+    sub_parser.add_argument('--padding_size',
+                            metavar='NUMBER',
+                            help='If non-zero, pads output with NUL bytes so '
+                                 'its size is a multiple of NUMBER (default: 0)',
+                            type=parse_number,
+                            default=0)
+    sub_parser.set_defaults(func=self.extract_vbmeta_image)
+
     sub_parser = subparsers.add_parser('resize_image',
                                        help='Resize image with a footer.')
     sub_parser.add_argument('--image',
@@ -3794,7 +4083,43 @@ class AvbTool(object):
                             help='Expected chain partition',
                             metavar='PART_NAME:ROLLBACK_SLOT:KEY_PATH',
                             action='append')
+    sub_parser.add_argument('--follow_chain_partitions',
+                            help=('Follows chain partitions even when not '
+                                  'specified with the --expected_chain_partition option'),
+                            action='store_true')
     sub_parser.set_defaults(func=self.verify_image)
+
+    sub_parser = subparsers.add_parser(
+        'calculate_vbmeta_digest',
+        help='Calculate vbmeta digest.')
+    sub_parser.add_argument('--image',
+                            help='Image to calculate digest for',
+                            type=argparse.FileType('rb'),
+                            required=True)
+    sub_parser.add_argument('--hash_algorithm',
+                            help='Hash algorithm to use (default: sha256)',
+                            default='sha256')
+    sub_parser.add_argument('--output',
+                            help='Write hex digest to file (default: stdout)',
+                            type=argparse.FileType('wt'),
+                            default=sys.stdout)
+    sub_parser.set_defaults(func=self.calculate_vbmeta_digest)
+
+    sub_parser = subparsers.add_parser(
+        'calculate_kernel_cmdline',
+        help='Calculate kernel cmdline.')
+    sub_parser.add_argument('--image',
+                            help='Image to calculate kernel cmdline for',
+                            type=argparse.FileType('rb'),
+                            required=True)
+    sub_parser.add_argument('--hashtree_disabled',
+                            help='Return the cmdline for hashtree disabled',
+                            action='store_true')
+    sub_parser.add_argument('--output',
+                            help='Write cmdline to file (default: stdout)',
+                            type=argparse.FileType('wt'),
+                            default=sys.stdout)
+    sub_parser.set_defaults(func=self.calculate_kernel_cmdline)
 
     sub_parser = subparsers.add_parser('set_ab_metadata',
                                        help='Set A/B metadata.')
@@ -3835,6 +4160,10 @@ class AvbTool(object):
                             help=('Generate an intermediate authority '
                                   'certificate'),
                             action='store_true')
+    sub_parser.add_argument('--usage',
+                            help=('Override usage with a hash of the provided '
+                                  'string'),
+                            required=False)
     sub_parser.add_argument('--authority_key',
                             help='Path to authority RSA private key file',
                             required=False)
@@ -3883,6 +4212,43 @@ class AvbTool(object):
                             type=argparse.FileType('rb'),
                             required=True)
     sub_parser.set_defaults(func=self.make_atx_metadata)
+
+    sub_parser = subparsers.add_parser(
+        'make_atx_unlock_credential',
+        help='Create an Android Things eXtension (ATX) unlock credential.')
+    sub_parser.add_argument('--output',
+                            help='Write credential to file',
+                            type=argparse.FileType('wb'),
+                            default=sys.stdout)
+    sub_parser.add_argument('--intermediate_key_certificate',
+                            help='Path to intermediate key certificate file',
+                            type=argparse.FileType('rb'),
+                            required=True)
+    sub_parser.add_argument('--unlock_key_certificate',
+                            help='Path to unlock key certificate file',
+                            type=argparse.FileType('rb'),
+                            required=True)
+    sub_parser.add_argument('--challenge',
+                            help='Path to the challenge to sign (optional). If '
+                                 'this is not provided the challenge signature '
+                                 'field is omitted and can be concatenated '
+                                 'later.',
+                            required=False)
+    sub_parser.add_argument('--unlock_key',
+                            help='Path to unlock key (optional). Must be '
+                                 'provided if using --challenge.',
+                            required=False)
+    sub_parser.add_argument('--signing_helper',
+                            help='Path to helper used for signing',
+                            metavar='APP',
+                            default=None,
+                            required=False)
+    sub_parser.add_argument('--signing_helper_with_files',
+                            help='Path to helper used for signing using files',
+                            metavar='APP',
+                            default=None,
+                            required=False)
+    sub_parser.set_defaults(func=self.make_atx_unlock_credential)
 
     args = parser.parse_args(argv[1:])
     try:
@@ -3982,6 +4348,11 @@ class AvbTool(object):
     """Implements the 'erase_footer' sub-command."""
     self.avb.erase_footer(args.image.name, args.keep_hashtree)
 
+  def extract_vbmeta_image(self, args):
+    """Implements the 'extract_vbmeta_image' sub-command."""
+    self.avb.extract_vbmeta_image(args.output, args.image.name,
+                                  args.padding_size)
+
   def resize_image(self, args):
     """Implements the 'resize_image' sub-command."""
     self.avb.resize_image(args.image.name, args.partition_size)
@@ -3997,7 +4368,17 @@ class AvbTool(object):
   def verify_image(self, args):
     """Implements the 'verify_image' sub-command."""
     self.avb.verify_image(args.image.name, args.key,
-                          args.expected_chain_partition)
+                          args.expected_chain_partition,
+                          args.follow_chain_partitions)
+
+  def calculate_vbmeta_digest(self, args):
+    """Implements the 'calculate_vbmeta_digest' sub-command."""
+    self.avb.calculate_vbmeta_digest(args.image.name, args.hash_algorithm,
+                                     args.output)
+
+  def calculate_kernel_cmdline(self, args):
+    """Implements the 'calculate_kernel_cmdline' sub-command."""
+    self.avb.calculate_kernel_cmdline(args.image.name, args.hashtree_disabled, args.output)
 
   def make_atx_certificate(self, args):
     """Implements the 'make_atx_certificate' sub-command."""
@@ -4006,6 +4387,7 @@ class AvbTool(object):
                                   args.subject_key_version,
                                   args.subject.read(),
                                   args.subject_is_intermediate_authority,
+                                  args.usage,
                                   args.signing_helper,
                                   args.signing_helper_with_files)
 
@@ -4020,6 +4402,17 @@ class AvbTool(object):
     self.avb.make_atx_metadata(args.output,
                                args.intermediate_key_certificate.read(),
                                args.product_key_certificate.read())
+
+  def make_atx_unlock_credential(self, args):
+    """Implements the 'make_atx_unlock_credential' sub-command."""
+    self.avb.make_atx_unlock_credential(
+        args.output,
+        args.intermediate_key_certificate.read(),
+        args.unlock_key_certificate.read(),
+        args.challenge,
+        args.unlock_key,
+        args.signing_helper,
+        args.signing_helper_with_files)
 
 
 if __name__ == '__main__':
