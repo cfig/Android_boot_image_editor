@@ -92,5 +92,8 @@ https://android.googlesource.com/platform/system/core
 AVB
 https://android.googlesource.com/platform/external/avb/
 
+mkbootimg
+https://android.googlesource.com/platform/system/core/+/master/mkbootimg/
+
 Android version list
 https://source.android.com/source/build-numbers.html

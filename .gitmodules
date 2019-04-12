@@ -1,0 +1,3 @@
+[submodule "src/integrationTest/resources"]
+	path = src/integrationTest/resources
+	url = https://github.com/cfig/boot_image_res.git

@@ -49,19 +49,23 @@ def verifySingleDir(inResourceDir, inImageDir):
     for jsonFile in jsonFiles:
         verifySingleJson(inResourceDir, inImageDir, jsonFile)
 
+resDir = "src/integrationTest/resources"
 # 5.0
-verifySingleDir("boot_image_res", "5.0_fugu_lrx21m")
+verifySingleDir(resDir, "5.0_fugu_lrx21m")
 # 6.0
-verifySingleDir("boot_image_res", "6.0.0_bullhead_mda89e")
+verifySingleDir(resDir, "6.0.0_bullhead_mda89e")
 # 7.0 special boot
-subprocess.check_call("dd if=boot_image_res/7.1.1_volantis_n9f27m/boot.img of=boot.img bs=256 skip=1", shell = True)
-verifySingleJson("boot_image_res", "7.1.1_volantis_n9f27m", "boot_image_res/7.1.1_volantis_n9f27m/boot.json")
+subprocess.check_call("dd if=%s/7.1.1_volantis_n9f27m/boot.img of=boot.img bs=256 skip=1" % resDir, shell = True)
+verifySingleJson(resDir, "7.1.1_volantis_n9f27m", "%s/7.1.1_volantis_n9f27m/boot.json" % resDir)
 # 7.0 special recovery
-subprocess.check_call("dd if=boot_image_res/7.1.1_volantis_n9f27m/recovery.img of=recovery.img bs=256 skip=1", shell = True)
-verifySingleJson("boot_image_res", "7.1.1_volantis_n9f27m", "boot_image_res/7.1.1_volantis_n9f27m/recovery.json")
+subprocess.check_call("dd if=%s/7.1.1_volantis_n9f27m/recovery.img of=recovery.img bs=256 skip=1" % resDir, shell = True)
+verifySingleJson(resDir, "7.1.1_volantis_n9f27m", "%s/7.1.1_volantis_n9f27m/recovery.json" % resDir)
 # 8.0
-verifySingleDir("boot_image_res", "8.0.0_fugu_opr2.170623.027")
+verifySingleDir(resDir, "8.0.0_fugu_opr2.170623.027")
 # 9.0 + avb
-subprocess.check_call("tar xf boot_image_res/9.0.0_blueline_pq1a.181105.017.a1/boot.img.tar.gz", shell = True)
-verifySingleJson("boot_image_res", "9.0.0_blueline_pq1a.181105.017.a1", "boot_image_res/9.0.0_blueline_pq1a.181105.017.a1/boot.json")
-verifySingleJson("boot_image_res", "9.0.0_blueline_pq1a.181105.017.a1", "boot_image_res/9.0.0_blueline_pq1a.181105.017.a1/vbmeta.json")
+subprocess.check_call("tar xf %s/9.0.0_blueline_pq1a.181105.017.a1/boot.img.tar.gz" % resDir, shell = True)
+verifySingleJson(resDir, "9.0.0_blueline_pq1a.181105.017.a1", "%s/9.0.0_blueline_pq1a.181105.017.a1/boot.json" % resDir)
+verifySingleJson(resDir, "9.0.0_blueline_pq1a.181105.017.a1", "%s/9.0.0_blueline_pq1a.181105.017.a1/vbmeta.json" % resDir)
+
+# from volunteers
+verifySingleDir(resDir, "recovery_image_from_s-trace")
