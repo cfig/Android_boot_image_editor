@@ -15,11 +15,11 @@ class FooterTest {
             it.skip(footerBytes.size - 64L)
             val footer = Footer(it)
             println(footer.toString())
-            assertEquals(1, footer.versionMajor)
-            assertEquals(0, footer.versionMinor)
-            assertEquals(512, footer.vbMetaSize)
-            assertEquals(28983296, footer.vbMetaOffset)
-            assertEquals(28983296, footer.originalImageSize)
+            assertEquals(1U, footer.versionMajor)
+            assertEquals(0U, footer.versionMinor)
+            assertEquals(512U.toULong(), footer.vbMetaSize)
+            assertEquals(28983296U.toULong(), footer.vbMetaOffset)
+            assertEquals(28983296U.toULong(), footer.originalImageSize)
         }
     }
 

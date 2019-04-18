@@ -1,20 +1,20 @@
 package avb.desc
 
 import cfig.Helper
-import cfig.io.Struct
+import cfig.io.Struct3
 import org.apache.commons.codec.binary.Hex
 import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 
-class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 0) {
+class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0U, 0U, 0) {
     @Throws(IllegalArgumentException::class)
     constructor(stream: InputStream, seq: Int = 0) : this() {
         this.sequence = seq
-        val info = Struct(FORMAT).unpack(stream)
-        this.tag = info[0] as Long
-        this.num_bytes_following = info[1] as Long
+        val info = Struct3(FORMAT).unpack(stream)
+        this.tag = info[0] as ULong
+        this.num_bytes_following = info[1] as ULong
         log.debug("UnknownDescriptor: tag = $tag, len = ${this.num_bytes_following}")
         this.data = ByteArray(this.num_bytes_following.toInt())
         if (this.num_bytes_following.toInt() != stream.read(data)) {
@@ -23,7 +23,7 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 
     }
 
     override fun encode(): ByteArray {
-        return Helper.join(Struct(FORMAT).pack(this.tag, this.data.size.toLong()), data)
+        return Helper.join(Struct3(FORMAT).pack(this.tag, this.data.size.toLong()), data)
     }
 
     override fun toString(): String {
@@ -31,20 +31,20 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 
     }
 
     fun analyze(): Any {
-        return when (this.tag) {
-            0L -> {
+        return when (this.tag.toUInt()) {
+            0U -> {
                 PropertyDescriptor(ByteArrayInputStream(this.encode()), this.sequence)
             }
-            1L -> {
+            1U -> {
                 HashTreeDescriptor(ByteArrayInputStream(this.encode()), this.sequence)
             }
-            2L -> {
+            2U -> {
                 HashDescriptor(ByteArrayInputStream(this.encode()), this.sequence)
             }
-            3L -> {
+            3U -> {
                 KernelCmdlineDescriptor(ByteArrayInputStream(this.encode()), this.sequence)
             }
-            4L -> {
+            4U -> {
                 ChainPartitionDescriptor(ByteArrayInputStream(this.encode()), this.sequence)
             }
             else -> {
@@ -107,7 +107,7 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 
         }
 
         init {
-            Assert.assertEquals(SIZE, Struct(FORMAT).calcSize())
+            Assert.assertEquals(SIZE, Struct3(FORMAT).calcSize())
         }
     }
 }

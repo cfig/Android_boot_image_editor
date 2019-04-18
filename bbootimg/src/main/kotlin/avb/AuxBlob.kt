@@ -3,7 +3,7 @@ package avb
 import avb.alg.Algorithm
 import avb.desc.*
 import cfig.Helper
-import cfig.io.Struct
+import cfig.io.Struct3
 import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
@@ -56,7 +56,7 @@ data class AuxBlob(
         this.pubkey?.let { sumOfSize += it.pubkey.size }
         this.pubkeyMeta?.let { sumOfSize += it.pkmd.size }
         val auxSize = Helper.round_to_multiple(sumOfSize.toLong(), 64)
-        return Struct("${auxSize}b").pack(
+        return Struct3("${auxSize}b").pack(
                 Helper.joinWithNulls(encodedDesc, this.pubkey?.pubkey, this.pubkeyMeta?.pkmd))
     }
 

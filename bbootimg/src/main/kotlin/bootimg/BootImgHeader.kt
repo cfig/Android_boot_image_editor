@@ -2,8 +2,7 @@ package cfig.bootimg
 
 import cfig.Helper
 import cfig.ParamConfig
-import cfig.io.Struct
-import com.fasterxml.jackson.databind.ObjectMapper
+import cfig.io.Struct3
 import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -15,27 +14,27 @@ import java.security.MessageDigest
 import java.util.regex.Pattern
 
 open class BootImgHeader(
-        var kernelLength: Long = 0,
-        var kernelOffset: Long = 0,
+        var kernelLength: UInt = 0U,
+        var kernelOffset: UInt = 0U,
 
-        var ramdiskLength: Long = 0,
-        var ramdiskOffset: Long = 0,
+        var ramdiskLength: UInt = 0U,
+        var ramdiskOffset: UInt = 0U,
 
-        var secondBootloaderLength: Long = 0,
-        var secondBootloaderOffset: Long = 0,
+        var secondBootloaderLength: UInt = 0U,
+        var secondBootloaderOffset: UInt = 0U,
 
-        var recoveryDtboLength: Long = 0,
-        var recoveryDtboOffset: Long = 0,
+        var recoveryDtboLength: UInt = 0U,
+        var recoveryDtboOffset: ULong = 0UL,//Q
 
-        var dtbLength: Long = 0,
-        var dtbOffset: Long = 0,
+        var dtbLength: UInt = 0U,
+        var dtbOffset: ULong = 0UL,//Q
 
-        var tagsOffset: Long = 0,
+        var tagsOffset: UInt = 0U,
 
-        var pageSize: Int = 0,
+        var pageSize: UInt = 0U,
 
-        var headerSize: Long = 0,
-        var headerVersion: Int = 0,
+        var headerSize: UInt = 0U,
+        var headerVersion: UInt = 0U,
 
         var board: String = "",
 
@@ -51,40 +50,40 @@ open class BootImgHeader(
             return
         }
         log.warn("BootImgHeader constructor")
-        val info = Struct(FORMAT_STRING).unpack(iS)
+        val info = Struct3(FORMAT_STRING).unpack(iS)
         Assert.assertEquals(20, info.size)
-        if (!(info[0] as ByteArray).contentEquals(magic.toByteArray())) {
+        if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like Android Boot Image Header")
         }
-        this.kernelLength = info[1] as Long
-        this.kernelOffset = info[2] as Long
-        this.ramdiskLength = info[3] as Long
-        this.ramdiskOffset = info[4] as Long
-        this.secondBootloaderLength = info[5] as Long
-        this.secondBootloaderOffset = info[6] as Long
-        this.tagsOffset = info[7] as Long
-        this.pageSize = (info[8] as Long).toInt()
-        this.headerVersion = (info[9] as Long).toInt()
-        val osNPatch = (info[10] as Long).toInt()
-        if (0 != osNPatch) { //treated as 'reserved' in this boot image
-            this.osVersion = parseOsVersion(osNPatch shr 11)
-            this.osPatchLevel = parseOsPatchLevel(osNPatch and 0x7ff)
+        this.kernelLength = info[1] as UInt
+        this.kernelOffset = info[2] as UInt
+        this.ramdiskLength = info[3] as UInt
+        this.ramdiskOffset = info[4] as UInt
+        this.secondBootloaderLength = info[5] as UInt
+        this.secondBootloaderOffset = info[6] as UInt
+        this.tagsOffset = info[7] as UInt
+        this.pageSize = info[8] as UInt
+        this.headerVersion = info[9] as UInt
+        val osNPatch = info[10] as UInt
+        if (0U != osNPatch) { //treated as 'reserved' in this boot image
+            this.osVersion = parseOsVersion(osNPatch.toInt() shr 11)
+            this.osPatchLevel = parseOsPatchLevel((osNPatch and 0x7ff.toUInt()).toInt())
         }
-        this.board = Helper.toCString(info[11] as ByteArray).trim()
-        this.cmdline = Helper.toCString(info[12] as ByteArray) + Helper.toCString(info[14] as ByteArray)
+        this.board = info[11] as String
+        this.cmdline = (info[12] as String) + (info[14] as String)
         this.hash = info[13] as ByteArray
 
-        if (this.headerVersion > 0) {
-            this.recoveryDtboLength = info[15] as Long
-            this.recoveryDtboOffset = info[16] as Long
+        if (this.headerVersion > 0U) {
+            this.recoveryDtboLength = info[15] as UInt
+            this.recoveryDtboOffset = info[16] as ULong
         }
 
-        this.headerSize = info[17] as Long
+        this.headerSize = info[17] as UInt
         assert(this.headerSize.toInt() in intArrayOf(BOOT_IMAGE_HEADER_V2_SIZE, BOOT_IMAGE_HEADER_V1_SIZE))
 
-        if (this.headerVersion > 1) {
-            this.dtbLength = info[18] as Long
-            this.dtbOffset = info[19] as Long
+        if (this.headerVersion > 1U) {
+            this.dtbLength = info[18] as UInt
+            this.dtbOffset = info[19] as ULong
         }
     }
 
@@ -181,45 +180,45 @@ open class BootImgHeader(
     private fun refresh() {
         val param = ParamConfig()
         //refresh kernel size
-        if (0L == this.kernelLength) {
+        if (0U == this.kernelLength) {
             throw java.lang.IllegalArgumentException("kernel size can not be 0")
         } else {
-            this.kernelLength = File(param.kernel).length()
+            this.kernelLength = File(param.kernel).length().toUInt()
         }
         //refresh ramdisk size
-        if (0L == this.ramdiskLength) {
+        if (0U == this.ramdiskLength) {
             param.ramdisk = null
         } else {
-            this.ramdiskLength = File(param.ramdisk).length()
+            this.ramdiskLength = File(param.ramdisk).length().toUInt()
         }
         //refresh second bootloader size
-        if (0L == this.secondBootloaderLength) {
+        if (0U == this.secondBootloaderLength) {
             param.second = null
         } else {
-            this.secondBootloaderLength = File(param.second).length()
+            this.secondBootloaderLength = File(param.second).length().toUInt()
         }
         //refresh recovery dtbo size
-        if (0L == this.recoveryDtboLength) {
+        if (0U == this.recoveryDtboLength) {
             param.dtbo = null
         } else {
-            this.recoveryDtboLength = File(param.dtbo).length()
+            this.recoveryDtboLength = File(param.dtbo).length().toUInt()
         }
         //refresh recovery dtbo size
-        if (0L == this.dtbLength) {
+        if (0U == this.dtbLength) {
             param.dtb = null
         } else {
-            this.dtbLength = File(param.dtb).length()
+            this.dtbLength = File(param.dtb).length().toUInt()
         }
 
         //refresh image hash
         val imageId = when (this.headerVersion) {
-            0 -> {
+            0U -> {
                 hashFileAndSize(param.kernel, param.ramdisk, param.second)
             }
-            1 -> {
+            1U -> {
                 hashFileAndSize(param.kernel, param.ramdisk, param.second, param.dtbo)
             }
-            2 -> {
+            2U -> {
                 hashFileAndSize(param.kernel, param.ramdisk, param.second, param.dtbo, param.dtb)
             }
             else -> {
@@ -231,8 +230,8 @@ open class BootImgHeader(
 
     fun encode(): ByteArray {
         this.refresh()
-        val ret = Struct(FORMAT_STRING).pack(
-                "ANDROID!".toByteArray(),
+        val ret = Struct3(FORMAT_STRING).pack(
+                "ANDROID!",
                 //10I
                 this.kernelLength,
                 this.kernelOffset,
@@ -245,28 +244,28 @@ open class BootImgHeader(
                 this.headerVersion,
                 (packOsVersion(this.osVersion) shl 11) or packOsPatchLevel(this.osPatchLevel),
                 //16s
-                this.board.toByteArray(),
+                this.board,
                 //512s
-                this.cmdline.substring(0, minOf(512, this.cmdline.length)).toByteArray(),
-                //32s
+                this.cmdline.substring(0, minOf(512, this.cmdline.length)),
+                //32b
                 this.hash!!,
                 //1024s
-                if (this.cmdline.length > 512) this.cmdline.substring(512).toByteArray() else byteArrayOf(0),
+                if (this.cmdline.length > 512) this.cmdline.substring(512) else "",
                 //I
                 this.recoveryDtboLength,
                 //Q
-                if (this.headerVersion > 0) this.recoveryDtboOffset else 0,
+                if (this.headerVersion > 0U) this.recoveryDtboOffset else 0,
                 //I
                 when (this.headerVersion) {
-                    0 -> 0
-                    1 -> BOOT_IMAGE_HEADER_V1_SIZE
-                    2 -> BOOT_IMAGE_HEADER_V2_SIZE
+                    0U -> 0
+                    1U -> BOOT_IMAGE_HEADER_V1_SIZE
+                    2U -> BOOT_IMAGE_HEADER_V2_SIZE
                     else -> java.lang.IllegalArgumentException("headerVersion ${this.headerVersion} illegal")
                 },
                 //I
                 this.dtbLength,
                 //Q
-                if (this.headerVersion > 1) this.dtbOffset else 0
+                if (this.headerVersion > 1U) this.dtbOffset else 0
         )
         return ret
     }
@@ -278,7 +277,7 @@ open class BootImgHeader(
                 "10I" +
                 "16s" +     //board name
                 "512s" +    //cmdline part 1
-                "32s" +     //hash digest
+                "32b" +     //hash digest
                 "1024s" +   //cmdline part 2
                 "I" +       //dtbo length [v1]
                 "Q" +       //dtbo offset [v1]
@@ -289,7 +288,7 @@ open class BootImgHeader(
         const val BOOT_IMAGE_HEADER_V1_SIZE = 1648
 
         init {
-            Assert.assertEquals(BOOT_IMAGE_HEADER_V2_SIZE, Struct(FORMAT_STRING).calcSize())
+            Assert.assertEquals(BOOT_IMAGE_HEADER_V2_SIZE, Struct3(FORMAT_STRING).calcSize())
         }
     }
 }

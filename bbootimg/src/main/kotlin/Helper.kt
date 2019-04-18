@@ -1,7 +1,8 @@
 package cfig
 
-import cfig.io.Struct
+import cfig.io.Struct3
 import com.google.common.math.BigIntegerMath
+import com.sun.org.apache.xml.internal.utils.UnImplNode
 import org.apache.commons.codec.binary.Hex
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipParameters
@@ -40,6 +41,14 @@ class Helper {
                 if (src.isNotEmpty()) baos.write(src)
             }
             return baos.toByteArray()
+        }
+
+        fun toHexString(inData: UByteArray): String {
+            val sb = StringBuilder()
+            for (i in inData.indices) {
+                sb.append(Integer.toString((inData[i].toInt().and(0xff)) + 0x100, 16).substring(1))
+            }
+            return sb.toString()
         }
 
         fun toHexString(inData: ByteArray): String {
@@ -169,6 +178,15 @@ class Helper {
             }
         }
 
+        fun round_to_multiple(size: UInt, page: UInt): UInt {
+            val remainder = size % page
+            return if (remainder == 0U) {
+                size
+            } else {
+                size + page - remainder
+            }
+        }
+
         fun round_to_multiple(size: Long, page: Int): Long {
             val remainder = size % page
             return if (remainder == 0L) {
@@ -201,7 +219,7 @@ class Helper {
             log.debug("BB: " + numBits / 8 + ", mod_len: " + rsa.modulus.toByteArray().size + ", rrmodn = " + rrModn.toByteArray().size)
             val unsignedModulo = rsa.modulus.toByteArray().sliceArray(1..numBits / 8) //remove sign byte
             log.debug("unsigned modulo: " + Hex.encodeHexString(unsignedModulo))
-            val ret = Struct("!II${numBits / 8}b${numBits / 8}b").pack(
+            val ret = Struct3("!II${numBits / 8}b${numBits / 8}b").pack(
                     numBits,
                     n0inv,
                     unsignedModulo,

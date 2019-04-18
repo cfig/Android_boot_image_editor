@@ -28,6 +28,9 @@ public class Struct {
         if (formatString.startsWith(">") || formatString.startsWith("!")) {
             this.byteOrder = ByteOrder.BIG_ENDIAN;
             log.debug("Parsing BIG_ENDIAN format: " + formatString);
+        } else if (formatString.startsWith("@") || formatString.startsWith("=")) {
+            this.byteOrder = ByteOrder.nativeOrder();
+            log.debug("Parsing native ENDIAN format: " + formatString);
         } else {
             log.debug("Parsing LITTLE_ENDIAN format: " + formatString);
         }
@@ -38,7 +41,12 @@ public class Struct {
             if (!m.group(1).isEmpty()) {
                 mul = Integer.decode(m.group(1));
             }
+            //item[0]: Type, item[1]: multiple
+            // if need to expand format items, explode it
+            // eg: "4L" will be exploded to "1L 1L 1L 1L"
+            // eg: "10x" won't be exploded, it's still "10x"
             Object item[] = new Object[2];
+
             switch (m.group(2)) {
                 case "x": {//byte 1
                     item[0] = PadByte.class;
@@ -98,7 +106,7 @@ public class Struct {
     }
 
     public Integer calcSize() {
-        Integer ret = 0;
+        int ret = 0;
         for (Object[] format : formats) {
             if (format[0] == Byte.class || format[0] == Character.class || format[0] == PadByte.class) {
                 ret += (int) format[1];
@@ -239,7 +247,7 @@ public class Struct {
         for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
             Class<?> format = (Class<?>) formats.get(i)[0];
-            Integer size = (int) formats.get(i)[1];
+            int size = (int) formats.get(i)[1];
             log.debug("Index[" + i + "], fmt = " + format + ", arg = " + arg + ", multi = " + size);
 
             //padding

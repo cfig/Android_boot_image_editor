@@ -7,33 +7,33 @@ import java.io.InputStream
 class BootImgInfo(iS: InputStream?) : BootImgHeader(iS) {
     constructor() : this(null)
 
-    val kernelPosition: Int
+    val kernelPosition: UInt
         get() {
             return getHeaderSize(this.pageSize)
         }
 
-    val ramdiskPosition: Int
+    val ramdiskPosition: UInt
         get() {
             return (kernelPosition + this.kernelLength +
-                    getPaddingSize(this.kernelLength.toInt(), this.pageSize)).toInt()
+                    getPaddingSize(this.kernelLength, this.pageSize))
         }
 
-    val secondBootloaderPosition: Int
+    val secondBootloaderPosition: UInt
         get() {
-            return (ramdiskPosition + ramdiskLength +
-                    getPaddingSize(ramdiskLength.toInt(), pageSize)).toInt()
+            return ramdiskPosition + ramdiskLength +
+                    getPaddingSize(ramdiskLength, pageSize)
         }
 
-    val recoveryDtboPosition: Int
+    val recoveryDtboPosition: ULong
         get() {
-            return (secondBootloaderPosition + secondBootloaderLength +
-                    getPaddingSize(secondBootloaderLength.toInt(), pageSize)).toInt()
+            return secondBootloaderPosition.toULong() + secondBootloaderLength +
+                    getPaddingSize(secondBootloaderLength, pageSize)
         }
 
-    val dtbPosition: Int
+    val dtbPosition: ULong
         get() {
-            return (recoveryDtboPosition + dtbLength +
-                    getPaddingSize(dtbLength.toInt(), pageSize)).toInt()
+            return recoveryDtboPosition + recoveryDtboLength +
+                    getPaddingSize(recoveryDtboLength, pageSize)
         }
 
     var signatureType: BootImgInfo.VerifyType? = null
@@ -43,6 +43,15 @@ class BootImgInfo(iS: InputStream?) : BootImgHeader(iS) {
     private fun getHeaderSize(pageSize: Int): Int {
         val pad = (pageSize - (1648 and (pageSize - 1))) and (pageSize - 1)
         return pad + 1648
+    }
+
+    private fun getHeaderSize(pageSize: UInt): UInt {
+        val pad = (pageSize - (1648U and (pageSize - 1U))) and (pageSize - 1U)
+        return pad + 1648U
+    }
+
+    private fun getPaddingSize(position: UInt, pageSize: UInt): UInt {
+        return (pageSize - (position and pageSize - 1U)) and (pageSize - 1U)
     }
 
     private fun getPaddingSize(position: Int, pageSize: Int): Int {
@@ -59,39 +68,39 @@ class BootImgInfo(iS: InputStream?) : BootImgHeader(iS) {
         ret.addArgument(" --kernel ")
         ret.addArgument(param.kernel)
         ret.addArgument(" --kernel_offset ")
-        ret.addArgument("0x" + java.lang.Long.toHexString(kernelOffset))
-        if (this.ramdiskLength > 0) {
+        ret.addArgument("0x" + Integer.toHexString(kernelOffset.toInt()))
+        if (this.ramdiskLength > 0U) {
             ret.addArgument(" --ramdisk ")
             ret.addArgument(param.ramdisk)
         }
         ret.addArgument(" --ramdisk_offset ")
-        ret.addArgument("0x" + java.lang.Long.toHexString(ramdiskOffset))
-        if (this.secondBootloaderLength > 0) {
+        ret.addArgument("0x" + Integer.toHexString(ramdiskOffset.toInt()))
+        if (this.secondBootloaderLength > 0U) {
             ret.addArgument(" --second ")
             ret.addArgument(param.second)
         }
         ret.addArgument(" --second_offset ")
-        ret.addArgument("0x" + java.lang.Long.toHexString(this.secondBootloaderOffset))
+        ret.addArgument("0x" + Integer.toHexString(this.secondBootloaderOffset.toInt()))
         if (!board.isBlank()) {
             ret.addArgument(" --board ")
             ret.addArgument(board)
         }
-        if (headerVersion > 0) {
-            if (this.recoveryDtboLength > 0) {
+        if (headerVersion > 0U) {
+            if (this.recoveryDtboLength > 0U) {
                 ret.addArgument(" --recovery_dtbo ")
                 ret.addArgument(param.dtbo)
             }
         }
-        if (headerVersion > 1) {
-            if (this.dtbLength > 0) {
+        if (headerVersion > 1U) {
+            if (this.dtbLength > 0U) {
                 ret.addArgument("--dtb ")
                 ret.addArgument(param.dtb)
             }
             ret.addArgument("--dtb_offset ")
-            ret.addArgument("0x" + java.lang.Long.toHexString(this.dtbOffset))
+            ret.addArgument("0x" + java.lang.Long.toHexString(this.dtbOffset.toLong()))
         }
         ret.addArgument(" --pagesize ")
-        ret.addArgument(Integer.toString(pageSize))
+        ret.addArgument(Integer.toString(pageSize.toInt()))
         ret.addArgument(" --cmdline ")
         ret.addArgument(cmdline, false)
         if (!osVersion.isNullOrBlank()) {
@@ -103,7 +112,7 @@ class BootImgInfo(iS: InputStream?) : BootImgHeader(iS) {
             ret.addArgument(osPatchLevel)
         }
         ret.addArgument(" --tags_offset ")
-        ret.addArgument("0x" + java.lang.Long.toHexString(tagsOffset))
+        ret.addArgument("0x" + Integer.toHexString(tagsOffset.toInt()))
         ret.addArgument(" --id ")
         ret.addArgument(" --output ")
         //ret.addArgument("boot.img" + ".google")

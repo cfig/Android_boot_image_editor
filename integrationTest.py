@@ -3,6 +3,12 @@
 import shutil, os.path, json, subprocess, hashlib, glob
 import unittest
 
+successLogo = """
+      +----------------------------------+
+      |    All test cases have PASSED    |
+      +----------------------------------+
+"""
+
 def hashFile(fileName):
     hasher = hashlib.md5()
     with open(fileName, 'rb') as afile:
@@ -69,3 +75,5 @@ verifySingleJson(resDir, "9.0.0_blueline_pq1a.181105.017.a1", "%s/9.0.0_blueline
 
 # from volunteers
 verifySingleDir(resDir, "recovery_image_from_s-trace")
+
+print(successLogo)

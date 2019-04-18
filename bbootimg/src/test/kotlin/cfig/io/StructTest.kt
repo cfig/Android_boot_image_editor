@@ -1,13 +1,39 @@
 import cfig.Helper
 import cfig.io.Struct
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.Test
 
 import org.junit.Assert.*
 import java.io.ByteArrayInputStream
+import kotlin.reflect.jvm.jvmName
 
 class StructTest {
+    private fun getConvertedFormats(inStruct: Struct): ArrayList<Map<String, Int>> {
+        val f = inStruct.javaClass.getDeclaredField("formats")
+        f.isAccessible = true
+        val formatDumps = arrayListOf<Map<String, Int>>()
+        (f.get(inStruct) as ArrayList<*>).apply {
+            this.forEach {
+                val format = it as Array<Object>
+                formatDumps.add(mapOf(format[0].toString().split(" ")[1] to (format[1] as Int)))
+            }
+        }
+        return formatDumps
+    }
+
+    private fun constructorTestFun1(inFormatString: String) {
+        println(ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(getConvertedFormats(Struct(inFormatString))))
+    }
+
     @Test
-    fun constructTest() {
+    fun constructorTest() {
+        constructorTestFun1("2s")
+        constructorTestFun1("2b")
+        constructorTestFun1("2bs")
+    }
+
+    @Test
+    fun calcSizeTest() {
         assertEquals(16, Struct("<2i4b4b").calcSize())
         assertEquals(16, Struct("<Q8b").calcSize())
         assertEquals(2, Struct(">h").calcSize())

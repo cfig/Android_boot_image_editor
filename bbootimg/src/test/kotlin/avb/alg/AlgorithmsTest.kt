@@ -7,7 +7,7 @@ import org.junit.Test
 
 class AlgorithmsTest {
     @Test
-    fun test() {
+    fun test1() {
        val alg = Algorithms.get("NONE")!!
 
         Assert.assertEquals(Helper.toHexString(Algorithms.get("SHA256_RSA4096")!!.padding),

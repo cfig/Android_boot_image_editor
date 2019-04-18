@@ -44,7 +44,7 @@ class Signer {
                             salt = Helper.toHexString(bootDesc.salt),
                             hash_algorithm = bootDesc.hash_algorithm_str,
                             partition_name = bootDesc.partition_name,
-                            rollback_index = ai.header!!.rollback_index,
+                            rollback_index = ai.header!!.rollback_index.toLong(),
                             common_algorithm = alg!!.name,
                             inReleaseString = ai.header!!.release_string)
                     //original signer

@@ -1,6 +1,6 @@
 package avb
 
-import cfig.io.Struct
+import cfig.io.Struct3
 import org.junit.Assert
 import java.io.InputStream
 /*
@@ -22,41 +22,41 @@ https://github.com/cfig/Android_boot_image_editor/blob/master/doc/layout.md#32-a
  */
 
 data class Footer constructor(
-        var versionMajor: Long = FOOTER_VERSION_MAJOR,
-        var versionMinor: Long = FOOTER_VERSION_MINOR,
-        var originalImageSize: Long = 0L,
-        var vbMetaOffset: Long = 0L,
-        var vbMetaSize: Long = 0L
+        var versionMajor: UInt = FOOTER_VERSION_MAJOR,
+        var versionMinor: UInt = FOOTER_VERSION_MINOR,
+        var originalImageSize: ULong = 0U,
+        var vbMetaOffset: ULong = 0U,
+        var vbMetaSize: ULong = 0U
 ) {
     companion object {
         const val MAGIC = "AVBf"
         const val SIZE = 64
         private const val RESERVED = 28
-        const val FOOTER_VERSION_MAJOR = 1L
-        const val FOOTER_VERSION_MINOR = 0L
+        const val FOOTER_VERSION_MAJOR = 1U
+        const val FOOTER_VERSION_MINOR = 0U
         private const val FORMAT_STRING = "!4s2L3Q${RESERVED}x"
 
         init {
-            Assert.assertEquals(SIZE, Struct(FORMAT_STRING).calcSize())
+            Assert.assertEquals(SIZE, Struct3(FORMAT_STRING).calcSize())
         }
     }
 
     @Throws(IllegalArgumentException::class)
     constructor(iS: InputStream) : this() {
-        val info = Struct(FORMAT_STRING).unpack(iS)
+        val info = Struct3(FORMAT_STRING).unpack(iS)
         Assert.assertEquals(7, info.size)
-        if (!MAGIC.toByteArray().contentEquals(info[0] as ByteArray)) {
+        if (MAGIC != (info[0] as String)) {
             throw IllegalArgumentException("stream doesn't look like valid AVB Footer")
         }
-        versionMajor = info[1] as Long
-        versionMinor = info[2] as Long
-        originalImageSize = info[3] as Long
-        vbMetaOffset = info[4] as Long
-        vbMetaSize = info[5] as Long
+        versionMajor = info[1] as UInt
+        versionMinor = info[2] as UInt
+        originalImageSize = info[3] as ULong
+        vbMetaOffset = info[4] as ULong
+        vbMetaSize = info[5] as ULong
     }
 
     fun encode(): ByteArray {
-        return Struct(FORMAT_STRING).pack(Footer.MAGIC.toByteArray(),
+        return Struct3(FORMAT_STRING).pack(MAGIC,
                 this.versionMajor,
                 this.versionMinor,
                 this.originalImageSize,

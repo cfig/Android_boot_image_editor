@@ -2,7 +2,7 @@ package avb
 
 import avb.alg.Algorithms
 import cfig.Helper
-import cfig.io.Struct
+import cfig.io.Struct3
 import org.slf4j.LoggerFactory
 import java.security.MessageDigest
 
@@ -15,7 +15,7 @@ class Blob {
             val auxSize = Helper.round_to_multiple(
                     (encodedDesc.size + encodedKey.size + pkmdBlob.size).toLong(),
                     64)
-            return Struct("${auxSize}b").pack(Helper.join(encodedDesc, encodedKey, pkmdBlob))
+            return Struct3("${auxSize}b").pack(Helper.join(encodedDesc, encodedKey, pkmdBlob))
         }
 
         fun getAuthBlob(header_data_blob: ByteArray,
@@ -40,7 +40,7 @@ class Blob {
                 binarySignature = Helper.rawSign(alg.defaultKey.replace(".pem", ".pk8"), Helper.join(alg.padding, binaryHash))
             }
             val authData = Helper.join(binaryHash, binarySignature)
-            return Helper.join(authData, Struct("${authBlockSize - authData.size}x").pack(0))
+            return Helper.join(authData, Struct3("${authBlockSize - authData.size}x").pack(0))
         }
     }
 }

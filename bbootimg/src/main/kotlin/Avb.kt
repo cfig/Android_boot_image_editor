@@ -4,7 +4,7 @@ import avb.*
 import avb.alg.Algorithms
 import avb.desc.*
 import avb.AuxBlob
-import cfig.io.Struct
+import cfig.io.Struct3
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
@@ -35,7 +35,7 @@ class Avb {
                         common_algorithm: String,
                         inReleaseString: String?) {
         log.info("add_hash_footer($image_file) ...")
-        var original_image_size: Long
+        var original_image_size: ULong
         //required libavb version
         if (use_persistent_digest || do_not_use_ab) {
             required_libavb_version_minor = 1
@@ -72,11 +72,11 @@ class Avb {
             FileOutputStream(File(image_file), true).channel.use {
                 log.info("original image $image_file has AVB footer, " +
                         "truncate it to original SIZE: ${footer.originalImageSize}")
-                it.truncate(footer.originalImageSize)
+                it.truncate(footer.originalImageSize.toLong())
             }
         } catch (e: IllegalArgumentException) {
             log.info("original image $image_file doesn't have AVB footer")
-            original_image_size = originalFileSize
+            original_image_size = originalFileSize.toULong()
         }
 
         //salt
@@ -103,12 +103,12 @@ class Avb {
 
         //HashDescriptor
         val hd = HashDescriptor()
-        hd.image_size = File(image_file).length()
-        hd.hash_algorithm = hash_algorithm.toByteArray()
+        hd.image_size = File(image_file).length().toULong()
+        hd.hash_algorithm = hash_algorithm
         hd.partition_name = partition_name
         hd.salt = saltByteArray
-        hd.flags = 0
-        if (do_not_use_ab) hd.flags = hd.flags or 1
+        hd.flags = 0U
+        if (do_not_use_ab) hd.flags = hd.flags or 1u
         if (!use_persistent_digest) hd.digest = digest
         log.info("encoded hash descriptor:" + Hex.encodeHexString(hd.encode()))
 
@@ -121,15 +121,15 @@ class Avb {
                 0,
                 null,
                 null,
-                0,
+                0U,
                 inReleaseString)
         log.debug("vbmeta_blob: " + Helper.toHexString(vbmeta_blob))
         Helper.dumpToFile("hashDescriptor.vbmeta.blob", vbmeta_blob)
 
         log.info("Padding image ...")
         // image + padding
-        if (hd.image_size % BLOCK_SIZE != 0L) {
-            val padding_needed = BLOCK_SIZE - (hd.image_size % BLOCK_SIZE)
+        if (hd.image_size.toLong() % BLOCK_SIZE != 0L) {
+            val padding_needed = BLOCK_SIZE - (hd.image_size.toLong() % BLOCK_SIZE)
             FileOutputStream(image_file, true).use { fos ->
                 fos.write(ByteArray(padding_needed.toInt()))
             }
@@ -142,7 +142,7 @@ class Avb {
         log.info("Appending vbmeta ...")
         val vbmeta_offset = File(image_file).length()
         val padding_needed = Helper.round_to_multiple(vbmeta_blob.size.toLong(), BLOCK_SIZE) - vbmeta_blob.size
-        val vbmeta_blob_with_padding = Helper.join(vbmeta_blob, Struct("${padding_needed}x").pack(null))
+        val vbmeta_blob_with_padding = Helper.join(vbmeta_blob, Struct3("${padding_needed}x").pack(null))
         FileOutputStream(image_file, true).use { fos ->
             fos.write(vbmeta_blob_with_padding)
         }
@@ -151,18 +151,18 @@ class Avb {
         log.info("Appending DONT_CARE chunk ...")
         val vbmeta_end_offset = vbmeta_offset + vbmeta_blob_with_padding.size
         FileOutputStream(image_file, true).use { fos ->
-            fos.write(Struct("${partition_size - vbmeta_end_offset - 1 * BLOCK_SIZE}x").pack(null))
+            fos.write(Struct3("${partition_size - vbmeta_end_offset - 1 * BLOCK_SIZE}x").pack(null))
         }
 
         // + AvbFooter + padding
         log.info("Appending footer ...")
         val footer = Footer()
         footer.originalImageSize = original_image_size
-        footer.vbMetaOffset = vbmeta_offset
-        footer.vbMetaSize = vbmeta_blob.size.toLong()
+        footer.vbMetaOffset = vbmeta_offset.toULong()
+        footer.vbMetaSize = vbmeta_blob.size.toULong()
         val footerBob = footer.encode()
         val footerBlobWithPadding = Helper.join(
-                Struct("${BLOCK_SIZE - Footer.SIZE}x").pack(null), footerBob)
+                Struct3("${BLOCK_SIZE - Footer.SIZE}x").pack(null), footerBob)
         log.info("footer:" + Helper.toHexString(footerBob))
         log.info(footer.toString())
         FileOutputStream(image_file, true).use { fos ->
@@ -181,7 +181,7 @@ class Avb {
                            inFlags: Long,
                            props: Map<String, String>?,
                            kernel_cmdlines: List<String>?,
-                           required_libavb_version_minor: Int,
+                           required_libavb_version_minor: UInt,
                            inReleaseString: String?): ByteArray {
         //encoded descriptors
         var encodedDesc: ByteArray = byteArrayOf()
@@ -207,31 +207,31 @@ class Avb {
         //1 - whole header blob
         val headerBlob = Header().apply {
             bump_required_libavb_version_minor(required_libavb_version_minor)
-            auxiliary_data_block_size = auxBlob.size.toLong()
+            auxiliary_data_block_size = auxBlob.size.toULong()
 
             authentication_data_block_size = Helper.round_to_multiple(
-                    (alg.hash_num_bytes + alg.signature_num_bytes).toLong(), 64)
+                    (alg.hash_num_bytes + alg.signature_num_bytes).toLong(), 64).toULong()
 
-            algorithm_type = alg.algorithm_type.toLong()
+            algorithm_type = alg.algorithm_type.toUInt()
 
-            hash_offset = 0
-            hash_size = alg.hash_num_bytes.toLong()
+            hash_offset = 0U
+            hash_size = alg.hash_num_bytes.toULong()
 
-            signature_offset = alg.hash_num_bytes.toLong()
-            signature_size = alg.signature_num_bytes.toLong()
+            signature_offset = alg.hash_num_bytes.toULong()
+            signature_size = alg.signature_num_bytes.toULong()
 
-            descriptors_offset = 0
-            descriptors_size = encodedDesc.size.toLong()
+            descriptors_offset = 0U
+            descriptors_size = encodedDesc.size.toULong()
 
             public_key_offset = descriptors_size
-            public_key_size = encodedKey.size.toLong()
+            public_key_size = encodedKey.size.toULong()
 
             //TODO: support pubkey metadata
-            public_key_metadata_size = 0
+            public_key_metadata_size = 0U
             public_key_metadata_offset = public_key_offset + public_key_size
 
-            rollback_index = inRollbackIndex
-            flags = inFlags
+            rollback_index = inRollbackIndex.toULong()
+            flags = inFlags.toUInt()
             if (inReleaseString != null) {
                 log.info("Using preset release string: $inReleaseString")
                 this.release_string = inReleaseString
@@ -248,7 +248,7 @@ class Avb {
         log.info("parsing $image_file ...")
         val jsonFile = getJsonFileName(image_file)
         var footer: Footer? = null
-        var vbMetaOffset = 0L
+        var vbMetaOffset: ULong = 0U
         FileInputStream(image_file).use { fis ->
             fis.skip(File(image_file).length() - Footer.SIZE)
             try {
@@ -262,13 +262,13 @@ class Avb {
 
         var vbMetaHeader = Header()
         FileInputStream(image_file).use { fis ->
-            fis.skip(vbMetaOffset)
+            fis.skip(vbMetaOffset.toLong())
             vbMetaHeader = Header(fis)
         }
         log.info(vbMetaHeader.toString())
         log.debug(ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(vbMetaHeader))
 
-        val authBlockOffset = vbMetaOffset + Header.SIZE
+        val authBlockOffset = vbMetaOffset + Header.SIZE.toUInt()
         val auxBlockOffset = authBlockOffset + vbMetaHeader.authentication_data_block_size
         val descStartOffset = auxBlockOffset + vbMetaHeader.descriptors_offset
 
@@ -276,22 +276,22 @@ class Avb {
         ai.footer = footer
         ai.auxBlob = AuxBlob()
         ai.header = vbMetaHeader
-        if (vbMetaHeader.public_key_size > 0L) {
+        if (vbMetaHeader.public_key_size > 0U) {
             ai.auxBlob!!.pubkey = AuxBlob.PubKeyInfo()
-            ai.auxBlob!!.pubkey!!.offset = vbMetaHeader.public_key_offset
-            ai.auxBlob!!.pubkey!!.size = vbMetaHeader.public_key_size
+            ai.auxBlob!!.pubkey!!.offset = vbMetaHeader.public_key_offset.toLong()
+            ai.auxBlob!!.pubkey!!.size = vbMetaHeader.public_key_size.toLong()
         }
-        if (vbMetaHeader.public_key_metadata_size > 0L) {
+        if (vbMetaHeader.public_key_metadata_size > 0U) {
             ai.auxBlob!!.pubkeyMeta = AuxBlob.PubKeyMetadataInfo()
-            ai.auxBlob!!.pubkeyMeta!!.offset = vbMetaHeader.public_key_metadata_offset
-            ai.auxBlob!!.pubkeyMeta!!.size = vbMetaHeader.public_key_metadata_size
+            ai.auxBlob!!.pubkeyMeta!!.offset = vbMetaHeader.public_key_metadata_offset.toLong()
+            ai.auxBlob!!.pubkeyMeta!!.size = vbMetaHeader.public_key_metadata_size.toLong()
         }
 
         var descriptors: List<Any> = mutableListOf()
-        if (vbMetaHeader.descriptors_size > 0) {
+        if (vbMetaHeader.descriptors_size > 0U) {
             FileInputStream(image_file).use { fis ->
-                fis.skip(descStartOffset)
-                descriptors = UnknownDescriptor.parseDescriptors2(fis, vbMetaHeader.descriptors_size)
+                fis.skip(descStartOffset.toLong())
+                descriptors = UnknownDescriptor.parseDescriptors2(fis, vbMetaHeader.descriptors_size.toLong())
             }
 
             descriptors.forEach {
@@ -299,32 +299,32 @@ class Avb {
             }
         }
 
-        if (vbMetaHeader.public_key_size > 0) {
+        if (vbMetaHeader.public_key_size > 0U) {
             FileInputStream(image_file).use { fis ->
-                fis.skip(auxBlockOffset)
-                fis.skip(vbMetaHeader.public_key_offset)
+                fis.skip(auxBlockOffset.toLong())
+                fis.skip(vbMetaHeader.public_key_offset.toLong())
                 ai.auxBlob!!.pubkey!!.pubkey = ByteArray(vbMetaHeader.public_key_size.toInt())
                 fis.read(ai.auxBlob!!.pubkey!!.pubkey)
                 log.debug("Parsed Pub Key: " + Hex.encodeHexString(ai.auxBlob!!.pubkey!!.pubkey))
             }
         }
 
-        if (vbMetaHeader.public_key_metadata_size > 0) {
+        if (vbMetaHeader.public_key_metadata_size > 0U) {
             FileInputStream(image_file).use { fis ->
-                fis.skip(vbMetaOffset)
+                fis.skip(vbMetaOffset.toLong())
                 fis.skip(Header.SIZE.toLong())
-                fis.skip(vbMetaHeader.public_key_metadata_offset)
+                fis.skip(vbMetaHeader.public_key_metadata_offset.toLong())
                 val ba = ByteArray(vbMetaHeader.public_key_metadata_size.toInt())
                 fis.read(ba)
                 log.debug("Parsed Pub Key Metadata: " + Hex.encodeHexString(ba))
             }
         }
 
-        if (vbMetaHeader.authentication_data_block_size > 0) {
+        if (vbMetaHeader.authentication_data_block_size > 0U) {
             FileInputStream(image_file).use { fis ->
-                fis.skip(vbMetaOffset)
+                fis.skip(vbMetaOffset.toLong())
                 fis.skip(Header.SIZE.toLong())
-                fis.skip(vbMetaHeader.hash_offset)
+                fis.skip(vbMetaHeader.hash_offset.toLong())
                 val ba = ByteArray(vbMetaHeader.hash_size.toInt())
                 fis.read(ba)
                 log.debug("Parsed Auth Hash (Header & Aux Blob): " + Hex.encodeHexString(ba))
@@ -382,7 +382,7 @@ class Avb {
 
         //3 - whole aux blob
         var auxBlob = byteArrayOf()
-        if (ai.header!!.auxiliary_data_block_size > 0) {
+        if (ai.header!!.auxiliary_data_block_size > 0U) {
             if (encodedKey.contentEquals(ai.auxBlob!!.pubkey!!.pubkey)) {
                 log.info("Using the same key as original vbmeta")
             } else {
@@ -395,24 +395,24 @@ class Avb {
 
         //1 - whole header blob
         val headerBlob = ai.header!!.apply {
-            auxiliary_data_block_size = auxBlob.size.toLong()
+            auxiliary_data_block_size = auxBlob.size.toULong()
             authentication_data_block_size = Helper.round_to_multiple(
-                    (alg.hash_num_bytes + alg.signature_num_bytes).toLong(), 64)
+                    (alg.hash_num_bytes + alg.signature_num_bytes).toLong(), 64).toULong()
 
-            descriptors_offset = 0
-            descriptors_size = encodedDesc.size.toLong()
+            descriptors_offset = 0U
+            descriptors_size = encodedDesc.size.toULong()
 
-            hash_offset = 0
-            hash_size = alg.hash_num_bytes.toLong()
+            hash_offset = 0U
+            hash_size = alg.hash_num_bytes.toULong()
 
-            signature_offset = alg.hash_num_bytes.toLong()
-            signature_size = alg.signature_num_bytes.toLong()
+            signature_offset = alg.hash_num_bytes.toULong()
+            signature_size = alg.signature_num_bytes.toULong()
 
             public_key_offset = descriptors_size
-            public_key_size = encodedKey.size.toLong()
+            public_key_size = encodedKey.size.toULong()
 
             //TODO: support pubkey metadata
-            public_key_metadata_size = 0
+            public_key_metadata_size = 0U
             public_key_metadata_offset = public_key_offset + public_key_size
         }.encode()
 
@@ -430,7 +430,7 @@ class Avb {
     fun packVbMetaWithPadding(info: AVBInfo? = null) {
         val rawBlob = packVbMeta(info)
         val paddingSize = Helper.round_to_multiple(rawBlob.size.toLong(), BLOCK_SIZE) - rawBlob.size
-        val paddedBlob = Helper.join(rawBlob, Struct("${paddingSize}x").pack(null))
+        val paddedBlob = Helper.join(rawBlob, Struct3("${paddingSize}x").pack(null))
         log.info("raw vbmeta size ${rawBlob.size}, padding size $paddingSize, total blob size ${paddedBlob.size}")
         log.info("Writing padded vbmeta to file: vbmeta.img.signed")
         Files.write(Paths.get("vbmeta.img.signed"), paddedBlob, StandardOpenOption.CREATE)
@@ -438,8 +438,8 @@ class Avb {
 
     companion object {
         private val log = LoggerFactory.getLogger(Avb::class.java)
-        const val AVB_VERSION_MAJOR = 1
-        const val AVB_VERSION_MINOR = 1
+        const val AVB_VERSION_MAJOR = 1U
+        const val AVB_VERSION_MINOR = 1U
         const val AVB_VERSION_SUB = 0
 
         fun getJsonFileName(image_file: String): String {

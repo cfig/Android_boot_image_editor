@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.PumpStreamHandler
+import org.junit.Assert
 import org.junit.Assert.assertTrue
 import org.slf4j.LoggerFactory
 import java.io.*
@@ -49,6 +50,11 @@ class Packer {
         return md.digest()
     }
 
+    private fun writePaddedFile(inBF: ByteBuffer, srcFile: String, padding: UInt) {
+        Assert.assertTrue(padding < Int.MAX_VALUE.toUInt())
+        writePaddedFile(inBF, srcFile, padding.toInt())
+    }
+
     private fun writePaddedFile(inBF: ByteBuffer, srcFile: String, padding: Int) {
         FileInputStream(srcFile).use { iS ->
             var byteRead: Int
@@ -64,6 +70,11 @@ class Packer {
         }
     }
 
+    private fun padFile(inBF: ByteBuffer, padding: UInt) {
+        Assert.assertTrue(padding < Int.MAX_VALUE.toUInt())
+        padFile(inBF, padding.toInt())
+    }
+
     private fun padFile(inBF: ByteBuffer, padding: Int) {
         val pad = padding - (inBF.position() and padding - 1) and padding - 1
         inBF.put(ByteArray(pad))
@@ -77,16 +88,16 @@ class Packer {
         bf.order(ByteOrder.LITTLE_ENDIAN)
 
         writePaddedFile(bf, param.kernel, info2.pageSize)
-        if (info2.ramdiskLength > 0) {
+        if (info2.ramdiskLength > 0U) {
             writePaddedFile(bf, param.ramdisk!!, info2.pageSize)
         }
-        if (info2.secondBootloaderLength > 0) {
+        if (info2.secondBootloaderLength > 0U) {
             writePaddedFile(bf, param.second!!, info2.pageSize)
         }
-        if (info2.recoveryDtboLength > 0) {
+        if (info2.recoveryDtboLength > 0U) {
             writePaddedFile(bf, param.dtbo!!, info2.pageSize)
         }
-        if (info2.dtbLength > 0) {
+        if (info2.dtbLength > 0U) {
             writePaddedFile(bf, param.dtb!!, info2.pageSize)
         }
         //write
@@ -131,7 +142,7 @@ class Packer {
         File(cfg.info.output + ".signed2").deleleIfExists()
         File("${UnifiedConfig.workDir}ramdisk.img").deleleIfExists()
 
-        if (info2.ramdiskLength > 0) {
+        if (info2.ramdiskLength > 0U) {
             if (File(param.ramdisk).exists() && !File(UnifiedConfig.workDir + "root").exists()) {
                 //do nothing if we have ramdisk.img.gz but no /root
                 log.warn("Use prebuilt ramdisk file: ${param.ramdisk}")
@@ -145,7 +156,7 @@ class Packer {
         //write
         FileOutputStream(cfg.info.output + ".clear", false).use { fos ->
             fos.write(encodedHeader)
-            fos.write(ByteArray(info2.pageSize - encodedHeader.size))
+            fos.write(ByteArray(info2.pageSize.toInt() - encodedHeader.size))
         }
         writeData(info2, cfg.info.output)
 

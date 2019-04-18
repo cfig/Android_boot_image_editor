@@ -56,17 +56,17 @@ class Parser {
 
     fun extractBootImg(fileName: String, info2: BootImgInfo) {
         val param = ParamConfig()
-        if (info2.kernelLength > 0) {
+        if (info2.kernelLength > 0U) {
             Helper.extractFile(fileName,
                     param.kernel,
                     info2.kernelPosition.toLong(),
                     info2.kernelLength.toInt())
-            log.info(" kernel  dumped  to: ${param.kernel}, size=${info2.kernelLength / 1024.0 / 1024.0}MB")
+            log.info(" kernel  dumped  to: ${param.kernel}, size=${info2.kernelLength.toInt() / 1024.0 / 1024.0}MB")
         } else {
             throw RuntimeException("bad boot image: no kernel found")
         }
 
-        if (info2.ramdiskLength > 0) {
+        if (info2.ramdiskLength > 0U) {
             Helper.extractFile(fileName,
                     param.ramdisk!!,
                     info2.ramdiskPosition.toLong(),
@@ -78,7 +78,7 @@ class Parser {
             log.info("no ramdisk found")
         }
 
-        if (info2.secondBootloaderLength > 0) {
+        if (info2.secondBootloaderLength > 0U) {
             Helper.extractFile(fileName,
                     param.second!!,
                     info2.secondBootloaderPosition.toLong(),
@@ -88,28 +88,28 @@ class Parser {
             log.info("no second bootloader found")
         }
 
-        if (info2.recoveryDtboLength > 0) {
+        if (info2.recoveryDtboLength > 0U) {
             Helper.extractFile(fileName,
                     param.dtbo!!,
                     info2.recoveryDtboPosition.toLong(),
                     info2.recoveryDtboLength.toInt())
             log.info("dtbo dumped to ${param.dtbo}")
         } else {
-            if (info2.headerVersion > 0) {
+            if (info2.headerVersion > 0U) {
                 log.info("no recovery dtbo found")
             } else {
                 log.debug("no recovery dtbo for header v0")
             }
         }
 
-        if (info2.dtbLength > 0) {
+        if (info2.dtbLength > 0U) {
             Helper.extractFile(fileName,
                     param.dtb!!,
                     info2.dtbPosition.toLong(),
                     info2.dtbLength.toInt())
             log.info("dtb dumped to ${param.dtb}")
         } else {
-            if (info2.headerVersion > 1) {
+            if (info2.headerVersion > 1U) {
                 log.info("no dtb found")
             } else {
                 log.debug("no dtb for header v0")
