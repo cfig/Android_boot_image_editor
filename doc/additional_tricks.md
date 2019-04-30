@@ -37,6 +37,10 @@ Now we can work with 'raw\_boot'
 
 Due to the configuration "BOARD_BUILD_SYSTEM_ROOT_IMAGE := true", the embeded ramdisk in boot.img is actually used in recovery mode.
 
+## Pixel 3 (blueline)
+
+Fickle Google removed "BOARD_BUILD_SYSTEM_ROOT_IMAGE" and added "ro.boot.dynamic_partitions=true", which means normal mode ramdisk is back. Besides, it also packed DTB inside boot.img.
+
 ## NX606J
 
 Thanks to the work by [CallMESuper], ZTE NX606J boot.img is also verified to be compatible with this toolkit.

@@ -23,7 +23,7 @@ Supported images:
 (2) These utilities are known to work for Nexus/Pixel boot.img for the following Android releases:
 
  - AOSP master
- - Lollipop (5.0) - Pie (9)
+ - Lollipop (5.0) - Q preview
 
 ## 2. Usage
 Put your boot.img to current directory, then start gradle 'unpack' task:
@@ -72,6 +72,7 @@ We now support both VB 1.0 and AVB 2.0 layouts.
 
 | Device Model                   | Manufacturer | Compatible           | Android Version          | Note |
 |--------------------------------|--------------|----------------------|--------------------------|------|
+| Pixel 3 (blueline)             | Google       | Y                    | Q preview (qpp2.190228.023, <Br>2019)| [more ...](doc/additional_tricks.md#pixel-3-blueline) |
 | Pixel XL (marlin)              | HTC          | Y                    | 9.0.0 (PPR2.180905.006, <Br>Sep 2018)| [more ...](doc/additional_tricks.md#pixel-xl-marlin) |
 | Z18(NX606J)                    | ZTE          | Y                    | 8.1.0                    | [more...](doc/additional_tricks.md#nx606j) |
 | Nexus 9 (volantis/flounder)    | HTC          | Y(with some tricks)  | 7.1.1 (N9F27M, Oct 2017) | [tricks](doc/additional_tricks.md#tricks-for-nexus-9volantis)|
