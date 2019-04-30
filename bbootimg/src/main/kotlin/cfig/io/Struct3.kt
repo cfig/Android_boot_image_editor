@@ -108,7 +108,7 @@ class Struct3 {
     fun calcSize(): Int? {
         var ret = 0
         for (format in formats) {
-            when (format[0]) {
+            when (val formatType = format[0]) {
                 Byte, UByte, Char, String, Type.Padding -> {
                     ret += format[1] as Int
                 }
@@ -122,7 +122,7 @@ class Struct3 {
                     ret += 8 * format[1] as Int
                 }
                 else -> {
-                    throw IllegalArgumentException("Class [" + format[0] + "] not supported")
+                    throw IllegalArgumentException("Class [" + formatType + "] not supported")
                 }
             }
         }

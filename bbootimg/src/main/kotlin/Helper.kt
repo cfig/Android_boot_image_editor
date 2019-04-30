@@ -2,7 +2,6 @@ package cfig
 
 import cfig.io.Struct3
 import com.google.common.math.BigIntegerMath
-import com.sun.org.apache.xml.internal.utils.UnImplNode
 import org.apache.commons.codec.binary.Hex
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipParameters

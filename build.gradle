@@ -9,8 +9,9 @@ subprojects {
 // ----------------------------------------------------------------------------
 //                       global
 // ----------------------------------------------------------------------------
-
-if (Float.parseFloat(gradle.gradleVersion) < 5.0) {
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+if (parseGradleVersion(gradle.gradleVersion) < 5) {
     logger.error("ERROR: Gradle Version MUST >= 5.0, current is {}", gradle.gradleVersion)
     throw new RuntimeException("ERROR: Gradle Version")
 } else {
@@ -173,4 +174,16 @@ task rr {
     doLast {
         rebootRecovery()
     }
+}
+
+int parseGradleVersion(String version) {
+	Pattern VERSION_PATTERN = Pattern.compile("((\\d+)(\\.\\d+)+)(-(\\p{Alpha}+)-(\\w+))?(-(SNAPSHOT|\\d{14}([-+]\\d{4})?))?")
+    Matcher matcher = VERSION_PATTERN.matcher(version)
+    if (!matcher.matches()) {
+        throw new IllegalArgumentException(format("'%s' is not a valid Gradle version string (examples: '1.0', '1.0-rc-1')", version))
+    }
+    String versionPart = matcher.group(1)
+    int majorPart = Integer.parseInt(matcher.group(2), 10)
+    logger.info("Gradle: versionPart {}, majorPart {}", versionPart, majorPart)
+	return majorPart
 }
