@@ -1,4 +1,13 @@
-apply plugin: 'java'
+apply plugin: "java"
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.apache.commons:commons-exec:1.3"
+    }
+}
 
 subprojects {
     tasks.withType(JavaCompile) {
@@ -11,6 +20,10 @@ subprojects {
 // ----------------------------------------------------------------------------
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import org.apache.commons.exec.CommandLine
+import org.apache.commons.exec.DefaultExecutor
+import org.apache.commons.exec.PumpStreamHandler
+
 if (parseGradleVersion(gradle.gradleVersion) < 5) {
     logger.error("ERROR: Gradle Version MUST >= 5.0, current is {}", gradle.gradleVersion)
     throw new RuntimeException("ERROR: Gradle Version")
@@ -93,27 +106,33 @@ task pull() {
     }
 
     doLast {
+        String avb_version = adbCmd("getprop ro.boot.avb_version2")
+        Boolean isAvbEnabled = false
+        if (avb_version.isEmpty()) {
+            isAvbEnabled = true
+        }
+        println("AVB: $isAvbEnabled")
         if (project.findProperty("group")) {
             println("Pull: $group")
         } else {
             println("Pull /boot, /recovery, /vbmeta")
-            pullDefault()
+            pullDefault(isAvbEnabled)
         }
     }
 }
 
-void pullDefault() {
+void pullDefault(Boolean avb = true) {
     Run(["adb", "shell", "dd if=/dev/block/by-name/boot of=/cache/boot.img"])
     Run(["adb", "shell", "dd if=/dev/block/by-name/recovery of=/cache/recovery.img"])
-    Run(["adb", "shell", "dd if=/dev/block/by-name/vbmeta of=/cache/vbmeta.img"])
+    if (avb) Run(["adb", "shell", "dd if=/dev/block/by-name/vbmeta of=/cache/vbmeta.img"])
 
     Run(["adb", "pull", "/cache/boot.img"])
     Run(["adb", "pull", "/cache/recovery.img"])
-    Run(["adb", "pull", "/cache/vbmeta.img"])
+    if (avb) Run(["adb", "pull", "/cache/vbmeta.img"])
 
     Run(["adb", "shell", "rm /cache/boot.img"])
     Run(["adb", "shell", "rm /cache/recovery.img"])
-    Run(["adb", "shell", "rm /cache/vbmeta.img"])
+    if (avb) Run(["adb", "shell", "rm /cache/vbmeta.img"])
 }
 
 void Run(List<String> inCmd, String inWorkdir = null) {
@@ -177,7 +196,7 @@ task rr {
 }
 
 int parseGradleVersion(String version) {
-	Pattern VERSION_PATTERN = Pattern.compile("((\\d+)(\\.\\d+)+)(-(\\p{Alpha}+)-(\\w+))?(-(SNAPSHOT|\\d{14}([-+]\\d{4})?))?")
+    Pattern VERSION_PATTERN = Pattern.compile("((\\d+)(\\.\\d+)+)(-(\\p{Alpha}+)-(\\w+))?(-(SNAPSHOT|\\d{14}([-+]\\d{4})?))?")
     Matcher matcher = VERSION_PATTERN.matcher(version)
     if (!matcher.matches()) {
         throw new IllegalArgumentException(format("'%s' is not a valid Gradle version string (examples: '1.0', '1.0-rc-1')", version))
@@ -185,5 +204,16 @@ int parseGradleVersion(String version) {
     String versionPart = matcher.group(1)
     int majorPart = Integer.parseInt(matcher.group(2), 10)
     logger.info("Gradle: versionPart {}, majorPart {}", versionPart, majorPart)
-	return majorPart
+    return majorPart
+}
+
+String adbCmd(String cmd) {
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream()
+    def exec = new DefaultExecutor()
+    exec.streamHandler = new PumpStreamHandler(outputStream)
+    def cmdline = "adb shell $cmd"
+    //println(cmdline)
+    exec.execute(CommandLine.parse(cmdline))
+    //println(outputStream)
+    return outputStream.toString().trim()
 }

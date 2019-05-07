@@ -78,7 +78,7 @@ class Reboot {
                                     BootloaderMsg().writeRebootBootloader()
                                 } else {
                                     log.info("$dynamicPartitionKey=true, using fastbootd")
-                                    BootloaderMsg.writeBootloaderMessage(arrayOf("--fastboot"))
+                                    BootloaderMsg().writeBootloaderMessage(arrayOf("--fastboot"))
                                     rebootTarget = "recovery"
                                 }
                             }
@@ -86,7 +86,7 @@ class Reboot {
                                 BootloaderMsg().writeRebootBootloader()
                             }
                             "sideload", "sideload-auto-reboot" -> {
-                                BootloaderMsg.writeBootloaderMessage(
+                                BootloaderMsg().writeBootloaderMessage(
                                         arrayOf("--" + rebootTarget.replace("-", "_")))
                                 rebootTarget = "recovery"
                             }
