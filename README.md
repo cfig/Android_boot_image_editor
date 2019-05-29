@@ -61,6 +61,9 @@ If you are working with recovery.img, the steps are similar:
 And you get recovery.img.signed
 
 
+### usage demo
+![](doc/op.gif)
+
 ## 3. example & test
 An example boot.img has been placed at **src/test/resources/boot.img**, which is extracted from Nexus 5x(code: bullhead) factory images from [Google](https://dl.google.com/dl/android/aosp/bullhead-mda89e-factory-29247942.tgz), you can take it as a quick start.
 
