@@ -47,6 +47,8 @@ dependencies {
     //compile("org.nd4j:nd4j-api:0.9.1")
     compile("com.google.guava:guava:18.0")
     compile("org.bouncycastle:bcprov-jdk15on:1.57")
+    compile("org.apache.commons:commons-exec:1.3")
+    compile("de.vandermeer:asciitable:0.3.2")
 }
 
 mainClassName = "cfig.RKt"

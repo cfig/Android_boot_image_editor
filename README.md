@@ -101,3 +101,6 @@ https://android.googlesource.com/platform/system/core/+/master/mkbootimg/
 
 Android version list
 https://source.android.com/source/build-numbers.html
+
+kernel info extractor
+https://android.googlesource.com/platform/build/+/refs/heads/master/tools/extract_kernel.py

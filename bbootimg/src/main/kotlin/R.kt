@@ -1,6 +1,7 @@
 package cfig
 
 import cfig.bootimg.BootImgInfo
+import de.vandermeer.asciitable.AsciiTable
 import org.slf4j.LoggerFactory
 import java.io.File
 
@@ -27,14 +28,27 @@ fun main(args: Array<String>) {
                     if (File(UnifiedConfig.workDir).exists()) File(UnifiedConfig.workDir).deleteRecursively()
                     File(UnifiedConfig.workDir).mkdirs()
                     val info = Parser().parseBootImgHeader(fileName = args[1], avbtool = args[3])
+                    InfoTable.instance.addRule()
+                    InfoTable.instance.addRow("image info", ParamConfig().cfg)
                     if (info.signatureType == BootImgInfo.VerifyType.AVB) {
                         log.info("continue to analyze vbmeta info in " + args[1])
                         Avb().parseVbMeta(args[1])
+                        InfoTable.instance.addRule()
+                        InfoTable.instance.addRow("AVB info", Avb.getJsonFileName(args[1]))
                         if (File("vbmeta.img").exists()) {
                             Avb().parseVbMeta("vbmeta.img")
                         }
                     }
                     Parser().extractBootImg(fileName = args[1], info2 = info)
+
+                    InfoTable.instance.addRule()
+                    val tableHeader = AsciiTable().apply {
+                        addRule()
+                        addRow("What", "Where")
+                        addRule()
+                    }
+                    log.info("\n\t\t\tUnpack Summary of ${args[1]}\n{}\n{}", tableHeader.render(), InfoTable.instance.render())
+                    log.info("Following components are not present: ${InfoTable.missingParts}")
                 }
                 "pack" -> {
                     Packer().pack(mkbootfsBin = args[5])

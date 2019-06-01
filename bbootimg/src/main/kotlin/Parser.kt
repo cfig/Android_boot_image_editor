@@ -1,7 +1,9 @@
 package cfig
 
 import cfig.bootimg.BootImgInfo
+import cfig.kernel_util.KernelExtractor
 import com.fasterxml.jackson.databind.ObjectMapper
+import de.vandermeer.asciitable.AsciiTable
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.junit.Assert.assertTrue
@@ -54,14 +56,25 @@ class Parser {
         return info2
     }
 
+    fun parseKernelInfo(kernelFile: String) {
+        val ke = KernelExtractor()
+        if (ke.envCheck()) {
+            ke.run(kernelFile, File("."))
+        }
+    }
+
     fun extractBootImg(fileName: String, info2: BootImgInfo) {
         val param = ParamConfig()
+
+        InfoTable.instance.addRule()
         if (info2.kernelLength > 0U) {
             Helper.extractFile(fileName,
                     param.kernel,
                     info2.kernelPosition.toLong(),
                     info2.kernelLength.toInt())
             log.info(" kernel  dumped  to: ${param.kernel}, size=${info2.kernelLength.toInt() / 1024.0 / 1024.0}MB")
+            InfoTable.instance.addRow("kernel", param.kernel)
+            parseKernelInfo(param.kernel)
         } else {
             throw RuntimeException("bad boot image: no kernel found")
         }
@@ -74,7 +87,11 @@ class Parser {
             log.info("ramdisk  dumped  to: ${param.ramdisk}")
             Helper.unGnuzipFile(param.ramdisk!!, param.ramdisk!!.removeSuffix(".gz"))
             unpackRamdisk(UnifiedConfig.workDir, param.ramdisk!!.removeSuffix(".gz"))
+            InfoTable.instance.addRule()
+            InfoTable.instance.addRow("ramdisk", param.ramdisk!!.removeSuffix(".gz"))
+            InfoTable.instance.addRow("\\-- extracted ramdisk rootfs", "${UnifiedConfig.workDir}root")
         } else {
+            InfoTable.missingParts.add("ramdisk")
             log.info("no ramdisk found")
         }
 
@@ -84,7 +101,10 @@ class Parser {
                     info2.secondBootloaderPosition.toLong(),
                     info2.secondBootloaderLength.toInt())
             log.info("second bootloader dumped to ${param.second}")
+            InfoTable.instance.addRule()
+            InfoTable.instance.addRow("second bootloader", param.second)
         } else {
+            InfoTable.missingParts.add("second bootloader")
             log.info("no second bootloader found")
         }
 
@@ -93,8 +113,11 @@ class Parser {
                     param.dtbo!!,
                     info2.recoveryDtboPosition.toLong(),
                     info2.recoveryDtboLength.toInt())
-            log.info("dtbo dumped to ${param.dtbo}")
+            log.info("recovery dtbo dumped to ${param.dtbo}")
+            InfoTable.instance.addRule()
+            InfoTable.instance.addRow("recovery dtbo", param.dtbo)
         } else {
+            InfoTable.missingParts.add("recovery dtbo")
             if (info2.headerVersion > 0U) {
                 log.info("no recovery dtbo found")
             } else {
@@ -108,7 +131,10 @@ class Parser {
                     info2.dtbPosition.toLong(),
                     info2.dtbLength.toInt())
             log.info("dtb dumped to ${param.dtb}")
+            InfoTable.instance.addRule()
+            InfoTable.instance.addRow("dtb", param.dtb)
         } else {
+            InfoTable.missingParts.add("dtb")
             if (info2.headerVersion > 1U) {
                 log.info("no dtb found")
             } else {
