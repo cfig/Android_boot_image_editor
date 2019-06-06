@@ -1,7 +1,7 @@
 package cfig.kernel_util
 
+import cfig.EnvironmentVerifier
 import cfig.InfoTable
-import de.vandermeer.asciitable.AsciiTable
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.Logger
@@ -12,31 +12,8 @@ class KernelExtractor {
     val log: Logger = LoggerFactory.getLogger("KernelExtractor")
 
     fun envCheck(): Boolean {
-        try {
-            Runtime.getRuntime().exec("lz4 --version")
-            log.debug("lz4 available")
-        } catch (e: Exception) {
-            log.warn("lz4 unavailable")
-            return false
-        }
-
-        try {
-            Runtime.getRuntime().exec("xz --version")
-            log.debug("xz available")
-        } catch (e: Exception) {
-            log.warn("xz unavailable")
-            return false
-        }
-
-        try {
-            Runtime.getRuntime().exec("gzip -V")
-            log.debug("gzip available")
-        } catch (e: Exception) {
-            log.warn("gzip unavailable")
-            return false
-        }
-
-        return true
+        val envv = EnvironmentVerifier()
+        return envv.hasLz4 && envv.hasXz && envv.hasGzip
     }
 
     fun run(fileName: String, workDir: File? = null) {

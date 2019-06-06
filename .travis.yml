@@ -1,8 +1,8 @@
 dist: trusty
 language: java
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y libblkid-dev
+  - sudo apt -qq update
+  - sudo apt install -y libblkid-dev liblz4-tool
 
 script:
   - ./gradlew check

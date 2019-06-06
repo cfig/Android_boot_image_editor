@@ -26,6 +26,10 @@ Supported images:
  - Lollipop (5.0) - Q preview
 
 ## 2. Usage
+Clone this repo with minimal depth:
+
+    git clone https://github.com/cfig/Android_boot_image_editor.git --depth=1
+
 Put your boot.img to current directory, then start gradle 'unpack' task:
 
     cp <original_boot_image> boot.img
@@ -104,3 +108,6 @@ https://source.android.com/source/build-numbers.html
 
 kernel info extractor
 https://android.googlesource.com/platform/build/+/refs/heads/master/tools/extract_kernel.py
+
+mkdtboimg
+https://android.googlesource.com/platform/system/libufdt/

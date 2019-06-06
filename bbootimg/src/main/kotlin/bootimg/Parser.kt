@@ -1,6 +1,7 @@
 package cfig
 
 import cfig.bootimg.BootImgInfo
+import cfig.dtb_util.DTC
 import cfig.kernel_util.KernelExtractor
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
+import java.lang.IllegalArgumentException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -133,6 +135,13 @@ class Parser {
             log.info("dtb dumped to ${param.dtb}")
             InfoTable.instance.addRule()
             InfoTable.instance.addRow("dtb", param.dtb)
+            //extract DTB
+            if (EnvironmentVerifier().hasDtc) {
+                if (DTC().decompile(param.dtb!!, param.dtb + ".src")) {
+                    InfoTable.instance.addRow("\\-- decompiled dts", param.dtb + ".src")
+                }
+            }
+            //extract DTB
         } else {
             InfoTable.missingParts.add("dtb")
             if (info2.headerVersion > 1U) {
@@ -149,7 +158,11 @@ class Parser {
         fun verifyAVBIntegrity(fileName: String, avbtool: String) {
             val cmdline = "$avbtool verify_image --image $fileName"
             log.info(cmdline)
-            DefaultExecutor().execute(CommandLine.parse(cmdline))
+            try {
+                DefaultExecutor().execute(CommandLine.parse(cmdline))
+            } catch (e: Exception) {
+                throw IllegalArgumentException("$fileName failed integrity check by \"$cmdline\"")
+            }
         }
 
         fun readShort(iS: InputStream): Short {

@@ -1,0 +1,12 @@
+1c1
+< #!/usr/bin/env python
+---
+> #!/usr/bin/env python2.7
+181c181
+<           "Cannot extract kernel configs in {}".format(args.input.name))
+---
+>           "Cannot extract kernel configs in {}\n".format(args.input.name))
+189c189
+<           "Cannot extract kernel versions in {}".format(args.input.name))
+---
+>           "Cannot extract kernel versions in {}\n".format(args.input.name))

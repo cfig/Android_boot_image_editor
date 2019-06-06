@@ -195,6 +195,20 @@ task rr {
     }
 }
 
+task u(type: JavaExec, dependsOn: ["bbootimg:jar"]) {
+    main = "cfig.packable.PackableLauncherKt"
+    classpath = files("bbootimg/build/libs/bbootimg.jar")
+    maxHeapSize '512m'
+    args "unpack"
+}
+
+task p(type: JavaExec, dependsOn: ["bbootimg:jar", "mkbootfs:mkbootfsExecutable"]) {
+    main = "cfig.packable.PackableLauncherKt"
+    classpath = files("bbootimg/build/libs/bbootimg.jar")
+    maxHeapSize '512m'
+    args "pack"
+}
+
 int parseGradleVersion(String version) {
     Pattern VERSION_PATTERN = Pattern.compile("((\\d+)(\\.\\d+)+)(-(\\p{Alpha}+)-(\\w+))?(-(SNAPSHOT|\\d{14}([-+]\\d{4})?))?")
     Matcher matcher = VERSION_PATTERN.matcher(version)

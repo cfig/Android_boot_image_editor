@@ -2,7 +2,10 @@ package avb
 
 import cfig.io.Struct3
 import org.junit.Assert
+import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
+
 /*
 https://github.com/cfig/Android_boot_image_editor/blob/master/doc/layout.md#32-avb-footer-vboot-20
 
@@ -53,6 +56,19 @@ data class Footer constructor(
         originalImageSize = info[3] as ULong
         vbMetaOffset = info[4] as ULong
         vbMetaSize = info[5] as ULong
+    }
+
+    @Throws(IllegalArgumentException::class)
+    constructor(image_file: String) : this() {
+        FileInputStream(image_file).use { fis ->
+            fis.skip(File(image_file).length() - Footer.SIZE)
+            val footer = Footer(fis)
+            this.versionMajor = footer.versionMajor
+            this.versionMinor = footer.versionMinor
+            this.originalImageSize = footer.originalImageSize
+            this.vbMetaOffset = footer.vbMetaOffset
+            this.vbMetaSize = footer.vbMetaSize
+        }
     }
 
     fun encode(): ByteArray {
