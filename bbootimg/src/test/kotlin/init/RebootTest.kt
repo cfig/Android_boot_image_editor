@@ -1,10 +1,10 @@
 package init
 
 import cfig.init.Reboot
-import org.junit.Assert.*
 import org.junit.Test
 import java.util.*
 
+@ExperimentalUnsignedTypes
 class RebootTest {
     @Test
     fun testDifferentModes() {

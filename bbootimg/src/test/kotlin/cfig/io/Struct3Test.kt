@@ -2,10 +2,10 @@ import cfig.Helper
 import cfig.io.Struct3
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.Assert
-import org.junit.Assert.*
 import org.junit.Test
 import java.io.ByteArrayInputStream
 
+@ExperimentalUnsignedTypes
 class Struct3Test {
     private fun getConvertedFormats(inStruct: Struct3): ArrayList<Map<String, Int>> {
         val f = inStruct.javaClass.getDeclaredField("formats")
@@ -13,7 +13,8 @@ class Struct3Test {
         val formatDumps = arrayListOf<Map<String, Int>>()
         (f.get(inStruct) as ArrayList<*>).apply {
             this.forEach {
-                val format = it as Array<Object>
+                @Suppress("UNCHECKED_CAST")
+                val format = it as Array<Any>
                 val k = if (format[0].toString().indexOf(" ") > 0) {
                     format[0].toString().split(" ")[1]
                 } else {
@@ -373,10 +374,10 @@ class Struct3Test {
     @Test
     fun legacyTest() {
         Assert.assertTrue(Struct3("<2i4b4b").pack(
-                1, 7321, byteArrayOf(1, 2, 3, 4), byteArrayOf(200.toByte(), 201.toByte(), 202.toByte(), 203.toByte()))!!
+                1, 7321, byteArrayOf(1, 2, 3, 4), byteArrayOf(200.toByte(), 201.toByte(), 202.toByte(), 203.toByte()))
                 .contentEquals(Helper.fromHexString("01000000991c000001020304c8c9cacb")))
         Assert.assertTrue(Struct3("<2i4b4B").pack(
-                1, 7321, byteArrayOf(1, 2, 3, 4), intArrayOf(200, 201, 202, 203))!!
+                1, 7321, byteArrayOf(1, 2, 3, 4), intArrayOf(200, 201, 202, 203))
                 .contentEquals(Helper.fromHexString("01000000991c000001020304c8c9cacb")))
 
         Assert.assertTrue(Struct3("b2x").pack(byteArrayOf(0x13), null).contentEquals(Helper.fromHexString("130000")))
@@ -390,20 +391,20 @@ class Struct3Test {
     @Test
     fun legacyIntegerLE() {
         //int (4B)
-        assertTrue(Struct3("<2i").pack(1, 7321).contentEquals(Helper.fromHexString("01000000991c0000")))
+        Assert.assertTrue(Struct3("<2i").pack(1, 7321).contentEquals(Helper.fromHexString("01000000991c0000")))
         val ret = Struct3("<2i").unpack(ByteArrayInputStream(Helper.fromHexString("01000000991c0000")))
-        assertEquals(2, ret.size)
-        assertTrue(ret[0] is Int)
-        assertTrue(ret[1] is Int)
-        assertEquals(1, ret[0] as Int)
-        assertEquals(7321, ret[1] as Int)
+        Assert.assertEquals(2, ret.size)
+        Assert.assertTrue(ret[0] is Int)
+        Assert.assertTrue(ret[1] is Int)
+        Assert.assertEquals(1, ret[0] as Int)
+        Assert.assertEquals(7321, ret[1] as Int)
 
         //unsigned int (4B)
-        assertTrue(Struct3("<I").pack(2L).contentEquals(Helper.fromHexString("02000000")))
-        assertTrue(Struct3("<I").pack(2).contentEquals(Helper.fromHexString("02000000")))
+        Assert.assertTrue(Struct3("<I").pack(2L).contentEquals(Helper.fromHexString("02000000")))
+        Assert.assertTrue(Struct3("<I").pack(2).contentEquals(Helper.fromHexString("02000000")))
         //greater than Int.MAX_VALUE
-        assertTrue(Struct3("<I").pack(2147483748L).contentEquals(Helper.fromHexString("64000080")))
-        assertTrue(Struct3("<I").pack(2147483748).contentEquals(Helper.fromHexString("64000080")))
+        Assert.assertTrue(Struct3("<I").pack(2147483748L).contentEquals(Helper.fromHexString("64000080")))
+        Assert.assertTrue(Struct3("<I").pack(2147483748).contentEquals(Helper.fromHexString("64000080")))
         try {
             Struct3("<I").pack(-12)
             throw Exception("should not reach here")
@@ -412,22 +413,22 @@ class Struct3Test {
         }
 
         //negative int
-        assertTrue(Struct3("<i").pack(-333).contentEquals(Helper.fromHexString("b3feffff")))
+        Assert.assertTrue(Struct3("<i").pack(-333).contentEquals(Helper.fromHexString("b3feffff")))
     }
 
     @Test
     fun legacyIntegerBE() {
         run {
-            assertTrue(Struct3(">2i").pack(1, 7321).contentEquals(Helper.fromHexString("0000000100001c99")))
+            Assert.assertTrue(Struct3(">2i").pack(1, 7321).contentEquals(Helper.fromHexString("0000000100001c99")))
             val ret = Struct3(">2i").unpack(ByteArrayInputStream(Helper.fromHexString("0000000100001c99")))
-            assertEquals(1, ret[0] as Int)
-            assertEquals(7321, ret[1] as Int)
+            Assert.assertEquals(1, ret[0] as Int)
+            Assert.assertEquals(7321, ret[1] as Int)
         }
 
         run {
-            assertTrue(Struct3("!i").pack(-333).contentEquals(Helper.fromHexString("fffffeb3")))
+            Assert.assertTrue(Struct3("!i").pack(-333).contentEquals(Helper.fromHexString("fffffeb3")))
             val ret2 = Struct3("!i").unpack(ByteArrayInputStream(Helper.fromHexString("fffffeb3")))
-            assertEquals(-333, ret2[0] as Int)
+            Assert.assertEquals(-333, ret2[0] as Int)
         }
     }
 }

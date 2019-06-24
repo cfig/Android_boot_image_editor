@@ -16,6 +16,7 @@ import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.security.MessageDigest
 
+@ExperimentalUnsignedTypes
 class Avb {
     private val MAX_VBMETA_SIZE = 64 * 1024
     private val MAX_FOOTER_SIZE = 4096
@@ -173,7 +174,7 @@ class Avb {
     }
 
     //avbtool::Avb::_generate_vbmeta_blob()
-    fun generateVbMetaBlob(algorithm_name: String,
+    private fun generateVbMetaBlob(algorithm_name: String,
                            public_key_metadata_path: String?,
                            descriptors: Array<Descriptor>,
                            chain_partitions: String?,
@@ -373,7 +374,7 @@ class Avb {
         return ai
     }
 
-    fun packVbMeta(info: AVBInfo? = null): ByteArray {
+    private fun packVbMeta(info: AVBInfo? = null): ByteArray {
         val ai = info ?: ObjectMapper().readValue(File(getJsonFileName("vbmeta.img")), AVBInfo::class.java)
         val alg = Algorithms.get(ai.header!!.algorithm_type.toInt())!!
         val encodedDesc = ai.auxBlob!!.encodeDescriptors()

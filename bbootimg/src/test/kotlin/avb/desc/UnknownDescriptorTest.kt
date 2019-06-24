@@ -6,6 +6,7 @@ import org.junit.Test
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 
+@ExperimentalUnsignedTypes
 class UnknownDescriptorTest {
     private val log = LoggerFactory.getLogger(UnknownDescriptorTest::class.java)
 

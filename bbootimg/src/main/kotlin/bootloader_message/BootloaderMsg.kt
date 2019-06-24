@@ -8,6 +8,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.IllegalStateException
 
+@ExperimentalUnsignedTypes
 data class BootloaderMsg(
         var command: String = "",
         var status: String = "",

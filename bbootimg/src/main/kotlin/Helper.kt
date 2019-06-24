@@ -23,6 +23,7 @@ import java.util.zip.GZIPOutputStream
 import javax.crypto.Cipher
 
 class Helper {
+    @ExperimentalUnsignedTypes
     companion object {
         fun joinWithNulls(vararg source: ByteArray?): ByteArray {
             val baos = ByteArrayOutputStream()
@@ -131,6 +132,7 @@ class Helper {
             This MAY not be a problem, at least we didn't find it till now.
          */
         @Throws(IOException::class)
+        @Deprecated("this function misses features")
         fun gnuZipFile(compressedFile: String, fis: InputStream) {
             val buffer = ByteArray(1024)
             FileOutputStream(compressedFile).use { fos ->

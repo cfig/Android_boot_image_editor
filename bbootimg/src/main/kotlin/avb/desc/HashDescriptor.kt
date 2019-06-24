@@ -7,6 +7,7 @@ import java.io.File
 import java.io.InputStream
 import java.security.MessageDigest
 
+@ExperimentalUnsignedTypes
 class HashDescriptor(var image_size: ULong = 0U,
                      var hash_algorithm: String = "",
                      var hash_algorithm_str: String = "",
@@ -60,7 +61,7 @@ class HashDescriptor(var image_size: ULong = 0U,
     }
 
     fun verify(image_file: String) {
-        val hasher = MessageDigest.getInstance(Helper.pyAlg2java(hash_algorithm.toString()))
+        val hasher = MessageDigest.getInstance(Helper.pyAlg2java(hash_algorithm))
         hasher.update(this.salt)
         hasher.update(File(image_file).readBytes())
         val digest = hasher.digest()

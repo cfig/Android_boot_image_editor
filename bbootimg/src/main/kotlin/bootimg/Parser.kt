@@ -4,18 +4,13 @@ import cfig.bootimg.BootImgInfo
 import cfig.dtb_util.DTC
 import cfig.kernel_util.KernelExtractor
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.vandermeer.asciitable.AsciiTable
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
-import org.junit.Assert.assertTrue
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
-import java.io.InputStream
-import java.lang.IllegalArgumentException
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
+@ExperimentalUnsignedTypes
 class Parser {
     private fun verifiedWithAVB(fileName: String): Boolean {
         val expectedBf = "AVBf".toByteArray()
@@ -58,7 +53,7 @@ class Parser {
         return info2
     }
 
-    fun parseKernelInfo(kernelFile: String) {
+    private fun parseKernelInfo(kernelFile: String) {
         val ke = KernelExtractor()
         if (ke.envCheck()) {
             ke.run(kernelFile, File("."))
@@ -163,57 +158,6 @@ class Parser {
             } catch (e: Exception) {
                 throw IllegalArgumentException("$fileName failed integrity check by \"$cmdline\"")
             }
-        }
-
-        fun readShort(iS: InputStream): Short {
-            val bf = ByteBuffer.allocate(128)
-            bf.order(ByteOrder.LITTLE_ENDIAN)
-            val data2 = ByteArray(2)
-            assertTrue(2 == iS.read(data2))
-            bf.clear()
-            bf.put(data2)
-            bf.flip()
-            return bf.short
-        }
-
-        fun readInt(iS: InputStream): Int {
-            val bf = ByteBuffer.allocate(128)
-            bf.order(ByteOrder.LITTLE_ENDIAN)
-            val data4 = ByteArray(4)
-            assertTrue(4 == iS.read(data4))
-            bf.clear()
-            bf.put(data4)
-            bf.flip()
-            return bf.int
-        }
-
-        fun readUnsignedAsLong(iS: InputStream): Long {
-            val bf = ByteBuffer.allocate(128)
-            bf.order(ByteOrder.LITTLE_ENDIAN)
-            val data4 = ByteArray(4)
-            assertTrue(4 == iS.read(data4))
-            bf.clear()
-            bf.put(data4)
-            bf.put(ByteArray(4)) //complete high bits with 0
-            bf.flip()
-            return bf.long
-        }
-
-        fun readLong(iS: InputStream): Long {
-            val bf = ByteBuffer.allocate(128)
-            bf.order(ByteOrder.LITTLE_ENDIAN)
-            val data4 = ByteArray(8)
-            assertTrue(8 == iS.read(data4))
-            bf.clear()
-            bf.put(data4)
-            bf.flip()
-            return bf.long
-        }
-
-        fun readBytes(iS: InputStream, len: Int): ByteArray {
-            val data4 = ByteArray(len)
-            assertTrue(len == iS.read(data4))
-            return data4
         }
     }
 }

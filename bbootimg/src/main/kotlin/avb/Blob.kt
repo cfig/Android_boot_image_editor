@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import java.security.MessageDigest
 
 class Blob {
+    @ExperimentalUnsignedTypes
     companion object {
         private val log = LoggerFactory.getLogger(Blob::class.java)
 

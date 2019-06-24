@@ -13,6 +13,7 @@ import java.nio.ByteOrder
 import java.security.MessageDigest
 import java.util.regex.Pattern
 
+@ExperimentalUnsignedTypes
 open class BootImgHeader(
         var kernelLength: UInt = 0U,
         var kernelOffset: UInt = 0U,
@@ -157,7 +158,7 @@ open class BootImgHeader(
                 val currentFile = File(item)
                 FileInputStream(currentFile).use { iS ->
                     var byteRead: Int
-                    var dataRead = ByteArray(1024)
+                    val dataRead = ByteArray(1024)
                     while (true) {
                         byteRead = iS.read(dataRead)
                         if (-1 == byteRead) {
@@ -189,25 +190,25 @@ open class BootImgHeader(
         if (0U == this.ramdiskLength) {
             param.ramdisk = null
         } else {
-            this.ramdiskLength = File(param.ramdisk).length().toUInt()
+            this.ramdiskLength = File(param.ramdisk!!).length().toUInt()
         }
         //refresh second bootloader size
         if (0U == this.secondBootloaderLength) {
             param.second = null
         } else {
-            this.secondBootloaderLength = File(param.second).length().toUInt()
+            this.secondBootloaderLength = File(param.second!!).length().toUInt()
         }
         //refresh recovery dtbo size
         if (0U == this.recoveryDtboLength) {
             param.dtbo = null
         } else {
-            this.recoveryDtboLength = File(param.dtbo).length().toUInt()
+            this.recoveryDtboLength = File(param.dtbo!!).length().toUInt()
         }
         //refresh recovery dtbo size
         if (0U == this.dtbLength) {
             param.dtb = null
         } else {
-            this.dtbLength = File(param.dtb).length().toUInt()
+            this.dtbLength = File(param.dtb!!).length().toUInt()
         }
 
         //refresh image hash
@@ -230,44 +231,43 @@ open class BootImgHeader(
 
     fun encode(): ByteArray {
         this.refresh()
-        val ret = Struct3(FORMAT_STRING).pack(
+        return Struct3(FORMAT_STRING).pack(
                 "ANDROID!",
                 //10I
-                this.kernelLength,
-                this.kernelOffset,
-                this.ramdiskLength,
-                this.ramdiskOffset,
-                this.secondBootloaderLength,
-                this.secondBootloaderOffset,
-                this.tagsOffset,
-                this.pageSize,
-                this.headerVersion,
-                (packOsVersion(this.osVersion) shl 11) or packOsPatchLevel(this.osPatchLevel),
+                kernelLength,
+                kernelOffset,
+                ramdiskLength,
+                ramdiskOffset,
+                secondBootloaderLength,
+                secondBootloaderOffset,
+                tagsOffset,
+                pageSize,
+                headerVersion,
+                (packOsVersion(osVersion) shl 11) or packOsPatchLevel(osPatchLevel),
                 //16s
-                this.board,
+                board,
                 //512s
-                this.cmdline.substring(0, minOf(512, this.cmdline.length)),
+                cmdline.substring(0, minOf(512, cmdline.length)),
                 //32b
-                this.hash!!,
+                hash!!,
                 //1024s
-                if (this.cmdline.length > 512) this.cmdline.substring(512) else "",
+                if (cmdline.length > 512) cmdline.substring(512) else "",
                 //I
-                this.recoveryDtboLength,
+                recoveryDtboLength,
                 //Q
-                if (this.headerVersion > 0U) this.recoveryDtboOffset else 0,
+                if (headerVersion > 0U) recoveryDtboOffset else 0,
                 //I
-                when (this.headerVersion) {
+                when (headerVersion) {
                     0U -> 0
                     1U -> BOOT_IMAGE_HEADER_V1_SIZE
                     2U -> BOOT_IMAGE_HEADER_V2_SIZE
-                    else -> java.lang.IllegalArgumentException("headerVersion ${this.headerVersion} illegal")
+                    else -> java.lang.IllegalArgumentException("headerVersion $headerVersion illegal")
                 },
                 //I
-                this.dtbLength,
+                dtbLength,
                 //Q
-                if (this.headerVersion > 1U) this.dtbOffset else 0
+                if (headerVersion > 1U) dtbOffset else 0
         )
-        return ret
     }
 
     companion object {

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 class Signer {
+    @ExperimentalUnsignedTypes
     companion object {
         private val log = LoggerFactory.getLogger(Signer::class.java)
 
@@ -38,9 +39,9 @@ class Signer {
                     //our signer
                     File(cfg.info.output + ".clear").copyTo(File(cfg.info.output + ".signed"))
                     Avb().add_hash_footer(cfg.info.output + ".signed",
-                            info2.imageSize.toLong(),
-                            false,
-                            false,
+                            info2.imageSize,
+                            use_persistent_digest = false,
+                            do_not_use_ab = false,
                             salt = Helper.toHexString(bootDesc.salt),
                             hash_algorithm = bootDesc.hash_algorithm_str,
                             partition_name = bootDesc.partition_name,

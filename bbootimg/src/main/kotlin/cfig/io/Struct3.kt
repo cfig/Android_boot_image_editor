@@ -5,12 +5,12 @@ import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.InputStream
-import java.net.URLStreamHandler
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.*
 import java.util.regex.Pattern
 
+@ExperimentalUnsignedTypes
 class Struct3 {
     private val log = LoggerFactory.getLogger(Struct3::class.java)
     private val formatString: String
@@ -207,7 +207,7 @@ class Struct3 {
                 Assert.assertTrue("[$arg](${arg!!::class.java}) is NOT instance of ByteArray/IntArray",
                         arg is ByteArray || arg is IntArray || arg is UByteArray)
                 val argInternal = if (arg is IntArray) {
-                    var arg2: MutableList<Byte> = mutableListOf()
+                    val arg2: MutableList<Byte> = mutableListOf()
                     for (item in arg) {
                         Assert.assertTrue("$item is not valid UByte",
                                 item in UByte.MIN_VALUE.toInt()..UByte.MAX_VALUE.toInt())

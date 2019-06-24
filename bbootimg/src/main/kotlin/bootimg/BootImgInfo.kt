@@ -4,6 +4,7 @@ import cfig.ParamConfig
 import org.apache.commons.exec.CommandLine
 import java.io.InputStream
 
+@ExperimentalUnsignedTypes
 class BootImgInfo(iS: InputStream?) : BootImgHeader(iS) {
     constructor() : this(null)
 

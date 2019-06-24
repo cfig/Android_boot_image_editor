@@ -58,7 +58,7 @@ class ReadTest {
                         triggers: MutableList<Trigger>,
                         services: MutableList<Service>) {
         if (!File(inRootDir + inPath).exists()) {
-            println("Parsing $inPath fail: 404");
+            println("Parsing $inPath fail: 404")
             return
         }
         println("Parsing file $inPath ...")
@@ -242,7 +242,7 @@ class ReadTest {
         imports.forEach { println(it) }
 
         //parse imports again
-        var iteratorImport: Iterator<Import> = imports.iterator()
+        val iteratorImport: Iterator<Import> = imports.iterator()
         while (iteratorImport.hasNext()) {
             val item: Import = iteratorImport.next()
             parseConfigFile(inRootDir, item.initrc, triggers, services)
@@ -278,8 +278,7 @@ class ReadTest {
             if (m.find()) {
                 inServices
                         .filter {
-                            it.theClass != null
-                                    && it.theClass!!.split(" ").contains(m.group(1))
+                            it.theClass.split(" ").contains(m.group(1))
                         }
                         .forEach {
                             println(aPre + "|    \\-- Starting " + it.name + "...")
@@ -288,8 +287,8 @@ class ReadTest {
                 println("error")
             }
         } else if (this.startsWith("start")) {
-            println(aPre + "|-- " + this)
-            println(aPre + "|    \\-- Starting " + this.substring(5).trim() + "...")
+            println("$aPre|-- $this")
+            println("""$aPre|    \-- Starting ${this.substring(5).trim()}...""")
         } else {
             println(aPre + "|-- " + this)
         }

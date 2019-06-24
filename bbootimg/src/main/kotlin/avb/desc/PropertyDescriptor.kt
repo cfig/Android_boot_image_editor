@@ -4,6 +4,7 @@ import cfig.Helper
 import cfig.io.Struct3
 import java.io.InputStream
 
+@ExperimentalUnsignedTypes
 class PropertyDescriptor(
         var key: String = "",
         var value: String = "") : Descriptor(TAG, 0U, 0) {

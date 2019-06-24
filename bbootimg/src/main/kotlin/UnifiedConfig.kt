@@ -3,9 +3,9 @@ package cfig
 import cfig.bootimg.BootImgInfo
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.slf4j.LoggerFactory
 import java.io.File
 
+@ExperimentalUnsignedTypes
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class UnifiedConfig(
         var info: MiscInfo = MiscInfo(),
@@ -22,6 +22,7 @@ data class UnifiedConfig(
             var size: String = "0",
             var loadOffset: String = "0")
 
+    @ExperimentalUnsignedTypes
     data class MiscInfo(
             var output: String = "",
             var headerVersion: UInt = 0U,
@@ -82,7 +83,6 @@ data class UnifiedConfig(
 
     companion object {
         const val workDir = "build/unzip_boot/"
-        private val log = LoggerFactory.getLogger(UnifiedConfig::class.java)
 
         fun fromBootImgInfo(info: BootImgInfo): UnifiedConfig {
             val ret = UnifiedConfig()
@@ -123,7 +123,7 @@ data class UnifiedConfig(
                 if (info.dtbLength > 0U) {
                     ret.dtb!!.file = param.dtb
                 }
-                ret.dtb!!.loadOffset = "0x${java.lang.Integer.toHexString(info.dtbOffset.toInt())}"
+                ret.dtb!!.loadOffset = "0x${Integer.toHexString(info.dtbOffset.toInt())}"
                 ret.dtb!!.size = "0x${Integer.toHexString(info.dtbLength.toInt())}"
                 ret.dtb!!.position = "0x${java.lang.Long.toHexString(info.dtbPosition.toLong())}"
             }

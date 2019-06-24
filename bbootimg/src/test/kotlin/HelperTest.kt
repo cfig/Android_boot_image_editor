@@ -23,6 +23,7 @@ import java.security.spec.RSAPrivateKeySpec
 import java.security.PrivateKey
 
 
+@ExperimentalUnsignedTypes
 class HelperTest {
     @Test
     fun rawSignTest() {
@@ -53,7 +54,7 @@ class HelperTest {
         println("data size " + data.size)
         println(signature.provider)
         val sig = signature.sign()
-//        assertEquals(expectedSig, Hex.encodeHexString(sig))
+        println(sig)
     }
 
     @Test
@@ -79,6 +80,7 @@ class HelperTest {
         val kf = KeyFactory.getInstance("rsa")
         val privk = kf.generatePrivate(pk8Spec)
         val pubk = kf.generatePublic(x509Spec)
+        println(pubk)
 
         val cipher = Cipher.getInstance("RSA").apply {
             this.init(Cipher.ENCRYPT_MODE, privk)
@@ -121,12 +123,5 @@ class HelperTest {
         val clearMsg = BigInteger.valueOf(10)
         val encMsg = clearMsg.pow(e.toInt()).mod(modulus)
         println("clear: $clearMsg, enc: $encMsg")
-        val decMsg = clearMsg
-    }
-
-    fun gcd(a: BigInteger, b: BigInteger): BigInteger {
-        return if (b == BigInteger.ZERO) {
-            a
-        } else gcd(b, a.mod(b))
     }
 }

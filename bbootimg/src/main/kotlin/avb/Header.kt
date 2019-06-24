@@ -1,12 +1,12 @@
 package avb
 
 import cfig.Avb
-import cfig.Helper
 import cfig.io.Struct3
 import org.junit.Assert
 import java.io.InputStream
 
 //avbtool::AvbVBMetaHeader
+@ExperimentalUnsignedTypes
 data class Header(
         var required_libavb_version_major: UInt = Avb.AVB_VERSION_MAJOR,
         var required_libavb_version_minor: UInt = 0U,

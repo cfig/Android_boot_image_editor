@@ -10,6 +10,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.util.*
 
+@ExperimentalUnsignedTypes
 class DtboParser(val workDir: File) : IPackable {
     constructor() : this(File("."))
 
@@ -59,14 +60,14 @@ class DtboParser(val workDir: File) : IPackable {
             return
         }
 
-        val headerPath = File("${UnifiedConfig.workDir}/dtbo.header").path!!
+        val headerPath = File("${UnifiedConfig.workDir}/dtbo.header").path
         val props = Properties()
         props.load(FileInputStream(File(headerPath)))
         val cmd = CommandLine.parse("external/mkdtboimg.py create $fileName.clear").let {
             it.addArguments("--version=1")
             for (i in 0 until Integer.parseInt(props.getProperty("dt_entry_count"))) {
                 val dtsName = File(UnifiedConfig.workDir + "/dtb.$i").path
-                it.addArguments("$dtsName")
+                it.addArguments(dtsName)
             }
             it
         }

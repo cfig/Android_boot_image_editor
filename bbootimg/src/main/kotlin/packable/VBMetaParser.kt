@@ -2,6 +2,7 @@ package cfig.packable
 
 import cfig.Avb
 
+@ExperimentalUnsignedTypes
 class VBMetaParser: IPackable {
     override fun capabilities(): List<String> {
         return listOf("^vbmeta\\.img$")

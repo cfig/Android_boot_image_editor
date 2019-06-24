@@ -7,6 +7,7 @@ import org.junit.Assert.*
 import java.io.ByteArrayInputStream
 import kotlin.reflect.jvm.jvmName
 
+@ExperimentalUnsignedTypes
 class StructTest {
     private fun getConvertedFormats(inStruct: Struct): ArrayList<Map<String, Int>> {
         val f = inStruct.javaClass.getDeclaredField("formats")
@@ -14,7 +15,8 @@ class StructTest {
         val formatDumps = arrayListOf<Map<String, Int>>()
         (f.get(inStruct) as ArrayList<*>).apply {
             this.forEach {
-                val format = it as Array<Object>
+                @Suppress("UNCHECKED_CAST")
+                val format = it as Array<Any>
                 formatDumps.add(mapOf(format[0].toString().split(" ")[1] to (format[1] as Int)))
             }
         }
@@ -52,7 +54,7 @@ class StructTest {
     @Test
     fun integerLE() {
         //int (4B)
-        assertTrue(Struct("<2i").pack(1, 7321).contentEquals(Helper.fromHexString("01000000991c0000")))
+        assertTrue(Struct("<2i").pack(1, 7321)!!.contentEquals(Helper.fromHexString("01000000991c0000")))
         val ret = Struct("<2i").unpack(ByteArrayInputStream(Helper.fromHexString("01000000991c0000")))
         assertEquals(2, ret.size)
         assertTrue(ret[0] is Int)
@@ -61,11 +63,11 @@ class StructTest {
         assertEquals(7321, ret[1] as Int)
 
         //unsigned int (4B)
-        assertTrue(Struct("<I").pack(2L).contentEquals(Helper.fromHexString("02000000")))
-        assertTrue(Struct("<I").pack(2).contentEquals(Helper.fromHexString("02000000")))
+        assertTrue(Struct("<I").pack(2L)!!.contentEquals(Helper.fromHexString("02000000")))
+        assertTrue(Struct("<I").pack(2)!!.contentEquals(Helper.fromHexString("02000000")))
         //greater than Int.MAX_VALUE
-        assertTrue(Struct("<I").pack(2147483748L).contentEquals(Helper.fromHexString("64000080")))
-        assertTrue(Struct("<I").pack(2147483748).contentEquals(Helper.fromHexString("64000080")))
+        assertTrue(Struct("<I").pack(2147483748L)!!.contentEquals(Helper.fromHexString("64000080")))
+        assertTrue(Struct("<I").pack(2147483748)!!.contentEquals(Helper.fromHexString("64000080")))
         try {
             Struct("<I").pack(-12)
             throw Exception("should not reach here")
@@ -73,20 +75,20 @@ class StructTest {
         }
 
         //negative int
-        assertTrue(Struct("<i").pack(-333).contentEquals(Helper.fromHexString("b3feffff")))
+        assertTrue(Struct("<i").pack(-333)!!.contentEquals(Helper.fromHexString("b3feffff")))
     }
 
     @Test
     fun integerBE() {
         run {
-            assertTrue(Struct(">2i").pack(1, 7321).contentEquals(Helper.fromHexString("0000000100001c99")))
+            assertTrue(Struct(">2i").pack(1, 7321)!!.contentEquals(Helper.fromHexString("0000000100001c99")))
             val ret = Struct(">2i").unpack(ByteArrayInputStream(Helper.fromHexString("0000000100001c99")))
             assertEquals(1, ret[0] as Int)
             assertEquals(7321, ret[1] as Int)
         }
 
         run {
-            assertTrue(Struct("!i").pack(-333).contentEquals(Helper.fromHexString("fffffeb3")))
+            assertTrue(Struct("!i").pack(-333)!!.contentEquals(Helper.fromHexString("fffffeb3")))
             val ret2 = Struct("!i").unpack(ByteArrayInputStream(Helper.fromHexString("fffffeb3")))
             assertEquals(-333, ret2[0] as Int)
         }
@@ -95,8 +97,8 @@ class StructTest {
     @Test
     fun byteArrayTest() {
         //byte array
-        assertTrue(Struct("<4b").pack(byteArrayOf(-128, 2, 55, 127)).contentEquals(Helper.fromHexString("8002377f")))
-        assertTrue(Struct("<4b").pack(intArrayOf(0, 55, 202, 0xff)).contentEquals(Helper.fromHexString("0037caff")))
+        assertTrue(Struct("<4b").pack(byteArrayOf(-128, 2, 55, 127))!!.contentEquals(Helper.fromHexString("8002377f")))
+        assertTrue(Struct("<4b").pack(intArrayOf(0, 55, 202, 0xff))!!.contentEquals(Helper.fromHexString("0037caff")))
         try {
             Struct("b").pack(intArrayOf(256))
             throw Exception("should not reach here")
@@ -121,13 +123,13 @@ class StructTest {
 
     @Test
     fun paddingTest() {
-        assertTrue(Struct("b2x").pack(byteArrayOf(0x13), null).contentEquals(Helper.fromHexString("130000")))
-        assertTrue(Struct("b2xi").pack(byteArrayOf(0x13), null, 55).contentEquals(Helper.fromHexString("13000037000000")))
+        assertTrue(Struct("b2x").pack(byteArrayOf(0x13), null)!!.contentEquals(Helper.fromHexString("130000")))
+        assertTrue(Struct("b2xi").pack(byteArrayOf(0x13), null, 55)!!.contentEquals(Helper.fromHexString("13000037000000")))
     }
 
     @Test
     fun stringTest() {
-        Struct("5s").pack("Good".toByteArray()).contentEquals(Helper.fromHexString("476f6f6400"))
-        Struct("5s1b").pack("Good".toByteArray(), byteArrayOf(13)).contentEquals(Helper.fromHexString("476f6f64000d"))
+        Struct("5s").pack("Good".toByteArray())!!.contentEquals(Helper.fromHexString("476f6f6400"))
+        Struct("5s1b").pack("Good".toByteArray(), byteArrayOf(13))!!.contentEquals(Helper.fromHexString("476f6f64000d"))
     }
 }

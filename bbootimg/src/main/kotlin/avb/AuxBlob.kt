@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Paths
 
+@ExperimentalUnsignedTypes
 data class AuxBlob(
         var pubkey: PubKeyInfo? = null,
         var pubkeyMeta: PubKeyMetadataInfo? = null,

@@ -4,7 +4,9 @@ import cfig.bootimg.BootImgInfo
 import de.vandermeer.asciitable.AsciiTable
 import org.slf4j.LoggerFactory
 import java.io.File
+import kotlin.system.exitProcess
 
+@ExperimentalUnsignedTypes
 fun main(args: Array<String>) {
     val log = LoggerFactory.getLogger("Launcher")
     if ((args.size == 6) && args[0] in setOf("pack", "unpack", "sign")) {
@@ -84,7 +86,7 @@ fun main(args: Array<String>) {
         println("Usage: unpack <boot_image_path> <mkbootimg_bin_path> <avbtool_path> <boot_signer_path> <mkbootfs_bin_path>")
         println("Usage:  pack  <boot_image_path> <mkbootimg_bin_path> <avbtool_path> <boot_signer_path> <mkbootfs_bin_path>")
         println("Usage:  sign  <boot_image_path> <mkbootimg_bin_path> <avbtool_path> <boot_signer_path> <mkbootfs_bin_path>")
-        System.exit(1)
+        exitProcess(1)
     }
 }
 

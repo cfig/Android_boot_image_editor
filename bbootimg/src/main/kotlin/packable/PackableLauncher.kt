@@ -9,10 +9,12 @@ import kotlin.reflect.full.createInstance
 
 class PackableLauncher
 
+@ExperimentalUnsignedTypes
 fun main(args: Array<String>) {
     val log = LoggerFactory.getLogger(PackableLauncher::class.java)
     val packablePool = mutableMapOf<List<String>, KClass<IPackable>>()
     listOf(DtboParser(), VBMetaParser(), BootImgParser()).forEach {
+        @Suppress("UNCHECKED_CAST")
         packablePool.put(it.capabilities(), it::class as KClass<IPackable>)
     }
     packablePool.forEach {

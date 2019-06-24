@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.lang.IllegalArgumentException
 
+@ExperimentalUnsignedTypes
 class BootImgParser : IPackable {
     private val log = LoggerFactory.getLogger(BootImgParser::class.java)
 

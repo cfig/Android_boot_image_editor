@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.util.*
 
+@ExperimentalUnsignedTypes
 class HashTreeDescriptor(
         var dm_verity_version: UInt = 0u,
         var image_size: ULong = 0UL,
@@ -86,6 +87,5 @@ class HashTreeDescriptor(
         private const val RESERVED = 60L
         private const val SIZE = 120 + RESERVED
         private const val FORMAT_STRING = "!2QL3Q3L2Q32s4L${RESERVED}x"
-        private val log = LoggerFactory.getLogger(HashTreeDescriptor::class.java)
     }
 }

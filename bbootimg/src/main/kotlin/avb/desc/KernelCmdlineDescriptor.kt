@@ -5,6 +5,7 @@ import cfig.io.Struct3
 import org.junit.Assert
 import java.io.InputStream
 
+@ExperimentalUnsignedTypes
 class KernelCmdlineDescriptor(
         var flags: UInt = 0U,
         var cmdlineLength: UInt = 0U,

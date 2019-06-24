@@ -24,7 +24,7 @@ class KeyUtil {
         }
 
         fun parsePemPrivateKey2(inputStream: InputStream): PrivateKey {
-            val rsa = KeyUtil.parsePemPrivateKey(inputStream)
+            val rsa = parsePemPrivateKey(inputStream)
             return generateRsaPrivateKey(rsa.modulus, rsa.privateExponent)
         }
 
