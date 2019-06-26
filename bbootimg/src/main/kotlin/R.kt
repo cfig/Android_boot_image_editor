@@ -18,7 +18,7 @@ fun main(args: Array<String>) {
                     Avb().parseVbMeta(args[1])
                 }
                 "pack" -> {
-                    Avb().packVbMetaWithPadding()
+                    Avb().packVbMetaWithPadding(null)
                 }
                 "sign" -> {
                     log.info("vbmeta is already signed")

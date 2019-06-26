@@ -5,7 +5,7 @@ import cfig.Avb
 @ExperimentalUnsignedTypes
 class VBMetaParser: IPackable {
     override fun capabilities(): List<String> {
-        return listOf("^vbmeta\\.img$")
+        return listOf("^vbmeta\\.img$", "^vbmeta\\_[a-z]+.img$")
     }
 
     override fun unpack(fileName: String) {
@@ -13,6 +13,6 @@ class VBMetaParser: IPackable {
     }
 
     override fun pack(fileName: String) {
-        Avb().packVbMetaWithPadding()
+        Avb().packVbMetaWithPadding(fileName)
     }
 }

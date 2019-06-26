@@ -374,8 +374,8 @@ class Avb {
         return ai
     }
 
-    private fun packVbMeta(info: AVBInfo? = null): ByteArray {
-        val ai = info ?: ObjectMapper().readValue(File(getJsonFileName("vbmeta.img")), AVBInfo::class.java)
+    private fun packVbMeta(info: AVBInfo? = null, image_file: String? = null): ByteArray {
+        val ai = info ?: ObjectMapper().readValue(File(getJsonFileName(image_file!!)), AVBInfo::class.java)
         val alg = Algorithms.get(ai.header!!.algorithm_type.toInt())!!
         val encodedDesc = ai.auxBlob!!.encodeDescriptors()
         //encoded pubkey
@@ -428,13 +428,13 @@ class Avb {
         return Helper.join(headerBlob, authBlob, auxBlob)
     }
 
-    fun packVbMetaWithPadding(info: AVBInfo? = null) {
-        val rawBlob = packVbMeta(info)
+    fun packVbMetaWithPadding(image_file: String? = null, info: AVBInfo? = null) {
+        val rawBlob = packVbMeta(info, image_file)
         val paddingSize = Helper.round_to_multiple(rawBlob.size.toLong(), BLOCK_SIZE) - rawBlob.size
         val paddedBlob = Helper.join(rawBlob, Struct3("${paddingSize}x").pack(null))
         log.info("raw vbmeta size ${rawBlob.size}, padding size $paddingSize, total blob size ${paddedBlob.size}")
-        log.info("Writing padded vbmeta to file: vbmeta.img.signed")
-        Files.write(Paths.get("vbmeta.img.signed"), paddedBlob, StandardOpenOption.CREATE)
+        log.info("Writing padded vbmeta to file: $image_file.signed")
+        Files.write(Paths.get("$image_file.signed"), paddedBlob, StandardOpenOption.CREATE)
     }
 
     companion object {
