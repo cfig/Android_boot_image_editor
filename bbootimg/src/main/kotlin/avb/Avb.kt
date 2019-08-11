@@ -1,9 +1,13 @@
 package cfig
 
-import avb.*
+import avb.AVBInfo
 import avb.alg.Algorithms
+import avb.blob.AuthBlob
+import avb.blob.AuxBlob
+import avb.blob.Footer
+import avb.blob.Header
 import avb.desc.*
-import avb.AuxBlob
+import cfig.Helper.Companion.paddingWith
 import cfig.io.Struct3
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
@@ -14,7 +18,6 @@ import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
-import java.security.MessageDigest
 
 @ExperimentalUnsignedTypes
 class Avb {
@@ -22,35 +25,106 @@ class Avb {
     private val MAX_FOOTER_SIZE = 4096
     private val BLOCK_SIZE = 4096
 
-    private var required_libavb_version_minor = 0
+    //migrated from: avbtool::Avb::addHashFooter
+    fun addHashFooter(image_file: String,
+                      partition_size: Long, //aligned by Avb::BLOCK_SIZE
+                      partition_name: String,
+                      newAvbInfo: AVBInfo) {
+        log.info("addHashFooter($image_file) ...")
 
-    //migrated from: avbtool::Avb::add_hash_footer
-    fun add_hash_footer(image_file: String,
-                        partition_size: Long, //aligned by Avb::BLOCK_SIZE
-                        use_persistent_digest: Boolean,
-                        do_not_use_ab: Boolean,
-                        salt: String,
-                        hash_algorithm: String,
-                        partition_name: String,
-                        rollback_index: Long,
-                        common_algorithm: String,
-                        inReleaseString: String?) {
-        log.info("add_hash_footer($image_file) ...")
-        var original_image_size: ULong
-        //required libavb version
-        if (use_persistent_digest || do_not_use_ab) {
-            required_libavb_version_minor = 1
+        imageSizeCheck(partition_size, image_file)
+
+        //truncate AVB footer if there is. Then addHashFooter() is idempotent
+        trimFooter(image_file)
+        val newImageSize = File(image_file).length()
+
+        //VBmeta blob: update hash descriptor
+        newAvbInfo.apply {
+            val itr = this.auxBlob!!.hashDescriptors.iterator()
+            var hd = HashDescriptor()
+            while (itr.hasNext()) {//remove previous hd entry
+                val itrValue = itr.next()
+                if (itrValue.partition_name == partition_name) {
+                    itr.remove()
+                    hd = itrValue
+                }
+            }
+            //HashDescriptor
+            hd.update(image_file)
+            log.info("updated hash descriptor:" + Hex.encodeHexString(hd.encode()))
+            this.auxBlob!!.hashDescriptors.add(hd)
         }
-        log.info("Required_libavb_version: 1.$required_libavb_version_minor")
 
-        // SIZE + metadata (footer + vbmeta struct)
-        val max_metadata_size = MAX_VBMETA_SIZE + MAX_FOOTER_SIZE
-        if (partition_size < max_metadata_size) {
+        val vbmetaBlob = packVbMeta(newAvbInfo)
+        log.debug("vbmeta_blob: " + Helper.toHexString(vbmetaBlob))
+        Helper.dumpToFile("hashDescriptor.vbmeta.blob", vbmetaBlob)
+
+        // image + padding
+        val imgPaddingNeeded = Helper.round_to_multiple(newImageSize, BLOCK_SIZE) - newImageSize
+
+        // + vbmeta + padding
+        val vbmetaOffset = File(image_file).length()
+        val vbmetaBlobWithPadding = vbmetaBlob.paddingWith(BLOCK_SIZE.toUInt())
+
+        // + DONT_CARE chunk
+        val vbmetaEndOffset = vbmetaOffset + vbmetaBlobWithPadding.size
+        val dontCareChunkSize = partition_size - vbmetaEndOffset - 1 * BLOCK_SIZE
+
+        // + AvbFooter + padding
+        newAvbInfo.footer!!.apply {
+            originalImageSize = newImageSize.toULong()
+            vbMetaOffset = vbmetaOffset.toULong()
+            vbMetaSize = vbmetaBlob.size.toULong()
+        }
+        log.info(newAvbInfo.footer.toString())
+        val footerBlobWithPadding = newAvbInfo.footer!!.encode().paddingWith(BLOCK_SIZE.toUInt(), true)
+
+        FileOutputStream(image_file, true).use { fos ->
+            log.info("1/4 Padding image with $imgPaddingNeeded bytes ...")
+            fos.write(ByteArray(imgPaddingNeeded.toInt()))
+
+            log.info("2/4 Appending vbmeta (${vbmetaBlobWithPadding.size} bytes)...")
+            fos.write(vbmetaBlobWithPadding)
+
+            log.info("3/4 Appending DONT CARE CHUNK ($dontCareChunkSize bytes) ...")
+            fos.write(ByteArray(dontCareChunkSize.toInt()))
+
+            log.info("4/4 Appending AVB footer (${footerBlobWithPadding.size} bytes)...")
+            fos.write(footerBlobWithPadding)
+        }
+
+        log.info("addHashFooter($image_file) done.")
+    }
+
+    private fun trimFooter(image_file: String) {
+        var footer: Footer? = null
+        FileInputStream(image_file).use {
+            it.skip(File(image_file).length() - 64)
+            try {
+                footer = Footer(it)
+                log.info("original image $image_file has AVB footer")
+            } catch (e: IllegalArgumentException) {
+                log.info("original image $image_file doesn't have AVB footer")
+            }
+        }
+        footer?.let {
+            FileOutputStream(File(image_file), true).channel.use { fc ->
+                log.info("original image $image_file has AVB footer, " +
+                        "truncate it to original SIZE: ${it.originalImageSize}")
+                fc.truncate(it.originalImageSize.toLong())
+            }
+        }
+    }
+
+    private fun imageSizeCheck(partition_size: Long, image_file: String) {
+        //image size sanity check
+        val maxMetadataSize = MAX_VBMETA_SIZE + MAX_FOOTER_SIZE
+        if (partition_size < maxMetadataSize) {
             throw IllegalArgumentException("Parition SIZE of $partition_size is too small. " +
-                    "Needs to be at least $max_metadata_size")
+                    "Needs to be at least $maxMetadataSize")
         }
-        val max_image_size = partition_size - max_metadata_size
-        log.info("max_image_size: $max_image_size")
+        val maxImageSize = partition_size - maxMetadataSize
+        log.info("max_image_size: $maxImageSize")
 
         //TODO: typical block size = 4096L, from avbtool::Avb::ImageHandler::block_size
         //since boot.img is not in sparse format, we are safe to hardcode it to 4096L for now
@@ -59,190 +133,11 @@ class Avb {
                     "a multiple of the image block SIZE 4096")
         }
 
-        //truncate AVB footer if there is. Then add_hash_footer() is idempotent
-        val fis = FileInputStream(image_file)
         val originalFileSize = File(image_file).length()
-        if (originalFileSize > max_image_size) {
+        if (originalFileSize > maxImageSize) {
             throw IllegalArgumentException("Image size of $originalFileSize exceeds maximum image size " +
-                    "of $max_image_size in order to fit in a partition size of $partition_size.")
+                    "of $maxImageSize in order to fit in a partition size of $partition_size.")
         }
-        fis.skip(originalFileSize - 64)
-        try {
-            val footer = Footer(fis)
-            original_image_size = footer.originalImageSize
-            FileOutputStream(File(image_file), true).channel.use {
-                log.info("original image $image_file has AVB footer, " +
-                        "truncate it to original SIZE: ${footer.originalImageSize}")
-                it.truncate(footer.originalImageSize.toLong())
-            }
-        } catch (e: IllegalArgumentException) {
-            log.info("original image $image_file doesn't have AVB footer")
-            original_image_size = originalFileSize.toULong()
-        }
-
-        //salt
-        var saltByteArray = Helper.fromHexString(salt)
-        if (salt.isBlank()) {
-            //If salt is not explicitly specified, choose a hash that's the same size as the hash size
-            val expectedDigestSize = MessageDigest.getInstance(Helper.pyAlg2java(hash_algorithm)).digest().size
-            FileInputStream(File("/dev/urandom")).use {
-                val randomSalt = ByteArray(expectedDigestSize)
-                it.read(randomSalt)
-                log.warn("salt is empty, using random salt[$expectedDigestSize]: " + Helper.toHexString(randomSalt))
-                saltByteArray = randomSalt
-            }
-        } else {
-            log.info("preset salt[${saltByteArray.size}] is valid: $salt")
-        }
-
-        //hash digest
-        val digest = MessageDigest.getInstance(Helper.pyAlg2java(hash_algorithm)).apply {
-            update(saltByteArray)
-            update(File(image_file).readBytes())
-        }.digest()
-        log.info("Digest(salt + file): " + Helper.toHexString(digest))
-
-        //HashDescriptor
-        val hd = HashDescriptor()
-        hd.image_size = File(image_file).length().toULong()
-        hd.hash_algorithm = hash_algorithm
-        hd.partition_name = partition_name
-        hd.salt = saltByteArray
-        hd.flags = 0U
-        if (do_not_use_ab) hd.flags = hd.flags or 1u
-        if (!use_persistent_digest) hd.digest = digest
-        log.info("encoded hash descriptor:" + Hex.encodeHexString(hd.encode()))
-
-        //VBmeta blob
-        val vbmeta_blob = generateVbMetaBlob(common_algorithm,
-                null,
-                arrayOf(hd as Descriptor),
-                null,
-                rollback_index,
-                0,
-                null,
-                null,
-                0U,
-                inReleaseString)
-        log.debug("vbmeta_blob: " + Helper.toHexString(vbmeta_blob))
-        Helper.dumpToFile("hashDescriptor.vbmeta.blob", vbmeta_blob)
-
-        log.info("Padding image ...")
-        // image + padding
-        if (hd.image_size.toLong() % BLOCK_SIZE != 0L) {
-            val padding_needed = BLOCK_SIZE - (hd.image_size.toLong() % BLOCK_SIZE)
-            FileOutputStream(image_file, true).use { fos ->
-                fos.write(ByteArray(padding_needed.toInt()))
-            }
-            log.info("$image_file padded: ${hd.image_size} -> ${File(image_file).length()}")
-        } else {
-            log.info("$image_file doesn't need padding")
-        }
-
-        // + vbmeta + padding
-        log.info("Appending vbmeta ...")
-        val vbmeta_offset = File(image_file).length()
-        val padding_needed = Helper.round_to_multiple(vbmeta_blob.size.toLong(), BLOCK_SIZE) - vbmeta_blob.size
-        val vbmeta_blob_with_padding = Helper.join(vbmeta_blob, Struct3("${padding_needed}x").pack(null))
-        FileOutputStream(image_file, true).use { fos ->
-            fos.write(vbmeta_blob_with_padding)
-        }
-
-        // + DONT_CARE chunk
-        log.info("Appending DONT_CARE chunk ...")
-        val vbmeta_end_offset = vbmeta_offset + vbmeta_blob_with_padding.size
-        FileOutputStream(image_file, true).use { fos ->
-            fos.write(Struct3("${partition_size - vbmeta_end_offset - 1 * BLOCK_SIZE}x").pack(null))
-        }
-
-        // + AvbFooter + padding
-        log.info("Appending footer ...")
-        val footer = Footer()
-        footer.originalImageSize = original_image_size
-        footer.vbMetaOffset = vbmeta_offset.toULong()
-        footer.vbMetaSize = vbmeta_blob.size.toULong()
-        val footerBob = footer.encode()
-        val footerBlobWithPadding = Helper.join(
-                Struct3("${BLOCK_SIZE - Footer.SIZE}x").pack(null), footerBob)
-        log.info("footer:" + Helper.toHexString(footerBob))
-        log.info(footer.toString())
-        FileOutputStream(image_file, true).use { fos ->
-            fos.write(footerBlobWithPadding)
-        }
-
-        log.info("add_hash_footer($image_file) done ...")
-    }
-
-    //avbtool::Avb::_generate_vbmeta_blob()
-    private fun generateVbMetaBlob(algorithm_name: String,
-                           public_key_metadata_path: String?,
-                           descriptors: Array<Descriptor>,
-                           chain_partitions: String?,
-                           inRollbackIndex: Long,
-                           inFlags: Long,
-                           props: Map<String, String>?,
-                           kernel_cmdlines: List<String>?,
-                           required_libavb_version_minor: UInt,
-                           inReleaseString: String?): ByteArray {
-        //encoded descriptors
-        var encodedDesc: ByteArray = byteArrayOf()
-        descriptors.forEach { encodedDesc = Helper.join(encodedDesc, it.encode()) }
-        props?.let {
-            it.forEach { t, u ->
-                Helper.join(encodedDesc, PropertyDescriptor(t, u).encode())
-            }
-        }
-        kernel_cmdlines?.let {
-            it.forEach { eachCmdline ->
-                Helper.join(encodedDesc, KernelCmdlineDescriptor(cmdline = eachCmdline).encode())
-            }
-        }
-        //algorithm
-        val alg = Algorithms.get(algorithm_name)!!
-        //encoded pubkey
-        val encodedKey = AuxBlob.encodePubKey(alg)
-
-        //3 - whole aux blob
-        val auxBlob = Blob.getAuxDataBlob(encodedDesc, encodedKey, byteArrayOf())
-
-        //1 - whole header blob
-        val headerBlob = Header().apply {
-            bump_required_libavb_version_minor(required_libavb_version_minor)
-            auxiliary_data_block_size = auxBlob.size.toULong()
-
-            authentication_data_block_size = Helper.round_to_multiple(
-                    (alg.hash_num_bytes + alg.signature_num_bytes).toLong(), 64).toULong()
-
-            algorithm_type = alg.algorithm_type.toUInt()
-
-            hash_offset = 0U
-            hash_size = alg.hash_num_bytes.toULong()
-
-            signature_offset = alg.hash_num_bytes.toULong()
-            signature_size = alg.signature_num_bytes.toULong()
-
-            descriptors_offset = 0U
-            descriptors_size = encodedDesc.size.toULong()
-
-            public_key_offset = descriptors_size
-            public_key_size = encodedKey.size.toULong()
-
-            //TODO: support pubkey metadata
-            public_key_metadata_size = 0U
-            public_key_metadata_offset = public_key_offset + public_key_size
-
-            rollback_index = inRollbackIndex.toULong()
-            flags = inFlags.toUInt()
-            if (inReleaseString != null) {
-                log.info("Using preset release string: $inReleaseString")
-                this.release_string = inReleaseString
-            }
-        }.encode()
-
-        //2 - auth blob
-        val authBlob = Blob.getAuthBlob(headerBlob, auxBlob, algorithm_name)
-
-        return Helper.join(headerBlob, authBlob, auxBlob)
     }
 
     fun parseVbMeta(image_file: String): AVBInfo {
@@ -250,6 +145,7 @@ class Avb {
         val jsonFile = getJsonFileName(image_file)
         var footer: Footer? = null
         var vbMetaOffset: ULong = 0U
+        // footer
         FileInputStream(image_file).use { fis ->
             fis.skip(File(image_file).length() - Footer.SIZE)
             try {
@@ -261,6 +157,7 @@ class Avb {
             }
         }
 
+        // header
         var vbMetaHeader = Header()
         FileInputStream(image_file).use { fis ->
             fis.skip(vbMetaOffset.toLong())
@@ -273,54 +170,9 @@ class Avb {
         val auxBlockOffset = authBlockOffset + vbMetaHeader.authentication_data_block_size
         val descStartOffset = auxBlockOffset + vbMetaHeader.descriptors_offset
 
-        val ai = AVBInfo()
-        ai.footer = footer
-        ai.auxBlob = AuxBlob()
-        ai.header = vbMetaHeader
-        if (vbMetaHeader.public_key_size > 0U) {
-            ai.auxBlob!!.pubkey = AuxBlob.PubKeyInfo()
-            ai.auxBlob!!.pubkey!!.offset = vbMetaHeader.public_key_offset.toLong()
-            ai.auxBlob!!.pubkey!!.size = vbMetaHeader.public_key_size.toLong()
-        }
-        if (vbMetaHeader.public_key_metadata_size > 0U) {
-            ai.auxBlob!!.pubkeyMeta = AuxBlob.PubKeyMetadataInfo()
-            ai.auxBlob!!.pubkeyMeta!!.offset = vbMetaHeader.public_key_metadata_offset.toLong()
-            ai.auxBlob!!.pubkeyMeta!!.size = vbMetaHeader.public_key_metadata_size.toLong()
-        }
+        val ai = AVBInfo(vbMetaHeader, null, AuxBlob(), footer)
 
-        var descriptors: List<Any> = mutableListOf()
-        if (vbMetaHeader.descriptors_size > 0U) {
-            FileInputStream(image_file).use { fis ->
-                fis.skip(descStartOffset.toLong())
-                descriptors = UnknownDescriptor.parseDescriptors2(fis, vbMetaHeader.descriptors_size.toLong())
-            }
-
-            descriptors.forEach {
-                log.debug(it.toString())
-            }
-        }
-
-        if (vbMetaHeader.public_key_size > 0U) {
-            FileInputStream(image_file).use { fis ->
-                fis.skip(auxBlockOffset.toLong())
-                fis.skip(vbMetaHeader.public_key_offset.toLong())
-                ai.auxBlob!!.pubkey!!.pubkey = ByteArray(vbMetaHeader.public_key_size.toInt())
-                fis.read(ai.auxBlob!!.pubkey!!.pubkey)
-                log.debug("Parsed Pub Key: " + Hex.encodeHexString(ai.auxBlob!!.pubkey!!.pubkey))
-            }
-        }
-
-        if (vbMetaHeader.public_key_metadata_size > 0U) {
-            FileInputStream(image_file).use { fis ->
-                fis.skip(vbMetaOffset.toLong())
-                fis.skip(Header.SIZE.toLong())
-                fis.skip(vbMetaHeader.public_key_metadata_offset.toLong())
-                val ba = ByteArray(vbMetaHeader.public_key_metadata_size.toInt())
-                fis.read(ba)
-                log.debug("Parsed Pub Key Metadata: " + Hex.encodeHexString(ba))
-            }
-        }
-
+        // Auth blob
         if (vbMetaHeader.authentication_data_block_size > 0U) {
             FileInputStream(image_file).use { fis ->
                 fis.skip(vbMetaOffset.toLong())
@@ -341,33 +193,69 @@ class Avb {
             }
         }
 
-        descriptors.forEach {
-            when (it) {
-                is PropertyDescriptor -> {
-                    ai.auxBlob!!.propertyDescriptor.add(it)
-                }
-                is HashDescriptor -> {
-                    ai.auxBlob!!.hashDescriptors.add(it)
-                }
-                is KernelCmdlineDescriptor -> {
-                    ai.auxBlob!!.kernelCmdlineDescriptor.add(it)
-                }
-                is HashTreeDescriptor -> {
-                    ai.auxBlob!!.hashTreeDescriptor.add(it)
-                }
-                is ChainPartitionDescriptor -> {
-                    ai.auxBlob!!.chainPartitionDescriptor.add(it)
-                }
-                is UnknownDescriptor -> {
-                    ai.auxBlob!!.unknownDescriptors.add(it)
-                }
-                else -> {
-                    throw IllegalArgumentException("invalid descriptor: $it")
+        // aux - desc
+        var descriptors: List<Any> = mutableListOf()
+        if (vbMetaHeader.descriptors_size > 0U) {
+            FileInputStream(image_file).use { fis ->
+                fis.skip(descStartOffset.toLong())
+                descriptors = UnknownDescriptor.parseDescriptors2(fis, vbMetaHeader.descriptors_size.toLong())
+            }
+            descriptors.forEach {
+                log.debug(it.toString())
+                when (it) {
+                    is PropertyDescriptor -> {
+                        ai.auxBlob!!.propertyDescriptor.add(it)
+                    }
+                    is HashDescriptor -> {
+                        ai.auxBlob!!.hashDescriptors.add(it)
+                    }
+                    is KernelCmdlineDescriptor -> {
+                        ai.auxBlob!!.kernelCmdlineDescriptor.add(it)
+                    }
+                    is HashTreeDescriptor -> {
+                        ai.auxBlob!!.hashTreeDescriptor.add(it)
+                    }
+                    is ChainPartitionDescriptor -> {
+                        ai.auxBlob!!.chainPartitionDescriptor.add(it)
+                    }
+                    is UnknownDescriptor -> {
+                        ai.auxBlob!!.unknownDescriptors.add(it)
+                    }
+                    else -> {
+                        throw IllegalArgumentException("invalid descriptor: $it")
+                    }
                 }
             }
         }
-        val aiStr = ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(ai)
-        log.debug(aiStr)
+        // aux - pubkey
+        if (vbMetaHeader.public_key_size > 0U) {
+            ai.auxBlob!!.pubkey = AuxBlob.PubKeyInfo()
+            ai.auxBlob!!.pubkey!!.offset = vbMetaHeader.public_key_offset.toLong()
+            ai.auxBlob!!.pubkey!!.size = vbMetaHeader.public_key_size.toLong()
+
+            FileInputStream(image_file).use { fis ->
+                fis.skip(auxBlockOffset.toLong())
+                fis.skip(vbMetaHeader.public_key_offset.toLong())
+                ai.auxBlob!!.pubkey!!.pubkey = ByteArray(vbMetaHeader.public_key_size.toInt())
+                fis.read(ai.auxBlob!!.pubkey!!.pubkey)
+                log.debug("Parsed Pub Key: " + Hex.encodeHexString(ai.auxBlob!!.pubkey!!.pubkey))
+            }
+        }
+        // aux - pkmd
+        if (vbMetaHeader.public_key_metadata_size > 0U) {
+            ai.auxBlob!!.pubkeyMeta = AuxBlob.PubKeyMetadataInfo()
+            ai.auxBlob!!.pubkeyMeta!!.offset = vbMetaHeader.public_key_metadata_offset.toLong()
+            ai.auxBlob!!.pubkeyMeta!!.size = vbMetaHeader.public_key_metadata_size.toLong()
+
+            FileInputStream(image_file).use { fis ->
+                fis.skip(auxBlockOffset.toLong())
+                fis.skip(vbMetaHeader.public_key_metadata_offset.toLong())
+                ai.auxBlob!!.pubkeyMeta!!.pkmd = ByteArray(vbMetaHeader.public_key_metadata_size.toInt())
+                fis.read(ai.auxBlob!!.pubkeyMeta!!.pkmd)
+                log.debug("Parsed Pub Key Metadata: " + Helper.toHexString(ai.auxBlob!!.pubkeyMeta!!.pkmd))
+            }
+        }
+
         ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(jsonFile), ai)
         log.info("vbmeta info written to $jsonFile")
 
@@ -377,22 +265,9 @@ class Avb {
     private fun packVbMeta(info: AVBInfo? = null, image_file: String? = null): ByteArray {
         val ai = info ?: ObjectMapper().readValue(File(getJsonFileName(image_file!!)), AVBInfo::class.java)
         val alg = Algorithms.get(ai.header!!.algorithm_type.toInt())!!
-        val encodedDesc = ai.auxBlob!!.encodeDescriptors()
-        //encoded pubkey
-        val encodedKey = AuxBlob.encodePubKey(alg)
 
         //3 - whole aux blob
-        var auxBlob = byteArrayOf()
-        if (ai.header!!.auxiliary_data_block_size > 0U) {
-            if (encodedKey.contentEquals(ai.auxBlob!!.pubkey!!.pubkey)) {
-                log.info("Using the same key as original vbmeta")
-            } else {
-                log.warn("Using different key from original vbmeta")
-            }
-            auxBlob = Blob.getAuxDataBlob(encodedDesc, encodedKey, byteArrayOf())
-        } else {
-            log.info("No aux blob")
-        }
+        val auxBlob = ai.auxBlob?.encode(alg) ?: byteArrayOf()
 
         //1 - whole header blob
         val headerBlob = ai.header!!.apply {
@@ -401,7 +276,7 @@ class Avb {
                     (alg.hash_num_bytes + alg.signature_num_bytes).toLong(), 64).toULong()
 
             descriptors_offset = 0U
-            descriptors_size = encodedDesc.size.toULong()
+            descriptors_size = ai.auxBlob?.descriptorSize?.toULong() ?: 0U
 
             hash_offset = 0U
             hash_size = alg.hash_num_bytes.toULong()
@@ -410,17 +285,17 @@ class Avb {
             signature_size = alg.signature_num_bytes.toULong()
 
             public_key_offset = descriptors_size
-            public_key_size = encodedKey.size.toULong()
+            public_key_size = AuxBlob.encodePubKey(alg).size.toULong()
 
-            //TODO: support pubkey metadata
-            public_key_metadata_size = 0U
+            public_key_metadata_size = ai.auxBlob!!.pubkeyMeta?.pkmd?.size?.toULong() ?: 0U
             public_key_metadata_offset = public_key_offset + public_key_size
+            log.info("pkmd size: $public_key_metadata_size, pkmd offset : $public_key_metadata_offset")
         }.encode()
 
         //2 - auth blob
         var authBlob = byteArrayOf()
         if (ai.authBlob != null) {
-            authBlob = Blob.getAuthBlob(headerBlob, auxBlob, alg.name)
+            authBlob = AuthBlob.createBlob(headerBlob, auxBlob, alg.name)
         } else {
             log.info("No auth blob")
         }

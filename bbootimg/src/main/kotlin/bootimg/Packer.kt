@@ -157,6 +157,7 @@ class Packer {
         val googleCmd = info2.toCommandLine().apply {
             addArgument(cfg.info.output + ".google")
         }
+        log.warn(googleCmd.toString())
         DefaultExecutor().execute(googleCmd)
 
         val ourHash = hashFileAndSize(cfg.info.output + ".clear")

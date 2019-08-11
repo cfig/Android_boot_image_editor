@@ -1,5 +1,6 @@
 package init
 
+import cfig.bootloader_message.BootloaderMsg
 import cfig.init.Reboot
 import org.junit.Test
 import java.util.*
@@ -23,17 +24,40 @@ class RebootTest {
     }
 
     @Test
-    fun fastbootd() {
+    fun bootloader() {
         Reboot.handlePowerctlMessage("reboot,bootloader")
+    }
+
+    @Test
+    fun fastboot2bootloader() {
         val props = Properties()
         Reboot.handlePowerctlMessage("reboot,fastboot", props)
+    }
+
+    @Test
+    fun fastbootd() {
+        val props = Properties()
         props.put(Reboot.dynamicPartitionKey, "true")
         Reboot.handlePowerctlMessage("reboot,fastboot", props)
+    }
+
+    @Test
+    fun fastbootd2() {
+        val msg = BootloaderMsg()
+        msg.updateBootloaderMessage("boot-fastboot", "recovery", null)
+        msg.writeBootloaderMessage()
     }
 
     @Test
     fun sideload() {
         Reboot.handlePowerctlMessage("reboot,sideload-auto-reboot")
         Reboot.handlePowerctlMessage("reboot,sideload")
+    }
+
+    @Test
+    fun rescue() {
+        val msg = BootloaderMsg()
+        msg.updateBootloaderMessage("boot-rescue", "recovery", null)
+        msg.writeBootloaderMessage()
     }
 }

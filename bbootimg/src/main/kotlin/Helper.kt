@@ -35,6 +35,19 @@ class Helper {
             return baos.toByteArray()
         }
 
+        fun ByteArray.paddingWith(pageSize: UInt, paddingHead: Boolean = false): ByteArray {
+            val paddingNeeded = round_to_multiple(this.size.toUInt(), pageSize) - this.size.toUInt()
+            return if (paddingNeeded > 0u) {
+                if (paddingHead) {
+                    join(Struct3("${paddingNeeded}x").pack(null), this)
+                } else {
+                    join(this, Struct3("${paddingNeeded}x").pack(null))
+                }
+            } else {
+                this
+            }
+        }
+
         fun join(vararg source: ByteArray): ByteArray {
             val baos = ByteArrayOutputStream()
             for (src in source) {
@@ -275,7 +288,7 @@ class Helper {
                 "sha256" -> "sha-256"
                 "sha384" -> "sha-384"
                 "sha512" -> "sha-512"
-                else -> throw IllegalArgumentException("unknown algorithm: $alg")
+                else -> throw IllegalArgumentException("unknown algorithm: [$alg]")
             }
         }
 

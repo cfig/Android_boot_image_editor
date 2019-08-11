@@ -79,9 +79,9 @@ class BootImgInfo(iS: InputStream?) : BootImgHeader(iS) {
         if (this.secondBootloaderLength > 0U) {
             ret.addArgument(" --second ")
             ret.addArgument(param.second)
+            ret.addArgument(" --second_offset ")
+            ret.addArgument("0x" + Integer.toHexString(this.secondBootloaderOffset.toInt()))
         }
-        ret.addArgument(" --second_offset ")
-        ret.addArgument("0x" + Integer.toHexString(this.secondBootloaderOffset.toInt()))
         if (!board.isBlank()) {
             ret.addArgument(" --board ")
             ret.addArgument(board)
@@ -118,7 +118,7 @@ class BootImgInfo(iS: InputStream?) : BootImgHeader(iS) {
         ret.addArgument(" --output ")
         //ret.addArgument("boot.img" + ".google")
 
-        log.info("To Commandline: " + ret.toString())
+        log.debug("To Commandline: " + ret.toString())
 
         return ret
     }

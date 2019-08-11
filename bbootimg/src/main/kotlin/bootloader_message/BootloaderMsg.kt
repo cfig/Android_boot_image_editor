@@ -99,4 +99,21 @@ data class BootloaderMsg(
             }
         }
     }
+
+    fun updateBootloaderMessage(command: String, recovery: String, options: Array<String>?) {
+        this.command = command
+        this.recovery = "$recovery\n"
+        options?.forEach {
+            this.recovery += if (it.endsWith("\n")) {
+                it
+            } else {
+                it + "\n"
+            }
+        }
+    }
+
+    fun updateBootFastboot() {
+        this.command = "boot-fastboot"
+        this.recovery = ""
+    }
 }

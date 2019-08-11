@@ -1121,7 +1121,7 @@ class AvbDescriptor(object):
     return bytearray(ret)
 
   def verify(self, image_dir, image_ext, expected_chain_partitions_map,
-             image_containing_descriptor):
+             image_containing_descriptor, accept_zeroed_hashtree):
     """Verifies contents of the descriptor - used in verify_image sub-command.
 
     Arguments:
@@ -1130,6 +1130,7 @@ class AvbDescriptor(object):
       expected_chain_partitions_map: A map from partition name to the
         tuple (rollback_index_location, key_blob).
       image_containing_descriptor: The image the descriptor is in.
+      accept_zeroed_hashtree: If True, don't fail if hashtree or FEC data is zeroed out.
 
     Returns:
       True if the descriptor verifies, False otherwise.
@@ -1207,7 +1208,7 @@ class AvbPropertyDescriptor(AvbDescriptor):
     return bytearray(ret)
 
   def verify(self, image_dir, image_ext, expected_chain_partitions_map,
-             image_containing_descriptor):
+             image_containing_descriptor, accept_zeroed_hashtree):
     """Verifies contents of the descriptor - used in verify_image sub-command.
 
     Arguments:
@@ -1216,6 +1217,7 @@ class AvbPropertyDescriptor(AvbDescriptor):
       expected_chain_partitions_map: A map from partition name to the
         tuple (rollback_index_location, key_blob).
       image_containing_descriptor: The image the descriptor is in.
+      accept_zeroed_hashtree: If True, don't fail if hashtree or FEC data is zeroed out.
 
     Returns:
       True if the descriptor verifies, False otherwise.
@@ -1369,7 +1371,7 @@ class AvbHashtreeDescriptor(AvbDescriptor):
     return bytearray(ret)
 
   def verify(self, image_dir, image_ext, expected_chain_partitions_map,
-             image_containing_descriptor):
+             image_containing_descriptor, accept_zeroed_hashtree):
     """Verifies contents of the descriptor - used in verify_image sub-command.
 
     Arguments:
@@ -1378,6 +1380,7 @@ class AvbHashtreeDescriptor(AvbDescriptor):
       expected_chain_partitions_map: A map from partition name to the
         tuple (rollback_index_location, key_blob).
       image_containing_descriptor: The image the descriptor is in.
+      accept_zeroed_hashtree: If True, don't fail if hashtree or FEC data is zeroed out.
 
     Returns:
       True if the descriptor verifies, False otherwise.
@@ -1406,17 +1409,22 @@ class AvbHashtreeDescriptor(AvbDescriptor):
     # ... also check that the on-disk hashtree matches
     image.seek(self.tree_offset)
     hash_tree_ondisk = image.read(self.tree_size)
-    if hash_tree != hash_tree_ondisk:
-      sys.stderr.write('hashtree of {} contains invalid data\n'.
+    is_zeroed = (hash_tree_ondisk[0:8] == 'ZeRoHaSH')
+    if is_zeroed and accept_zeroed_hashtree:
+      print ('{}: skipping verification since hashtree is zeroed and --accept_zeroed_hashtree was given'
+             .format(self.partition_name))
+    else:
+      if hash_tree != hash_tree_ondisk:
+        sys.stderr.write('hashtree of {} contains invalid data\n'.
                        format(image_filename))
-      return False
+        return False
+      print ('{}: Successfully verified {} hashtree of {} for image of {} bytes'
+             .format(self.partition_name, self.hash_algorithm, image.filename,
+                     self.image_size))
     # TODO: we could also verify that the FEC stored in the image is
     # correct but this a) currently requires the 'fec' binary; and b)
     # takes a long time; and c) is not strictly needed for
     # verification purposes as we've already verified the root hash.
-    print ('{}: Successfully verified {} hashtree of {} for image of {} bytes'
-           .format(self.partition_name, self.hash_algorithm, image.filename,
-                   self.image_size))
     return True
 
 
@@ -1526,7 +1534,7 @@ class AvbHashDescriptor(AvbDescriptor):
     return bytearray(ret)
 
   def verify(self, image_dir, image_ext, expected_chain_partitions_map,
-             image_containing_descriptor):
+             image_containing_descriptor, accept_zeroed_hashtree):
     """Verifies contents of the descriptor - used in verify_image sub-command.
 
     Arguments:
@@ -1535,6 +1543,7 @@ class AvbHashDescriptor(AvbDescriptor):
       expected_chain_partitions_map: A map from partition name to the
         tuple (rollback_index_location, key_blob).
       image_containing_descriptor: The image the descriptor is in.
+      accept_zeroed_hashtree: If True, don't fail if hashtree or FEC data is zeroed out.
 
     Returns:
       True if the descriptor verifies, False otherwise.
@@ -1636,7 +1645,7 @@ class AvbKernelCmdlineDescriptor(AvbDescriptor):
     return bytearray(ret)
 
   def verify(self, image_dir, image_ext, expected_chain_partitions_map,
-             image_containing_descriptor):
+             image_containing_descriptor, accept_zeroed_hashtree):
     """Verifies contents of the descriptor - used in verify_image sub-command.
 
     Arguments:
@@ -1645,6 +1654,7 @@ class AvbKernelCmdlineDescriptor(AvbDescriptor):
       expected_chain_partitions_map: A map from partition name to the
         tuple (rollback_index_location, key_blob).
       image_containing_descriptor: The image the descriptor is in.
+      accept_zeroed_hashtree: If True, don't fail if hashtree or FEC data is zeroed out.
 
     Returns:
       True if the descriptor verifies, False otherwise.
@@ -1739,7 +1749,7 @@ class AvbChainPartitionDescriptor(AvbDescriptor):
     return bytearray(ret)
 
   def verify(self, image_dir, image_ext, expected_chain_partitions_map,
-             image_containing_descriptor):
+             image_containing_descriptor, accept_zeroed_hashtree):
     """Verifies contents of the descriptor - used in verify_image sub-command.
 
     Arguments:
@@ -1748,6 +1758,7 @@ class AvbChainPartitionDescriptor(AvbDescriptor):
       expected_chain_partitions_map: A map from partition name to the
         tuple (rollback_index_location, key_blob).
       image_containing_descriptor: The image the descriptor is in.
+      accept_zeroed_hashtree: If True, don't fail if hashtree or FEC data is zeroed out.
 
     Returns:
       True if the descriptor verifies, False otherwise.
@@ -2086,6 +2097,63 @@ class Avb(object):
     # And cut...
     image.truncate(new_image_size)
 
+  def zero_hashtree(self, image_filename):
+    """Implements the 'zero_hashtree' command.
+
+    Arguments:
+      image_filename: File to zero hashtree and FEC data from.
+
+    Raises:
+      AvbError: If there's no footer in the image.
+    """
+
+    image = ImageHandler(image_filename)
+
+    (footer, _, descriptors, _) = self._parse_image(image)
+
+    if not footer:
+      raise AvbError('Given image does not have a footer.')
+
+    # Search for a hashtree descriptor to figure out the location and
+    # size of the hashtree and FEC.
+    ht_desc = None
+    for desc in descriptors:
+      if isinstance(desc, AvbHashtreeDescriptor):
+        ht_desc = desc
+        break
+
+    if not ht_desc:
+      raise AvbError('No hashtree descriptor was found.')
+
+    zero_ht_start_offset = ht_desc.tree_offset
+    zero_ht_num_bytes = ht_desc.tree_size
+    zero_fec_start_offset = None
+    zero_fec_num_bytes = 0
+    if ht_desc.fec_offset > 0:
+      if ht_desc.fec_offset != ht_desc.tree_offset + ht_desc.tree_size:
+        raise AvbError('Hash-tree and FEC data must be adjacent.')
+      zero_fec_start_offset = ht_desc.fec_offset
+      zero_fec_num_bytes = ht_desc.fec_size
+    zero_end_offset = zero_ht_start_offset + zero_ht_num_bytes + zero_fec_num_bytes
+    image.seek(zero_end_offset)
+    data = image.read(image.image_size - zero_end_offset)
+
+    # Write zeroes all over hashtree and FEC, except for the first eight bytes
+    # where a magic marker - ZeroHaSH - is placed. Place these markers in the
+    # beginning of both hashtree and FEC. (That way, in the future we can add
+    # options to 'avbtool zero_hashtree' so as to zero out only either/or.)
+    #
+    # Applications can use these markers to detect that the hashtree and/or
+    # FEC needs to be recomputed.
+    image.truncate(zero_ht_start_offset)
+    data_zeroed_firstblock = 'ZeRoHaSH' + '\0'*(image.block_size - 8)
+    image.append_raw(data_zeroed_firstblock)
+    image.append_fill('\0\0\0\0', zero_ht_num_bytes - image.block_size)
+    if zero_fec_start_offset:
+      image.append_raw(data_zeroed_firstblock)
+      image.append_fill('\0\0\0\0', zero_fec_num_bytes - image.block_size)
+    image.append_raw(data)
+
   def resize_image(self, image_filename, partition_size):
     """Implements the 'resize_image' command.
 
@@ -2220,7 +2288,8 @@ class Avb(object):
     if num_printed == 0:
       o.write('    (none)\n')
 
-  def verify_image(self, image_filename, key_path, expected_chain_partitions, follow_chain_partitions):
+  def verify_image(self, image_filename, key_path, expected_chain_partitions, follow_chain_partitions,
+                   accept_zeroed_hashtree):
     """Implements the 'verify_image' command.
 
     Arguments:
@@ -2229,6 +2298,7 @@ class Avb(object):
       expected_chain_partitions: List of chain partitions to check or None.
       follow_chain_partitions: If True, will follows chain partitions even when not
                                specified with the --expected_chain_partition option
+      accept_zeroed_hashtree: If True, don't fail if hashtree or FEC data is zeroed out.
     """
     expected_chain_partitions_map = {}
     if expected_chain_partitions:
@@ -2244,8 +2314,7 @@ class Avb(object):
         expected_chain_partitions_map[partition_name] = (rollback_index_location, pk_blob)
 
     image_dir = os.path.dirname(image_filename)
-    #image_ext = os.path.splitext(image_filename)[1]
-    image_ext = image_filename[image_filename.index('.'):]
+    image_ext = os.path.splitext(image_filename)[1]
 
     key_blob = None
     if key_path:
@@ -2295,13 +2364,14 @@ class Avb(object):
               .format(desc.partition_name, desc.rollback_index_location,
                       hashlib.sha1(desc.public_key).hexdigest()))
       else:
-        if not desc.verify(image_dir, image_ext, expected_chain_partitions_map, image):
+        if not desc.verify(image_dir, image_ext, expected_chain_partitions_map, image,
+                           accept_zeroed_hashtree):
           raise AvbError('Error verifying descriptor.')
       # Honor --follow_chain_partitions - add '--' to make the output more readable.
       if isinstance(desc, AvbChainPartitionDescriptor) and follow_chain_partitions:
         print '--'
         chained_image_filename = os.path.join(image_dir, desc.partition_name + image_ext)
-        self.verify_image(chained_image_filename, key_path, None, False)
+        self.verify_image(chained_image_filename, key_path, None, False, accept_zeroed_hashtree)
 
 
   def calculate_vbmeta_digest(self, image_filename, hash_algorithm, output):
@@ -4027,6 +4097,14 @@ class AvbTool(object):
                             action='store_true')
     sub_parser.set_defaults(func=self.erase_footer)
 
+    sub_parser = subparsers.add_parser('zero_hashtree',
+                                       help='Zero out hashtree and FEC data.')
+    sub_parser.add_argument('--image',
+                            help='Image with a footer',
+                            type=argparse.FileType('rwb+'),
+                            required=True)
+    sub_parser.set_defaults(func=self.zero_hashtree)
+
     sub_parser = subparsers.add_parser('extract_vbmeta_image',
                                        help='Extracts vbmeta from an image with a footer.')
     sub_parser.add_argument('--image',
@@ -4086,6 +4164,9 @@ class AvbTool(object):
     sub_parser.add_argument('--follow_chain_partitions',
                             help=('Follows chain partitions even when not '
                                   'specified with the --expected_chain_partition option'),
+                            action='store_true')
+    sub_parser.add_argument('--accept_zeroed_hashtree',
+                            help=('Accept images where the hashtree or FEC data is zeroed out'),
                             action='store_true')
     sub_parser.set_defaults(func=self.verify_image)
 
@@ -4348,6 +4429,10 @@ class AvbTool(object):
     """Implements the 'erase_footer' sub-command."""
     self.avb.erase_footer(args.image.name, args.keep_hashtree)
 
+  def zero_hashtree(self, args):
+    """Implements the 'zero_hashtree' sub-command."""
+    self.avb.zero_hashtree(args.image.name)
+
   def extract_vbmeta_image(self, args):
     """Implements the 'extract_vbmeta_image' sub-command."""
     self.avb.extract_vbmeta_image(args.output, args.image.name,
@@ -4369,7 +4454,8 @@ class AvbTool(object):
     """Implements the 'verify_image' sub-command."""
     self.avb.verify_image(args.image.name, args.key,
                           args.expected_chain_partition,
-                          args.follow_chain_partitions)
+                          args.follow_chain_partitions,
+                          args.accept_zeroed_hashtree)
 
   def calculate_vbmeta_digest(self, args):
     """Implements the 'calculate_vbmeta_digest' sub-command."""

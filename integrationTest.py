@@ -52,7 +52,7 @@ def verifySingleJson(inResourceDir, inImageDir, jsonFile):
     subprocess.check_call("gradle pack", shell = True)
     for k, v in verifyItems["hash"].items():
         log.info("%s : %s" % (k, v))
-        unittest.TestCase().assertEqual(hashFile(k), v)
+        unittest.TestCase().assertEqual(v, hashFile(k))
 
 def verifySingleDir(inResourceDir, inImageDir):
     resDir = inResourceDir

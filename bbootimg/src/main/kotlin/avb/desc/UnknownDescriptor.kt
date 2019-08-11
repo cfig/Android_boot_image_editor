@@ -31,7 +31,7 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0U, 0U
         return "UnknownDescriptor(tag=$tag, SIZE=${data.size}, data=${Hex.encodeHexString(data)}"
     }
 
-    fun analyze(): Any {
+    fun analyze(): Descriptor {
         return when (this.tag.toUInt()) {
             0U -> {
                 PropertyDescriptor(ByteArrayInputStream(this.encode()), this.sequence)
@@ -82,9 +82,9 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0U, 0U
             return ret
         }
 
-        fun parseDescriptors2(stream: InputStream, totalSize: Long): List<Any> {
+        fun parseDescriptors2(stream: InputStream, totalSize: Long): List<Descriptor> {
             log.info("Parse descriptors stream, SIZE = $totalSize")
-            val ret: MutableList<Any> = mutableListOf()
+            val ret: MutableList<Descriptor> = mutableListOf()
             var currentSize = 0L
             var seq = 0
             while (true) {

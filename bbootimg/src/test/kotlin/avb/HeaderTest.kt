@@ -1,5 +1,6 @@
 package avb
 
+import avb.blob.Header
 import org.apache.commons.codec.binary.Hex
 import org.junit.Test
 import java.io.ByteArrayInputStream

@@ -32,6 +32,7 @@ if (parseGradleVersion(gradle.gradleVersion) < 5) {
 }
 
 def workdir = 'build/unzip_boot'
+def GROUP_ANDROID = "Android"
 project.ext.rootWorkDir = new File(workdir).getAbsolutePath()
 String activeImg = "boot.img"
 String activePath = "/boot"
@@ -49,7 +50,7 @@ if (new File("boot.img").exists()) {
     activePath = "/vbmeta"
 }
 project.ext.outClearIMg = new File(String.format("%s.clear", activeImg)).getAbsolutePath()
-project.ext.mkbootimgBin = new File("src/mkbootimg/mkbootimg").getAbsolutePath()
+project.ext.mkbootimgBin = new File("tools/mkbootimg").getAbsolutePath()
 project.ext.mkbootfsBin = new File("mkbootfs/build/exe/mkbootfs/mkbootfs").getAbsolutePath()
 project.ext.avbtool = new File("avb/avbtool").getAbsolutePath()
 project.ext.bootSigner = new File("boot_signer/build/libs/boot_signer.jar").getAbsolutePath()
@@ -58,49 +59,14 @@ logger.warn("Active image target: " + activeImg)
 // ----------------------------------------------------------------------------
 //                       tasks
 // ----------------------------------------------------------------------------
-task unpack(type: JavaExec, dependsOn: ["bbootimg:jar"]) {
-    classpath = sourceSets.main.runtimeClasspath
-    main = "cfig.RKt"
-    classpath = files("bbootimg/build/libs/bbootimg.jar")
-    maxHeapSize '512m'
-    args "unpack", activeImg, rootProject.mkbootimgBin, rootProject.avbtool, rootProject.bootSigner, rootProject.mkbootfsBin
-}
-
-task packClear(type: JavaExec, dependsOn: ["bbootimg:jar", "mkbootfs:mkbootfsExecutable"]) {
-    classpath = sourceSets.main.runtimeClasspath
-    main = "cfig.RKt"
-    classpath = files("bbootimg/build/libs/bbootimg.jar")
-    maxHeapSize '512m'
-    args "pack", activeImg, rootProject.mkbootimgBin, rootProject.avbtool, rootProject.bootSigner, rootProject.mkbootfsBin
-}
-
-task sign(type: JavaExec, dependsOn: ["bbootimg:jar", packClear, "boot_signer:jar"]) {
-    classpath = sourceSets.main.runtimeClasspath
-    main = "cfig.RKt"
-    classpath = files("bbootimg/build/libs/bbootimg.jar")
-    maxHeapSize '4096m'
-    args "sign", activeImg, rootProject.mkbootimgBin, rootProject.avbtool, rootProject.bootSigner, rootProject.mkbootfsBin
-}
-
-task signTest(type: JavaExec, dependsOn: ["boot_signer:jar"]) {
-    main = 'com.android.verity.BootSignature'
-    classpath = files("boot_signer/build/libs/boot_signer.jar")
-    maxHeapSize '512m'
-    args activePath, activeImg + '.clear', 'security/verity.pk8', 'security/verity.x509.pem', activeImg + '.signed', rootProject.mkbootfsBin
-}
-
-task pack(dependsOn: sign) {
-    doLast {
-        println("Pack task finished: " + activeImg + ".signed")
-    }
-}
-
 task _setup(type: Copy) {
+    group GROUP_ANDROID
     from 'src/test/resources/boot.img'
     into '.'
 }
 
 task pull() {
+    group GROUP_ANDROID
     doFirst {
         println("Pulling ...")
     }
@@ -179,6 +145,7 @@ void updateBootImage(String activeImg) {
 }
 
 task flash {
+    group GROUP_ANDROID
     doLast {
         updateBootImage(activeImg)
         updateBootImage("vbmeta.img")
@@ -190,19 +157,22 @@ void rebootRecovery() {
 }
 
 task rr {
+    group GROUP_ANDROID
     doLast {
         rebootRecovery()
     }
 }
 
-task u(type: JavaExec, dependsOn: ["bbootimg:jar"]) {
+task unpack(type: JavaExec, dependsOn: ["bbootimg:jar"]) {
+    group GROUP_ANDROID
     main = "cfig.packable.PackableLauncherKt"
     classpath = files("bbootimg/build/libs/bbootimg.jar")
     maxHeapSize '512m'
     args "unpack"
 }
 
-task p(type: JavaExec, dependsOn: ["bbootimg:jar", "mkbootfs:mkbootfsExecutable"]) {
+task pack(type: JavaExec, dependsOn: ["bbootimg:jar", "mkbootfs:mkbootfsExecutable"]) {
+    group GROUP_ANDROID
     main = "cfig.packable.PackableLauncherKt"
     classpath = files("bbootimg/build/libs/bbootimg.jar")
     maxHeapSize '512m'

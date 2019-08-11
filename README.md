@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/cfig/Android_boot_image_editor.svg?branch=master)](https://travis-ci.org/cfig/Android_boot_image_editor)
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-This tool focuses on editing Android boot.img(also recovery.img, recovery-two-step.img and vbmeta.img).
+This tool focuses on editing Android boot.img(also recovery.img, and vbmeta.img).
 
 ## 1. Prerequisite
 #### 1.1 Host OS requirement:
@@ -12,13 +12,13 @@ Also need python 2.x and jdk 8.
 
 #### 1.2 Target Android requirement:
 
-(1) Target boot.img MUST follows AOSP verified boot flow, either [Boot image signature](https://source.android.com/security/verifiedboot/verified-boot#signature_format) in VBoot 1.0 or [AVB HASH footer](https://android.googlesource.com/platform/external/avb/+/master/README.md#The-VBMeta-struct) in VBoot 2.0.
+(1) Target boot.img MUST follows AOSP verified boot flow, either [Boot image signature](https://source.android.com/security/verifiedboot/verified-boot#signature_format) in VBoot 1.0 or [AVB HASH footer](https://android.googlesource.com/platform/external/avb/+/master/README.md#The-VBMeta-struct) (a.k.a. AVB) in VBoot 2.0.
 
 Supported images:
  - boot.img
- - recovery.img
- - recovery-two-step.img
- - vbmeta.img
+ - recovery.img (also recovery-two-step.img)
+ - vbmeta.img (also vbmeta\_system.img, vbmeta\_vendor.img etc.)
+ - dtbo.img (only 'unpack' is supported)
 
 (2) These utilities are known to work for Nexus/Pixel boot.img for the following Android releases:
 

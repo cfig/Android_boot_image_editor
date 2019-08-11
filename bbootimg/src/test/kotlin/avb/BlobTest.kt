@@ -1,6 +1,7 @@
 package avb
 
 import avb.alg.Algorithms
+import avb.blob.AuxBlob
 import org.apache.commons.codec.binary.Hex
 import org.junit.Assert.assertEquals
 import org.junit.Test

@@ -2,12 +2,12 @@ package avb.desc
 
 import cfig.Helper
 import cfig.io.Struct3
-import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.util.*
 
 @ExperimentalUnsignedTypes
 class HashTreeDescriptor(
+        var flags: UInt = 0U,
         var dm_verity_version: UInt = 0u,
         var image_size: ULong = 0UL,
         var tree_offset: ULong = 0UL,
@@ -20,8 +20,18 @@ class HashTreeDescriptor(
         var hash_algorithm: String = "",
         var partition_name: String = "",
         var salt: ByteArray = byteArrayOf(),
-        var root_digest: ByteArray = byteArrayOf(),
-        var flags: UInt = 0U) : Descriptor(TAG, 0U, 0) {
+        var root_digest: ByteArray = byteArrayOf()) : Descriptor(TAG, 0U, 0) {
+    var flagsInterpretation: String = ""
+        get() {
+            var ret = ""
+            if (this.flags and AVB_HASHTREE_DESCRIPTOR_FLAGS_DO_NOT_USE_AB == 1U) {
+                ret += "1:no-A/B system"
+            } else {
+                ret += "0:A/B system"
+            }
+            return ret
+        }
+
     constructor(data: InputStream, seq: Int = 0) : this() {
         this.sequence = seq
         val info = Struct3(FORMAT_STRING).unpack(data)
@@ -87,5 +97,6 @@ class HashTreeDescriptor(
         private const val RESERVED = 60L
         private const val SIZE = 120 + RESERVED
         private const val FORMAT_STRING = "!2QL3Q3L2Q32s4L${RESERVED}x"
+        private const val AVB_HASHTREE_DESCRIPTOR_FLAGS_DO_NOT_USE_AB = 1U
     }
 }

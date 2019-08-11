@@ -2,22 +2,36 @@ package avb.desc
 
 import cfig.Helper
 import cfig.io.Struct3
+import org.apache.commons.codec.binary.Hex
 import org.junit.Assert
+import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
 import java.security.MessageDigest
 
 @ExperimentalUnsignedTypes
-class HashDescriptor(var image_size: ULong = 0U,
+class HashDescriptor(var flags: UInt = 0U,
+                     var partition_name: String = "",
                      var hash_algorithm: String = "",
-                     var hash_algorithm_str: String = "",
+                     var image_size: ULong = 0U,
+                     var salt: ByteArray = byteArrayOf(),
+                     var digest: ByteArray = byteArrayOf(),
                      var partition_name_len: UInt = 0U,
                      var salt_len: UInt = 0U,
-                     var digest_len: UInt = 0U,
-                     var flags: UInt = 0U,
-                     var partition_name: String = "",
-                     var salt: ByteArray = byteArrayOf(),
-                     var digest: ByteArray = byteArrayOf()) : Descriptor(TAG, 0U, 0) {
+                     var digest_len: UInt = 0U)
+    : Descriptor(TAG, 0U, 0) {
+    var flagsInterpretation: String = ""
+        get() {
+            var ret = ""
+            if (this.flags and AVB_HASH_DESCRIPTOR_FLAGS_DO_NOT_USE_AB == 1U) {
+                ret += "1:no-A/B system"
+            } else {
+                ret += "0:A/B system"
+            }
+            return ret
+        }
+
     constructor(data: InputStream, seq: Int = 0) : this() {
         val info = Struct3(FORMAT_STRING).unpack(data)
         this.tag = info[0] as ULong
@@ -39,7 +53,6 @@ class HashDescriptor(var image_size: ULong = 0U,
         this.partition_name = payload[0] as String
         this.salt = payload[1] as ByteArray
         this.digest = payload[2] as ByteArray
-        this.hash_algorithm_str = this.hash_algorithm
     }
 
     override fun encode(): ByteArray {
@@ -67,11 +80,51 @@ class HashDescriptor(var image_size: ULong = 0U,
         val digest = hasher.digest()
     }
 
+    fun update(image_file: String, use_persistent_digest: Boolean = false): HashDescriptor {
+        //salt
+        if (this.salt.isEmpty()) {
+            //If salt is not explicitly specified, choose a hash that's the same size as the hash size
+            val expectedDigestSize = MessageDigest.getInstance(Helper.pyAlg2java(hash_algorithm)).digest().size
+            FileInputStream(File("/dev/urandom")).use {
+                val randomSalt = ByteArray(expectedDigestSize)
+                it.read(randomSalt)
+                log.warn("salt is empty, using random salt[$expectedDigestSize]: " + Helper.toHexString(randomSalt))
+                this.salt = randomSalt
+            }
+        } else {
+            log.info("preset salt[${this.salt.size}] is valid: ${Hex.encodeHexString(this.salt)}")
+        }
+
+        //size
+        this.image_size = File(image_file).length().toULong()
+
+        //flags
+        if (this.flags and 1U == 1U) {
+            log.info("flag: use_ab = 0")
+        } else {
+            log.info("flag: use_ab = 1")
+        }
+
+        if (!use_persistent_digest) {
+            //hash digest
+            val newDigest = MessageDigest.getInstance(Helper.pyAlg2java(hash_algorithm)).apply {
+                update(salt)
+                update(File(image_file).readBytes())
+            }.digest()
+            log.info("Digest(salt + file): " + Helper.toHexString(newDigest))
+            this.digest = newDigest
+        }
+
+        return this
+    }
+
     companion object {
         const val TAG: ULong = 2U
         private const val RESERVED = 60
         private const val SIZE = 72 + RESERVED
         private const val FORMAT_STRING = "!3Q32s4L${RESERVED}x"
+        private val log = LoggerFactory.getLogger(HashDescriptor::class.java)
+        private const val AVB_HASH_DESCRIPTOR_FLAGS_DO_NOT_USE_AB = 1U
     }
 
     override fun toString(): String {

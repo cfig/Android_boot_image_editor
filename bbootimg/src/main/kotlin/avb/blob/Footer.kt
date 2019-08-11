@@ -1,4 +1,4 @@
-package avb
+package avb.blob
 
 import cfig.io.Struct3
 import org.junit.Assert
@@ -32,19 +32,6 @@ data class Footer constructor(
         var vbMetaOffset: ULong = 0U,
         var vbMetaSize: ULong = 0U
 ) {
-    companion object {
-        const val MAGIC = "AVBf"
-        const val SIZE = 64
-        private const val RESERVED = 28
-        const val FOOTER_VERSION_MAJOR = 1U
-        const val FOOTER_VERSION_MINOR = 0U
-        private const val FORMAT_STRING = "!4s2L3Q${RESERVED}x"
-
-        init {
-            Assert.assertEquals(SIZE, Struct3(FORMAT_STRING).calcSize())
-        }
-    }
-
     @Throws(IllegalArgumentException::class)
     constructor(iS: InputStream) : this() {
         val info = Struct3(FORMAT_STRING).unpack(iS)
@@ -59,10 +46,13 @@ data class Footer constructor(
         vbMetaSize = info[5] as ULong
     }
 
+    constructor(originalImageSize: ULong, vbMetaOffset: ULong, vbMetaSize: ULong)
+            : this(FOOTER_VERSION_MAJOR, FOOTER_VERSION_MINOR, originalImageSize, vbMetaOffset, vbMetaSize)
+
     @Throws(IllegalArgumentException::class)
     constructor(image_file: String) : this() {
         FileInputStream(image_file).use { fis ->
-            fis.skip(File(image_file).length() - Footer.SIZE)
+            fis.skip(File(image_file).length() - SIZE)
             val footer = Footer(fis)
             this.versionMajor = footer.versionMajor
             this.versionMinor = footer.versionMinor
@@ -73,12 +63,25 @@ data class Footer constructor(
     }
 
     fun encode(): ByteArray {
-        return Struct3(FORMAT_STRING).pack(MAGIC,
-                this.versionMajor,
-                this.versionMinor,
-                this.originalImageSize,
-                this.vbMetaOffset,
-                this.vbMetaSize,
-                null)
+        return Struct3(FORMAT_STRING).pack(MAGIC, //4s
+                this.versionMajor,                //L
+                this.versionMinor,                //L
+                this.originalImageSize,           //Q
+                this.vbMetaOffset,                //Q
+                this.vbMetaSize,                  //Q
+                null)                             //${RESERVED}x
+    }
+
+    companion object {
+        private const val MAGIC = "AVBf"
+        const val SIZE = 64
+        private const val RESERVED = 28
+        private const val FOOTER_VERSION_MAJOR = 1U
+        private const val FOOTER_VERSION_MINOR = 0U
+        private const val FORMAT_STRING = "!4s2L3Q${RESERVED}x"
+
+        init {
+            Assert.assertEquals(SIZE, Struct3(FORMAT_STRING).calcSize())
+        }
     }
 }

@@ -1,4 +1,4 @@
-package avb
+package avb.blob
 
 import avb.alg.Algorithms
 import cfig.Helper
@@ -6,20 +6,14 @@ import cfig.io.Struct3
 import org.slf4j.LoggerFactory
 import java.security.MessageDigest
 
-class Blob {
-    @ExperimentalUnsignedTypes
+@ExperimentalUnsignedTypes
+data class AuthBlob(
+        var offset: ULong = 0U,
+        var size: ULong = 0U,
+        var hash: String? = null,
+        var signature: String? = null) {
     companion object {
-        private val log = LoggerFactory.getLogger(Blob::class.java)
-
-        //encoded_descriptors + encoded_key + pkmd_blob + (padding)
-        fun getAuxDataBlob(encodedDesc: ByteArray, encodedKey: ByteArray, pkmdBlob: ByteArray): ByteArray {
-            val auxSize = Helper.round_to_multiple(
-                    (encodedDesc.size + encodedKey.size + pkmdBlob.size).toLong(),
-                    64)
-            return Struct3("${auxSize}b").pack(Helper.join(encodedDesc, encodedKey, pkmdBlob))
-        }
-
-        fun getAuthBlob(header_data_blob: ByteArray,
+        fun createBlob(header_data_blob: ByteArray,
                         aux_data_blob: ByteArray,
                         algorithm_name: String): ByteArray {
             val alg = Algorithms.get(algorithm_name)!!
@@ -43,5 +37,7 @@ class Blob {
             val authData = Helper.join(binaryHash, binarySignature)
             return Helper.join(authData, Struct3("${authBlockSize - authData.size}x").pack(0))
         }
+
+        private val log = LoggerFactory.getLogger(AuthBlob::class.java)
     }
 }

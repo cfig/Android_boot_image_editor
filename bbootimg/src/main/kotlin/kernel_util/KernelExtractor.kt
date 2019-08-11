@@ -34,7 +34,7 @@ class KernelExtractor {
                 it.execute(cmd)
                 log.info(cmd.toString())
                 val kernelVersion = File(kernelVersionFile).readLines()
-                log.info("kernel version: " + kernelVersion)
+                log.info("kernel version: $kernelVersion")
                 log.info("kernel config dumped to : $kernelConfigFile")
                 InfoTable.instance.addRow("\\-- version $kernelVersion", kernelVersionFile)
                 InfoTable.instance.addRow("\\-- config", kernelConfigFile)

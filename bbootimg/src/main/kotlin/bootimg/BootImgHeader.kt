@@ -195,12 +195,14 @@ open class BootImgHeader(
         //refresh second bootloader size
         if (0U == this.secondBootloaderLength) {
             param.second = null
+            this.secondBootloaderOffset = 0U
         } else {
             this.secondBootloaderLength = File(param.second!!).length().toUInt()
         }
         //refresh recovery dtbo size
         if (0U == this.recoveryDtboLength) {
             param.dtbo = null
+            this.recoveryDtboOffset = 0U
         } else {
             this.recoveryDtboLength = File(param.dtbo!!).length().toUInt()
         }

@@ -2,6 +2,7 @@ package cfig
 
 import avb.AVBInfo
 import avb.alg.Algorithms
+import cfig.Avb.Companion.getJsonFileName
 import cfig.bootimg.BootImgInfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.exec.CommandLine
@@ -38,16 +39,10 @@ class Signer {
 
                     //our signer
                     File(cfg.info.output + ".clear").copyTo(File(cfg.info.output + ".signed"))
-                    Avb().add_hash_footer(cfg.info.output + ".signed",
+                    Avb().addHashFooter(cfg.info.output + ".signed",
                             info2.imageSize,
-                            use_persistent_digest = false,
-                            do_not_use_ab = false,
-                            salt = Helper.toHexString(bootDesc.salt),
-                            hash_algorithm = bootDesc.hash_algorithm_str,
                             partition_name = bootDesc.partition_name,
-                            rollback_index = ai.header!!.rollback_index.toLong(),
-                            common_algorithm = alg!!.name,
-                            inReleaseString = ai.header!!.release_string)
+                            newAvbInfo = ObjectMapper().readValue(File(getJsonFileName(cfg.info.output)), AVBInfo::class.java))
                     //original signer
                     File(cfg.info.output + ".clear").copyTo(File(cfg.info.output + ".signed2"))
                     var cmdlineStr = "$avbtool add_hash_footer " +
@@ -55,8 +50,8 @@ class Signer {
                             "--partition_size ${info2.imageSize} " +
                             "--salt ${Helper.toHexString(bootDesc.salt)} " +
                             "--partition_name ${bootDesc.partition_name} " +
-                            "--hash_algorithm ${bootDesc.hash_algorithm_str} " +
-                            "--algorithm ${alg.name} "
+                            "--hash_algorithm ${bootDesc.hash_algorithm} " +
+                            "--algorithm ${alg!!.name} "
                     if (alg.defaultKey.isNotBlank()) {
                         cmdlineStr += "--key ${alg.defaultKey}"
                     }

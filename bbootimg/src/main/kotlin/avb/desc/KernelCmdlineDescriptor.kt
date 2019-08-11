@@ -9,7 +9,19 @@ import java.io.InputStream
 class KernelCmdlineDescriptor(
         var flags: UInt = 0U,
         var cmdlineLength: UInt = 0U,
-        var cmdline: String = "") : Descriptor(TAG, 0U, 0) {
+        var cmdline: String = "")
+    : Descriptor(TAG, 0U, 0) {
+    var flagsInterpretation: String = ""
+        get() {
+            var ret = ""
+            if (this.flags and flagHashTreeEnabled == flagHashTreeEnabled) {
+                ret += "$flagHashTreeEnabled: hashTree Enabled"
+            } else if (this.flags and flagHashTreeDisabled == flagHashTreeDisabled) {
+                ret += "$flagHashTreeDisabled: hashTree Disabled"
+            }
+            return ret
+        }
+
     @Throws(IllegalArgumentException::class)
     constructor(data: InputStream, seq: Int = 0) : this() {
         val info = Struct3(FORMAT_STRING).unpack(data)
@@ -42,8 +54,10 @@ class KernelCmdlineDescriptor(
         const val TAG: ULong = 3U
         const val SIZE = 24
         const val FORMAT_STRING = "!2Q2L" //# tag, num_bytes_following (descriptor header), flags, cmdline length (bytes)
-        const val flagHashTreeEnabled = 1
-        const val flagHashTreeDisabled = 2
+        //AVB_KERNEL_CMDLINE_FLAGS_USE_ONLY_IF_HASHTREE_NOT_DISABLED
+        const val flagHashTreeEnabled = 1U
+        //AVB_KERNEL_CMDLINE_FLAGS_USE_ONLY_IF_HASHTREE_DISABLED
+        const val flagHashTreeDisabled = 2U
 
         init {
             Assert.assertEquals(SIZE, Struct3(FORMAT_STRING).calcSize())

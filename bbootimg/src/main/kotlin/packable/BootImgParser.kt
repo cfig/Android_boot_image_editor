@@ -12,7 +12,7 @@ class BootImgParser : IPackable {
     private val log = LoggerFactory.getLogger(BootImgParser::class.java)
 
     override fun capabilities(): List<String> {
-        return listOf("^boot\\.img$", "^recovery\\.img$")
+        return listOf("^boot\\.img$", "^recovery\\.img$", "^recovery-two-step\\.img$")
     }
 
     override fun unpack(fileName: String) {

@@ -1,16 +1,19 @@
-package avb
+package avb.blob
 
 import avb.alg.Algorithm
 import avb.desc.*
 import cfig.Helper
 import cfig.io.Struct3
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Paths
 
 @ExperimentalUnsignedTypes
-data class AuxBlob(
+@JsonIgnoreProperties("descriptorSize")
+class AuxBlob(
         var pubkey: PubKeyInfo? = null,
         var pubkeyMeta: PubKeyMetadataInfo? = null,
         var propertyDescriptor: MutableList<PropertyDescriptor> = mutableListOf(),
@@ -18,8 +21,13 @@ data class AuxBlob(
         var hashDescriptors: MutableList<HashDescriptor> = mutableListOf(),
         var kernelCmdlineDescriptor: MutableList<KernelCmdlineDescriptor> = mutableListOf(),
         var chainPartitionDescriptor: MutableList<ChainPartitionDescriptor> = mutableListOf(),
-        var unknownDescriptors: MutableList<UnknownDescriptor> = mutableListOf()
-) {
+        var unknownDescriptors: MutableList<UnknownDescriptor> = mutableListOf()) {
+
+    val descriptorSize: Int
+        get(): Int {
+            return this.encodeDescriptors().size
+        }
+
     data class PubKeyInfo(
             var offset: Long = 0L,
             var size: Long = 0L,
@@ -32,8 +40,7 @@ data class AuxBlob(
             var pkmd: ByteArray = byteArrayOf()
     )
 
-    fun encodeDescriptors(): ByteArray {
-        var ret = byteArrayOf()
+    private fun encodeDescriptors(): ByteArray {
         return mutableListOf<Descriptor>().let { descList ->
             arrayOf(this.propertyDescriptor,        //tag 0
                     this.hashTreeDescriptor,        //tag 1
@@ -44,6 +51,7 @@ data class AuxBlob(
             ).forEach { typedList ->
                 typedList.forEach { descList.add(it) }
             }
+            var ret = byteArrayOf()
             descList.sortBy { it.sequence }
             descList.forEach { ret = Helper.join(ret, it.encode()) }
             ret
@@ -51,14 +59,33 @@ data class AuxBlob(
     }
 
     //encoded_descriptors + encoded_key + pkmd_blob + (padding)
-    fun encode(): ByteArray {
+    fun encode(alg: Algorithm): ByteArray {
+        //descriptors
         val encodedDesc = this.encodeDescriptors()
-        var sumOfSize = encodedDesc.size
-        this.pubkey?.let { sumOfSize += it.pubkey.size }
-        this.pubkeyMeta?.let { sumOfSize += it.pkmd.size }
-        val auxSize = Helper.round_to_multiple(sumOfSize.toLong(), 64)
-        return Struct3("${auxSize}b").pack(
-                Helper.joinWithNulls(encodedDesc, this.pubkey?.pubkey, this.pubkeyMeta?.pkmd))
+        //pubkey
+        val encodedKey = encodePubKey(alg)
+        if (this.pubkey != null) {
+            if (encodedKey.contentEquals(this.pubkey!!.pubkey)) {
+                log.info("Using the same key as original vbmeta")
+            } else {
+                log.warn("Using different key from original vbmeta")
+            }
+        } else {
+            log.info("no pubkey in auxBlob")
+        }
+        //pkmd
+        var encodedPkmd = byteArrayOf()
+        if (this.pubkeyMeta != null) {
+            encodedPkmd = this.pubkeyMeta!!.pkmd
+            log.warn("adding pkmd [size=${this.pubkeyMeta!!.pkmd.size}]...")
+        } else {
+            log.info("no pubkey metadata in auxBlob")
+        }
+
+        val auxSize = Helper.round_to_multiple(
+                (encodedDesc.size + encodedKey.size + encodedPkmd.size).toLong(),
+                64)
+        return Struct3("${auxSize}b").pack(Helper.join(encodedDesc, encodedKey, encodedPkmd))
     }
 
     companion object {

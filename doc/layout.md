@@ -46,9 +46,9 @@
     |--------------------------------+--------------------------|    --> 608 (0x260)
     |<cmdline part 2>                |     1024                 |
     |--------------------------------+--------------------------|    --> 1632 (0x660)
-    |<dtbo length>            [v1]   |     4                    |
+    |<recovery dtbo length>   [v1]   |     4                    |
     |--------------------------------+--------------------------|    --> 1636
-    |<dtbo offset>            [v1]   |     8                    |
+    |<recovery dtbo offset>   [v1]   |     8                    |
     |--------------------------------+--------------------------|    --> 1644
     |<header size>            [v1]   |     4 (v1: value=1648)   |
     |                                |       (v2: value=1660)   |
@@ -112,7 +112,7 @@
     |      |   - Header Magic "AVB0"        |     4                   |
     |      |   - avb_version Major          |     4                   |
     |      |   - avb_version Minor          |     4                   |
-    |      |   - authentication blob size   |     8                   |
+    |      |   - authentication_blob_size   |     8                   |
     |      |   - auxiliary blob size        |     8                   |
     |      |   - algorithm type             |     4                   |
     |      |   - hash_offset                |     8                   |
@@ -133,14 +133,14 @@
     |      |   - RESERVED                   |     80                  |
     |      |--------------------------------+-------------------------+ --> + 256
     |      | Authentication Blob            |                         |
-    |      |   - Hash of Header & Aux Blob  | alg.hash_num_bytes      |
-    |      |   - Signature of Hash          | alg.signature_num_bytes |
+    |      |   - Hash of Header & Aux Blob  | alg.hash_num_bytes      | --> + 256 + hash_offset
+    |      |   - Signature of Hash          | alg.signature_num_bytes | --> + 256 + signature_offset
     |      |   - Padding                    | align by 64             |
     |      +--------------------------------+-------------------------+
     |      | Auxiliary Blob                 |                         |
-    |      |   - descriptors                |                         | --> + 256 + descriptors_offset
-    |      |   - pub key                    |                         | --> + 256 + pub_key_offset
-    |      |   - pub key meta data          |                         | --> + 256 + pub_key_metadata_offset
+    |      |   - descriptors                |                         | --> + 256 + authentication_blob_size + descriptors_offset
+    |      |   - pub key                    |                         | --> + 256 + authentication_blob_size + pub_key_offset
+    |      |   - pub key meta data          |                         | --> + 256 + authentication_blob_size + pub_key_metadata_offset
     |      |   - padding                    | align by 64             |
     |      +--------------------------------+-------------------------+
     |      | Padding                        | align by block_size     |
