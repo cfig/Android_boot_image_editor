@@ -77,6 +77,30 @@ data class Header(
         this.required_libavb_version_minor = maxOf(required_libavb_version_minor, minor)
     }
 
+    //toplevel flags
+    enum class AvbVBMetaImageFlags(val inFlags: Int) {
+        AVB_VBMETA_IMAGE_FLAGS_HASHTREE_DISABLED(1),
+        AVB_VBMETA_IMAGE_FLAGS_VERIFICATION_DISABLED(2 shl 1)
+    }
+
+    //verify flags
+    enum class AvbSlotVerifyFlags(val inFlags: Int) {
+        AVB_SLOT_VERIFY_FLAGS_NONE(0),
+        AVB_SLOT_VERIFY_FLAGS_ALLOW_VERIFICATION_ERROR(1),
+        AVB_SLOT_VERIFY_FLAGS_RESTART_CAUSED_BY_HASHTREE_CORRUPTION(2),
+        AVB_SLOT_VERIFY_FLAGS_NO_VBMETA_PARTITION(4)
+    }
+
+    //hash descriptor flags
+    enum class HashDescriptorFlags(val inFlags: Int) {
+        AVB_HASH_DESCRIPTOR_FLAGS_DO_NOT_USE_AB(1)
+    }
+
+    //hash tree descriptor flags
+    enum class HashTreeDescriptorFlags(val inFlags: Int) {
+        AVB_HASHTREE_DESCRIPTOR_FLAGS_DO_NOT_USE_AB(1)
+    }
+
     companion object {
         private const val magic: String = "AVB0"
         const val SIZE = 256

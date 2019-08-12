@@ -6,4 +6,7 @@ interface IPackable {
     }
     fun unpack(fileName: String = "dtbo.img")
     fun pack(fileName: String = "dtbo.img")
+    fun flash(fileName: String = "dtbo.img") {
+
+    }
 }

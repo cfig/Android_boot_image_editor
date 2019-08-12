@@ -12,6 +12,10 @@ import java.util.*
 
 @ExperimentalUnsignedTypes
 class DtboParser(val workDir: File) : IPackable {
+    override fun flash(fileName: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     constructor() : this(File("."))
 
     private val log = LoggerFactory.getLogger(DtboParser::class.java)

@@ -9,6 +9,10 @@ import java.lang.IllegalArgumentException
 
 @ExperimentalUnsignedTypes
 class BootImgParser : IPackable {
+    override fun flash(fileName: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private val log = LoggerFactory.getLogger(BootImgParser::class.java)
 
     override fun capabilities(): List<String> {

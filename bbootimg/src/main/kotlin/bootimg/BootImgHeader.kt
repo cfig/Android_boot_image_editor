@@ -12,6 +12,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.security.MessageDigest
 import java.util.regex.Pattern
+import kotlin.math.pow
 
 @ExperimentalUnsignedTypes
 open class BootImgHeader(
@@ -178,6 +179,13 @@ open class BootImgHeader(
         return md.digest()
     }
 
+    private fun get_recovery_dtbo_offset(): UInt {
+        return Helper.round_to_multiple(this.headerSize, pageSize) +
+            Helper.round_to_multiple(this.kernelLength, pageSize) +
+            Helper.round_to_multiple(this.ramdiskLength, pageSize) +
+            Helper.round_to_multiple(this.secondBootloaderLength, pageSize)
+    }
+
     private fun refresh() {
         val param = ParamConfig()
         //refresh kernel size
@@ -205,14 +213,15 @@ open class BootImgHeader(
             this.recoveryDtboOffset = 0U
         } else {
             this.recoveryDtboLength = File(param.dtbo!!).length().toUInt()
+            this.recoveryDtboOffset = get_recovery_dtbo_offset().toULong()
+            log.warn("using fake recoveryDtboOffset $recoveryDtboOffset (as is in AOSP avbtool)")
         }
-        //refresh recovery dtbo size
+        //refresh dtb size
         if (0U == this.dtbLength) {
             param.dtb = null
         } else {
             this.dtbLength = File(param.dtb!!).length().toUInt()
         }
-
         //refresh image hash
         val imageId = when (this.headerVersion) {
             0U -> {
@@ -233,6 +242,11 @@ open class BootImgHeader(
 
     fun encode(): ByteArray {
         this.refresh()
+        val pageSizeChoices: MutableSet<Long> = mutableSetOf<Long>().apply {
+            (11..14).forEach { add(2.0.pow(it).toLong()) }
+        }
+        Assert.assertTrue("invalid parameter [pageSize=$pageSize], (choose from $pageSizeChoices)",
+                pageSizeChoices.contains(pageSize.toLong()))
         return Struct3(FORMAT_STRING).pack(
                 "ANDROID!",
                 //10I

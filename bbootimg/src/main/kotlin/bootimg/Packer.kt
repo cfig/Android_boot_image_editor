@@ -150,7 +150,7 @@ class Packer {
         //write
         FileOutputStream(cfg.info.output + ".clear", false).use { fos ->
             fos.write(encodedHeader)
-            fos.write(ByteArray(info2.pageSize.toInt() - encodedHeader.size))
+            fos.write(ByteArray((Helper.round_to_multiple(encodedHeader.size.toUInt(), info2.pageSize) - encodedHeader.size.toUInt()).toInt()))
         }
         writeData(info2, cfg.info.output)
 

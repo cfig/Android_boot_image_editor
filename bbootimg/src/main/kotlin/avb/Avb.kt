@@ -11,6 +11,7 @@ import cfig.Helper.Companion.paddingWith
 import cfig.io.Struct3
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
+import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -63,7 +64,7 @@ class Avb {
         val imgPaddingNeeded = Helper.round_to_multiple(newImageSize, BLOCK_SIZE) - newImageSize
 
         // + vbmeta + padding
-        val vbmetaOffset = File(image_file).length()
+        val vbmetaOffset = newImageSize + imgPaddingNeeded
         val vbmetaBlobWithPadding = vbmetaBlob.paddingWith(BLOCK_SIZE.toUInt())
 
         // + DONT_CARE chunk
@@ -92,7 +93,7 @@ class Avb {
             log.info("4/4 Appending AVB footer (${footerBlobWithPadding.size} bytes)...")
             fos.write(footerBlobWithPadding)
         }
-
+        Assert.assertEquals("generated file size mismatch", partition_size, File(image_file).length())
         log.info("addHashFooter($image_file) done.")
     }
 

@@ -1,5 +1,6 @@
 package avb.desc
 
+import avb.blob.Header
 import cfig.Helper
 import cfig.io.Struct3
 import java.io.InputStream
@@ -24,7 +25,7 @@ class HashTreeDescriptor(
     var flagsInterpretation: String = ""
         get() {
             var ret = ""
-            if (this.flags and AVB_HASHTREE_DESCRIPTOR_FLAGS_DO_NOT_USE_AB == 1U) {
+            if (this.flags and Header.HashTreeDescriptorFlags.AVB_HASHTREE_DESCRIPTOR_FLAGS_DO_NOT_USE_AB.inFlags.toUInt() == 1U) {
                 ret += "1:no-A/B system"
             } else {
                 ret += "0:A/B system"
@@ -97,6 +98,5 @@ class HashTreeDescriptor(
         private const val RESERVED = 60L
         private const val SIZE = 120 + RESERVED
         private const val FORMAT_STRING = "!2QL3Q3L2Q32s4L${RESERVED}x"
-        private const val AVB_HASHTREE_DESCRIPTOR_FLAGS_DO_NOT_USE_AB = 1U
     }
 }
