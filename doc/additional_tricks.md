@@ -46,3 +46,9 @@ Fickle Google removed "BOARD_BUILD_SYSTEM_ROOT_IMAGE" and added "ro.boot.dynamic
 Thanks to the work by [CallMESuper], ZTE NX606J boot.img is also verified to be compatible with this toolkit.
 
 ROM download page: [http://ui.nubia.cn/rom/detail/56](http://ui.nubia.cn/rom/detail/56)
+
+## about porting
+
+#### libsparse: output\_file.cpp
+
+*typeof* is missing in macos clang++, need to change it to *decltype* instead.

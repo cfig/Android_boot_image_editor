@@ -49,7 +49,8 @@ class BootImgParser : IPackable {
     }
 
     override fun pack(fileName: String) {
-        Packer().pack(mkbootfsBin = "mkbootfs/build/exe/mkbootfs/mkbootfs")
-        Signer.sign(avbtool = "avb/avbtool", bootSigner = "boot_signer/build/libs/boot_signer.jar")
+        val osSuffix = if (EnvironmentVerifier().isMacOS) "macos" else "linux"
+        Packer().pack(mkbootfsBin = "./aosp/mkbootfs/build/install/main/release/$osSuffix/mkbootfs")
+        Signer.sign(avbtool = "avb/avbtool", bootSigner = "aosp/boot_signer/build/libs/boot_signer.jar")
     }
 }

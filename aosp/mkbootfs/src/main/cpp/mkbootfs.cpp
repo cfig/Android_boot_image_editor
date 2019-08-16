@@ -88,7 +88,7 @@ static void fix_stat(const char *path, struct stat *s)
         unsigned st_mode = s->st_mode;
         int is_dir = S_ISDIR(s->st_mode) || strcmp(path, TRAILER) == 0;
         fs_config(path, is_dir, target_out_path, &s->st_uid, &s->st_gid, &st_mode, &capabilities);
-        s->st_mode = (typeof(s->st_mode)) st_mode;
+        s->st_mode = (decltype(s->st_mode)) st_mode;
     }
 }
 

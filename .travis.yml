@@ -1,4 +1,4 @@
-dist: trusty
+dist: bionic
 language: java
 before_install:
   - sudo apt -qq update

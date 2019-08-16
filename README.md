@@ -111,3 +111,6 @@ https://android.googlesource.com/platform/build/+/refs/heads/master/tools/extrac
 
 mkdtboimg
 https://android.googlesource.com/platform/system/libufdt/
+
+libsparse
+https://android.googlesource.com/platform/system/core/+/refs/heads/master/libsparse/

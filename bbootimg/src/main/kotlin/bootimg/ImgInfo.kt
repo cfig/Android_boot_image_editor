@@ -34,5 +34,5 @@ data class ImgInfo(
             var path: String = "/boot",
             var verity_pk8: String = "security/verity.pk8",
             var verity_pem: String = "security/verity.x509.pem",
-            var jarPath: String = "boot_signer/build/libs/boot_signer.jar")
+            var jarPath: String = "aosp/boot_signer/build/libs/boot_signer.jar")
 }

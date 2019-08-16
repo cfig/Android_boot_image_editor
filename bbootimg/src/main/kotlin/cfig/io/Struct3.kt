@@ -10,6 +10,7 @@ import java.nio.ByteOrder
 import java.util.*
 import java.util.regex.Pattern
 
+@ExperimentalStdlibApi
 @ExperimentalUnsignedTypes
 class Struct3 {
     private val log = LoggerFactory.getLogger(Struct3::class.java)
@@ -410,7 +411,7 @@ class Struct3 {
             if (format[0] === String) {
                 val data = ByteArray(format[1] as Int)
                 Assert.assertEquals(format[1] as Int, iS.read(data))
-                ret.add(Helper.toCString(data))
+                ret.add(data.decodeToString())
                 continue
             }
 

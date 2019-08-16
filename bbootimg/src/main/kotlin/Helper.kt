@@ -23,6 +23,7 @@ import java.util.zip.GZIPOutputStream
 import javax.crypto.Cipher
 
 class Helper {
+    @ExperimentalStdlibApi
     @ExperimentalUnsignedTypes
     companion object {
         fun joinWithNulls(vararg source: ByteArray?): ByteArray {
@@ -84,6 +85,7 @@ class Helper {
         }
 
         //similar to this.toString(StandardCharsets.UTF_8).replace("${Character.MIN_VALUE}", "")
+        @Deprecated("by 1.3.41 experimental api: String.decodeToString()")
         fun toCString(ba: ByteArray): String {
             val str = ba.toString(StandardCharsets.UTF_8)
             val nullPos = str.indexOf(Character.MIN_VALUE)
@@ -298,6 +300,23 @@ class Helper {
                 fos.write(data)
             }
             log.info("Dumping data to $dumpFile done")
+        }
+
+        fun String.check_call(): Boolean {
+            var ret = false
+            try {
+                val cmd = CommandLine.parse(this)
+                log.info(cmd.toString())
+                DefaultExecutor().execute(cmd)
+                ret = true
+            } catch (e: java.lang.IllegalArgumentException) {
+                log.error("$e: can not parse command: [$this]")
+            } catch (e: ExecuteException) {
+                log.error("$e: can not exec command")
+            } catch (e: IOException) {
+                log.error("$e: can not exec command")
+            }
+            return ret
         }
 
         private val log = LoggerFactory.getLogger("Helper")

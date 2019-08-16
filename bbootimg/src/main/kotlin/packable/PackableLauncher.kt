@@ -1,6 +1,7 @@
 package cfig.packable
 
 import cfig.UnifiedConfig
+import cfig.sparse_util.SparseImg
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.regex.Pattern
@@ -13,7 +14,7 @@ class PackableLauncher
 fun main(args: Array<String>) {
     val log = LoggerFactory.getLogger(PackableLauncher::class.java)
     val packablePool = mutableMapOf<List<String>, KClass<IPackable>>()
-    listOf(DtboParser(), VBMetaParser(), BootImgParser()).forEach {
+    listOf(DtboParser(), VBMetaParser(), BootImgParser(), SparseImg()).forEach {
         @Suppress("UNCHECKED_CAST")
         packablePool.put(it.capabilities(), it::class as KClass<IPackable>)
     }
