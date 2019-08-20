@@ -44,4 +44,8 @@ class SparseImg : IPackable {
         "file $sparseOut".check_call()
         log.info("transformed Android sparse image: $flatIn -> $sparseOut")
     }
+
+    override fun flash(fileName: String, deviceName: String) {
+        TODO("not implemented")
+    }
 }

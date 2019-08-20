@@ -9,10 +9,6 @@ import java.lang.IllegalArgumentException
 
 @ExperimentalUnsignedTypes
 class BootImgParser : IPackable {
-    override fun flash(fileName: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     private val log = LoggerFactory.getLogger(BootImgParser::class.java)
 
     override fun capabilities(): List<String> {
@@ -52,5 +48,10 @@ class BootImgParser : IPackable {
         val osSuffix = if (EnvironmentVerifier().isMacOS) "macos" else "linux"
         Packer().pack(mkbootfsBin = "./aosp/mkbootfs/build/install/main/release/$osSuffix/mkbootfs")
         Signer.sign(avbtool = "avb/avbtool", bootSigner = "aosp/boot_signer/build/libs/boot_signer.jar")
+    }
+
+    override fun flash(fileName: String, deviceName: String) {
+        val stem = fileName.substring(0, fileName.indexOf("."))
+        super.flash("$fileName.signed", stem)
     }
 }

@@ -12,10 +12,6 @@ import java.util.*
 
 @ExperimentalUnsignedTypes
 class DtboParser(val workDir: File) : IPackable {
-    override fun flash(fileName: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     constructor() : this(File("."))
 
     private val log = LoggerFactory.getLogger(DtboParser::class.java)
@@ -33,17 +29,7 @@ class DtboParser(val workDir: File) : IPackable {
             it.addArguments("--dtb $dtbPath")
             it.addArguments("--output $headerPath")
         }
-
-        DefaultExecutor().let {
-            it.workingDirectory = this.workDir
-            try {
-                log.info(cmd.toString())
-                it.execute(cmd)
-            } catch (e: org.apache.commons.exec.ExecuteException) {
-                log.error("can not parse $fileName")
-                return
-            }
-        }
+        execInDirectory(cmd, this.workDir)
 
         val props = Properties()
         props.load(FileInputStream(File(headerPath)))
@@ -75,14 +61,17 @@ class DtboParser(val workDir: File) : IPackable {
             }
             it
         }
+        execInDirectory(cmd, this.workDir)
+    }
 
+    private fun execInDirectory(cmd: CommandLine, inWorkDir: File) {
         DefaultExecutor().let {
-            it.workingDirectory = this.workDir
+            it.workingDirectory = inWorkDir
             try {
                 log.info(cmd.toString())
                 it.execute(cmd)
             } catch (e: org.apache.commons.exec.ExecuteException) {
-                log.error("can not parse $fileName")
+                log.error("can not exec command")
                 return
             }
         }

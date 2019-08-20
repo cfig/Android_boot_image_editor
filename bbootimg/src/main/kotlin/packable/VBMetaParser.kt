@@ -4,10 +4,6 @@ import cfig.Avb
 
 @ExperimentalUnsignedTypes
 class VBMetaParser: IPackable {
-    override fun flash(fileName: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     override fun capabilities(): List<String> {
         return listOf("^vbmeta\\.img$", "^vbmeta\\_[a-z]+.img$")
     }
@@ -18,5 +14,10 @@ class VBMetaParser: IPackable {
 
     override fun pack(fileName: String) {
         Avb().packVbMetaWithPadding(fileName)
+    }
+
+    override fun flash(fileName: String, deviceName: String) {
+        val stem = fileName.substring(0, fileName.indexOf("."))
+        super.flash("$fileName.signed", stem)
     }
 }

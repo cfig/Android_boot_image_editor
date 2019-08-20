@@ -23,7 +23,6 @@ import java.util.zip.GZIPOutputStream
 import javax.crypto.Cipher
 
 class Helper {
-    @ExperimentalStdlibApi
     @ExperimentalUnsignedTypes
     companion object {
         fun joinWithNulls(vararg source: ByteArray?): ByteArray {
@@ -311,12 +310,26 @@ class Helper {
                 ret = true
             } catch (e: java.lang.IllegalArgumentException) {
                 log.error("$e: can not parse command: [$this]")
+                throw e
             } catch (e: ExecuteException) {
                 log.error("$e: can not exec command")
+                throw e
             } catch (e: IOException) {
                 log.error("$e: can not exec command")
+                throw e
             }
             return ret
+        }
+
+        fun String.check_output(): String {
+            val outputStream = ByteArrayOutputStream()
+            log.info(this)
+            DefaultExecutor().let {
+                it.streamHandler = PumpStreamHandler(outputStream)
+                it.execute(CommandLine.parse(this))
+            }
+            log.info(outputStream.toString())
+            return outputStream.toString().trim()
         }
 
         private val log = LoggerFactory.getLogger("Helper")

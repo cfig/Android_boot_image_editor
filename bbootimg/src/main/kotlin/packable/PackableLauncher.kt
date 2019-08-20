@@ -28,7 +28,7 @@ fun main(args: Array<String>) {
             packablePool.forEach { p ->
                 for (item in p.key) {
                     if (Pattern.compile(item).matcher(file.name).matches()) {
-                        log.debug("Found: "  + file.name + ", " + item)
+                        log.debug("Found: " + file.name + ", " + item)
                         targetFile = file.name
                         targetHandler = p.value
                         return@found
@@ -48,6 +48,9 @@ fun main(args: Array<String>) {
             }
             "pack" -> {
                 targetHandler!!.createInstance().pack(targetFile!!)
+            }
+            "flash" -> {
+                targetHandler!!.createInstance().flash(targetFile!!)
             }
             else -> {
                 log.error("Unknown cmd: " + args[0])
