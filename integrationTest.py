@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import shutil, os.path, json, subprocess, hashlib, glob
-import unittest, logging, sys
+import unittest, logging, sys, lzma
 
 successLogo = """
       +----------------------------------+
@@ -41,13 +41,20 @@ def cleanUp():
     deleteIfExists("vbmeta.img")
     deleteIfExists("vbmeta.img.signed")
 
-def verifySingleJson(inResourceDir, inImageDir, jsonFile):
+def verifySingleJson(jsonFile):
     log.info(jsonFile)
-    resDir = inResourceDir
-    imgDir = inImageDir
+    imgDir = os.path.dirname(jsonFile)
     verifyItems = json.load(open(jsonFile))
     for k, v in verifyItems["copy"].items():
-        shutil.copyfile(os.path.join(resDir, imgDir, k), v)
+        it = os.path.join(imgDir, k)
+        if (os.path.isfile(it)):
+            log.info("copy file: %s -> %s" % (os.path.join(imgDir, k), v))
+            shutil.copyfile(it, v)
+        elif (os.path.isfile(it + ".xz")):
+            log.info("extract file: %s -> %s" % (it + ".xz", v))
+            decompressXZ(it + ".xz", v)
+        else:
+            raise
     subprocess.check_call("gradle unpack", shell = True)
     subprocess.check_call("gradle pack", shell = True)
     for k, v in verifyItems["hash"].items():
@@ -61,8 +68,14 @@ def verifySingleDir(inResourceDir, inImageDir):
     jsonFiles = glob.glob(os.path.join(resDir, imgDir) + "/*.json")
     for jsonFile in jsonFiles:
         cleanUp()
-        verifySingleJson(inResourceDir, inImageDir, jsonFile)
+        verifySingleJson(jsonFile)
         cleanUp()
+
+def decompressXZ(inFile, outFile):
+    with lzma.open(inFile) as f:
+        file_content = f.read()
+        with open(outFile, "wb") as f2:
+            f2.write(file_content)
 
 def main():
     # 5.0
@@ -72,19 +85,15 @@ def main():
     # 7.0 special boot
     cleanUp()
     subprocess.check_call("dd if=%s/7.1.1_volantis_n9f27m/boot.img of=boot.img bs=256 skip=1" % resDir, shell = True)
-    verifySingleJson(resDir, "7.1.1_volantis_n9f27m", "%s/7.1.1_volantis_n9f27m/boot.json" % resDir)
+    verifySingleJson("%s/7.1.1_volantis_n9f27m/boot.json" % resDir)
     # 7.0 special recovery
     cleanUp()
     subprocess.check_call("dd if=%s/7.1.1_volantis_n9f27m/recovery.img of=recovery.img bs=256 skip=1" % resDir, shell = True)
-    verifySingleJson(resDir, "7.1.1_volantis_n9f27m", "%s/7.1.1_volantis_n9f27m/recovery.json" % resDir)
+    verifySingleJson("%s/7.1.1_volantis_n9f27m/recovery.json" % resDir)
     # 8.0
     verifySingleDir(resDir, "8.0.0_fugu_opr2.170623.027")
     # 9.0 + avb
-    cleanUp()
-    subprocess.check_call("tar xf %s/9.0.0_blueline_pq1a.181105.017.a1/boot.img.tar.gz" % resDir, shell = True)
-    verifySingleJson(resDir, "9.0.0_blueline_pq1a.181105.017.a1", "%s/9.0.0_blueline_pq1a.181105.017.a1/boot.json" % resDir)
-    cleanUp()
-    verifySingleJson(resDir, "9.0.0_blueline_pq1a.181105.017.a1", "%s/9.0.0_blueline_pq1a.181105.017.a1/vbmeta.json" % resDir)
+    verifySingleDir(resDir, "9.0.0_blueline_pq1a.181105.017.a1")
     # Q preview
     verifySingleDir(resDir, "Q_preview_blueline_qpp2.190228.023")
 

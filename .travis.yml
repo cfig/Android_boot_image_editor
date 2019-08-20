@@ -3,9 +3,7 @@ language: java
 before_install:
   - sudo apt -qq update
   - sudo apt install -y libblkid-dev liblz4-tool
-
 script:
   - ./gradlew check
-  - ./gradlew _setup
-  - ./gradlew unpack
-  - ./gradlew pack
+  - ./gradlew clean
+  - ./integrationTest.py
