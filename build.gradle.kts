@@ -22,6 +22,15 @@ buildscript {
 }
 
 tasks {
+    register("rr") {
+        this.group = GROUP_ANDROID
+        this.description = "reboot to recovery"
+        this.doLast {
+            logger.warn("Rebooting to recovery ...")
+            Runtime.getRuntime().exec("adb root")
+            Runtime.getRuntime().exec("adb reboot recovery")
+        }
+    }
     val unpackTask by register<JavaExec>("unpack") {
         group = GROUP_ANDROID
         main = "cfig.packable.PackableLauncherKt"
