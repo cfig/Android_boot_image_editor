@@ -56,6 +56,8 @@ You get the repacked boot.img at $(CURDIR):
 
     boot.img.signed
 
+Well done you did it! The last step is to add the star to this repo :smile
+
 #### If you are working with recovery.img
 If you are working with recovery.img, the steps are similar:
 

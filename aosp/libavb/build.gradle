@@ -1,0 +1,20 @@
+apply plugin: "c"
+apply plugin: "cpp"
+
+model {
+    buildTypes {
+        release
+    }
+
+    components {
+        avb(NativeLibrarySpec) {
+            binaries.all {
+                cCompiler.define "_FILE_OFFSET_BITS", "64" 
+                cCompiler.define "_POSIX_C_SOURCE", "199309L" 
+                cCompiler.define "AVB_ENABLE_DEBUG"
+                cCompiler.define "AVB_COMPILATION"
+                cCompiler.args << "-Wall" << "-g"
+            }
+        }
+    }
+}

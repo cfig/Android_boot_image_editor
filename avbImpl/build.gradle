@@ -1,0 +1,22 @@
+apply plugin: "c"
+apply plugin: "cpp"
+apply plugin: "cpp-unit-test"
+
+model {
+    buildTypes {
+        release
+    }
+
+    components {
+        libavbx(NativeLibrarySpec) {
+            sources {
+                cpp {
+                    lib project: ":aosp:libavb", library: "avb"
+                }
+            }
+            binaries.all {
+                cCompiler.args << "-Wall" << "-g"
+            }
+        }
+    }
+}

@@ -1,0 +1,16 @@
+diff --git a/aosp/libavb/src/avb/c/avb_sysdeps_posix.c b/aosp/libavb/src/avb/c/avb_sysdeps_posix.c
+index e26c3ef..f1572a5 100644
+--- a/aosp/libavb/src/avb/c/avb_sysdeps_posix.c
++++ b/aosp/libavb/src/avb/c/avb_sysdeps_posix.c
+@@ -22,7 +22,11 @@
+  * SOFTWARE.
+  */
+ 
++#if defined(__APPLE__) && defined(__MACH__)
++#include <machine/endian.h>
++#else
+ #include <endian.h>
++#endif
+ #include <stdarg.h>
+ #include <stdio.h>
+ #include <stdlib.h>
