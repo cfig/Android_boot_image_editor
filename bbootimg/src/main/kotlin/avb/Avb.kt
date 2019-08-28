@@ -141,7 +141,7 @@ class Avb {
         }
     }
 
-    fun parseVbMeta(image_file: String): AVBInfo {
+    fun parseVbMeta(image_file: String, dumpFile: Boolean = true): AVBInfo {
         log.info("parsing $image_file ...")
         val jsonFile = getJsonFileName(image_file)
         var footer: Footer? = null
@@ -257,8 +257,13 @@ class Avb {
             }
         }
 
-        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(jsonFile), ai)
-        log.info("vbmeta info written to $jsonFile")
+        if (dumpFile) {
+            ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(jsonFile), ai)
+            log.info("vbmeta info of [$image_file] has been analyzed")
+            log.info("vbmeta info written to $jsonFile")
+        } else {
+            log.warn("vbmeta info of [$image_file] has been analyzed, no dummping")
+        }
 
         return ai
     }

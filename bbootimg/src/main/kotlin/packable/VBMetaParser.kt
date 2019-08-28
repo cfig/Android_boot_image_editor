@@ -4,6 +4,9 @@ import cfig.Avb
 
 @ExperimentalUnsignedTypes
 class VBMetaParser: IPackable {
+    override val loopNo: Int
+        get() = 1
+
     override fun capabilities(): List<String> {
         return listOf("^vbmeta\\.img$", "^vbmeta\\_[a-z]+.img$")
     }

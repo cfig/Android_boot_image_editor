@@ -44,22 +44,23 @@ class Signer {
                             partition_name = bootDesc.partition_name,
                             newAvbInfo = ObjectMapper().readValue(File(getJsonFileName(cfg.info.output)), AVBInfo::class.java))
                     //original signer
-                    File(cfg.info.output + ".clear").copyTo(File(cfg.info.output + ".signed2"))
-                    var cmdlineStr = "$avbtool add_hash_footer " +
-                            "--image ${cfg.info.output}.signed2 " +
-                            "--partition_size ${info2.imageSize} " +
-                            "--salt ${Helper.toHexString(bootDesc.salt)} " +
-                            "--partition_name ${bootDesc.partition_name} " +
-                            "--hash_algorithm ${bootDesc.hash_algorithm} " +
-                            "--algorithm ${alg!!.name} "
-                    if (alg.defaultKey.isNotBlank()) {
-                        cmdlineStr += "--key ${alg.defaultKey}"
+                    CommandLine.parse("$avbtool add_hash_footer").apply {
+                        addArguments("--image ${cfg.info.output}.signed2")
+                        addArguments("--partition_size ${info2.imageSize}")
+                        addArguments("--salt ${Helper.toHexString(bootDesc.salt)}")
+                        addArguments("--partition_name ${bootDesc.partition_name}")
+                        addArguments("--hash_algorithm ${bootDesc.hash_algorithm}")
+                        addArguments("--algorithm ${alg!!.name}")
+                        if (alg.defaultKey.isNotBlank()) {
+                            addArguments("--key ${alg.defaultKey}")
+                        }
+                        addArgument("--internal_release_string")
+                        addArgument(ai.header!!.release_string, false)
+                        log.warn(this.toString())
+
+                        File(cfg.info.output + ".clear").copyTo(File(cfg.info.output + ".signed2"))
+                        DefaultExecutor().execute(this)
                     }
-                    log.warn(cmdlineStr)
-                    val cmdLine = CommandLine.parse(cmdlineStr)
-                    cmdLine.addArgument("--internal_release_string")
-                    cmdLine.addArgument(ai.header!!.release_string, false)
-                    DefaultExecutor().execute(cmdLine)
                     Parser.verifyAVBIntegrity(cfg.info.output, avbtool)
                 }
             }

@@ -25,16 +25,33 @@ fun main(args: Array<String>) {
     var targetHandler: KClass<IPackable>? = null
     run found@{
         File(".").listFiles().forEach { file ->
-            packablePool.forEach { p ->
-                for (item in p.key) {
-                    if (Pattern.compile(item).matcher(file.name).matches()) {
-                        log.debug("Found: " + file.name + ", " + item)
-                        targetFile = file.name
-                        targetHandler = p.value
-                        return@found
+            packablePool
+                    .filter { it.value.createInstance().loopNo == 0 }
+                    .forEach { p ->
+                        for (item in p.key) {
+                            if (Pattern.compile(item).matcher(file.name).matches()) {
+                                log.debug("Found: " + file.name + ", " + item)
+                                targetFile = file.name
+                                targetHandler = p.value
+                                return@found
+                            }
+                        }
                     }
-                }
-            }
+        }
+
+        File(".").listFiles().forEach { file ->
+            packablePool
+                    .filter { it.value.createInstance().loopNo != 0 }
+                    .forEach { p ->
+                        for (item in p.key) {
+                            if (Pattern.compile(item).matcher(file.name).matches()) {
+                                log.debug("Found: " + file.name + ", " + item)
+                                targetFile = file.name
+                                targetHandler = p.value
+                                return@found
+                            }
+                        }
+                    }
         }
     }
 

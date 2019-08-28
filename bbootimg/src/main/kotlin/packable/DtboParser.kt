@@ -12,6 +12,9 @@ import java.util.*
 
 @ExperimentalUnsignedTypes
 class DtboParser(val workDir: File) : IPackable {
+    override val loopNo: Int
+        get() = 0
+
     constructor() : this(File("."))
 
     private val log = LoggerFactory.getLogger(DtboParser::class.java)

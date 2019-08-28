@@ -7,6 +7,8 @@ import cfig.Helper.Companion.check_call
 
 @ExperimentalUnsignedTypes
 class SparseImg : IPackable {
+    override val loopNo: Int
+        get() = 0
     private val log = LoggerFactory.getLogger(SparseImg::class.java)
     private val simg2imgBin: String
     private val img2simgBin: String

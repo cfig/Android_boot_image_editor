@@ -6,6 +6,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 interface IPackable {
+    val loopNo: Int
     fun capabilities(): List<String> {
         return listOf("^dtbo\\.img$")
     }
