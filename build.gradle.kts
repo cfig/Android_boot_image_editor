@@ -59,14 +59,14 @@ tasks {
     flashTask.dependsOn("bbootimg:jar")
 
     //sparse image dependencies
+    packTask.dependsOn("aosp:mkbootfs:mkbootfsExecutable")
+    unpackTask.dependsOn("aosp:mkbootfs:mkbootfsExecutable")
     if (System.getProperty("os.name").contains("Mac")) {
         unpackTask.dependsOn("aosp:libsparse:simg2img:installReleaseMacos")
         packTask.dependsOn("aosp:libsparse:img2simg:installReleaseMacos")
-        packTask.dependsOn("aosp:mkbootfs:installReleaseMacos")
     } else {
         unpackTask.dependsOn("aosp:libsparse:simg2img:installReleaseLinux")
         packTask.dependsOn("aosp:libsparse:img2simg:installReleaseLinux")
-        packTask.dependsOn("aosp:mkbootfs:installReleaseLinux")
     }
 }
 

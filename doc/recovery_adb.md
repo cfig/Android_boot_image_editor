@@ -10,7 +10,7 @@
 
 ###2. 先解开boot.img, 然后做修改如下
 
-修改**prop.default**,打开debuggable
+修改**prop.default**,打开debuggable, 注意ro.debuggable出现两次，得全改了, 或者删一个
 ```diff
 -ro.debuggable=0
 +ro.debuggable=1
