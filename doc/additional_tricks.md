@@ -49,7 +49,9 @@ ROM download page: [http://ui.nubia.cn/rom/detail/56](http://ui.nubia.cn/rom/det
 
 ## K3 (CPH1955)
 
-`boot.img` extracted from OTA ozip file doesn't work properly but `recovery.img` works fine. In order to obtain `recovery.img`, a `bsdiff` patch from `system/recovery-from-boot.p` is applied to `boot.img`. Ex: ```bspatch boot.img recovery.img system/recovery-from-boot.p```
+`boot.img` extracted from OTA zip file doesn't work properly but `recovery.img` works fine. In order to obtain `recovery.img`, a `bsdiff` patch from `system/recovery-from-boot.p` is applied to `boot.img`. Ex: ```bspatch boot.img recovery.img system/recovery-from-boot.p```
+
+This part is contributed by @Surendrajat, thanks!
 
 ## about porting
 
