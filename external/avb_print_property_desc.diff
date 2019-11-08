@@ -1,0 +1,40 @@
+diff --git a/aosp/libavb/src/avb/c/avb_slot_verify.c b/aosp/libavb/src/avb/c/avb_slot_verify.c
+index 0d75210..4c44755 100644
+--- a/aosp/libavb/src/avb/c/avb_slot_verify.c
++++ b/aosp/libavb/src/avb/c/avb_slot_verify.c
+@@ -29,10 +29,12 @@
+ #include "avb_hash_descriptor.h"
+ #include "avb_hashtree_descriptor.h"
+ #include "avb_kernel_cmdline_descriptor.h"
++#include "avb_property_descriptor.h"
+ #include "avb_sha.h"
+ #include "avb_util.h"
+ #include "avb_vbmeta_image.h"
+ #include "avb_version.h"
++#include <stdio.h>
+ 
+ /* Maximum number of partitions that can be loaded with avb_slot_verify(). */
+ #define MAX_NUMBER_OF_LOADED_PARTITIONS 32
+@@ -1199,8 +1201,21 @@ static AvbSlotVerifyResult load_and_verify_vbmeta(
+         }
+       } break;
+ 
+-      case AVB_DESCRIPTOR_TAG_PROPERTY:
++      case AVB_DESCRIPTOR_TAG_PROPERTY: {
+         /* Do nothing. */
++        AvbPropertyDescriptor property_desc;
++        const uint8_t* prop_key = NULL;
++        const char* prop_value = NULL;
++        if (!avb_property_descriptor_validate_and_byteswap((AvbPropertyDescriptor *)descriptors[n], &property_desc)) {
++            avb_errorv(full_partition_name, ": Property descriptor is invalid.\n", NULL);
++            ret = AVB_SLOT_VERIFY_RESULT_ERROR_INVALID_METADATA;
++            goto out;
++        }
++        prop_key = (const uint8_t*)descriptors[n] + sizeof(AvbPropertyDescriptor);
++        prop_value = (const char*)descriptors[n] + sizeof(AvbPropertyDescriptor) + property_desc.key_num_bytes + 1;
++        fprintf(stderr, "PROPERTY DESCRIPTOR: k=[%s], v=[%s]\n", prop_key, prop_value);
++        /* Do nothing. */
++      }
+         break;
+     }
+   }
