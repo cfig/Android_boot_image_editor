@@ -16,6 +16,7 @@ model {
             }
             binaries.all {
                 cCompiler.args << "-Wall" << "-g"
+                cppCompiler.args << "--std=c++11"
             }
         }
     }
