@@ -2,7 +2,7 @@ dist: bionic
 language: java
 before_install:
   - sudo apt -qq update
-  - sudo apt install -y libblkid-dev liblz4-tool
+  - sudo apt install -y libblkid-dev liblz4-tool device-tree-compiler
 script:
   - ./gradlew check
   - ./gradlew clean
