@@ -9,4 +9,5 @@ data class ParamConfig(
         var dtbo: String? = UnifiedConfig.workDir + "recoveryDtbo",
         var dtb: String? = UnifiedConfig.workDir + "dtb",
         var cfg: String = UnifiedConfig.workDir + "bootimg.json",
-        val mkbootimg: String = "./external/mkbootimg")
+        val mkbootimg: String = "./aosp/system/tools/mkbootimg/mkbootimg.py")
+

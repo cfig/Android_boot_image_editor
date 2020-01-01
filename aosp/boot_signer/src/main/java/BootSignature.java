@@ -77,6 +77,12 @@ public class BootSignature extends ASN1Object
      * or equal to 1.
      */
     private static final int BOOT_IMAGE_HEADER_V1_RECOVERY_DTBO_SIZE_OFFSET = 1632;
+    /**
+     * Offset of DTB length in a boot image header of version greater than
+     * or equal to 2.
+     */
+    private static final int BOOT_IMAGE_HEADER_V2_DTB_SIZE_OFFSET = 1648;
+
 
     /**
      * Initializes the object for signing an image file
@@ -221,12 +227,16 @@ public class BootSignature extends ASN1Object
             length += ((recoveryDtboLength + pageSize - 1) / pageSize) * pageSize;
 
             image.getLong(); // recovery_dtbo address
-            if (headerVersion == 1) {
-                int headerSize = image.getInt();
-                if (image.position() != headerSize) {
-                    throw new IllegalArgumentException(
-                            "Invalid image header: invalid header length");
-                }
+            int headerSize = image.getInt();
+            if (headerVersion == 2) {
+                image.position(BOOT_IMAGE_HEADER_V2_DTB_SIZE_OFFSET);
+                int dtbLength = image.getInt();
+                length += ((dtbLength + pageSize - 1) / pageSize) * pageSize;
+                image.getLong(); // dtb address
+            }
+            if (image.position() != headerSize) {
+                throw new IllegalArgumentException(
+                        "Invalid image header: invalid header length");
             }
         }
 

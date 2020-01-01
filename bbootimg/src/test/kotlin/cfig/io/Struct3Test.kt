@@ -46,6 +46,11 @@ class Struct3Test {
         Assert.assertEquals(9, Struct3("9c").calcSize())
     }
 
+    @Test
+    fun toStringTest() {
+        println(Struct3("!4s2L2QL11QL4x47sx80x"))
+    }
+
     //x
     @Test
     fun paddingTest() {
@@ -189,7 +194,7 @@ class Struct3Test {
             Struct3("3s").pack("abcd")
             Assert.fail("should throw exception here")
         } catch (e: Throwable) {
-            Assert.assertTrue(e is AssertionError || e is IllegalArgumentException)
+            Assert.assertTrue(e.toString(), e is AssertionError || e is IllegalArgumentException)
         }
 
         //unpack

@@ -95,9 +95,6 @@ We now support both VB 1.0 and AVB 2.0 layouts.
 boot\_signer
 https://android.googlesource.com/platform/system/extras
 
-bouncycastle
-https://android.googlesource.com/platform/external/bouncycastle
-
 cpio / fs\_config
 https://android.googlesource.com/platform/system/core
 
@@ -105,7 +102,7 @@ AVB
 https://android.googlesource.com/platform/external/avb/
 
 mkbootimg
-https://android.googlesource.com/platform/system/core/+/master/mkbootimg/
+https://android.googlesource.com/platform/system/tools/mkbootimg/+/refs/heads/master/
 
 Android version list
 https://source.android.com/source/build-numbers.html

@@ -33,7 +33,7 @@ class BootImgParser() : IPackable {
         if (File(UnifiedConfig.workDir).exists()) File(UnifiedConfig.workDir).deleteRecursively()
         File(UnifiedConfig.workDir).mkdirs()
         try {
-            val info = Parser().parseBootImgHeader(fileName, avbtool = "avb/avbtool")
+            val info = Parser().parseBootImgHeader(fileName, avbtool = "aosp/avb/avbtool")
             InfoTable.instance.addRule()
             InfoTable.instance.addRow("image info", ParamConfig().cfg)
             if (info.signatureType == BootImgInfo.VerifyType.AVB) {
@@ -69,7 +69,7 @@ class BootImgParser() : IPackable {
 
     override fun pack(fileName: String) {
         Packer().pack(mkbootfsBin = "./aosp/mkbootfs/build/exe/mkbootfs/mkbootfs")
-        Signer.sign(avbtool = "avb/avbtool", bootSigner = "aosp/boot_signer/build/libs/boot_signer.jar")
+        Signer.sign(avbtool = "aosp/avb/avbtool", bootSigner = "aosp/boot_signer/build/libs/boot_signer.jar")
         if (File("vbmeta.img").exists()) {
             val partitionName = ObjectMapper().readValue(File(Avb.getJsonFileName(fileName)), AVBInfo::class.java).let {
                 it.auxBlob!!.hashDescriptors.get(0).partition_name

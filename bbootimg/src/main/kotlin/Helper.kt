@@ -83,18 +83,6 @@ class Helper {
             return data
         }
 
-        //similar to this.toString(StandardCharsets.UTF_8).replace("${Character.MIN_VALUE}", "")
-        @Deprecated("by 1.3.41 experimental api: String.decodeToString()")
-        fun toCString(ba: ByteArray): String {
-            val str = ba.toString(StandardCharsets.UTF_8)
-            val nullPos = str.indexOf(Character.MIN_VALUE)
-            return if (nullPos >= 0) {
-                str.substring(0, nullPos)
-            } else {
-                str
-            }
-        }
-
         @Throws(IOException::class)
         fun gnuZipFile(compressedFile: String, decompressedFile: String) {
             val buffer = ByteArray(1024)
@@ -302,7 +290,7 @@ class Helper {
         }
 
         fun String.check_call(): Boolean {
-            var ret = false
+            val ret: Boolean
             try {
                 val cmd = CommandLine.parse(this)
                 log.info(cmd.toString())

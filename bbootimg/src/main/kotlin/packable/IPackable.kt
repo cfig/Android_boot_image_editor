@@ -5,6 +5,7 @@ import cfig.Helper.Companion.check_output
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+@ExperimentalUnsignedTypes
 interface IPackable {
     val loopNo: Int
     fun capabilities(): List<String> {

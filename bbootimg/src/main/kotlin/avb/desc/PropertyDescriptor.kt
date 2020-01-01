@@ -9,7 +9,7 @@ class PropertyDescriptor(
         var key: String = "",
         var value: String = "") : Descriptor(TAG, 0U, 0) {
     override fun encode(): ByteArray {
-        if (SIZE != Struct3(FORMAT_STRING).calcSize()!!.toUInt()) {
+        if (SIZE != Struct3(FORMAT_STRING).calcSize().toUInt()) {
             throw RuntimeException()
         }
         this.num_bytes_following = (SIZE + this.key.length.toUInt() + this.value.length.toUInt() + 2U - 16U).toULong()

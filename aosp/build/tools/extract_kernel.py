@@ -187,7 +187,7 @@ def main():
       args.output_configs.write(o)
     else:
       sys.stderr.write(
-          "Cannot extract kernel configs in {}\n".format(args.input.name))
+          "Cannot extract kernel configs in {}".format(args.input.name))
       ret = 1
   if args.output_version is not None:
     o = decompress_dump(dump_version, input_bytes)
@@ -195,7 +195,7 @@ def main():
       args.output_version.write(o)
     else:
       sys.stderr.write(
-          "Cannot extract kernel versions in {}\n".format(args.input.name))
+          "Cannot extract kernel versions in {}".format(args.input.name))
       ret = 1
 
   return ret

@@ -20,7 +20,7 @@ class KernelExtractor {
         val baseDir = "build/unzip_boot"
         val kernelVersionFile = "$baseDir/kernel_version.txt"
         val kernelConfigFile = "$baseDir/kernel_configs.txt"
-        val cmd = CommandLine.parse("external/extract_kernel.py").let {
+        val cmd = CommandLine.parse("aosp/build/tools/extract_kernel.py").let {
             it.addArgument("--input")
             it.addArgument(fileName)
             it.addArgument("--output-configs")

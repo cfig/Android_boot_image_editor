@@ -36,7 +36,7 @@ class Algorithms {
                             intArrayOf(0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86,
                                     0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05,
                                     0x00, 0x04, 0x20)),
-                    defaultKey = "avb/avb_test_data/testkey_rsa2048.pem")
+                    defaultKey = "aosp/avb/avb_test_data/testkey_rsa2048.pem")
 
             val SHA256_RSA4096 = Algorithm(
                     name = "SHA256_RSA4096",
@@ -53,7 +53,7 @@ class Algorithms {
                                     0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05,
                                     0x00, 0x04, 0x20)
                     ),
-                    defaultKey = "avb/avb_test_data/testkey_rsa4096.pem"
+                    defaultKey = "aosp/avb/avb_test_data/testkey_rsa4096.pem"
             )
 
             val SHA256_RSA8192 = Algorithm(
@@ -70,7 +70,7 @@ class Algorithms {
                             intArrayOf(0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86,
                                     0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05,
                                     0x00, 0x04, 0x20)),
-                    defaultKey = "avb/avb_test_data/testkey_rsa8192.pem")
+                    defaultKey = "aosp/avb/avb_test_data/testkey_rsa8192.pem")
 
             val SHA512_RSA2048 = Algorithm(
                     name = "SHA512_RSA2048",
@@ -86,7 +86,7 @@ class Algorithms {
                             intArrayOf(0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86,
                                     0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05,
                                     0x00, 0x04, 0x40)),
-                    defaultKey = "avb/avb_test_data/testkey_rsa2048.pem")
+                    defaultKey = "aosp/avb/avb_test_data/testkey_rsa2048.pem")
 
             val SHA512_RSA4096 = Algorithm(
                     name = "SHA512_RSA4096",
@@ -102,7 +102,7 @@ class Algorithms {
                             intArrayOf(0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86,
                                     0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05,
                                     0x00, 0x04, 0x40)),
-                    defaultKey = "avb/avb_test_data/testkey_rsa4096.pem")
+                    defaultKey = "aosp/avb/avb_test_data/testkey_rsa4096.pem")
 
             val SHA512_RSA8192 = Algorithm(
                     name = "SHA512_RSA8192",
@@ -119,7 +119,7 @@ class Algorithms {
                             intArrayOf(0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86,
                                     0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05,
                                     0x00, 0x04, 0x40)),
-                    defaultKey = "avb/avb_test_data/testkey_rsa8192.pem")
+                    defaultKey = "aosp/avb/avb_test_data/testkey_rsa8192.pem")
 
             algMap[NONE.name] = NONE
 

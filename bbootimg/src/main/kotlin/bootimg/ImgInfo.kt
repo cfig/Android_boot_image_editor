@@ -32,7 +32,7 @@ data class ImgInfo(
     data class VeritySignature(
             var type: String = "dm-verity",
             var path: String = "/boot",
-            var verity_pk8: String = "security/verity.pk8",
-            var verity_pem: String = "security/verity.x509.pem",
+            var verity_pk8: String = "aosp/security/verity.pk8",
+            var verity_pem: String = "aosp/security/verity.x509.pem",
             var jarPath: String = "aosp/boot_signer/build/libs/boot_signer.jar")
 }
