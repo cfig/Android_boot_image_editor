@@ -89,6 +89,7 @@ We now support both VB 1.0 and AVB 2.0 layouts.
 | Nexus 9 (volantis/flounder)    | HTC          | Y(with some tricks)  | 7.1.1 (N9F27M, Oct 2017) | [tricks](doc/additional_tricks.md#tricks-for-nexus-9volantis)|
 | Nexus 5x (bullhead)            | LG           | Y                    | 6.0.0_r12 (MDA89E)       |      |
 | Moto X (2013) T-Mobile         | Motorola     | N                    |                          |      |
+| X7 (PD1602_A_3.12.8)           | VIVO         | N                    | ?                        | [Issue 35](https://github.com/cfig/Android_boot_image_editor/issues/35) |
 
 ## 6. References
 
