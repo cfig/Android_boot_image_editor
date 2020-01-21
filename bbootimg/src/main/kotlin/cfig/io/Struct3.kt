@@ -21,7 +21,6 @@ import cfig.io.Struct3.InputStreamExt.Companion.getUByteArray
 import cfig.io.Struct3.InputStreamExt.Companion.getUInt
 import cfig.io.Struct3.InputStreamExt.Companion.getULong
 import cfig.io.Struct3.InputStreamExt.Companion.getUShort
-import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.InputStream
@@ -40,8 +39,7 @@ class Struct3 {
     private val formats = ArrayList<Array<Any?>>()
 
     constructor(inFormatString: String) {
-        Assert.assertTrue("FORMAT_STRING must not be empty",
-                inFormatString.isNotEmpty())
+        assert(inFormatString.isNotEmpty()) { "FORMAT_STRING must not be empty" }
         formatString = inFormatString
         val m = Pattern.compile("(\\d*)([a-zA-Z])").matcher(formatString)
         when (formatString[0]) {
@@ -137,7 +135,7 @@ class Struct3 {
             val multiple = formats[i][1] as Int
 
             if (typeName !in arrayOf(Random, Byte, String, UByte)) {
-                Assert.assertEquals(1, multiple)
+                assert(1 == multiple)
             }
 
             //x: padding:
@@ -154,8 +152,7 @@ class Struct3 {
 
             //c: character
             if (Char == typeName) {
-                Assert.assertTrue("[$arg](${arg!!::class.java}) is NOT Char",
-                        arg is Char)
+                assert(arg is Char) { "[$arg](${arg!!::class.java}) is NOT Char" }
                 if ((arg as Char) !in '\u0000'..'\u00ff') {
                     throw IllegalArgumentException("arg[${arg.toInt()}] exceeds 8-bit bound")
                 }
@@ -186,9 +183,8 @@ class Struct3 {
 
             //s: String
             if (String == typeName) {
-                Assert.assertNotNull("arg can not be NULL for String, formatString=$formatString, ${getFormatInfo(i)}", arg)
-                Assert.assertTrue("[$arg](${arg!!::class.java}) is NOT String, ${getFormatInfo(i)}",
-                        arg is String)
+                assert(arg != null) { "arg can not be NULL for String, formatString=$formatString, ${getFormatInfo(i)}" }
+                assert(arg is String) { "[$arg](${arg!!::class.java}) is NOT String, ${getFormatInfo(i)}" }
                 bf.appendByteArray((arg as String).toByteArray(), multiple)
                 continue
             }
@@ -197,8 +193,7 @@ class Struct3 {
             if (Short == typeName) {
                 when (arg) {
                     is Int -> {
-                        Assert.assertTrue("[$arg] is truncated as type Short.class",
-                                arg in Short.MIN_VALUE..Short.MAX_VALUE)
+                        assert(arg in Short.MIN_VALUE..Short.MAX_VALUE) { "[$arg] is truncated as type Short.class" }
                         bf.putShort(arg.toShort())
                     }
                     is Short -> bf.putShort(arg) //instance Short
@@ -209,17 +204,14 @@ class Struct3 {
 
             //H: UShort
             if (UShort == typeName) {
-                Assert.assertTrue("[$arg](${arg!!::class.java}) is NOT UShort/UInt/Int",
-                        arg is UShort || arg is UInt || arg is Int)
+                assert(arg is UShort || arg is UInt || arg is Int) { "[$arg](${arg!!::class.java}) is NOT UShort/UInt/Int" }
                 when (arg) {
                     is Int -> {
-                        Assert.assertFalse("[$arg] is truncated as type UShort",
-                                arg < UShort.MIN_VALUE.toInt() || arg > UShort.MAX_VALUE.toInt())
+                        assert(arg >= UShort.MIN_VALUE.toInt() && arg <= UShort.MAX_VALUE.toInt()) { "[$arg] is truncated as type UShort" }
                         bf.putShort(arg.toShort())
                     }
                     is UInt -> {
-                        Assert.assertFalse("[$arg] is truncated as type UShort",
-                                arg < UShort.MIN_VALUE || arg > UShort.MAX_VALUE)
+                        assert(arg >= UShort.MIN_VALUE && arg <= UShort.MAX_VALUE) { "[$arg] is truncated as type UShort" }
                         bf.putShort(arg.toShort())
                     }
                     is UShort -> bf.putShort(arg.toShort())
@@ -229,7 +221,7 @@ class Struct3 {
 
             //i, l: Int
             if (Int == typeName) {
-                Assert.assertTrue("[$arg](${arg!!::class.java}) is NOT Int", arg is Int)
+                assert(arg is Int) { "[$arg](${arg!!::class.java}) is NOT Int" }
                 bf.putInt(arg as Int)
                 continue
             }
@@ -238,12 +230,12 @@ class Struct3 {
             if (UInt == typeName) {
                 when (arg) {
                     is Int -> {
-                        Assert.assertTrue("[$arg] is invalid as type UInt", arg >= 0)
+                        assert(arg >= 0) { "[$arg] is invalid as type UInt" }
                         bf.putInt(arg)
                     }
                     is UInt -> bf.putInt(arg.toInt())
                     is Long -> {
-                        Assert.assertTrue("[$arg] is invalid as type UInt", arg >= 0)
+                        assert(arg >= 0) { "[$arg] is invalid as type UInt" }
                         bf.putInt(arg.toInt())
                     }
                     else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT UInt/Int/Long")
@@ -265,11 +257,11 @@ class Struct3 {
             if (ULong == typeName) {
                 when (arg) {
                     is Int -> {
-                        Assert.assertTrue("[$arg] is invalid as type ULong", arg >= 0)
+                        assert(arg >= 0) { "[$arg] is invalid as type ULong" }
                         bf.putLong(arg.toLong())
                     }
                     is Long -> {
-                        Assert.assertTrue("[$arg] is invalid as type ULong", arg >= 0)
+                        assert(arg >= 0) { "[$arg] is invalid as type ULong" }
                         bf.putLong(arg)
                     }
                     is ULong -> bf.putLong(arg.toLong())
@@ -371,55 +363,55 @@ class Struct3 {
         companion object {
             fun InputStream.getChar(): Char {
                 val data = ByteArray(Byte.SIZE_BYTES)
-                Assert.assertEquals(Byte.SIZE_BYTES, this.read(data))
+                assert(Byte.SIZE_BYTES == this.read(data))
                 return data[0].toChar()
             }
 
             fun InputStream.getShort(inByteOrder: ByteOrder): Short {
                 val data = ByteArray(Short.SIZE_BYTES)
-                Assert.assertEquals(Short.SIZE_BYTES, this.read(data))
+                assert(Short.SIZE_BYTES == this.read(data))
                 return data.toShort(inByteOrder)
             }
 
             fun InputStream.getInt(inByteOrder: ByteOrder): Int {
                 val data = ByteArray(Int.SIZE_BYTES)
-                Assert.assertEquals(Int.SIZE_BYTES, this.read(data))
+                assert(Int.SIZE_BYTES == this.read(data))
                 return data.toInt(inByteOrder)
             }
 
             fun InputStream.getLong(inByteOrder: ByteOrder): Long {
                 val data = ByteArray(Long.SIZE_BYTES)
-                Assert.assertEquals(Long.SIZE_BYTES, this.read(data))
+                assert(Long.SIZE_BYTES == this.read(data))
                 return data.toLong(inByteOrder)
             }
 
             fun InputStream.getUShort(inByteOrder: ByteOrder): UShort {
                 val data = ByteArray(UShort.SIZE_BYTES)
-                Assert.assertEquals(UShort.SIZE_BYTES, this.read(data))
+                assert(UShort.SIZE_BYTES == this.read(data))
                 return data.toUShort(inByteOrder)
             }
 
             fun InputStream.getUInt(inByteOrder: ByteOrder): UInt {
                 val data = ByteArray(UInt.SIZE_BYTES)
-                Assert.assertEquals(UInt.SIZE_BYTES, this.read(data))
+                assert(UInt.SIZE_BYTES == this.read(data))
                 return data.toUInt(inByteOrder)
             }
 
             fun InputStream.getULong(inByteOrder: ByteOrder): ULong {
                 val data = ByteArray(ULong.SIZE_BYTES)
-                Assert.assertEquals(ULong.SIZE_BYTES, this.read(data))
+                assert(ULong.SIZE_BYTES == this.read(data))
                 return data.toULong(inByteOrder)
             }
 
             fun InputStream.getByteArray(inSize: Int): ByteArray {
                 val data = ByteArray(inSize)
-                Assert.assertEquals(inSize, this.read(data))
+                assert(inSize == this.read(data))
                 return data
             }
 
             fun InputStream.getUByteArray(inSize: Int): UByteArray {
                 val data = ByteArray(inSize)
-                Assert.assertEquals(inSize, this.read(data))
+                assert(inSize == this.read(data))
                 val innerData2 = mutableListOf<UByte>()
                 data.toMutableList().mapTo(innerData2, { it.toUByte() })
                 return innerData2.toUByteArray()
@@ -427,15 +419,15 @@ class Struct3 {
 
             fun InputStream.getCString(inSize: Int): String {
                 val data = ByteArray(inSize)
-                Assert.assertEquals(inSize, this.read(data))
+                assert(inSize == this.read(data))
                 return data.toCString()
             }
 
             fun InputStream.getPadding(inSize: Int): Byte {
                 val data = ByteArray(Byte.SIZE_BYTES)
-                Assert.assertEquals(Byte.SIZE_BYTES, this.read(data)) //sample the 1st byte
+                assert(Byte.SIZE_BYTES == this.read(data)) //sample the 1st byte
                 val skipped = this.skip(inSize.toLong() - Byte.SIZE_BYTES)//skip remaining to save memory
-                Assert.assertEquals(inSize.toLong() - Byte.SIZE_BYTES, skipped)
+                assert(inSize.toLong() - Byte.SIZE_BYTES == skipped)
                 return data[0]
             }
         }
@@ -445,7 +437,7 @@ class Struct3 {
         companion object {
             fun ByteArray.toShort(inByteOrder: ByteOrder): Short {
                 val typeSize = Short.SIZE_BYTES / Byte.SIZE_BYTES
-                Assert.assertEquals("Short must have $typeSize bytes", typeSize, this.size)
+                assert(typeSize == this.size) { "Short must have $typeSize bytes" }
                 var ret: Short
                 ByteBuffer.allocate(typeSize).let {
                     it.order(inByteOrder)
@@ -458,7 +450,7 @@ class Struct3 {
 
             fun ByteArray.toInt(inByteOrder: ByteOrder): Int {
                 val typeSize = Int.SIZE_BYTES / Byte.SIZE_BYTES
-                Assert.assertEquals("Int must have $typeSize bytes", typeSize, this.size)
+                assert(typeSize == this.size) { "Int must have $typeSize bytes" }
                 var ret: Int
                 ByteBuffer.allocate(typeSize).let {
                     it.order(inByteOrder)
@@ -471,7 +463,7 @@ class Struct3 {
 
             fun ByteArray.toLong(inByteOrder: ByteOrder): Long {
                 val typeSize = Long.SIZE_BYTES / Byte.SIZE_BYTES
-                Assert.assertEquals("Long must have $typeSize bytes", typeSize, this.size)
+                assert(typeSize == this.size) { "Long must have $typeSize bytes" }
                 var ret: Long
                 ByteBuffer.allocate(typeSize).let {
                     it.order(inByteOrder)
@@ -484,7 +476,7 @@ class Struct3 {
 
             fun ByteArray.toUShort(inByteOrder: ByteOrder): UShort {
                 val typeSize = UShort.SIZE_BYTES / Byte.SIZE_BYTES
-                Assert.assertEquals("UShort must have $typeSize bytes", typeSize, this.size)
+                assert(typeSize == this.size) { "UShort must have $typeSize bytes" }
                 var ret: UShort
                 ByteBuffer.allocate(typeSize).let {
                     it.order(inByteOrder)
@@ -497,7 +489,7 @@ class Struct3 {
 
             fun ByteArray.toUInt(inByteOrder: ByteOrder): UInt {
                 val typeSize = UInt.SIZE_BYTES / Byte.SIZE_BYTES
-                Assert.assertEquals("UInt must have $typeSize bytes", typeSize, this.size)
+                assert(typeSize == this.size) { "UInt must have $typeSize bytes" }
                 var ret: UInt
                 ByteBuffer.allocate(typeSize).let {
                     it.order(inByteOrder)
@@ -510,7 +502,7 @@ class Struct3 {
 
             fun ByteArray.toULong(inByteOrder: ByteOrder): ULong {
                 val typeSize = ULong.SIZE_BYTES / Byte.SIZE_BYTES
-                Assert.assertEquals("ULong must have $typeSize bytes", typeSize, this.size)
+                assert(typeSize == this.size) { "ULong must have $typeSize bytes" }
                 var ret: ULong
                 ByteBuffer.allocate(typeSize).let {
                     it.order(inByteOrder)
