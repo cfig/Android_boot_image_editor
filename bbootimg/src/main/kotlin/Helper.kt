@@ -9,8 +9,6 @@ import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.ExecuteException
 import org.apache.commons.exec.PumpStreamHandler
-import org.junit.Assert
-import org.junit.Assert.assertTrue
 import org.slf4j.LoggerFactory
 import java.io.*
 import java.math.BigInteger
@@ -175,7 +173,7 @@ class Helper {
                 RandomAccessFile(outImgName, "rw").use { outRaf ->
                     inRaf.seek(offset)
                     val data = ByteArray(length)
-                    assertTrue(length == inRaf.read(data))
+                    assert(length == inRaf.read(data))
                     outRaf.write(data)
                 }
             }
@@ -210,7 +208,7 @@ class Helper {
          */
         fun encodeRSAkey(key: ByteArray): ByteArray {
             val rsa = KeyUtil.parsePemPrivateKey(ByteArrayInputStream(key))
-            Assert.assertEquals(65537.toBigInteger(), rsa.publicExponent)
+            assert(65537.toBigInteger() == rsa.publicExponent)
             val numBits: Int = BigIntegerMath.log2(rsa.modulus, RoundingMode.CEILING)
             log.debug("modulus: " + rsa.modulus)
             log.debug("numBits: $numBits")

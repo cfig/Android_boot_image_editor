@@ -1,7 +1,6 @@
 package avb.blob
 
 import cfig.io.Struct3
-import org.junit.Assert
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -35,7 +34,7 @@ data class Footer constructor(
     @Throws(IllegalArgumentException::class)
     constructor(iS: InputStream) : this() {
         val info = Struct3(FORMAT_STRING).unpack(iS)
-        Assert.assertEquals(7, info.size)
+        assert(7 == info.size)
         if (MAGIC != (info[0] as String)) {
             throw IllegalArgumentException("stream doesn't look like valid AVB Footer")
         }
@@ -81,7 +80,7 @@ data class Footer constructor(
         private const val FORMAT_STRING = "!4s2L3Q${RESERVED}x"
 
         init {
-            Assert.assertEquals(SIZE, Struct3(FORMAT_STRING).calcSize())
+            assert(SIZE == Struct3(FORMAT_STRING).calcSize())
         }
     }
 }

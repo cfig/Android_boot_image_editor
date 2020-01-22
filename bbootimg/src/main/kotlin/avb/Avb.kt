@@ -11,7 +11,6 @@ import cfig.Helper.Companion.paddingWith
 import cfig.io.Struct3
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
-import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -93,7 +92,7 @@ class Avb {
             log.info("4/4 Appending AVB footer (${footerBlobWithPadding.size} bytes)...")
             fos.write(footerBlobWithPadding)
         }
-        Assert.assertEquals("generated file size mismatch", partition_size, File(image_file).length())
+        assert(partition_size == File(image_file).length()) { "generated file size mismatch" }
         log.info("addHashFooter($image_file) done.")
     }
 

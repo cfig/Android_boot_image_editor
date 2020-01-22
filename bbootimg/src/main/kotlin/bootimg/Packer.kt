@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.PumpStreamHandler
-import org.junit.Assert.assertTrue
 import org.slf4j.LoggerFactory
 import java.io.*
 import java.nio.ByteBuffer
@@ -50,7 +49,7 @@ class Packer {
     }
 
     private fun writePaddedFile(inBF: ByteBuffer, srcFile: String, padding: UInt) {
-        assertTrue(padding < Int.MAX_VALUE.toUInt())
+        assert(padding < Int.MAX_VALUE.toUInt())
         writePaddedFile(inBF, srcFile, padding.toInt())
     }
 

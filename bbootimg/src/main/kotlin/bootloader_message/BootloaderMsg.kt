@@ -1,7 +1,6 @@
 package cfig.bootloader_message
 
 import cfig.io.Struct3
-import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -23,7 +22,7 @@ data class BootloaderMsg(
         private val log = LoggerFactory.getLogger("BootloaderMsg")
 
         init {
-            Assert.assertEquals(SIZE, Struct3(FORMAT_STRING).calcSize())
+            assert(SIZE == Struct3(FORMAT_STRING).calcSize())
         }
     }
 

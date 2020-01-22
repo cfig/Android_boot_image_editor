@@ -2,7 +2,6 @@ package avb.desc
 
 import cfig.Helper
 import cfig.io.Struct3
-import org.junit.Assert
 import java.io.InputStream
 
 @ExperimentalUnsignedTypes
@@ -60,7 +59,7 @@ class KernelCmdlineDescriptor(
         const val flagHashTreeDisabled = 2U
 
         init {
-            Assert.assertEquals(SIZE, Struct3(FORMAT_STRING).calcSize())
+            assert(SIZE == Struct3(FORMAT_STRING).calcSize())
         }
     }
 }

@@ -2,7 +2,6 @@ package avb.blob
 
 import cfig.Avb
 import cfig.io.Struct3
-import org.junit.Assert
 import java.io.InputStream
 
 //avbtool::AvbVBMetaHeader
@@ -29,7 +28,7 @@ data class Header(
     @Throws(IllegalArgumentException::class)
     constructor(iS: InputStream) : this() {
         val info = Struct3(FORMAT_STRING).unpack(iS)
-        Assert.assertEquals(22, info.size)
+        assert(22 == info.size)
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like valid VBMeta Header")
         }
@@ -109,7 +108,7 @@ data class Header(
         private const val FORMAT_STRING = ("!4s2L2QL11QL${REVERSED0}x47sx" + "${REVERSED}x")
 
         init {
-            Assert.assertEquals(SIZE, Struct3(FORMAT_STRING).calcSize())
+            assert(SIZE == Struct3(FORMAT_STRING).calcSize())
         }
     }
 }

@@ -6,7 +6,6 @@ import cfig.Helper
 import cfig.io.Struct3
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -98,7 +97,7 @@ class AuxBlob(
                 }
                 encodedKey = Helper.encodeRSAkey(algKey!!)
                 log.info("encodePubKey(): size = ${alg.public_key_num_bytes}, algorithm key size: ${encodedKey.size}")
-                Assert.assertEquals(alg.public_key_num_bytes, encodedKey.size)
+                assert(alg.public_key_num_bytes == encodedKey.size)
             } else {
                 log.info("encodePubKey(): No key to encode for algorithm " + alg.name)
             }

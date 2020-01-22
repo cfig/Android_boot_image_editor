@@ -4,7 +4,6 @@ import avb.blob.Header
 import cfig.Helper
 import cfig.io.Struct3
 import org.apache.commons.codec.binary.Hex
-import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -50,7 +49,7 @@ class HashDescriptor(var flags: UInt = 0U,
             throw IllegalArgumentException("Given data does not look like a |hash| descriptor")
         }
         val payload = Struct3("${this.partition_name_len}s${this.salt_len}b${this.digest_len}b").unpack(data)
-        Assert.assertEquals(3, payload.size)
+        assert(3 == payload.size)
         this.partition_name = payload[0] as String
         this.salt = payload[1] as ByteArray
         this.digest = payload[2] as ByteArray

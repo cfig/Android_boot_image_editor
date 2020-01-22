@@ -3,7 +3,6 @@ package avb.desc
 import cfig.Helper
 import cfig.io.Struct3
 import org.apache.commons.codec.binary.Hex
-import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.InputStream
@@ -108,7 +107,7 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0U, 0U
         }
 
         init {
-            Assert.assertEquals(SIZE, Struct3(FORMAT).calcSize())
+            assert(SIZE == Struct3(FORMAT).calcSize())
         }
     }
 }

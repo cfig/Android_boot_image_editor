@@ -3,7 +3,6 @@ package cfig.bootimg
 import cfig.Helper
 import cfig.ParamConfig
 import cfig.io.Struct3
-import org.junit.Assert
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -53,7 +52,7 @@ open class BootImgHeader(
         }
         log.warn("BootImgHeader constructor")
         val info = Struct3(FORMAT_STRING).unpack(iS)
-        Assert.assertEquals(20, info.size)
+        assert(20 == info.size)
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like Android Boot Image Header")
         }
@@ -118,9 +117,9 @@ open class BootImgHeader(
             if (m.groupCount() == 3) {
                 c = Integer.decode(m.group(3))
             }
-            Assert.assertTrue(a < 128)
-            Assert.assertTrue(b < 128)
-            Assert.assertTrue(c < 128)
+            assert(a < 128)
+            assert(b < 128)
+            assert(c < 128)
             return (a shl 14) or (b shl 7) or c
         } else {
             throw IllegalArgumentException("invalid os_version")
@@ -136,8 +135,8 @@ open class BootImgHeader(
             val y = Integer.parseInt(matcher.group(1), 10) - 2000
             val m = Integer.parseInt(matcher.group(2), 10)
             // 7 bits allocated for the year, 4 bits for the month
-            Assert.assertTrue(y in 0..127)
-            Assert.assertTrue(m in 1..12)
+            assert(y in 0..127)
+            assert(m in 1..12)
             ret = (y shl 4) or m
         } else {
             throw IllegalArgumentException("invalid os_patch_level")
@@ -181,9 +180,9 @@ open class BootImgHeader(
 
     private fun get_recovery_dtbo_offset(): UInt {
         return Helper.round_to_multiple(this.headerSize, pageSize) +
-            Helper.round_to_multiple(this.kernelLength, pageSize) +
-            Helper.round_to_multiple(this.ramdiskLength, pageSize) +
-            Helper.round_to_multiple(this.secondBootloaderLength, pageSize)
+                Helper.round_to_multiple(this.kernelLength, pageSize) +
+                Helper.round_to_multiple(this.ramdiskLength, pageSize) +
+                Helper.round_to_multiple(this.secondBootloaderLength, pageSize)
     }
 
     private fun refresh() {
@@ -245,8 +244,7 @@ open class BootImgHeader(
         val pageSizeChoices: MutableSet<Long> = mutableSetOf<Long>().apply {
             (11..14).forEach { add(2.0.pow(it).toLong()) }
         }
-        Assert.assertTrue("invalid parameter [pageSize=$pageSize], (choose from $pageSizeChoices)",
-                pageSizeChoices.contains(pageSize.toLong()))
+        assert(pageSizeChoices.contains(pageSize.toLong())) { "invalid parameter [pageSize=$pageSize], (choose from $pageSizeChoices)" }
         return Struct3(FORMAT_STRING).pack(
                 "ANDROID!",
                 //10I
@@ -304,7 +302,7 @@ open class BootImgHeader(
         const val BOOT_IMAGE_HEADER_V1_SIZE = 1648
 
         init {
-            Assert.assertEquals(BOOT_IMAGE_HEADER_V2_SIZE, Struct3(FORMAT_STRING).calcSize())
+            assert(BOOT_IMAGE_HEADER_V2_SIZE == Struct3(FORMAT_STRING).calcSize())
         }
     }
 }
