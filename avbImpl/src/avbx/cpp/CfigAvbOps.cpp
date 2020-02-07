@@ -41,7 +41,6 @@ static size_t get_file_size(const char *filename) {
 }
 
 static AvbIOResult read_is_device_unlockedX(AvbOps *, bool *out_is_unlocked) {
-    std::cout << "[" << __FUNCTION__ << "()]:" << std::endl;
     std::string line = read_line(lockStatusFile);
     if ("0" == line) {
         *out_is_unlocked = true;
@@ -67,6 +66,7 @@ std::string hexStr(const unsigned char *data, int len) {
 }
 
 bool write_to_file(std::string file, std::string value) {
+    std::cout << "write_to_file(file=" << file << ", value=" << value << ")" << std::endl;
     FILE *fp;
     fp = fopen(file.c_str(), "w");
     if (fp == nullptr) {
@@ -144,7 +144,6 @@ static AvbIOResult write_to_partitionX(AvbOps *,
 static AvbIOResult get_size_of_partitionX(AvbOps *,
                                           const char *partition,
                                           uint64_t *out_size_num_bytes) {
-    std::cout << "[" << __FUNCTION__ << "()]:" << std::endl;
     auto partitionFile = getPartitionFile(partition);
     if (validPartitions.find(partitionFile) == validPartitions.end()) {
         std::cout << "[" << __FUNCTION__ << "(" << partition << ")]: NO_SUCH_PARTITION" << std::endl;
@@ -152,14 +151,17 @@ static AvbIOResult get_size_of_partitionX(AvbOps *,
     }
     auto file_size = get_file_size(partitionFile.c_str());
     if (-1 == file_size) {
-        std::cout << "\t: error when accessing file [" << partitionFile << "]" << std::endl;
+        std::cout << "[" << __FUNCTION__ << "(" << partition << ")]: ";
+        std::cout << ": error when accessing file [" << partitionFile << "]" << std::endl;
         return AVB_IO_RESULT_ERROR_IO;
     } else {
-        std::cout << "\t: partition " << partitionFile << " size: " << file_size << std::endl;
+        std::cout << "[" << __FUNCTION__ << "(" << partition << ")]: ";
+        std::cout << ": partition " << partitionFile << " size: " << file_size << std::endl;
         if (out_size_num_bytes != nullptr) {
             *out_size_num_bytes = file_size;
         } else {
-            std::cerr << "\t: size is not passed back" << std::endl;
+            std::cerr << "[" << __FUNCTION__ << "(" << partition << ")]: ";
+            std::cerr << ": size is not passed back" << std::endl;
         }
     }
     return AVB_IO_RESULT_OK;
@@ -253,25 +255,30 @@ static AvbIOResult get_preloaded_partitionX(AvbOps *,
 
     auto it = preloaded_partitions_.find(std::string(partition));
     if (it == preloaded_partitions_.end()) {
-        fprintf(stdout, "\t%s: partition [%s] not preloaded\n", __FUNCTION__, partition);
+        fprintf(stdout, "[%s()]: partition [%s] not preloaded\n", __FUNCTION__, partition);
         *out_pointer = nullptr;
         *out_num_bytes_preloaded = 0;
         return AVB_IO_RESULT_OK;
     }
 
-    uint64_t size;
-    AvbIOResult result = get_size_of_partitionX(nullptr, partition, &size);
+    uint64_t partSize;
+    AvbIOResult result = get_size_of_partitionX(nullptr, partition, &partSize);
     if (result != AVB_IO_RESULT_OK) {
-        std::cout << "\t" << __FUNCTION__ << ": can not get size of partition: (" << partition << ")" << std::endl;
+        std::cout << "[" << __FUNCTION__ << "()]: can not get size of partition: (" << partition << ")" << std::endl;
         return result;
     }
-    if (size != num_bytes) {
-        std::cout << "\t" << __FUNCTION__ << ": size(" << size << ") != num_bytes(" << num_bytes << "), can not proceed"
+
+    if (num_bytes > partSize) {
+        std::cout << "[" << __FUNCTION__ << "()]: size(" << partSize << ") < num_bytes(" << num_bytes << "), can not proceed"
                   << std::endl;
         return AVB_IO_RESULT_ERROR_IO;
+    } else if (num_bytes < partSize) {
+        *out_num_bytes_preloaded = num_bytes;
+    } else {
+        //exact match
+        *out_num_bytes_preloaded = partSize;
     }
 
-    *out_num_bytes_preloaded = num_bytes;
     *out_pointer = it->second;
     return AVB_IO_RESULT_OK;
 }
@@ -282,7 +289,6 @@ static AvbIOResult validate_vbmeta_public_keyX(AvbOps *,
                                                const uint8_t *public_key_metadata,
                                                size_t public_key_metadata_length,
                                                bool *out_key_is_trusted) {
-    std::cout << "[" << __FUNCTION__ << "()]:" << std::endl;
     if (out_key_is_trusted != nullptr) {
         bool pk_matches = (public_key_length == expected_public_key_.size() &&
                            (memcmp(expected_public_key_.c_str(),
@@ -293,13 +299,17 @@ static AvbIOResult validate_vbmeta_public_keyX(AvbOps *,
                  (memcmp(expected_public_key_metadata_.c_str(),
                          public_key_metadata,
                          public_key_metadata_length) == 0));
+        std::cout << "[" << __FUNCTION__ << "(): " << "pk_matches = " << pk_matches << ", pkmd_matches = " << pkmd_matches << std::endl;
         *out_key_is_trusted = pk_matches && pkmd_matches;
+    } else {
+        std::cout << "[" << __FUNCTION__ << "(out_key_is_trusted = null)]: invalid arg" << std::endl;
     }
+
     return AVB_IO_RESULT_OK;
 }
 
 bool CfigAvbOps::preload_partition(std::string partition) {
-    std::cout << "[" << __FUNCTION__ << "()]:" << std::endl;
+    std::cout << "[" << __FUNCTION__ << "(" << partition << ")]:" << std::endl;
     if (preloaded_partitions_.count(partition) > 0) {
         fprintf(stderr, "\t: Partition '%s' already preloaded\n", partition.c_str());
         return false;
@@ -347,9 +357,9 @@ bool CfigAvbOps::preload_partition(std::string partition) {
 static AvbIOResult read_rollback_indexX(AvbOps *,
                                         size_t rollback_index_location,
                                         uint64_t *out_rollback_index) {
-    std::cout << "[" << __FUNCTION__ << "](loc=" << rollback_index_location << ")" << std::endl;
     std::string line = read_line("config/rollbackIndex_" + std::to_string(rollback_index_location));
     if (line.empty()) {
+        std::cout << "[" << __FUNCTION__ << "](loc=" << rollback_index_location << "), ret=ERROR_IO" << std::endl;
         return AVB_IO_RESULT_ERROR_IO;
     } else {
         uint64_t value;
@@ -357,9 +367,9 @@ static AvbIOResult read_rollback_indexX(AvbOps *,
         iss >> value;
         if (out_rollback_index != nullptr) {
             *out_rollback_index = value;
-            std::cout << "[" << __FUNCTION__ << "](loc=" << rollback_index_location << ") = " << value << std::endl;
+            std::cout << "[" << __FUNCTION__ << "](loc=" << rollback_index_location << "), ret = " << value << std::endl;
         } else {
-            std::cout << "[" << __FUNCTION__ << "](loc=" << rollback_index_location << ") = " << value
+            std::cout << "[" << __FUNCTION__ << "](loc=" << rollback_index_location << "), ret = " << value
                       << ", value not passed out " << std::endl;
         }
         return AVB_IO_RESULT_OK;
@@ -383,9 +393,9 @@ static AvbIOResult get_unique_guid_for_partitionX(AvbOps *,
                                                   const char *partition,
                                                   char *guid_buf,
                                                   size_t guid_buf_size) {
-    std::cout << "[" << __FUNCTION__ << "()]:" << std::endl;
     std::string uuid = "1dddd936-20da-460a-834c-b938a89acab0";
     snprintf(guid_buf, guid_buf_size, "%s-%s", uuid.c_str(), partition);
+    std::cout << "[" << __FUNCTION__ << "(" << partition << ")]: set fake value: " << guid_buf << std::endl;
     return AVB_IO_RESULT_OK;
 }
 
@@ -395,7 +405,7 @@ static AvbIOResult read_persistent_valueX(AvbOps *,
                                           size_t buffer_size,
                                           uint8_t *out_buffer,
                                           size_t *out_num_bytes_read) {
-    std::cout << "[" << __FUNCTION__ << "()]:" << std::endl;
+    std::cout << "[" << __FUNCTION__ << "()]: ret = AVB_IO_RESULT_ERROR_NO_SUCH_VALUE" << std::endl;
     return AVB_IO_RESULT_ERROR_NO_SUCH_VALUE;
 }
 
@@ -404,7 +414,7 @@ static AvbIOResult write_persistent_valueX(AvbOps *,
                                            const char *name,
                                            size_t value_size,
                                            const uint8_t *value) {
-    std::cout << "[" << __FUNCTION__ << "()]:" << std::endl;
+    std::cout << "[" << __FUNCTION__ << "()]: ret = AVB_IO_RESULT_ERROR_NO_SUCH_VALUE" << std::endl;
     return AVB_IO_RESULT_ERROR_NO_SUCH_VALUE;
 }
 
@@ -435,11 +445,10 @@ static AvbIOResult validate_public_key_for_partitionX(
 }
 
 static void loadPubkey() {
-    std::cout << "[" << __FUNCTION__ << "()]:" << std::endl;
     auto key_file = pubkeyFile;
     std::ifstream ifs(key_file, std::ios::binary | std::ios::ate);
     if (ifs) {
-        std::cout << "loading key from " << key_file << std::endl;
+        std::cout << "[" << __FUNCTION__ << "()]:" << "loading key from " << key_file << std::endl;
         std::streamsize size = ifs.tellg();
         ifs.seekg(0, std::ios::beg);
         std::vector<char> buffer(size);
@@ -449,13 +458,13 @@ static void loadPubkey() {
             std::ofstream ofs("out.key");
             ofs << expected_public_key_;
             ofs.close();
-            std::cout << "pubkey read finished" << std::endl;
+            std::cout << "[" << __FUNCTION__ << "()]:" << "pubkey read finished" << std::endl;
         } else {
-            std::cout << "error: only " << ifs.gcount() << " could be read";
+            std::cout << "[" << __FUNCTION__ << "()]:" << "error: only " << ifs.gcount() << " could be read";
         }
         ifs.close();
     } else {
-        std::cerr << "can not open pubkey file: " << pubkeyFile << std::endl;
+        std::cerr << "[" << __FUNCTION__ << "()]:" << "can not open pubkey file: " << pubkeyFile << std::endl;
         abort();
     }
 }
@@ -465,15 +474,15 @@ static bool startsWith(const std::string &s, const std::string &sub) {
 }
 
 static bool endsWith(const std::string &s, const std::string &sub) {
-    return s.rfind(sub) == (s.length() - sub.length());
+    return (s.rfind(sub) == (s.length() - sub.length())) && (s.length() >= sub.length());
 }
 
 static void populatePartitions(const char *path) {
-    std::cout << "[" << __FUNCTION__ << "()]:" << std::endl;
     struct dirent *entry;
     DIR *dir = opendir(path);
     if (dir == nullptr) {
-        std::cerr << __FUNCTION__ << ": can not open dir: " << path << std::endl;
+        std::cerr << "[" << __FUNCTION__ << "(path=" << path << ")]:";
+        std::cerr << ": can not open dir: " << path << std::endl;
         return;
     }
     while ((entry = readdir(dir)) != nullptr) {
@@ -481,7 +490,7 @@ static void populatePartitions(const char *path) {
             auto dn = std::string(entry->d_name);
             if (endsWith(dn, ".img")) {
                 validPartitions.insert(dn);
-//                cout << "Valid: " << dn << endl;
+                //std::cout << "Valid: " << dn << std::endl;
             } else {
                 //pass
             }
@@ -490,9 +499,11 @@ static void populatePartitions(const char *path) {
         }
     }
     closedir(dir);
+    std::cout << "[" << __FUNCTION__ << "(path=" << path << ")]: parts = { ";
     for (const auto &validPartition : validPartitions) {
-//        cout << "Parts: " << validPartition << endl;
+        std::cout << validPartition << " ";
     }
+    std::cout << "}" << std::endl;
 }
 
 static bool fileExists(const std::string &name) {
@@ -523,11 +534,21 @@ CfigAvbOps::CfigAvbOps() {
     loadPubkey();
     populatePartitions(".");
     if (!fileExists("config")) {
+        std::cout << "init: config/ dir" << std::endl;
         if (-1 == mkdir("config", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)) {
             std::cout << "can not make config dir: " << errno << ", msg=" << strerror(errno) << std::endl;
         }
     }
     if (!fileExists(lockStatusFile)) {
+        std::cout << __FUNCTION__ << ": lockStatusFile" << std::endl;
         write_to_file(lockStatusFile, "");
+    }
+    if (!fileExists("config/rollbackIndex_0")) {
+        std::cout << "config/rollbackIndex_0" << std::endl;
+        write_to_file("config/rollbackIndex_0", "0");
+    }
+    if (!fileExists("config/rollbackIndex_1")) {
+        std::cout << "config/rollbackIndex_1" << std::endl;
+        write_to_file("config/rollbackIndex_1", "0");
     }
 }

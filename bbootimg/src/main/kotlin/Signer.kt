@@ -61,7 +61,9 @@ class Signer {
                         File(cfg.info.output + ".clear").copyTo(File(cfg.info.output + ".signed2"))
                         DefaultExecutor().execute(this)
                     }
-                    Parser.verifyAVBIntegrity(cfg.info.output, avbtool)
+                    //TODO: decide what to verify
+                    //Parser.verifyAVBIntegrity(cfg.info.output + ".signed", avbtool)
+                    //Parser.verifyAVBIntegrity(cfg.info.output + ".signed2", avbtool)
                 }
             }
         }

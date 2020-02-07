@@ -10,7 +10,7 @@ CFLAGS := \
     -DAVB_ENABLE_DEBUG \
     -DAVB_COMPILATION \
     -Wall -g
-nativeLibrary: build/libs/avb/shared/libavb.so
+nativeLibrary: build/libs/avb/shared/libavb.dylib
 CPP_FILES := $(wildcard src/avb/c/*.c)
 OBJ_FILES := $(patsubst src/avb/c/%,build/%,$(CPP_FILES:.c=.o))
 
@@ -21,6 +21,6 @@ build/%.o: $(src_dir)/%.c
 	mkdir -p $(dir $@)
 	$(CC) -fPIC $(CFLAGS) -c -o $@ $<
 
-build/libs/avb/shared/libavb.so: $(OBJ_FILES)
+build/libs/avb/shared/libavb.dylib: $(OBJ_FILES)
 	mkdir -p $(dir $@)
 	$(CC) -shared -fPIC $^ -o $@

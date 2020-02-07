@@ -8,7 +8,7 @@ model {
     }
 
     components {
-        libavbx(NativeLibrarySpec) {
+        avbx(NativeLibrarySpec) {
             sources {
                 cpp {
                     lib project: ":aosp:libavb", library: "avb"
@@ -17,6 +17,19 @@ model {
             binaries.all {
                 cCompiler.args << "-Wall" << "-g"
                 cppCompiler.args << "--std=c++11"
+            }
+        }
+
+        avbVerifier(NativeExecutableSpec) {
+            sources {
+                cpp {
+                    lib project: ":aosp:libavb", library: "avb", linkage: "static"
+                    lib project: ":avbImpl", library: "avbx", linkage: "static"
+                }
+            }
+            binaries.all {
+                cppCompiler.define "XXX"
+                cppCompiler.args << '-std=c++11'
             }
         }
     }
