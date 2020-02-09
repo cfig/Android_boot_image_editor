@@ -1,12 +1,14 @@
 package cfig.packable
 
 import avb.AVBInfo
+import avb.blob.Footer
 import cfig.*
 import cfig.bootimg.BootImgInfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.FileInputStream
 import java.lang.IllegalArgumentException
 
 @ExperimentalUnsignedTypes
@@ -20,18 +22,17 @@ class BootImgParser() : IPackable {
     }
 
     private fun unpackVBMeta(): Boolean {
-        if (File("vbmeta.img").exists()) {
+        return if (File("vbmeta.img").exists()) {
             log.warn("Found vbmeta.img, parsing ...")
             VBMetaParser().unpack("vbmeta.img")
-            return true
+            true
         } else {
-            return false
+            false
         }
     }
 
     override fun unpack(fileName: String) {
-        if (File(UnifiedConfig.workDir).exists()) File(UnifiedConfig.workDir).deleteRecursively()
-        File(UnifiedConfig.workDir).mkdirs()
+        cleanUp()
         try {
             val info = Parser().parseBootImgHeader(fileName, avbtool = "aosp/avb/avbtool")
             InfoTable.instance.addRule()
@@ -97,5 +98,18 @@ class BootImgParser() : IPackable {
     override fun flash(fileName: String, deviceName: String) {
         val stem = fileName.substring(0, fileName.indexOf("."))
         super.flash("$fileName.signed", stem)
+    }
+
+    // invoked solely by reflection
+    fun `@footer`(image_file: String) {
+        FileInputStream(image_file).use { fis ->
+            fis.skip(File(image_file).length() - Footer.SIZE)
+            try {
+                val footer = Footer(fis)
+                log.info("\n" + ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(footer))
+            } catch (e: IllegalArgumentException) {
+                log.info("image $image_file has no AVB Footer")
+            }
+        }
     }
 }

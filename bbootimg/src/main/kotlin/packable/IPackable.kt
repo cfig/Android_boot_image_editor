@@ -2,8 +2,10 @@ package cfig.packable
 
 import cfig.Helper.Companion.check_call
 import cfig.Helper.Companion.check_output
+import cfig.UnifiedConfig
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.File
 
 @ExperimentalUnsignedTypes
 interface IPackable {
@@ -27,6 +29,11 @@ interface IPackable {
         "adb push $fileName /cache/file.to.burn".check_call()
         "adb shell dd if=/cache/file.to.burn of=/dev/block/by-name/$deviceName$slotSuffix".check_call()
         "adb shell rm /cache/file.to.burn".check_call()
+    }
+
+    fun cleanUp() {
+        if (File(UnifiedConfig.workDir).exists()) File(UnifiedConfig.workDir).deleteRecursively()
+        File(UnifiedConfig.workDir).mkdirs()
     }
 
     companion object {

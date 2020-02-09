@@ -34,10 +34,12 @@ def cleanUp():
     deleteIfExists("boot.img.clear")
     deleteIfExists("boot.img.google")
     deleteIfExists("boot.img.signed")
+    deleteIfExists("boot.img.signed2")
     deleteIfExists("recovery.img")
     deleteIfExists("recovery.img.clear")
     deleteIfExists("recovery.img.google")
     deleteIfExists("recovery.img.signed")
+    deleteIfExists("recovery.img.signed2")
     deleteIfExists("vbmeta.img")
     deleteIfExists("vbmeta.img.signed")
 

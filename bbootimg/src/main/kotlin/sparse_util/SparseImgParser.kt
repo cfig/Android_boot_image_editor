@@ -6,10 +6,10 @@ import org.slf4j.LoggerFactory
 import cfig.Helper.Companion.check_call
 
 @ExperimentalUnsignedTypes
-class SparseImg : IPackable {
+class SparseImgParser : IPackable {
     override val loopNo: Int
         get() = 0
-    private val log = LoggerFactory.getLogger(SparseImg::class.java)
+    private val log = LoggerFactory.getLogger(SparseImgParser::class.java)
     private val simg2imgBin: String
     private val img2simgBin: String
 
@@ -24,6 +24,7 @@ class SparseImg : IPackable {
     }
 
     override fun unpack(fileName: String) {
+        cleanUp()
         simg2img(fileName, "$fileName.unsparse")
     }
 

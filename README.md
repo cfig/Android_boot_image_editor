@@ -20,6 +20,7 @@ Supported images:
  - recovery.img (also recovery-two-step.img)
  - vbmeta.img (also vbmeta\_system.img, vbmeta\_vendor.img etc.)
  - dtbo.img (only 'unpack' is supported)
+ - sparse images (system.img, vendor.img ...)
 
 (2) These utilities are known to work for Nexus/Pixel boot.img for the following Android releases:
 
@@ -85,7 +86,7 @@ We now support both VB 1.0 and AVB 2.0 layouts.
 | Pixel 3 (blueline)             | Google       | Y                    | Q preview (qpp2.190228.023, <Br>2019)| [more ...](doc/additional_tricks.md#pixel-3-blueline) |
 | Pixel XL (marlin)              | HTC          | Y                    | 9.0.0 (PPR2.180905.006, <Br>Sep 2018)| [more ...](doc/additional_tricks.md#pixel-xl-marlin) |
 | K3 (CPH1955)                   | OPPO         | Y for recovery.img<Br> N for boot.img  | Pie    | [more](doc/additional_tricks.md#k3-cph1955) |
-| Z18(NX606J)                    | ZTE          | Y                    | 8.1.0                    | [more...](doc/additional_tricks.md#nx606j) |
+| Z18 (NX606J)                    | ZTE          | Y                    | 8.1.0                    | [more...](doc/additional_tricks.md#nx606j) |
 | Nexus 9 (volantis/flounder)    | HTC          | Y(with some tricks)  | 7.1.1 (N9F27M, Oct 2017) | [tricks](doc/additional_tricks.md#tricks-for-nexus-9volantis)|
 | Nexus 5x (bullhead)            | LG           | Y                    | 6.0.0_r12 (MDA89E)       |      |
 | Moto X (2013) T-Mobile         | Motorola     | N                    |                          |      |
@@ -116,3 +117,6 @@ https://android.googlesource.com/platform/system/libufdt/
 
 libsparse
 https://android.googlesource.com/platform/system/core/+/refs/heads/master/libsparse/
+
+Android Nexus/Pixle factory images
+https://developers.google.cn/android/images

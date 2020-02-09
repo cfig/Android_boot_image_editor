@@ -1,12 +1,13 @@
 package cfig.packable
 
-import cfig.UnifiedConfig
-import cfig.sparse_util.SparseImg
+import cfig.sparse_util.SparseImgParser
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.declaredFunctions
+import kotlin.system.exitProcess
 
 class PackableLauncher
 
@@ -14,7 +15,7 @@ class PackableLauncher
 fun main(args: Array<String>) {
     val log = LoggerFactory.getLogger(PackableLauncher::class.java)
     val packablePool = mutableMapOf<List<String>, KClass<IPackable>>()
-    listOf(DtboParser(), VBMetaParser(), BootImgParser(), SparseImg()).forEach {
+    listOf(DtboParser(), VBMetaParser(), BootImgParser(), SparseImgParser()).forEach {
         @Suppress("UNCHECKED_CAST")
         packablePool.put(it.capabilities(), it::class as KClass<IPackable>)
     }
@@ -24,56 +25,83 @@ fun main(args: Array<String>) {
     var targetFile: String? = null
     var targetHandler: KClass<IPackable>? = null
     run found@{
-        File(".").listFiles().forEach { file ->
-            packablePool
-                    .filter { it.value.createInstance().loopNo == 0 }
-                    .forEach { p ->
-                        for (item in p.key) {
-                            if (Pattern.compile(item).matcher(file.name).matches()) {
-                                log.debug("Found: " + file.name + ", " + item)
-                                targetFile = file.name
-                                targetHandler = p.value
-                                return@found
+        for (currentLoopNo in 0..1) { //currently we have only 2 loops
+            File(".").listFiles()!!.forEach { file ->
+                packablePool
+                        .filter { it.value.createInstance().loopNo == currentLoopNo }
+                        .forEach { p ->
+                            for (item in p.key) {
+                                if (Pattern.compile(item).matcher(file.name).matches()) {
+                                    log.debug("Found: " + file.name + ", " + item)
+                                    targetFile = file.name
+                                    targetHandler = p.value
+                                    return@found
+                                }
                             }
                         }
-                    }
-        }
+            }//end-of-file-traversing
+        }//end-of-range-loop
+    }//end-of-found@
 
-        File(".").listFiles().forEach { file ->
-            packablePool
-                    .filter { it.value.createInstance().loopNo != 0 }
-                    .forEach { p ->
-                        for (item in p.key) {
-                            if (Pattern.compile(item).matcher(file.name).matches()) {
-                                log.debug("Found: " + file.name + ", " + item)
-                                targetFile = file.name
-                                targetHandler = p.value
-                                return@found
-                            }
-                        }
-                    }
+    // /* 1 */ no-args & no-handler: help for IPackable
+    // /* 2 */ no-args & handler   : help for Handler
+    // /* 3 */ args    & no-handler: do nothing
+    // /* 4 */ args    & handler   : work
+    when (listOf(args.isEmpty(), targetHandler == null)) {
+        listOf(true, true) -> { /* 1 */
+            log.info("help:")
+            log.info("available IPackable subcommands are:")
+            IPackable::class.declaredFunctions.forEach {
+                log.info("\t" + it.name)
+            }
+            exitProcess(1)
+        }
+        listOf(true, false) -> {/* 2 */
+            log.info("available ${targetHandler!!.simpleName} subcommands are:")
+            targetHandler!!.declaredFunctions.forEach {
+                log.info("\t" + it.name)
+            }
+            exitProcess(1)
+        }
+        listOf(false, true) -> {/* 3 */
+            log.warn("No handler is activated, DO NOTHING!")
+            exitProcess(2)
+        }
+        listOf(false, false) -> {/* 4 */
+            log.debug("continue ...")
         }
     }
 
-    if (targetHandler != null) {
-        log.warn("Active image target: $targetFile")
-        when (args[0]) {
-            "unpack" -> {
-                if (File(UnifiedConfig.workDir).exists()) File(UnifiedConfig.workDir).deleteRecursively()
-                File(UnifiedConfig.workDir).mkdirs()
-                targetHandler!!.createInstance().unpack(targetFile!!)
+    targetHandler?.let {
+        log.warn("[$targetFile] will be handled by [${it.simpleName}]")
+        val functions = it.declaredFunctions.filter { funcItem -> funcItem.name == args[0] }
+        if (functions.size != 1) {
+            log.error("command '${args[0]}' can not be recognized")
+            log.info("available ${it.simpleName} subcommands are:")
+            it.declaredFunctions.forEach {
+                log.info("\t" + it.name)
             }
-            "pack" -> {
-                targetHandler!!.createInstance().pack(targetFile!!)
+            exitProcess(3)
+        }
+        log.warn("'${args[0]}' sequence initialized")
+        val reflectRet = when (functions[0].parameters.size) {
+            1 -> {
+                functions[0].call(it.createInstance())
             }
-            "flash" -> {
-                targetHandler!!.createInstance().flash(targetFile!!)
+            2 -> {
+                functions[0].call(it.createInstance(), targetFile!!)
             }
             else -> {
-                log.error("Unknown cmd: " + args[0])
+                functions[0].parameters.forEach { kp ->
+                    println("Param: " + kp.index + " " + kp.type + " " + kp.name)
+                }
+                log.error("I am confused by so many parameters")
+                exitProcess(4)
             }
         }
-    } else {
-        log.warn("Nothing to do")
+        if (functions[0].returnType.toString() != Unit.toString()) {
+            log.info("ret: $reflectRet")
+        }
+        log.warn("'${args[0]}' sequence completed")
     }
 }

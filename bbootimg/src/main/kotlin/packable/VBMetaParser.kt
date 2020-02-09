@@ -1,6 +1,8 @@
 package cfig.packable
 
 import cfig.Avb
+import cfig.UnifiedConfig
+import java.io.File
 
 @ExperimentalUnsignedTypes
 class VBMetaParser: IPackable {
@@ -11,7 +13,12 @@ class VBMetaParser: IPackable {
         return listOf("^vbmeta\\.img$", "^vbmeta\\_[a-z]+.img$")
     }
 
+    override fun cleanUp() {
+        File(UnifiedConfig.workDir).mkdirs()
+    }
+
     override fun unpack(fileName: String) {
+        cleanUp()
         Avb().parseVbMeta(fileName)
     }
 

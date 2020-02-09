@@ -25,6 +25,7 @@ class DtboParser(val workDir: File) : IPackable {
     }
 
     override fun unpack(fileName: String) {
+        cleanUp()
         val outputDir = UnifiedConfig.workDir
         val dtbPath = File("$outputDir/dtb").path!!
         val headerPath = File("$outputDir/dtbo.header").path!!
