@@ -24,7 +24,7 @@ Supported images:
 (2) These utilities are known to work for Nexus/Pixel boot.img for the following Android releases:
 
  - AOSP master
- - Lollipop (5.0) - Q preview
+ - Lollipop (5.0) - Android 10
 
 ## 2. Usage
 Clone this repo with minimal depth:

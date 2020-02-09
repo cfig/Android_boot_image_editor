@@ -22,7 +22,7 @@ static std::string expected_public_key_;
 static std::string expected_public_key_metadata_;
 
 static auto lockStatusFile = "config/locked";
-static auto pubkeyFile = "config/rsa4096.pubkey";
+static auto pubkeyFile = "config/pubkey";
 
 static std::string read_line(std::string file);
 
@@ -347,7 +347,7 @@ bool CfigAvbOps::preload_partition(std::string partition) {
 
     preloaded_partitions_[partition] = buffer;
 
-    fprintf(stderr,
+    fprintf(stdout,
             "[%s()]: partition [%s] preloaded\n",
             __FUNCTION__,
             partition.c_str());

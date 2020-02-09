@@ -34,3 +34,16 @@ model {
         }
     }
 }
+
+task v1(type:Exec) {
+    workingDir "."
+    environment preloads: "vbmeta boot", requests: "boot dtbo", suffix: ""
+    commandLine "./build/exe/avbVerifier/avbVerifier"
+}
+
+task v2(type:Exec) {
+    description "verify non-AB recovery mode"
+    workingDir "."
+    environment preloads: "", requests: "recovery", suffix: ""
+    commandLine "./build/exe/avbVerifier/avbVerifier"
+}

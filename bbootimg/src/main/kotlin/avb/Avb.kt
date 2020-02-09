@@ -298,12 +298,7 @@ class Avb {
         }.encode()
 
         //2 - auth blob
-        var authBlob = byteArrayOf()
-        if (ai.authBlob != null) {
-            authBlob = AuthBlob.createBlob(headerBlob, auxBlob, alg.name)
-        } else {
-            log.info("No auth blob")
-        }
+        val authBlob = AuthBlob.createBlob(headerBlob, auxBlob, alg.name)
 
         return Helper.join(headerBlob, authBlob, auxBlob)
     }

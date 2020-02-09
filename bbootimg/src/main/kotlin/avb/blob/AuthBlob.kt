@@ -19,7 +19,7 @@ data class AuthBlob(
             val alg = Algorithms.get(algorithm_name)!!
             val authBlockSize = Helper.round_to_multiple((alg.hash_num_bytes + alg.signature_num_bytes).toLong(), 64)
             if (0L == authBlockSize) {
-                log.info("No auth blob")
+                log.info("No auth blob for algorithm " + alg.name)
                 return byteArrayOf()
             }
 
