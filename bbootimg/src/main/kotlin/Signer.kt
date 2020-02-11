@@ -62,7 +62,7 @@ class Signer {
                         }
                         addArgument("--internal_release_string")
                         addArgument(ai.header!!.release_string, false)
-                        log.warn(this.toString())
+                        log.info(this.toString())
 
                         File(cfg.info.output + ".clear").copyTo(File(cfg.info.output + ".signed2"))
                         DefaultExecutor().execute(this)

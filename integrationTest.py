@@ -72,6 +72,12 @@ def verifySingleDir(inResourceDir, inImageDir):
         cleanUp()
         verifySingleJson(jsonFile)
         cleanUp()
+    pyFiles = glob.glob(os.path.join(resDir, imgDir) + "/*.py")
+    for pyFile in pyFiles:
+        cleanUp()
+        log.warning("calling %s" % pyFile)
+        subprocess.check_call(pyFile, shell = True)
+        cleanUp()
 
 def decompressXZ(inFile, outFile):
     with lzma.open(inFile) as f:
@@ -101,6 +107,9 @@ def main():
 
     # from volunteers
     verifySingleDir(resDir, "recovery_image_from_s-trace")
+
+    # 10
+    verifySingleDir(resDir, "10.0.0_coral-qq1d.200205.002")
 
     log.info(successLogo)
 

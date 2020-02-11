@@ -58,3 +58,7 @@ This part is contributed by @Surendrajat, thanks!
 #### libsparse: output\_file.cpp
 
 *typeof* is missing in macos clang++, need to change it to *decltype* instead.
+
+## using pre-packed ramdisk.img.gz
+place 'ramdisk.img.gz' in directory, delete "root/", program will use it as prebuilt.
+

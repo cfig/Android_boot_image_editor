@@ -23,13 +23,11 @@ class HashDescriptor(var flags: UInt = 0U,
     : Descriptor(TAG, 0U, 0) {
     var flagsInterpretation: String = ""
         get() {
-            var ret = ""
-            if (this.flags and Header.HashDescriptorFlags.AVB_HASH_DESCRIPTOR_FLAGS_DO_NOT_USE_AB.inFlags.toUInt() == 1U) {
-                ret += "1:no-A/B system"
+            return if (this.flags and Header.HashDescriptorFlags.AVB_HASH_DESCRIPTOR_FLAGS_DO_NOT_USE_AB.inFlags.toUInt() == 1U) {
+                "1:no-A/B system"
             } else {
-                ret += "0:A/B system"
+                "0:A/B system"
             }
-            return ret
         }
 
     constructor(data: InputStream, seq: Int = 0) : this() {
@@ -90,6 +88,7 @@ class HashDescriptor(var flags: UInt = 0U,
                 it.read(randomSalt)
                 log.warn("salt is empty, using random salt[$expectedDigestSize]: " + Helper.toHexString(randomSalt))
                 this.salt = randomSalt
+                this.salt_len = this.salt.size.toUInt()
             }
         } else {
             log.info("preset salt[${this.salt.size}] is valid: ${Hex.encodeHexString(this.salt)}")
@@ -113,6 +112,7 @@ class HashDescriptor(var flags: UInt = 0U,
             }.digest()
             log.info("Digest(salt + file): " + Helper.toHexString(newDigest))
             this.digest = newDigest
+            this.digest_len = this.digest.size.toUInt()
         }
 
         return this
