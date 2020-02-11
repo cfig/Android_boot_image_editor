@@ -36,13 +36,14 @@ class Signer {
                     val ai = ObjectMapper().readValue(File(Avb.getJsonFileName(cfg.info.output)), AVBInfo::class.java)
                     val alg = Algorithms.get(ai.header!!.algorithm_type.toInt())
                     val bootDesc = ai.auxBlob!!.hashDescriptors[0]
+                    val newAvbInfo = ObjectMapper().readValue(File(getJsonFileName(cfg.info.output)), AVBInfo::class.java)
 
                     //our signer
                     File(cfg.info.output + ".clear").copyTo(File(cfg.info.output + ".signed"))
                     Avb().addHashFooter(cfg.info.output + ".signed",
                             info2.imageSize,
                             partition_name = bootDesc.partition_name,
-                            newAvbInfo = ObjectMapper().readValue(File(getJsonFileName(cfg.info.output)), AVBInfo::class.java))
+                            newAvbInfo = newAvbInfo)
                     //original signer
                     CommandLine.parse("$avbtool add_hash_footer").apply {
                         addArguments("--image ${cfg.info.output}.signed2")
@@ -53,6 +54,11 @@ class Signer {
                         addArguments("--algorithm ${alg!!.name}")
                         if (alg.defaultKey.isNotBlank()) {
                             addArguments("--key ${alg.defaultKey}")
+                        }
+                        newAvbInfo.auxBlob?.let { newAuxblob ->
+                            newAuxblob.propertyDescriptor.forEach { newProp ->
+                                addArguments(arrayOf("--prop", "${newProp.key}:${newProp.value}"))
+                            }
                         }
                         addArgument("--internal_release_string")
                         addArgument(ai.header!!.release_string, false)
