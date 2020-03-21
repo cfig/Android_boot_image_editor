@@ -8,7 +8,7 @@ import avb.blob.Header
 /*
     a wonderfaul base64 encoder/decoder: https://cryptii.com/base64-to-hex
  */
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class AVBInfo(var header: Header? = null,
               var authBlob: AuthBlob? = null,
               var auxBlob: AuxBlob? = null,

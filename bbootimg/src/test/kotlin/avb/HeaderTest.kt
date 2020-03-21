@@ -5,7 +5,7 @@ import org.apache.commons.codec.binary.Hex
 import org.junit.Test
 import java.io.ByteArrayInputStream
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class HeaderTest {
 
     @Test

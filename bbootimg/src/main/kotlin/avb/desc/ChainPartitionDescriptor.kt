@@ -6,7 +6,7 @@ import java.io.InputStream
 import java.security.MessageDigest
 import java.util.*
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class ChainPartitionDescriptor(
         var rollback_index_location: UInt = 0U,
         var partition_name_len: UInt = 0U,

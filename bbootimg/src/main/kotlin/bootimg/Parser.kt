@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class Parser {
     private fun verifiedWithAVB(fileName: String): Boolean {
         val expectedBf = "AVBf".toByteArray()

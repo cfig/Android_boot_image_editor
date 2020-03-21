@@ -10,7 +10,7 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.security.MessageDigest
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class HashDescriptor(var flags: UInt = 0U,
                      var partition_name: String = "",
                      var hash_algorithm: String = "",

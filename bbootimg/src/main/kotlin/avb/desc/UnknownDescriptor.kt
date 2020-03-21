@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0U, 0U, 0) {
     @Throws(IllegalArgumentException::class)
     constructor(stream: InputStream, seq: Int = 0) : this() {

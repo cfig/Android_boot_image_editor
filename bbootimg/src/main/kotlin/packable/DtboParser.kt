@@ -10,7 +10,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.util.*
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class DtboParser(val workDir: File) : IPackable {
     override val loopNo: Int
         get() = 0

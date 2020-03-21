@@ -6,7 +6,7 @@ import org.apache.commons.codec.binary.Hex
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class BlobTest {
     @Test
     fun testEncodedKey2048() {

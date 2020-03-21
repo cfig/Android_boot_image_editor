@@ -5,7 +5,7 @@ import cfig.packable.IPackable
 import org.slf4j.LoggerFactory
 import cfig.Helper.Companion.check_call
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class SparseImgParser : IPackable {
     override val loopNo: Int
         get() = 0

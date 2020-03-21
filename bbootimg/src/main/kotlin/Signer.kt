@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 class Signer {
-    @ExperimentalUnsignedTypes
+    @OptIn(ExperimentalUnsignedTypes::class)
     companion object {
         private val log = LoggerFactory.getLogger(Signer::class.java)
 

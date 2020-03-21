@@ -31,7 +31,7 @@ import java.util.*
 import java.util.regex.Pattern
 import kotlin.random.Random
 
-@ExperimentalUnsignedTypes
+@OptIn(kotlin.ExperimentalUnsignedTypes::class)
 class Struct3 {
     private val log = LoggerFactory.getLogger(Struct3::class.java)
     private val formatString: String

@@ -11,7 +11,7 @@ import kotlin.system.exitProcess
 
 class PackableLauncher
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 fun main(args: Array<String>) {
     val log = LoggerFactory.getLogger(PackableLauncher::class.java)
     val packablePool = mutableMapOf<List<String>, KClass<IPackable>>()

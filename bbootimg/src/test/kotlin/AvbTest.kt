@@ -7,7 +7,7 @@ import org.junit.Assert.*
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class AvbTest {
     private val log = LoggerFactory.getLogger(AvbTest::class.java)
 

@@ -7,7 +7,7 @@ import org.junit.Test
 import org.junit.Assert.*
 import java.io.ByteArrayInputStream
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class FooterTest {
 
     @Test

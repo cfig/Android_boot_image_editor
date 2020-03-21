@@ -23,7 +23,7 @@ https://github.com/cfig/Android_boot_image_editor/blob/master/doc/layout.md#32-a
 +---------------------------------------+-------------------------+ --> partition_size
  */
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 data class Footer constructor(
         var versionMajor: UInt = FOOTER_VERSION_MAJOR,
         var versionMinor: UInt = FOOTER_VERSION_MINOR,

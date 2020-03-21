@@ -20,8 +20,8 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import javax.crypto.Cipher
 
+@OptIn(ExperimentalUnsignedTypes::class)
 class Helper {
-    @ExperimentalUnsignedTypes
     companion object {
         fun joinWithNulls(vararg source: ByteArray?): ByteArray {
             val baos = ByteArrayOutputStream()

@@ -1,5 +1,7 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    id("org.jetbrains.kotlin.jvm").version("1.3.61")
+    id("org.jetbrains.kotlin.jvm").version("1.3.71")
     application
 }
 
@@ -29,6 +31,10 @@ dependencies {
 
 application {
     mainClassName = "cfig.packable.PackableLauncherKt"
+}
+
+tasks.withType<KotlinCompile>().all {
+    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
 }
 
 tasks {

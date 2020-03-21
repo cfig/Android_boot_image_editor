@@ -6,7 +6,7 @@ import org.junit.Test
 import org.junit.Assert.*
 import org.slf4j.LoggerFactory
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class BootloaderMsgTest {
     private val log = LoggerFactory.getLogger(BootloaderMsgTest::class.java)
 

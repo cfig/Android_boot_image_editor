@@ -11,7 +11,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.lang.IllegalArgumentException
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class BootImgParser() : IPackable {
     override val loopNo: Int
         get() = 0

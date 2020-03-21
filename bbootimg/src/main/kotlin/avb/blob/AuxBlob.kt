@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Paths
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 @JsonIgnoreProperties("descriptorSize")
 class AuxBlob(
         var pubkey: PubKeyInfo? = null,

@@ -5,7 +5,7 @@ import cfig.init.Reboot
 import org.junit.Test
 import java.util.*
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class RebootTest {
     @Test
     fun testDifferentModes() {

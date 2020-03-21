@@ -13,7 +13,7 @@ import java.security.MessageDigest
 import java.util.regex.Pattern
 import kotlin.math.pow
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 open class BootImgHeader(
         var kernelLength: UInt = 0U,
         var kernelOffset: UInt = 0U,

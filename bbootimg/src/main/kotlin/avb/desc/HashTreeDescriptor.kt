@@ -6,7 +6,7 @@ import cfig.io.Struct3
 import java.io.InputStream
 import java.util.*
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class HashTreeDescriptor(
         var flags: UInt = 0U,
         var dm_verity_version: UInt = 0u,

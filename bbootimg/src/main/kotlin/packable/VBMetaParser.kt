@@ -4,7 +4,7 @@ import cfig.Avb
 import cfig.UnifiedConfig
 import java.io.File
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class VBMetaParser: IPackable {
     override val loopNo: Int
         get() = 1

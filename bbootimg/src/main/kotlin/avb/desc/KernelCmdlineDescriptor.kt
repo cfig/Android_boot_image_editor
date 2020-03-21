@@ -4,7 +4,7 @@ import cfig.Helper
 import cfig.io.Struct3
 import java.io.InputStream
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 class KernelCmdlineDescriptor(
         var flags: UInt = 0U,
         var cmdlineLength: UInt = 0U,

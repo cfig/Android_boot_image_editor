@@ -1,6 +1,6 @@
 package cfig
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 data class ParamConfig(
         //file input
         var kernel: String = UnifiedConfig.workDir + "kernel",

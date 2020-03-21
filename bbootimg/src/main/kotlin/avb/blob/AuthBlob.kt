@@ -6,7 +6,7 @@ import cfig.io.Struct3
 import org.slf4j.LoggerFactory
 import java.security.MessageDigest
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 data class AuthBlob(
         var offset: ULong = 0U,
         var size: ULong = 0U,

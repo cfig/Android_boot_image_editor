@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.File
 
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class UnifiedConfig(
         var info: MiscInfo = MiscInfo(),
@@ -22,7 +22,6 @@ data class UnifiedConfig(
             var size: String = "0",
             var loadOffset: String = "0")
 
-    @ExperimentalUnsignedTypes
     data class MiscInfo(
             var output: String = "",
             var headerVersion: UInt = 0U,

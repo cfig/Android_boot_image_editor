@@ -5,7 +5,7 @@ import cfig.io.Struct3
 import java.io.InputStream
 
 //avbtool::AvbVBMetaHeader
-@ExperimentalUnsignedTypes
+@OptIn(ExperimentalUnsignedTypes::class)
 data class Header(
         var required_libavb_version_major: UInt = Avb.AVB_VERSION_MAJOR,
         var required_libavb_version_minor: UInt = 0U,
@@ -78,8 +78,8 @@ data class Header(
 
     //toplevel flags
     enum class AvbVBMetaImageFlags(val inFlags: Int) {
-        AVB_VBMETA_IMAGE_FLAGS_HASHTREE_DISABLED(1),
-        AVB_VBMETA_IMAGE_FLAGS_VERIFICATION_DISABLED(2 shl 1)
+        AVB_VBMETA_IMAGE_FLAGS_HASHTREE_DISABLED(1),          //disable hashtree image verification, for system/vendor/product etc.
+        AVB_VBMETA_IMAGE_FLAGS_VERIFICATION_DISABLED(2 shl 1) //disable all verification, do not parse descriptors
     }
 
     //verify flags
