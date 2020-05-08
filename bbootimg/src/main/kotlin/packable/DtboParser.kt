@@ -1,7 +1,7 @@
 package cfig.packable
 
 import cfig.EnvironmentVerifier
-import cfig.UnifiedConfig
+import cfig.Helper
 import cfig.dtb_util.DTC
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
@@ -19,6 +19,7 @@ class DtboParser(val workDir: File) : IPackable {
 
     private val log = LoggerFactory.getLogger(DtboParser::class.java)
     private val envv = EnvironmentVerifier()
+    private val outDir = Helper.prop("workDir")
 
     override fun capabilities(): List<String> {
         return listOf("^dtbo\\.img$")
@@ -26,9 +27,8 @@ class DtboParser(val workDir: File) : IPackable {
 
     override fun unpack(fileName: String) {
         cleanUp()
-        val outputDir = UnifiedConfig.workDir
-        val dtbPath = File("$outputDir/dtb").path!!
-        val headerPath = File("$outputDir/dtbo.header").path!!
+        val dtbPath = File("$outDir/dtb").path
+        val headerPath = File("$outDir/dtbo.header").path
         val cmd = CommandLine.parse("external/mkdtboimg.py dump $fileName").let {
             it.addArguments("--dtb $dtbPath")
             it.addArguments("--output $headerPath")
@@ -40,7 +40,7 @@ class DtboParser(val workDir: File) : IPackable {
         if (envv.hasDtc) {
             for (i in 0 until Integer.parseInt(props.getProperty("dt_entry_count"))) {
                 val inputDtb = "$dtbPath.$i"
-                val outputSrc = File(UnifiedConfig.workDir + "/" + File(inputDtb).name + ".src").path
+                val outputSrc = File(outDir + "/" + File(inputDtb).name + ".src").path
                 DTC().decompile(inputDtb, outputSrc)
             }
         } else {
@@ -54,13 +54,13 @@ class DtboParser(val workDir: File) : IPackable {
             return
         }
 
-        val headerPath = File("${UnifiedConfig.workDir}/dtbo.header").path
+        val headerPath = File("${outDir}/dtbo.header").path
         val props = Properties()
         props.load(FileInputStream(File(headerPath)))
         val cmd = CommandLine.parse("external/mkdtboimg.py create $fileName.clear").let {
             it.addArguments("--version=1")
             for (i in 0 until Integer.parseInt(props.getProperty("dt_entry_count"))) {
-                val dtsName = File(UnifiedConfig.workDir + "/dtb.$i").path
+                val dtsName = File("$outDir/dtb.$i").path
                 it.addArguments(dtsName)
             }
             it

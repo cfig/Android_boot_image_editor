@@ -1,7 +1,7 @@
 package cfig.packable
 
 import cfig.Avb
-import cfig.UnifiedConfig
+import cfig.Helper
 import java.io.File
 
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -14,7 +14,7 @@ class VBMetaParser: IPackable {
     }
 
     override fun cleanUp() {
-        File(UnifiedConfig.workDir).mkdirs()
+        File(Helper.prop("workDir")).mkdirs()
     }
 
     override fun unpack(fileName: String) {

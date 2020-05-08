@@ -64,7 +64,7 @@ def get_recovery_dtbo_offset(args):
 
 
 def write_header_v3(args):
-    BOOT_IMAGE_HEADER_V3_SIZE = 1596
+    BOOT_IMAGE_HEADER_V3_SIZE = 1580
     BOOT_MAGIC = 'ANDROID!'.encode()
 
     args.output.write(pack('8s', BOOT_MAGIC))
@@ -82,7 +82,7 @@ def write_header_v3(args):
     pad_file(args.output, BOOT_IMAGE_HEADER_V3_PAGESIZE)
 
 def write_vendor_boot_header(args):
-    VENDOR_BOOT_IMAGE_HEADER_V3_SIZE = 2108
+    VENDOR_BOOT_IMAGE_HEADER_V3_SIZE = 2112
     BOOT_MAGIC = 'VNDRBOOT'.encode()
 
     args.vendor_boot.write(pack('8s', BOOT_MAGIC))
@@ -214,7 +214,7 @@ def parse_os_version(x):
 
 
 def parse_os_patch_level(x):
-    match = re.search(r'^(\d{4})-(\d{2})-(\d{2})', x)
+    match = re.search(r'^(\d{4})-(\d{2})(?:-(\d{2}))?', x)
     if match:
         y = int(match.group(1)) - 2000
         m = int(match.group(2))

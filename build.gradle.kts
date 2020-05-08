@@ -36,6 +36,7 @@ tasks {
         main = "cfig.packable.PackableLauncherKt"
         classpath = files("bbootimg/build/libs/bbootimg.jar")
         this.maxHeapSize = "512m"
+        enableAssertions = true
         args("unpack")
     }
     unpackTask.dependsOn("bbootimg:jar")
@@ -45,6 +46,7 @@ tasks {
         main = "cfig.packable.PackableLauncherKt"
         classpath = files("bbootimg/build/libs/bbootimg.jar")
         this.maxHeapSize = "512m"
+        enableAssertions = true
         args("pack")
     }
     packTask.dependsOn("bbootimg:jar", "aosp:boot_signer:build")
@@ -54,6 +56,7 @@ tasks {
         main = "cfig.packable.PackableLauncherKt"
         classpath = files("bbootimg/build/libs/bbootimg.jar")
         this.maxHeapSize = "512m"
+        enableAssertions = true
         args("flash")
     }
     flashTask.dependsOn("bbootimg:jar")

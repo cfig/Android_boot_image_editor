@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory
 import java.io.*
 import java.math.BigInteger
 import java.math.RoundingMode
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.*
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import javax.crypto.Cipher
@@ -23,6 +23,14 @@ import javax.crypto.Cipher
 @OptIn(ExperimentalUnsignedTypes::class)
 class Helper {
     companion object {
+        private val gcfg: Properties = Properties().apply {
+            load(Helper::class.java.classLoader.getResourceAsStream("general.cfg"))
+        }
+
+        fun prop(k: String): String {
+            return gcfg.getProperty(k)
+        }
+
         fun joinWithNulls(vararg source: ByteArray?): ByteArray {
             val baos = ByteArrayOutputStream()
             for (src in source) {

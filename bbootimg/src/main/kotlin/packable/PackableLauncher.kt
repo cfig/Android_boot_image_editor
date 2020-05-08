@@ -15,7 +15,7 @@ class PackableLauncher
 fun main(args: Array<String>) {
     val log = LoggerFactory.getLogger(PackableLauncher::class.java)
     val packablePool = mutableMapOf<List<String>, KClass<IPackable>>()
-    listOf(DtboParser(), VBMetaParser(), BootImgParser(), SparseImgParser()).forEach {
+    listOf(DtboParser(), VBMetaParser(), BootImgParser(), SparseImgParser(), VendorBootParser()).forEach {
         @Suppress("UNCHECKED_CAST")
         packablePool.put(it.capabilities(), it::class as KClass<IPackable>)
     }
@@ -78,8 +78,8 @@ fun main(args: Array<String>) {
         if (functions.size != 1) {
             log.error("command '${args[0]}' can not be recognized")
             log.info("available ${it.simpleName} subcommands are:")
-            it.declaredFunctions.forEach {
-                log.info("\t" + it.name)
+            it.declaredFunctions.forEach { theFunc ->
+                log.info("\t" + theFunc.name)
             }
             exitProcess(3)
         }
@@ -90,6 +90,15 @@ fun main(args: Array<String>) {
             }
             2 -> {
                 functions[0].call(it.createInstance(), targetFile!!)
+            }
+            3 -> {
+                if (args.size != 2 ) {
+                    log.info("invoke: ${it.qualifiedName}, $targetFile, " + targetFile!!.removeSuffix(".img"))
+                    functions[0].call(it.createInstance(), targetFile!!, targetFile!!.removeSuffix(".img"))
+                } else {
+                    log.info("invoke: ${it.qualifiedName}, $targetFile, " + args[1])
+                    functions[0].call(it.createInstance(), targetFile!!, args[1])
+                }
             }
             else -> {
                 functions[0].parameters.forEach { kp ->

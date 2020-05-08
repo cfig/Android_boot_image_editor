@@ -11,6 +11,8 @@ import cfig.Helper.Companion.paddingWith
 import cfig.io.Struct3
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
+import org.apache.commons.exec.CommandLine
+import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -319,9 +321,28 @@ class Avb {
         const val AVB_VERSION_SUB = 0
 
         fun getJsonFileName(image_file: String): String {
-            val fileName = File(image_file).name
-            val jsonFile = "$fileName.avb.json"
-            return UnifiedConfig.workDir + jsonFile
+            val jsonFile = File(image_file).name.removeSuffix(".img") + ".avb.json"
+            return Helper.prop("workDir") + jsonFile
+        }
+
+        fun hasAvbFooter(fileName: String): Boolean {
+            val expectedBf = "AVBf".toByteArray()
+            FileInputStream(fileName).use { fis ->
+                fis.skip(File(fileName).length() - 64)
+                val bf = ByteArray(4)
+                fis.read(bf)
+                return bf.contentEquals(expectedBf)
+            }
+        }
+
+        fun verifyAVBIntegrity(fileName: String, avbtool: String) {
+            val cmdline = "$avbtool verify_image --image $fileName"
+            log.info(cmdline)
+            try {
+                DefaultExecutor().execute(CommandLine.parse(cmdline))
+            } catch (e: Exception) {
+                throw IllegalArgumentException("$fileName failed integrity check by \"$cmdline\"")
+            }
         }
     }
 }

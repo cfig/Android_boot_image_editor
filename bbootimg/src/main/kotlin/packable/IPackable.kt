@@ -1,8 +1,8 @@
 package cfig.packable
 
+import cfig.Helper
 import cfig.Helper.Companion.check_call
 import cfig.Helper.Companion.check_output
-import cfig.UnifiedConfig
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -32,8 +32,9 @@ interface IPackable {
     }
 
     fun cleanUp() {
-        if (File(UnifiedConfig.workDir).exists()) File(UnifiedConfig.workDir).deleteRecursively()
-        File(UnifiedConfig.workDir).mkdirs()
+        val workDir = Helper.prop("workDir")
+        if (File(workDir).exists()) File(workDir).deleteRecursively()
+        File(workDir).mkdirs()
     }
 
     companion object {

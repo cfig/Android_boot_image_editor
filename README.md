@@ -8,19 +8,21 @@ This tool focuses on editing Android boot.img(also recovery.img, and vbmeta.img)
 ## 1. Prerequisite
 #### 1.1 Host OS requirement:
 
-Linux or Mac.
-Also need python 2.x and jdk 8.
+Linux or Mac development env. To get the most of the toolkit, following packages are also needed: python, jdk 8+, zlib1g-dev, cpio, device-tree-compiler.
 
 #### 1.2 Target Android requirement:
 
 (1) Target boot.img MUST follows AOSP verified boot flow, either [Boot image signature](https://source.android.com/security/verifiedboot/verified-boot#signature_format) in VBoot 1.0 or [AVB HASH footer](https://android.googlesource.com/platform/external/avb/+/master/README.md#The-VBMeta-struct) (a.k.a. AVB) in VBoot 2.0.
 
 Supported images:
- - boot.img
- - recovery.img (also recovery-two-step.img)
- - vbmeta.img (also vbmeta\_system.img, vbmeta\_vendor.img etc.)
- - dtbo.img (only 'unpack' is supported)
- - sparse images (system.img, vendor.img ...)
+
+| Image Type      | typical file names                  |   |
+|-----------------|-------------------------------------|---|
+| boot images     | boot.img, vendor_boot.img           |   |
+| recovery images | recovery.img, recovery-two-step.img |   |
+| vbmeta images   | vbmeta.img, vbmeta_system.img etc.  |   |
+| sparse images   | system.img, vendor.img etc.         |   |
+| dtbo images     | dtbo.img                            |   |
 
 (2) These utilities are known to work for Nexus/Pixel boot.img for the following Android releases:
 
@@ -40,13 +42,13 @@ Put your boot.img to current directory, then start gradle 'unpack' task:
 Your get the flattened kernel and /root filesystem under **./build/unzip\_boot**:
 
     build/unzip_boot/
-    ├── boot.img.avb.json (AVB only)
-    ├── bootimg.json (boot image info)
+    ├── boot.json     (boot image info)
+    ├── boot.avb.json (AVB only)
     ├── kernel
-    ├── second       (2nd bootloader, if exists)
-    ├── dtb          (dtb, if exists)
-    ├── dtbo         (dtbo, if exists)
-    └── root
+    ├── second        (2nd bootloader, if exists)
+    ├── dtb           (dtb, if exists)
+    ├── dtbo          (dtbo, if exists)
+    └── root          (extracted initramfs)
 
 Then you can edit the actual file contents, like rootfs or kernel.
 Now, pack the boot.img again
@@ -76,8 +78,7 @@ And you get recovery.img.signed
 An example boot.img has been placed at **src/test/resources/boot.img**, which is extracted from Nexus 5x(code: bullhead) factory images from [Google](https://dl.google.com/dl/android/aosp/bullhead-mda89e-factory-29247942.tgz), you can take it as a quick start.
 
 ## 4. boot.img layout
-Read [layout](doc/layout.md) of Android boot.img.
-We now support both VB 1.0 and AVB 2.0 layouts.
+Read [layout](doc/layout.md) of Android boot.img and vendor\_boot.img.
 
 ## 5. compatible devices
 
@@ -99,6 +100,7 @@ https://android.googlesource.com/platform/system/extras
 
 cpio / fs\_config
 https://android.googlesource.com/platform/system/core
+https://www.kernel.org/doc/Documentation/early-userspace/buffer-format.txt
 
 AVB
 https://android.googlesource.com/platform/external/avb/

@@ -1,7 +1,7 @@
 package cfig.kernel_util
 
 import cfig.EnvironmentVerifier
-import cfig.InfoTable
+import cfig.Helper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.Logger
@@ -16,11 +16,11 @@ class KernelExtractor {
         return envv.hasLz4 && envv.hasXz && envv.hasGzip
     }
 
-    fun run(fileName: String, workDir: File? = null) {
-        val baseDir = "build/unzip_boot"
-        val kernelVersionFile = "$baseDir/kernel_version.txt"
-        val kernelConfigFile = "$baseDir/kernel_configs.txt"
-        val cmd = CommandLine.parse("aosp/build/tools/extract_kernel.py").let {
+    fun run(fileName: String, workDir: File? = null): List<String> {
+        val ret: MutableList<String> = mutableListOf()
+        val kernelVersionFile = Helper.prop("kernelVersionFile")
+        val kernelConfigFile = Helper.prop("kernelConfigFile")
+        val cmd = CommandLine.parse(Helper.prop("kernelExtracter")).let {
             it.addArgument("--input")
             it.addArgument(fileName)
             it.addArgument("--output-configs")
@@ -36,11 +36,13 @@ class KernelExtractor {
                 val kernelVersion = File(kernelVersionFile).readLines()
                 log.info("kernel version: $kernelVersion")
                 log.info("kernel config dumped to : $kernelConfigFile")
-                InfoTable.instance.addRow("\\-- version $kernelVersion", kernelVersionFile)
-                InfoTable.instance.addRow("\\-- config", kernelConfigFile)
+                ret.add(kernelVersion.toString())
+                ret.add(kernelVersionFile)
+                ret.add(kernelConfigFile)
             } catch (e: org.apache.commons.exec.ExecuteException) {
                 log.warn("can not parse kernel info")
             }
         }
+        return ret
     }
 }
