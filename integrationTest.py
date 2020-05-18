@@ -86,6 +86,9 @@ def decompressXZ(inFile, outFile):
             f2.write(file_content)
 
 def main():
+    # from volunteers
+    verifySingleDir(resDir, "recovery_image_from_s-trace")
+    verifySingleDir(resDir, "boot_img_from_gesangtome") # android 9, no ramdisk
     # 5.0
     verifySingleDir(resDir, "5.0_fugu_lrx21m")
     # 6.0
@@ -104,10 +107,6 @@ def main():
     verifySingleDir(resDir, "9.0.0_blueline_pq1a.181105.017.a1")
     # Q preview
     verifySingleDir(resDir, "Q_preview_blueline_qpp2.190228.023")
-
-    # from volunteers
-    verifySingleDir(resDir, "recovery_image_from_s-trace")
-
     # 10
     verifySingleDir(resDir, "10.0.0_coral-qq1d.200205.002")
 

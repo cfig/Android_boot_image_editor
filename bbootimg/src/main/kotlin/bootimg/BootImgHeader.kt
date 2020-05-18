@@ -196,6 +196,7 @@ open class BootImgHeader(
         //refresh ramdisk size
         if (0U == this.ramdiskLength) {
             param.ramdisk = null
+            this.ramdiskOffset = 0U
         } else {
             this.ramdiskLength = File(param.ramdisk!!).length().toUInt()
         }
