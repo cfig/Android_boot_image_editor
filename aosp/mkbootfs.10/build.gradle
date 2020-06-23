@@ -11,7 +11,7 @@ model {
             binaries.all {
                 cppCompiler.define "__ANDROID_VNDK__"
                 //cppCompiler.define 'CFIG_NO_FIX_STAT'
-                cppCompiler.args << '-std=gnu++11' << "-Wno-write-strings"
+                cppCompiler.args << "-Wno-write-strings"
             }   
         }   
     }   

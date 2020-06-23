@@ -30,4 +30,8 @@ class VBMetaParser: IPackable {
         val stem = fileName.substring(0, fileName.indexOf("."))
         super.flash("$fileName.signed", stem)
     }
+
+    override fun pull(fileName: String, deviceName: String) {
+        super.pull(fileName, deviceName)
+    }
 }

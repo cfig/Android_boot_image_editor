@@ -31,6 +31,21 @@ interface IPackable {
         "adb shell rm /cache/file.to.burn".check_call()
     }
 
+    fun pull(fileName: String = "dtbo.img", deviceName: String = "dtbo") {
+        "adb root".check_call()
+        val abUpdateProp = "adb shell getprop ro.build.ab_update".check_output()
+        log.info("ro.build.ab_update=$abUpdateProp")
+        val slotSuffix = if (abUpdateProp == "true") {
+            "adb shell getprop ro.boot.slot_suffix".check_output()
+        } else {
+            ""
+        }
+        log.info("slot suffix = $slotSuffix")
+        "adb shell dd if=/dev/block/by-name/$deviceName$slotSuffix of=/cache/file.to.pull".check_call()
+        "adb pull /cache/file.to.pull $fileName".check_call()
+        "adb shell rm /cache/file.to.pull".check_call()
+    }
+
     fun cleanUp() {
         val workDir = Helper.prop("workDir")
         if (File(workDir).exists()) File(workDir).deleteRecursively()

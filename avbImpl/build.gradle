@@ -16,7 +16,7 @@ model {
             }
             binaries.all {
                 cCompiler.args << "-Wall" << "-g"
-                cppCompiler.args << "--std=c++11"
+                cppCompiler.args << "-std=c++17"
             }
         }
 
@@ -29,7 +29,7 @@ model {
             }
             binaries.all {
                 cppCompiler.define "XXX"
-                cppCompiler.args << '-std=c++11'
+                cppCompiler.args << '-std=c++17'
             }
         }
     }

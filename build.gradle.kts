@@ -61,6 +61,17 @@ tasks {
     }
     flashTask.dependsOn("bbootimg:jar")
 
+
+    val pullTask by register("pull", JavaExec::class) {
+        group = GROUP_ANDROID
+        main = "cfig.packable.PackableLauncherKt"
+        classpath = files("bbootimg/build/libs/bbootimg.jar")
+        this.maxHeapSize = "512m"
+        enableAssertions = true
+        args("pull")
+    }
+    pullTask.dependsOn("bbootimg:jar")
+
     //sparse image dependencies
     packTask.dependsOn("aosp:mkbootfs.10:mkbootfsExecutable")
     packTask.dependsOn("aosp:mkbootfs.11:mkbootfsExecutable")

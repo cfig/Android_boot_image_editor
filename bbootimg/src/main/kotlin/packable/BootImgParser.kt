@@ -87,6 +87,10 @@ class BootImgParser() : IPackable {
         }
     }
 
+    override fun pull(fileName: String, deviceName: String) {
+        super.pull(fileName, deviceName)
+    }
+
     companion object {
         private val log = LoggerFactory.getLogger(BootImgParser::class.java)
 
