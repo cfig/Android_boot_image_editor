@@ -42,6 +42,11 @@ def cleanUp():
     deleteIfExists("recovery.img.signed2")
     deleteIfExists("vbmeta.img")
     deleteIfExists("vbmeta.img.signed")
+    deleteIfExists("vendor_boot.img")
+    deleteIfExists("vendor_boot.img.clear")
+    deleteIfExists("vendor_boot.img.google")
+    deleteIfExists("vendor_boot.img.signed")
+    deleteIfExists("vendor_boot.img.signed2")
 
 def verifySingleJson(jsonFile):
     log.info(jsonFile)

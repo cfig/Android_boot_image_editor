@@ -11,7 +11,7 @@ model {
         avbx(NativeLibrarySpec) {
             sources {
                 cpp {
-                    lib project: ":aosp:libavb", library: "avb"
+                    lib project: ":aosp:libavb1.2", library: "avb"
                 }
             }
             binaries.all {
@@ -23,7 +23,7 @@ model {
         avbVerifier(NativeExecutableSpec) {
             sources {
                 cpp {
-                    lib project: ":aosp:libavb", library: "avb", linkage: "static"
+                    lib project: ":aosp:libavb1.2", library: "avb", linkage: "static"
                     lib project: ":avbImpl", library: "avbx", linkage: "static"
                 }
             }

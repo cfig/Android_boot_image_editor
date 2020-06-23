@@ -175,14 +175,14 @@ class Common {
             }
         }
 
-        fun packRootfs(rootDir: String, ramdiskGz: String) {
-            val mkbootfs = Helper.prop("mkbootfsBin")
+        fun packRootfs(rootDir: String, ramdiskGz: String, osMajor: Int = 10) {
+            val mkbootfs = String.format(Helper.prop("mkbootfsBin"), osMajor)
             log.info("Packing rootfs $rootDir ...")
             val outputStream = ByteArrayOutputStream()
             DefaultExecutor().let { exec ->
                 exec.streamHandler = PumpStreamHandler(outputStream)
                 val cmdline = "$mkbootfs $rootDir"
-                log.info(cmdline)
+                log.info("CMD: $cmdline -> PIPE -> $ramdiskGz")
                 exec.execute(CommandLine.parse(cmdline))
             }
             Helper.gnuZipFile2(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))

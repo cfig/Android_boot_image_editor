@@ -302,6 +302,16 @@ data class BootV2(
         )
     }
 
+    fun parseOsMajor(): Int {
+        return try {
+            log.info("OS Major: " + (info.osVersion?.split(".")?.get(0) ?: "null"))
+            val ret = Integer.parseInt(info.osVersion!!.split(".")[0])
+            if (ret <= 10) 10 else ret
+        } catch (e: Exception) {
+            10
+        }
+    }
+
     fun pack(): BootV2 {
         //refresh kernel size
         this.kernel.size = File(this.kernel.file!!).length().toInt()
@@ -316,7 +326,7 @@ data class BootV2(
             } else {
                 File(this.ramdisk.file!!).deleleIfExists()
                 File(this.ramdisk.file!!.removeSuffix(".gz")).deleleIfExists()
-                Common.packRootfs("${workDir}/root", this.ramdisk.file!!)
+                Common.packRootfs("${workDir}/root", this.ramdisk.file!!, parseOsMajor())
             }
             this.ramdisk.size = File(this.ramdisk.file!!).length().toInt()
         }

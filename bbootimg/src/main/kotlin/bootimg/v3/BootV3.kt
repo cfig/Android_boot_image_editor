@@ -72,6 +72,15 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
             var position: Int = 0,
             var size: Int = 0)
 
+    fun parseOsMajor(): Int {
+        return try {
+            log.info("OS Major: " + info.osVersion.split(".")[0])
+            Integer.parseInt(info.osVersion.split(".")[0])
+        } catch (e: Exception) {
+            11
+        }
+    }
+
     fun pack(): BootV3 {
         if (File( this.ramdisk.file).exists() && !File(workDir + "root").exists()) {
             //do nothing if we have ramdisk.img.gz but no /root
@@ -79,7 +88,7 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
         } else {
             File(this.ramdisk.file).deleleIfExists()
             File(this.ramdisk.file.removeSuffix(".gz")).deleleIfExists()
-            C.packRootfs("$workDir/root", this.ramdisk.file)
+            C.packRootfs("$workDir/root", this.ramdisk.file, parseOsMajor())
         }
         this.kernel.size = File(this.kernel.file).length().toInt()
         this.ramdisk.size = File( this.ramdisk.file).length().toInt()

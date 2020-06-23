@@ -75,6 +75,10 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
         }
     }
 
+    private fun parseOsMajor(): Int {
+        return 11
+    }
+
     fun pack(): VendorBoot {
         val workDir = Helper.prop("workDir")
         if (File(workDir + this.ramdisk.file).exists() && !File(workDir + "root").exists()) {
@@ -83,7 +87,7 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
         } else {
             File(this.ramdisk.file).deleleIfExists()
             File(this.ramdisk.file.removeSuffix(".gz")).deleleIfExists()
-            C.packRootfs("$workDir/root", this.ramdisk.file)
+            C.packRootfs("$workDir/root", this.ramdisk.file, parseOsMajor())
         }
         this.ramdisk.size = File(this.ramdisk.file).length().toUInt()
         this.dtb.size = File(this.dtb.file).length().toUInt()
@@ -152,7 +156,11 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
     }
 
     fun extractVBMeta(): VendorBoot {
-        Avb().parseVbMeta(info.output)
+        try {
+            Avb().parseVbMeta(info.output)
+        } catch (e: Exception) {
+            log.error("extraceVBMeta(): $e")
+        }
         if (File("vbmeta.img").exists()) {
             log.warn("Found vbmeta.img, parsing ...")
             VBMetaParser().unpack("vbmeta.img")
@@ -200,14 +208,15 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
 
     private fun toCommandLine(): CommandLine {
         return CommandLine(Helper.prop("mkbootimg"))
-                .addArgument("--vendor_ramdisk")
-                .addArgument(this.ramdisk.file)
-                .addArgument("--dtb")
-                .addArgument(this.dtb.file)
-                .addArgument("--vendor_cmdline")
-                .addArgument(info.cmdline, false)
-                .addArgument("--header_version")
-                .addArgument(info.headerVersion.toString())
+                .addArgument("--vendor_ramdisk").addArgument(this.ramdisk.file)
+                .addArgument("--dtb").addArgument(this.dtb.file)
+                .addArgument("--vendor_cmdline").addArgument(info.cmdline, false)
+                .addArgument("--header_version").addArgument(info.headerVersion.toString())
+                .addArgument("--base").addArgument("0")
+                .addArgument("--tags_offset").addArgument(info.tagsLoadAddr.toString())
+                .addArgument("--kernel_offset").addArgument(info.kernelLoadAddr.toString())
+                .addArgument("--ramdisk_offset").addArgument(ramdisk.loadAddr.toString())
+                .addArgument("--dtb_offset").addArgument(dtb.loadAddr.toString())
                 .addArgument("--vendor_boot")
     }
 }
