@@ -15,3 +15,7 @@ tasks.withType(LinkExecutable::class.java).configureEach {
 
 tasks.register<CppCompile>("hello") {
 }
+
+tasks.withType(CppCompile::class.java).configureEach {
+    compilerArgs.add("-std=c++17")
+}

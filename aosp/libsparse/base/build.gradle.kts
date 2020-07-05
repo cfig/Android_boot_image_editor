@@ -12,3 +12,7 @@ extensions.configure<CppLibrary> {
     privateHeaders.from(file("src/main/headers"))
     publicHeaders.from(file("src/main/public"))
 }
+
+tasks.withType(CppCompile::class.java).configureEach {
+    compilerArgs.add("-std=c++17")
+}

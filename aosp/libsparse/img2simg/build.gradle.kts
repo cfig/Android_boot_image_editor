@@ -12,3 +12,7 @@ application {
 tasks.withType(LinkExecutable::class.java).configureEach {
     linkerArgs.add("-lz")
 }
+
+tasks.withType(CppCompile::class.java).configureEach {
+    compilerArgs.add("-std=c++17")
+}

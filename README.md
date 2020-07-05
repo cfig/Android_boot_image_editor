@@ -8,7 +8,7 @@ This tool focuses on editing Android boot.img(also recovery.img, and vbmeta.img)
 ## 1. Prerequisite
 #### 1.1 Host OS requirement:
 
-Linux or Mac development env. To get the most of the toolkit, following packages are also needed: python, jdk 8+, zlib1g-dev, cpio, device-tree-compiler.
+![Linux](doc/linux24.png) or ![Mac](doc/apple24.png) development env. To get the most of the toolkit, following packages are also needed: python, jdk 8+, zlib1g-dev, cpio, device-tree-compiler.
 
 #### 1.2 Target Android requirement:
 
@@ -33,6 +33,10 @@ Supported images:
 Clone this repo with minimal depth:
 
     git clone https://github.com/cfig/Android_boot_image_editor.git --depth=1
+
+or clone it from mirror:
+
+    git clone https://gitee.com/cfig/Android_boot_image_editor.git --depth=1
 
 Put your boot.img to current directory, then start gradle 'unpack' task:
 

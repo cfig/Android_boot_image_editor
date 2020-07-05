@@ -1,10 +1,10 @@
-apply plugin: 'cpp' 
-apply plugin: 'c' 
+apply plugin: 'cpp'
+apply plugin: 'c'
 
 model {
     buildTypes {
         release
-    }   
+    }
 
     components {
         mkbootfs(NativeExecutableSpec) {
@@ -12,7 +12,7 @@ model {
                 cppCompiler.define "__ANDROID_VNDK__"
                 //cppCompiler.define 'CFIG_NO_FIX_STAT'
                 cppCompiler.args << "-Wno-write-strings"
-            }   
-        }   
-    }   
+            }
+        }
+    }
 }

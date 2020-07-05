@@ -22,7 +22,11 @@
  * SOFTWARE.
  */
 
+#if defined(__APPLE__) && defined(__MACH__)
+#include <machine/endian.h>
+#else
 #include <endian.h>
+#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
