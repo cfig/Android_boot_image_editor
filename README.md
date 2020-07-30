@@ -1,48 +1,38 @@
-[中文](doc/short.md)
 # Android_boot_image_editor
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/fa6a49bb22b84307b12e7a8878867c1e)](https://app.codacy.com/manual/cfig97/Android_boot_image_editor?utm_source=github.com&utm_medium=referral&utm_content=cfig/Android_boot_image_editor&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.org/cfig/Android_boot_image_editor.svg?branch=master)](https://travis-ci.org/cfig/Android_boot_image_editor)
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-This tool focuses on editing Android boot.img(also recovery.img, and vbmeta.img).
+A tool for reverse engineering Android ROM images.  (working on ![Linux](doc/linux24.png) and ![Mac](doc/apple24.png))
 
-## 1. Prerequisite
-#### 1.1 Host OS requirement:
+## Getting Started
 
-![Linux](doc/linux24.png) or ![Mac](doc/apple24.png) development env. To get the most of the toolkit, following packages are also needed: python, jdk 8+, zlib1g-dev, cpio, device-tree-compiler.
+#### Installation
+* install required packages
 
-#### 1.2 Target Android requirement:
+  ```bash
+  sudo apt install device-tree-compiler lz4 zlib1g-dev cpio
+  ```
 
-(1) Target boot.img MUST follows AOSP verified boot flow, either [Boot image signature](https://source.android.com/security/verifiedboot/verified-boot#signature_format) in VBoot 1.0 or [AVB HASH footer](https://android.googlesource.com/platform/external/avb/+/master/README.md#The-VBMeta-struct) (a.k.a. AVB) in VBoot 2.0.
+* get the tool
+  ```bash
+  git clone https://github.com/cfig/Android_boot_image_editor.git --depth=1
+  ```
 
-Supported images:
+  or clone it from mirror:
 
-| Image Type      | typical file names                  |   |
-|-----------------|-------------------------------------|---|
-| boot images     | boot.img, vendor_boot.img           |   |
-| recovery images | recovery.img, recovery-two-step.img |   |
-| vbmeta images   | vbmeta.img, vbmeta_system.img etc.  |   |
-| sparse images   | system.img, vendor.img etc.         |   |
-| dtbo images     | dtbo.img                            |   |
+  ```bash
+  git clone https://gitee.com/cfig/Android_boot_image_editor.git --depth=1
+  ```
 
-(2) These utilities are known to work for Nexus/Pixel boot.img for the following Android releases:
-
- - AOSP master
- - Lollipop (5.0) - Android 10
-
-## 2. Usage
-Clone this repo with minimal depth:
-
-    git clone https://github.com/cfig/Android_boot_image_editor.git --depth=1
-
-or clone it from mirror:
-
-    git clone https://gitee.com/cfig/Android_boot_image_editor.git --depth=1
+#### Parsing and packing
 
 Put your boot.img to current directory, then start gradle 'unpack' task:
 
-    cp <original_boot_image> boot.img
-    ./gradlew unpack
+```bash
+cp <original_boot_image> boot.img
+./gradlew unpack
+```
 
 Your get the flattened kernel and /root filesystem under **./build/unzip\_boot**:
 
@@ -64,28 +54,28 @@ You get the repacked boot.img at $(CURDIR):
 
     boot.img.signed
 
-Well done you did it! The last step is to add the star to this repo :smile
-
-#### If you are working with recovery.img
-If you are working with recovery.img, the steps are similar:
-
-    cp <original_recovery_image> recovery.img
-    ./gradlew unpack
-    ./gradlew pack
-
-And you get recovery.img.signed
+Well done you did it! The last step is to star this repo :smile
 
 
-### usage demo
-![](doc/op.gif)
+### live demo
+<!-- ![](doc/op.gif) -->
+<p align="center">
+    <img src=doc/op.gif width="615" height="492">
+</p>
 
-## 3. example & test
-An example boot.img has been placed at **src/test/resources/boot.img**, which is extracted from Nexus 5x(code: bullhead) factory images from [Google](https://dl.google.com/dl/android/aosp/bullhead-mda89e-factory-29247942.tgz), you can take it as a quick start.
+## Supported ROM image types
 
-## 4. boot.img layout
-Read [layout](doc/layout.md) of Android boot.img and vendor\_boot.img.
+| Image Type      | file names                          |      |
+| --------------- | ----------------------------------- | ---- |
+| boot images     | boot.img, vendor_boot.img           |      |
+| recovery images | recovery.img, recovery-two-step.img |      |
+| vbmeta images   | vbmeta.img, vbmeta_system.img etc.  |      |
+| sparse images   | system.img, vendor.img etc.         |      |
+| dtbo images     | dtbo.img                            |      |
 
-## 5. compatible devices
+Please note that the boot.img MUST follows AOSP verified boot flow, either [Boot image signature](https://source.android.com/security/verifiedboot/verified-boot#signature_format) in VBoot 1.0 or [AVB HASH footer](https://android.googlesource.com/platform/external/avb/+/master/README.md#The-VBMeta-struct) (a.k.a. AVB) in VBoot 2.0.
+
+## compatible devices
 
 | Device Model                   | Manufacturer | Compatible           | Android Version          | Note |
 |--------------------------------|--------------|----------------------|--------------------------|------|
@@ -98,7 +88,51 @@ Read [layout](doc/layout.md) of Android boot.img and vendor\_boot.img.
 | Moto X (2013) T-Mobile         | Motorola     | N                    |                          |      |
 | X7 (PD1602_A_3.12.8)           | VIVO         | N                    | ?                        | [Issue 35](https://github.com/cfig/Android_boot_image_editor/issues/35) |
 
-## 6. References
+## more examples
+
+* recovery.img
+
+If you are working with recovery.img, the steps are similar:
+
+    cp <your_recovery_image> recovery.img
+    ./gradlew unpack
+    ./gradlew pack
+
+* vbmeta.img
+
+```bash
+cp <your_vbmeta_image> vbmeta.img
+./gradlew unpack
+./gradlew pack
+```
+
+* boot.img and vbmeta.img
+```bash
+cp <your_boot_image> boot.img
+cp <your_vbmeta_image> vbmeta.img
+./gradlew unpack
+./gradlew pack
+```
+Your boot.img.signed and vbmeta.img.signd will be updated together.
+
+* sparse vendor.img
+
+```bash
+cp <your_vendor_image> vendor.img
+./gradlew unpack
+./gradlew pack
+```
+
+You get vendor.img.unsparse, then you can mount it.
+```bash
+mkdir mnt
+sudo mount -o ro vendor.img mnt
+```
+
+## boot.img layout
+Read [layout](doc/layout.md) of Android boot.img and vendor\_boot.img.
+
+## References
 
 boot\_signer
 https://android.googlesource.com/platform/system/extras

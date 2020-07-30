@@ -20,6 +20,7 @@ class DtboParser(val workDir: File) : IPackable {
     private val log = LoggerFactory.getLogger(DtboParser::class.java)
     private val envv = EnvironmentVerifier()
     private val outDir = Helper.prop("workDir")
+    private val dtboMaker = Helper.prop("dtboMaker")
 
     override fun capabilities(): List<String> {
         return listOf("^dtbo\\.img$")
@@ -29,7 +30,7 @@ class DtboParser(val workDir: File) : IPackable {
         cleanUp()
         val dtbPath = File("$outDir/dtb").path
         val headerPath = File("$outDir/dtbo.header").path
-        val cmd = CommandLine.parse("external/mkdtboimg.py dump $fileName").let {
+        val cmd = CommandLine.parse("$dtboMaker dump $fileName").let {
             it.addArguments("--dtb $dtbPath")
             it.addArguments("--output $headerPath")
         }
@@ -57,7 +58,7 @@ class DtboParser(val workDir: File) : IPackable {
         val headerPath = File("${outDir}/dtbo.header").path
         val props = Properties()
         props.load(FileInputStream(File(headerPath)))
-        val cmd = CommandLine.parse("external/mkdtboimg.py create $fileName.clear").let {
+        val cmd = CommandLine.parse("$dtboMaker create $fileName.clear").let {
             it.addArguments("--version=1")
             for (i in 0 until Integer.parseInt(props.getProperty("dt_entry_count"))) {
                 val dtsName = File("$outDir/dtb.$i").path
