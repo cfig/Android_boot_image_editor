@@ -1,5 +1,6 @@
 [中文](doc/short.md)
 # Android_boot_image_editor
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fa6a49bb22b84307b12e7a8878867c1e)](https://app.codacy.com/manual/cfig97/Android_boot_image_editor?utm_source=github.com&utm_medium=referral&utm_content=cfig/Android_boot_image_editor&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.org/cfig/Android_boot_image_editor.svg?branch=master)](https://travis-ci.org/cfig/Android_boot_image_editor)
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
