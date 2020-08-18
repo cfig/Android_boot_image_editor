@@ -42,13 +42,13 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
                 ret.info.pageSize = BootHeaderV3.pageSize
                 //kernel
                 ret.kernel.file = workDir + "kernel"
-                ret.kernel.size = header.kernelSize.toInt()
-                ret.kernel.position = BootHeaderV3.pageSize.toInt()
+                ret.kernel.size = header.kernelSize
+                ret.kernel.position = BootHeaderV3.pageSize
                 //ramdisk
                 ret.ramdisk.file = workDir + "ramdisk.img.gz"
-                ret.ramdisk.size = header.ramdiskSize.toInt()
-                ret.ramdisk.position = ret.kernel.position + header.kernelSize.toInt() +
-                        getPaddingSize(header.kernelSize, BootHeaderV3.pageSize).toInt()
+                ret.ramdisk.size = header.ramdiskSize
+                ret.ramdisk.position = ret.kernel.position + header.kernelSize +
+                        getPaddingSize(header.kernelSize, BootHeaderV3.pageSize)
             }
             ret.info.imageSize = File(fileName).length()
             return ret
@@ -58,9 +58,9 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
     data class MiscInfo(
             var output: String = "",
             var json: String = "",
-            var headerVersion: UInt = 0U,
-            var headerSize: UInt = 0U,
-            var pageSize: UInt = 0U,
+            var headerVersion: Int = 0,
+            var headerSize: Int = 0,
+            var pageSize: Int = 0,
             var cmdline: String = "",
             var osVersion: String = "",
             var osPatchLevel: String = "",
@@ -97,10 +97,9 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
         FileOutputStream(this.info.output + ".clear", false).use { fos ->
             val encodedHeader = this.toHeader().encode()
             fos.write(encodedHeader)
-            fos.write(ByteArray((
-                    Helper.round_to_multiple(encodedHeader.size.toUInt(),
-                            this.info.pageSize) - encodedHeader.size.toUInt()).toInt()
-            ))
+            fos.write(ByteArray(
+                    Helper.round_to_multiple(encodedHeader.size,
+                            this.info.pageSize) - encodedHeader.size))
         }
 
         //data
@@ -131,8 +130,8 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
 
     private fun toHeader(): BootHeaderV3 {
         return BootHeaderV3(
-                kernelSize = kernel.size.toUInt(),
-                ramdiskSize = ramdisk.size.toUInt(),
+                kernelSize = kernel.size,
+                ramdiskSize = ramdisk.size,
                 headerVersion = info.headerVersion,
                 osVersion = info.osVersion,
                 osPatchLevel = info.osPatchLevel,

@@ -9,27 +9,27 @@ import kotlin.math.pow
 
 @OptIn(ExperimentalUnsignedTypes::class)
 open class BootHeaderV2(
-        var kernelLength: UInt = 0U,
-        var kernelOffset: UInt = 0U,
+        var kernelLength: Int = 0,
+        var kernelOffset: Long = 0L, //UInt
 
-        var ramdiskLength: UInt = 0U,
-        var ramdiskOffset: UInt = 0U,
+        var ramdiskLength: Int = 0,
+        var ramdiskOffset: Long = 0L, //UInt
 
-        var secondBootloaderLength: UInt = 0U,
-        var secondBootloaderOffset: UInt = 0U,
+        var secondBootloaderLength: Int = 0,
+        var secondBootloaderOffset: Long = 0L, //UInt
 
-        var recoveryDtboLength: UInt = 0U,
-        var recoveryDtboOffset: ULong = 0UL,//Q
+        var recoveryDtboLength: Int = 0,
+        var recoveryDtboOffset: Long = 0L,//Q
 
-        var dtbLength: UInt = 0U,
-        var dtbOffset: ULong = 0UL,//Q
+        var dtbLength: Int = 0,
+        var dtbOffset: Long = 0L,//Q
 
-        var tagsOffset: UInt = 0U,
+        var tagsOffset: Long = 0L, //UInt
 
-        var pageSize: UInt = 0U,
+        var pageSize: Int = 0,
 
-        var headerSize: UInt = 0U,
-        var headerVersion: UInt = 0U,
+        var headerSize: Int = 0,
+        var headerVersion: Int = 0,
 
         var board: String = "",
 
@@ -50,15 +50,15 @@ open class BootHeaderV2(
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like Android Boot Image Header")
         }
-        this.kernelLength = info[1] as UInt
-        this.kernelOffset = info[2] as UInt
-        this.ramdiskLength = info[3] as UInt
-        this.ramdiskOffset = info[4] as UInt
-        this.secondBootloaderLength = info[5] as UInt
-        this.secondBootloaderOffset = info[6] as UInt
-        this.tagsOffset = info[7] as UInt
-        this.pageSize = info[8] as UInt
-        this.headerVersion = info[9] as UInt
+        this.kernelLength = (info[1] as UInt).toInt()
+        this.kernelOffset = (info[2] as UInt).toLong()
+        this.ramdiskLength = (info[3] as UInt).toInt()
+        this.ramdiskOffset = (info[4] as UInt).toLong()
+        this.secondBootloaderLength = (info[5] as UInt).toInt()
+        this.secondBootloaderOffset = (info[6] as UInt).toLong()
+        this.tagsOffset = (info[7] as UInt).toLong()
+        this.pageSize = (info[8] as UInt).toInt()
+        this.headerVersion = (info[9] as UInt).toInt()
         val osNPatch = info[10] as UInt
         if (0U != osNPatch) { //treated as 'reserved' in this boot image
             this.osVersion = Common.parseOsVersion(osNPatch.toInt() shr 11)
@@ -68,25 +68,25 @@ open class BootHeaderV2(
         this.cmdline = (info[12] as String) + (info[14] as String)
         this.hash = info[13] as ByteArray
 
-        if (this.headerVersion > 0U) {
-            this.recoveryDtboLength = info[15] as UInt
-            this.recoveryDtboOffset = info[16] as ULong
+        if (this.headerVersion > 0) {
+            this.recoveryDtboLength = (info[15] as UInt).toInt()
+            this.recoveryDtboOffset = (info[16] as ULong).toLong()
         }
 
-        this.headerSize = info[17] as UInt
+        this.headerSize = (info[17] as UInt).toInt()
         assert(this.headerSize.toInt() in intArrayOf(BOOT_IMAGE_HEADER_V2_SIZE,
                 BOOT_IMAGE_HEADER_V1_SIZE, BOOT_IMAGE_HEADER_V0_SIZE)) {
             "header size ${this.headerSize} illegal"
         }
 
-        if (this.headerVersion > 1U) {
-            this.dtbLength = info[18] as UInt
-            this.dtbOffset = info[19] as ULong
+        if (this.headerVersion > 1) {
+            this.dtbLength = (info[18] as UInt).toInt()
+            this.dtbOffset = (info[19] as ULong).toLong()
         }
     }
 
-    private fun get_recovery_dtbo_offset(): UInt {
-        return Helper.round_to_multiple(this.headerSize, pageSize) +
+    private fun get_recovery_dtbo_offset(): Long {
+        return Helper.round_to_multiple(this.headerSize.toLong(), pageSize) +
                 Helper.round_to_multiple(this.kernelLength, pageSize) +
                 Helper.round_to_multiple(this.ramdiskLength, pageSize) +
                 Helper.round_to_multiple(this.secondBootloaderLength, pageSize)
@@ -121,18 +121,18 @@ open class BootHeaderV2(
                 //I
                 recoveryDtboLength,
                 //Q
-                if (headerVersion > 0U) recoveryDtboOffset else 0,
+                if (headerVersion > 0) recoveryDtboOffset else 0,
                 //I
                 when (headerVersion) {
-                    0U -> BOOT_IMAGE_HEADER_V0_SIZE
-                    1U -> BOOT_IMAGE_HEADER_V1_SIZE
-                    2U -> BOOT_IMAGE_HEADER_V2_SIZE
+                    0 -> BOOT_IMAGE_HEADER_V0_SIZE
+                    1 -> BOOT_IMAGE_HEADER_V1_SIZE
+                    2 -> BOOT_IMAGE_HEADER_V2_SIZE
                     else -> java.lang.IllegalArgumentException("headerVersion $headerVersion illegal")
                 },
                 //I
                 dtbLength,
                 //Q
-                if (headerVersion > 1U) dtbOffset else 0
+                if (headerVersion > 1) dtbOffset else 0
         )
     }
 

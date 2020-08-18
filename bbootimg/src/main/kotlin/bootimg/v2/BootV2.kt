@@ -30,12 +30,12 @@ data class BootV2(
     data class MiscInfo(
             var output: String = "",
             var json: String = "",
-            var headerVersion: UInt = 0U,
-            var headerSize: UInt = 0U,
-            var loadBase: UInt = 0U,
-            var tagsOffset: UInt = 0U,
+            var headerVersion: Int = 0,
+            var headerSize: Int = 0,
+            var loadBase: Long = 0,
+            var tagsOffset: Long = 0,
             var board: String? = null,
-            var pageSize: UInt = 0U,
+            var pageSize: Int = 0,
             var cmdline: String = "",
             var osVersion: String? = null,
             var osPatchLevel: String? = null,
@@ -45,15 +45,15 @@ data class BootV2(
 
     data class CommArgs(
             var file: String? = null,
-            var position: UInt = 0U,
+            var position: Long = 0,
             var size: Int = 0,
-            var loadOffset: UInt = 0U)
+            var loadOffset: Long = 0)
 
     data class CommArgsLong(
             var file: String? = null,
-            var position: UInt = 0U,
-            var size: UInt = 0U,
-            var loadOffset: ULong = 0U)
+            var position: Long = 0,
+            var size: Int = 0,
+            var loadOffset: Long = 0)
 
     companion object {
         private val log = LoggerFactory.getLogger(BootV2::class.java)
@@ -93,25 +93,25 @@ data class BootV2(
                     theRamdisk.size = bh2.ramdiskLength.toInt()
                     theRamdisk.loadOffset = bh2.ramdiskOffset
                     theRamdisk.position = ret.getRamdiskPosition()
-                    if (bh2.ramdiskLength > 0U) {
+                    if (bh2.ramdiskLength > 0) {
                         theRamdisk.file = "${workDir}ramdisk.img.gz"
                     }
                 }
-                if (bh2.secondBootloaderLength > 0U) {
+                if (bh2.secondBootloaderLength > 0) {
                     ret.secondBootloader = CommArgs()
                     ret.secondBootloader!!.size = bh2.secondBootloaderLength.toInt()
                     ret.secondBootloader!!.loadOffset = bh2.secondBootloaderOffset
                     ret.secondBootloader!!.file = "${workDir}second"
                     ret.secondBootloader!!.position = ret.getSecondBootloaderPosition()
                 }
-                if (bh2.recoveryDtboLength > 0U) {
+                if (bh2.recoveryDtboLength > 0) {
                     ret.recoveryDtbo = CommArgsLong()
                     ret.recoveryDtbo!!.size = bh2.recoveryDtboLength
                     ret.recoveryDtbo!!.loadOffset = bh2.recoveryDtboOffset //Q
                     ret.recoveryDtbo!!.file = "${workDir}recoveryDtbo"
-                    ret.recoveryDtbo!!.position = ret.getRecoveryDtboPosition().toUInt()
+                    ret.recoveryDtbo!!.position = ret.getRecoveryDtboPosition()
                 }
-                if (bh2.dtbLength > 0U) {
+                if (bh2.dtbLength > 0) {
                     ret.dtb = CommArgsLong()
                     ret.dtb!!.size = bh2.dtbLength
                     ret.dtb!!.loadOffset = bh2.dtbOffset //Q
@@ -123,35 +123,35 @@ data class BootV2(
         }
     }
 
-    private fun getHeaderSize(pageSize: UInt): UInt {
-        val pad = (pageSize - (1648U and (pageSize - 1U))) and (pageSize - 1U)
-        return pad + 1648U
+    private fun getHeaderSize(pageSize: Int): Int {
+        val pad = (pageSize - (1648 and (pageSize - 1))) and (pageSize - 1)
+        return pad + 1648
     }
 
-    private fun getKernelPosition(): UInt {
-        return getHeaderSize(info.pageSize)
+    private fun getKernelPosition(): Long {
+        return getHeaderSize(info.pageSize).toLong()
     }
 
-    private fun getRamdiskPosition(): UInt {
-        return (getKernelPosition() + kernel.size.toUInt() +
-                Common.getPaddingSize(kernel.size.toUInt(), info.pageSize))
+    private fun getRamdiskPosition(): Long {
+        return (getKernelPosition() + kernel.size +
+                Common.getPaddingSize(kernel.size, info.pageSize))
     }
 
-    private fun getSecondBootloaderPosition(): UInt {
-        return getRamdiskPosition() + ramdisk.size.toUInt() +
-                Common.getPaddingSize(ramdisk.size.toUInt(), info.pageSize)
+    private fun getSecondBootloaderPosition(): Long {
+        return getRamdiskPosition() + ramdisk.size +
+                Common.getPaddingSize(ramdisk.size, info.pageSize)
     }
 
-    private fun getRecoveryDtboPosition(): UInt {
+    private fun getRecoveryDtboPosition(): Long {
         return if (this.secondBootloader == null) {
             getSecondBootloaderPosition()
         } else {
-            getSecondBootloaderPosition() + secondBootloader!!.size.toUInt() +
-                    Common.getPaddingSize(secondBootloader!!.size.toUInt(), info.pageSize)
+            getSecondBootloaderPosition() + secondBootloader!!.size +
+                    Common.getPaddingSize(secondBootloader!!.size, info.pageSize)
         }
     }
 
-    private fun getDtbPosition(): UInt {
+    private fun getDtbPosition(): Long {
         return if (this.recoveryDtbo == null) {
             getRecoveryDtboPosition()
         } else {
@@ -244,14 +244,14 @@ data class BootV2(
             }
             //dtbo
             this.recoveryDtbo?.let { theDtbo ->
-                if (theDtbo.size > 0U) {
+                if (theDtbo.size > 0) {
                     it.addRule()
                     it.addRow("recovery dtbo", theDtbo.file)
                 }
             }
             //dtb
             this.dtb?.let { theDtb ->
-                if (theDtb.size > 0u) {
+                if (theDtb.size > 0) {
                     it.addRule()
                     it.addRow("dtb", theDtb.file)
                     if (File(theDtb.file + ".src").exists()) {
@@ -280,16 +280,16 @@ data class BootV2(
 
     private fun toHeader(): BootHeaderV2 {
         return BootHeaderV2(
-                kernelLength = kernel.size.toUInt(),
+                kernelLength = kernel.size,
                 kernelOffset = kernel.loadOffset,
-                ramdiskLength = ramdisk.size.toUInt(),
+                ramdiskLength = ramdisk.size,
                 ramdiskOffset = ramdisk.loadOffset,
-                secondBootloaderLength = if (secondBootloader != null) secondBootloader!!.size.toUInt() else 0U,
-                secondBootloaderOffset = if (secondBootloader != null) secondBootloader!!.loadOffset else 0U,
-                recoveryDtboLength = if (recoveryDtbo != null) recoveryDtbo!!.size.toUInt() else 0U,
-                recoveryDtboOffset = if (recoveryDtbo != null) recoveryDtbo!!.loadOffset else 0U,
-                dtbLength = if (dtb != null) dtb!!.size else 0U,
-                dtbOffset = if (dtb != null) dtb!!.loadOffset else 0U,
+                secondBootloaderLength = if (secondBootloader != null) secondBootloader!!.size else 0,
+                secondBootloaderOffset = if (secondBootloader != null) secondBootloader!!.loadOffset else 0,
+                recoveryDtboLength = if (recoveryDtbo != null) recoveryDtbo!!.size else 0,
+                recoveryDtboOffset = if (recoveryDtbo != null) recoveryDtbo!!.loadOffset else 0,
+                dtbLength = if (dtb != null) dtb!!.size else 0,
+                dtbOffset = if (dtb != null) dtb!!.loadOffset else 0,
                 tagsOffset = info.tagsOffset,
                 pageSize = info.pageSize,
                 headerSize = info.headerSize,
@@ -318,7 +318,7 @@ data class BootV2(
         //refresh ramdisk size
         if (this.ramdisk.file.isNullOrBlank()) {
             ramdisk.file = null
-            ramdisk.loadOffset = 0U
+            ramdisk.loadOffset = 0
         } else {
             if (File(this.ramdisk.file!!).exists() && !File(workDir + "root").exists()) {
                 //do nothing if we have ramdisk.img.gz but no /root
@@ -336,24 +336,24 @@ data class BootV2(
         }
         //refresh recovery dtbo size
         recoveryDtbo?.let { theDtbo ->
-            theDtbo.size = File(theDtbo.file!!).length().toUInt()
-            theDtbo.loadOffset = getRecoveryDtboPosition().toULong()
+            theDtbo.size = File(theDtbo.file!!).length().toInt()
+            theDtbo.loadOffset = getRecoveryDtboPosition()
             log.warn("using fake recoveryDtboOffset ${theDtbo.loadOffset} (as is in AOSP avbtool)")
         }
         //refresh dtb size
         dtb?.let { theDtb ->
-            theDtb.size = File(theDtb.file!!).length().toUInt()
+            theDtb.size = File(theDtb.file!!).length().toInt()
         }
         //refresh image hash
         info.hash = when (info.headerVersion) {
-            0U -> {
+            0 -> {
                 Common.hashFileAndSize(kernel.file, ramdisk.file, secondBootloader?.file)
             }
-            1U -> {
+            1 -> {
                 Common.hashFileAndSize(kernel.file, ramdisk.file,
                         secondBootloader?.file, recoveryDtbo?.file)
             }
-            2U -> {
+            2 -> {
                 Common.hashFileAndSize(kernel.file, ramdisk.file,
                         secondBootloader?.file, recoveryDtbo?.file, dtb?.file)
             }
@@ -367,7 +367,7 @@ data class BootV2(
         //write
         FileOutputStream("${info.output}.clear", false).use { fos ->
             fos.write(encodedHeader)
-            fos.write(ByteArray((Helper.round_to_multiple(encodedHeader.size.toUInt(), info.pageSize) - encodedHeader.size.toUInt()).toInt()))
+            fos.write(ByteArray((Helper.round_to_multiple(encodedHeader.size, info.pageSize) - encodedHeader.size)))
         }
 
         log.info("Writing data ...")
@@ -431,13 +431,13 @@ data class BootV2(
             ret.addArgument(" --board ")
             ret.addArgument(info.board)
         }
-        if (info.headerVersion > 0U) {
+        if (info.headerVersion > 0) {
             if (recoveryDtbo != null) {
                 ret.addArgument(" --recovery_dtbo ")
                 ret.addArgument(recoveryDtbo!!.file!!)
             }
         }
-        if (info.headerVersion > 1U) {
+        if (info.headerVersion > 1) {
             if (dtb != null) {
                 ret.addArgument("--dtb ")
                 ret.addArgument(dtb!!.file!!)

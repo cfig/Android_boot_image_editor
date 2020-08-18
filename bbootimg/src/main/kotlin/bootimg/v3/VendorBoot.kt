@@ -23,20 +23,20 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
                       var dtb: CommArgs = CommArgs()) {
     data class CommArgs(
             var file: String = "",
-            var position: UInt = 0U,
-            var size: UInt = 0U,
-            var loadAddr: UInt = 0U)
+            var position: Long = 0,
+            var size: Int = 0,
+            var loadAddr: Long = 0)
 
     data class MiscInfo(
             var output: String = "",
             var json: String = "",
-            var headerVersion: UInt = 0U,
+            var headerVersion: Int = 0,
             var product: String = "",
-            var headerSize: UInt = 0U,
-            var pageSize: UInt = 0U,
+            var headerSize: Int = 0,
+            var pageSize: Int = 0,
             var cmdline: String = "",
-            var tagsLoadAddr: UInt = 0U,
-            var kernelLoadAddr: UInt = 0U,
+            var tagsLoadAddr: Long = 0,
+            var kernelLoadAddr: Long = 0,
             var imageSize: Long = 0
     )
 
@@ -61,12 +61,12 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
                 ret.ramdisk.size = header.vndRamdiskSize
                 ret.ramdisk.loadAddr = header.ramdiskLoadAddr
                 ret.ramdisk.position = Helper.round_to_multiple(
-                        VendorBootHeader.VENDOR_BOOT_IMAGE_HEADER_V3_SIZE,
+                        VendorBootHeader.VENDOR_BOOT_IMAGE_HEADER_V3_SIZE.toLong(),
                         header.pageSize)
                 //dtb
                 ret.dtb.file = workDir + "dtb"
                 ret.dtb.size = header.dtbSize
-                ret.dtb.loadAddr = header.dtbLoadAddr.toUInt()
+                ret.dtb.loadAddr = header.dtbLoadAddr
                 ret.dtb.position = ret.ramdisk.position +
                         Helper.round_to_multiple(ret.ramdisk.size, header.pageSize)
             }
@@ -89,16 +89,15 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
             File(this.ramdisk.file.removeSuffix(".gz")).deleleIfExists()
             C.packRootfs("$workDir/root", this.ramdisk.file, parseOsMajor())
         }
-        this.ramdisk.size = File(this.ramdisk.file).length().toUInt()
-        this.dtb.size = File(this.dtb.file).length().toUInt()
+        this.ramdisk.size = File(this.ramdisk.file).length().toInt()
+        this.dtb.size = File(this.dtb.file).length().toInt()
         //header
         FileOutputStream(this.info.output + ".clear", false).use { fos ->
             val encodedHeader = this.toHeader().encode()
             fos.write(encodedHeader)
-            fos.write(ByteArray((
-                    Helper.round_to_multiple(encodedHeader.size.toUInt(),
-                            this.info.pageSize) - encodedHeader.size.toUInt()).toInt()
-            ))
+            fos.write(ByteArray(
+                    Helper.round_to_multiple(encodedHeader.size,
+                            this.info.pageSize) - encodedHeader.size))
         }
         //data
         log.info("Writing data ...")
@@ -138,7 +137,7 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
                 product = info.product,
                 headerSize = info.headerSize,
                 dtbSize = dtb.size,
-                dtbLoadAddr = dtb.loadAddr.toULong()
+                dtbLoadAddr = dtb.loadAddr
         )
     }
 

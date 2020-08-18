@@ -7,14 +7,14 @@ import java.io.InputStream
 @OptIn(ExperimentalUnsignedTypes::class)
 class PropertyDescriptor(
         var key: String = "",
-        var value: String = "") : Descriptor(TAG, 0U, 0) {
+        var value: String = "") : Descriptor(TAG, 0, 0) {
     override fun encode(): ByteArray {
         if (SIZE != Struct3(FORMAT_STRING).calcSize().toUInt()) {
             throw RuntimeException()
         }
-        this.num_bytes_following = (SIZE + this.key.length.toUInt() + this.value.length.toUInt() + 2U - 16U).toULong()
+        this.num_bytes_following = (SIZE + this.key.length.toUInt() + this.value.length.toUInt() + 2U - 16U).toLong()
         val nbfWithPadding = Helper.round_to_multiple(this.num_bytes_following.toLong(), 8).toULong()
-        val paddingSize = nbfWithPadding - num_bytes_following
+        val paddingSize = nbfWithPadding - num_bytes_following.toUInt()
         val padding = Struct3("${paddingSize}x").pack(0)
         val desc = Struct3(FORMAT_STRING).pack(
                 TAG,
@@ -29,12 +29,12 @@ class PropertyDescriptor(
 
     constructor(data: InputStream, seq: Int = 0) : this() {
         val info = Struct3(FORMAT_STRING).unpack(data)
-        this.tag = info[0] as ULong
-        this.num_bytes_following = info[1] as ULong
+        this.tag = (info[0] as ULong).toLong()
+        this.num_bytes_following = (info[1] as ULong).toLong()
         val keySize = (info[2] as ULong).toUInt()
         val valueSize = (info[3] as ULong).toUInt()
         val expectedSize = Helper.round_to_multiple(SIZE - 16U + keySize + 1U + valueSize + 1U, 8U)
-        if (this.tag != TAG || expectedSize.toULong() != this.num_bytes_following) {
+        if (this.tag != TAG || expectedSize.toLong() != this.num_bytes_following) {
             throw IllegalArgumentException("Given data does not look like a |property| descriptor")
         }
         this.sequence = seq
@@ -45,7 +45,7 @@ class PropertyDescriptor(
     }
 
     companion object {
-        const val TAG: ULong = 0U
+        const val TAG: Long = 0L
         const val SIZE = 32U
         const val FORMAT_STRING = "!4Q"
     }

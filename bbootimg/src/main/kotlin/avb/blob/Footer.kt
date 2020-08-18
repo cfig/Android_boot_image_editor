@@ -25,11 +25,11 @@ https://github.com/cfig/Android_boot_image_editor/blob/master/doc/layout.md#32-a
 
 @OptIn(ExperimentalUnsignedTypes::class)
 data class Footer constructor(
-        var versionMajor: UInt = FOOTER_VERSION_MAJOR,
-        var versionMinor: UInt = FOOTER_VERSION_MINOR,
-        var originalImageSize: ULong = 0U,
-        var vbMetaOffset: ULong = 0U,
-        var vbMetaSize: ULong = 0U
+        var versionMajor: Int = FOOTER_VERSION_MAJOR,
+        var versionMinor: Int = FOOTER_VERSION_MINOR,
+        var originalImageSize: Long = 0,
+        var vbMetaOffset: Long = 0,
+        var vbMetaSize: Long = 0
 ) {
     @Throws(IllegalArgumentException::class)
     constructor(iS: InputStream) : this() {
@@ -38,14 +38,14 @@ data class Footer constructor(
         if (MAGIC != (info[0] as String)) {
             throw IllegalArgumentException("stream doesn't look like valid AVB Footer")
         }
-        versionMajor = info[1] as UInt
-        versionMinor = info[2] as UInt
-        originalImageSize = info[3] as ULong
-        vbMetaOffset = info[4] as ULong
-        vbMetaSize = info[5] as ULong
+        versionMajor = (info[1] as UInt).toInt()
+        versionMinor = (info[2] as UInt).toInt()
+        originalImageSize = (info[3] as ULong).toLong()
+        vbMetaOffset = (info[4] as ULong).toLong()
+        vbMetaSize = (info[5] as ULong).toLong()
     }
 
-    constructor(originalImageSize: ULong, vbMetaOffset: ULong, vbMetaSize: ULong)
+    constructor(originalImageSize: Long, vbMetaOffset: Long, vbMetaSize: Long)
             : this(FOOTER_VERSION_MAJOR, FOOTER_VERSION_MINOR, originalImageSize, vbMetaOffset, vbMetaSize)
 
     @Throws(IllegalArgumentException::class)
@@ -75,8 +75,8 @@ data class Footer constructor(
         private const val MAGIC = "AVBf"
         const val SIZE = 64
         private const val RESERVED = 28
-        private const val FOOTER_VERSION_MAJOR = 1U
-        private const val FOOTER_VERSION_MINOR = 0U
+        private const val FOOTER_VERSION_MAJOR = 1
+        private const val FOOTER_VERSION_MINOR = 0
         private const val FORMAT_STRING = "!4s2L3Q${RESERVED}x"
 
         init {

@@ -46,6 +46,9 @@ class EnvironmentVerifier {
                 log.debug("lz4 available")
             } catch (e: Exception) {
                 log.warn("lz4 not installed")
+                if (isMacOS) {
+                    log.warn("For Mac OS: \n\n\tbrew install lz4\n")
+                }
                 return false
             }
             return true

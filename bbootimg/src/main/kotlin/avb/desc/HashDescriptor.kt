@@ -11,19 +11,19 @@ import java.io.InputStream
 import java.security.MessageDigest
 
 @OptIn(ExperimentalUnsignedTypes::class)
-class HashDescriptor(var flags: UInt = 0U,
+class HashDescriptor(var flags: Int = 0,
                      var partition_name: String = "",
                      var hash_algorithm: String = "",
-                     var image_size: ULong = 0U,
+                     var image_size: Long = 0,
                      var salt: ByteArray = byteArrayOf(),
                      var digest: ByteArray = byteArrayOf(),
-                     var partition_name_len: UInt = 0U,
-                     var salt_len: UInt = 0U,
-                     var digest_len: UInt = 0U)
-    : Descriptor(TAG, 0U, 0) {
+                     var partition_name_len: Int = 0,
+                     var salt_len: Int = 0,
+                     var digest_len: Int = 0)
+    : Descriptor(TAG, 0, 0) {
     var flagsInterpretation: String = ""
         get() {
-            return if (this.flags and Header.HashDescriptorFlags.AVB_HASH_DESCRIPTOR_FLAGS_DO_NOT_USE_AB.inFlags.toUInt() == 1U) {
+            return if (this.flags and Header.HashDescriptorFlags.AVB_HASH_DESCRIPTOR_FLAGS_DO_NOT_USE_AB.inFlags == 1) {
                 "1:no-A/B system"
             } else {
                 "0:A/B system"
@@ -32,17 +32,17 @@ class HashDescriptor(var flags: UInt = 0U,
 
     constructor(data: InputStream, seq: Int = 0) : this() {
         val info = Struct3(FORMAT_STRING).unpack(data)
-        this.tag = info[0] as ULong
-        this.num_bytes_following = info[1] as ULong
-        this.image_size = info[2] as ULong
+        this.tag = (info[0] as ULong).toLong()
+        this.num_bytes_following = (info[1] as ULong).toLong()
+        this.image_size = (info[2] as ULong).toLong()
         this.hash_algorithm = info[3] as String
-        this.partition_name_len = info[4] as UInt
-        this.salt_len = info[5] as UInt
-        this.digest_len = info[6] as UInt
-        this.flags = info[7] as UInt
+        this.partition_name_len = (info[4] as UInt).toInt()
+        this.salt_len = (info[5] as UInt).toInt()
+        this.digest_len = (info[6] as UInt).toInt()
+        this.flags = (info[7] as UInt).toInt()
         this.sequence = seq
         val expectedSize = Helper.round_to_multiple(
-                SIZE - 16 + (partition_name_len + salt_len + digest_len).toLong(), 8).toULong()
+                SIZE - 16 + (partition_name_len + salt_len + digest_len).toLong(), 8)
         if (this.tag != TAG || expectedSize != this.num_bytes_following) {
             throw IllegalArgumentException("Given data does not look like a |hash| descriptor")
         }
@@ -55,8 +55,8 @@ class HashDescriptor(var flags: UInt = 0U,
 
     override fun encode(): ByteArray {
         val payload_bytes_following = SIZE + this.partition_name.length + this.salt.size + this.digest.size - 16L
-        this.num_bytes_following = Helper.round_to_multiple(payload_bytes_following, 8).toULong()
-        val padding_size = num_bytes_following - payload_bytes_following.toUInt()
+        this.num_bytes_following = Helper.round_to_multiple(payload_bytes_following, 8)
+        val padding_size = num_bytes_following - payload_bytes_following
         val desc = Struct3(FORMAT_STRING).pack(
                 TAG,
                 this.num_bytes_following,
@@ -88,17 +88,17 @@ class HashDescriptor(var flags: UInt = 0U,
                 it.read(randomSalt)
                 log.warn("salt is empty, using random salt[$expectedDigestSize]: " + Helper.toHexString(randomSalt))
                 this.salt = randomSalt
-                this.salt_len = this.salt.size.toUInt()
+                this.salt_len = this.salt.size
             }
         } else {
             log.info("preset salt[${this.salt.size}] is valid: ${Hex.encodeHexString(this.salt)}")
         }
 
         //size
-        this.image_size = File(image_file).length().toULong()
+        this.image_size = File(image_file).length()
 
         //flags
-        if (this.flags and 1U == 1U) {
+        if (this.flags and 1 == 1) {
             log.info("flag: use_ab = 0")
         } else {
             log.info("flag: use_ab = 1")
@@ -112,14 +112,14 @@ class HashDescriptor(var flags: UInt = 0U,
             }.digest()
             log.info("Digest(salt + file): " + Helper.toHexString(newDigest))
             this.digest = newDigest
-            this.digest_len = this.digest.size.toUInt()
+            this.digest_len = this.digest.size
         }
 
         return this
     }
 
     companion object {
-        const val TAG: ULong = 2U
+        const val TAG: Long = 2L
         private const val RESERVED = 60
         private const val SIZE = 72 + RESERVED
         private const val FORMAT_STRING = "!3Q32s4L${RESERVED}x"

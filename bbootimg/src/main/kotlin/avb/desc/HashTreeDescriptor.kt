@@ -8,24 +8,24 @@ import java.util.*
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class HashTreeDescriptor(
-        var flags: UInt = 0U,
-        var dm_verity_version: UInt = 0u,
-        var image_size: ULong = 0UL,
-        var tree_offset: ULong = 0UL,
-        var tree_size: ULong = 0UL,
-        var data_block_size: UInt = 0U,
-        var hash_block_size: UInt = 0U,
-        var fec_num_roots: UInt = 0U,
-        var fec_offset: ULong = 0U,
-        var fec_size: ULong = 0U,
+        var flags: Int = 0,
+        var dm_verity_version: Int = 0,
+        var image_size: Long = 0,
+        var tree_offset: Long = 0,
+        var tree_size: Long = 0,
+        var data_block_size: Int = 0,
+        var hash_block_size: Int = 0,
+        var fec_num_roots: Int = 0,
+        var fec_offset: Long = 0,
+        var fec_size: Long = 0,
         var hash_algorithm: String = "",
         var partition_name: String = "",
         var salt: ByteArray = byteArrayOf(),
-        var root_digest: ByteArray = byteArrayOf()) : Descriptor(TAG, 0U, 0) {
+        var root_digest: ByteArray = byteArrayOf()) : Descriptor(TAG, 0, 0) {
     var flagsInterpretation: String = ""
         get() {
             var ret = ""
-            if (this.flags and Header.HashTreeDescriptorFlags.AVB_HASHTREE_DESCRIPTOR_FLAGS_DO_NOT_USE_AB.inFlags.toUInt() == 1U) {
+            if (this.flags and Header.HashTreeDescriptorFlags.AVB_HASHTREE_DESCRIPTOR_FLAGS_DO_NOT_USE_AB.inFlags == 1) {
                 ret += "1:no-A/B system"
             } else {
                 ret += "0:A/B system"
@@ -36,24 +36,24 @@ class HashTreeDescriptor(
     constructor(data: InputStream, seq: Int = 0) : this() {
         this.sequence = seq
         val info = Struct3(FORMAT_STRING).unpack(data)
-        this.tag = info[0] as ULong
-        this.num_bytes_following = info[1] as ULong
-        this.dm_verity_version = info[2] as UInt
-        this.image_size = info[3] as ULong
-        this.tree_offset = info[4] as ULong
-        this.tree_size = info[5] as ULong
-        this.data_block_size = info[6] as UInt
-        this.hash_block_size = info[7] as UInt
-        this.fec_num_roots = info[8] as UInt
-        this.fec_offset = info[9] as ULong
-        this.fec_size = info[10] as ULong
+        this.tag = (info[0] as ULong).toLong()
+        this.num_bytes_following = (info[1] as ULong).toLong()
+        this.dm_verity_version = (info[2] as UInt).toInt()
+        this.image_size = (info[3] as ULong).toLong()
+        this.tree_offset = (info[4] as ULong).toLong()
+        this.tree_size = (info[5] as ULong).toLong()
+        this.data_block_size = (info[6] as UInt).toInt()
+        this.hash_block_size = (info[7] as UInt).toInt()
+        this.fec_num_roots = (info[8] as UInt).toInt()
+        this.fec_offset = (info[9] as ULong).toLong()
+        this.fec_size = (info[10] as ULong).toLong()
         this.hash_algorithm = info[11] as String
         val partition_name_len = info[12] as UInt
         val salt_len = info[13] as UInt
         val root_digest_len = info[14] as UInt
-        this.flags = info[15] as UInt
+        this.flags = (info[15] as UInt).toInt()
         val expectedSize = Helper.round_to_multiple(SIZE.toUInt() - 16U + partition_name_len + salt_len + root_digest_len, 8U)
-        if (this.tag != TAG || this.num_bytes_following != expectedSize.toULong()) {
+        if (this.tag != TAG || this.num_bytes_following != expectedSize.toLong()) {
             throw IllegalArgumentException("Given data does not look like a hashtree descriptor")
         }
 
@@ -64,7 +64,7 @@ class HashTreeDescriptor(
     }
 
     override fun encode(): ByteArray {
-        this.num_bytes_following = (SIZE + this.partition_name.length + this.salt.size + this.root_digest.size - 16).toULong()
+        this.num_bytes_following = SIZE + this.partition_name.length + this.salt.size + this.root_digest.size - 16
         val nbf_with_padding = Helper.round_to_multiple(this.num_bytes_following.toLong(), 8)
         val padding_size = nbf_with_padding - this.num_bytes_following.toLong()
         val desc = Struct3(FORMAT_STRING).pack(
@@ -94,7 +94,7 @@ class HashTreeDescriptor(
     }
 
     companion object {
-        const val TAG: ULong = 1U
+        const val TAG: Long = 1L
         private const val RESERVED = 60L
         private const val SIZE = 120 + RESERVED
         private const val FORMAT_STRING = "!2QL3Q3L2Q32s4L${RESERVED}x"

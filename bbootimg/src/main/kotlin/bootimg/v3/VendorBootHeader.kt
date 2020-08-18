@@ -6,17 +6,17 @@ import java.io.InputStream
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class VendorBootHeader(
-        var headerVersion: UInt = 0U,
-        var pageSize: UInt = 0U,
-        var kernelLoadAddr: UInt = 0U,
-        var ramdiskLoadAddr: UInt = 0U,
-        var vndRamdiskSize: UInt = 0U,
+        var headerVersion: Int = 0,
+        var pageSize: Int = 0,
+        var kernelLoadAddr: Long = 0,
+        var ramdiskLoadAddr: Long = 0,
+        var vndRamdiskSize: Int = 0,
         var cmdline: String = "",
-        var tagsLoadAddr: UInt = 0U,
+        var tagsLoadAddr: Long = 0,
         var product: String = "",
-        var headerSize: UInt = 0U,
-        var dtbSize: UInt = 0U,
-        var dtbLoadAddr: ULong = 0U
+        var headerSize: Int = 0,
+        var dtbSize: Int = 0,
+        var dtbLoadAddr: Long = 0
 ) {
     @Throws(IllegalArgumentException::class)
     constructor(iS: InputStream?) : this() {
@@ -29,20 +29,24 @@ class VendorBootHeader(
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like Android Vendor Boot Image")
         }
-        this.headerVersion = info[1] as UInt
-        this.pageSize = info[2] as UInt
-        this.kernelLoadAddr = info[3] as UInt
-        this.ramdiskLoadAddr = info[4] as UInt
-        this.vndRamdiskSize = info[5] as UInt
+        this.headerVersion = (info[1] as UInt).toInt()
+        this.pageSize = (info[2] as UInt).toInt()
+        this.kernelLoadAddr = (info[3] as UInt).toLong()
+        this.ramdiskLoadAddr = (info[4] as UInt).toLong()
+        this.vndRamdiskSize = (info[5] as UInt).toInt()
         this.cmdline = info[6] as String
-        this.tagsLoadAddr = info[7] as UInt
+        this.tagsLoadAddr = (info[7] as UInt).toLong()
         this.product = info[8] as String
-        this.headerSize = info[9] as UInt
-        this.dtbSize = info[10] as UInt
-        this.dtbLoadAddr = info[11] as ULong
+        this.headerSize = (info[9] as UInt).toInt()
+        this.dtbSize = (info[10] as UInt).toInt()
+        this.dtbLoadAddr = (info[11] as ULong).toLong()
 
-        assert(this.headerSize in arrayOf(VENDOR_BOOT_IMAGE_HEADER_V3_SIZE))
-        assert(this.headerVersion == 3U)
+        if (this.headerSize !in arrayOf(VENDOR_BOOT_IMAGE_HEADER_V3_SIZE)) {
+            throw IllegalArgumentException("header size " + this.headerSize + " invalid")
+        }
+        if (this.headerVersion != 3) {
+            throw IllegalArgumentException("header version " + this.headerVersion + " invalid")
+        }
     }
 
     fun encode(): ByteArray {
@@ -64,7 +68,7 @@ class VendorBootHeader(
     companion object {
         private val log = LoggerFactory.getLogger(VendorBootHeader::class.java)
         const val magic = "VNDRBOOT"
-        const val VENDOR_BOOT_IMAGE_HEADER_V3_SIZE = 2112U
+        const val VENDOR_BOOT_IMAGE_HEADER_V3_SIZE = 2112
         const val FORMAT_STRING = "8s" + //magic
                 "I" + //header version
                 "I" + //page size
@@ -78,7 +82,7 @@ class VendorBootHeader(
                 "I" + //dtb size
                 "Q" //dtb physical load addr
         init {
-            assert(Struct3(FORMAT_STRING).calcSize().toUInt() == VENDOR_BOOT_IMAGE_HEADER_V3_SIZE)
+            assert(Struct3(FORMAT_STRING).calcSize() == VENDOR_BOOT_IMAGE_HEADER_V3_SIZE)
         }
     }
 

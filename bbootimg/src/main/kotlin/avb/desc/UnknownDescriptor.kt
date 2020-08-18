@@ -8,13 +8,13 @@ import java.io.ByteArrayInputStream
 import java.io.InputStream
 
 @OptIn(ExperimentalUnsignedTypes::class)
-class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0U, 0U, 0) {
+class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 0) {
     @Throws(IllegalArgumentException::class)
     constructor(stream: InputStream, seq: Int = 0) : this() {
         this.sequence = seq
         val info = Struct3(FORMAT).unpack(stream)
-        this.tag = info[0] as ULong
-        this.num_bytes_following = info[1] as ULong
+        this.tag = (info[0] as ULong).toLong()
+        this.num_bytes_following = (info[1] as ULong).toLong()
         log.debug("UnknownDescriptor: tag = $tag, len = ${this.num_bytes_following}")
         this.data = ByteArray(this.num_bytes_following.toInt())
         if (this.num_bytes_following.toInt() != stream.read(data)) {

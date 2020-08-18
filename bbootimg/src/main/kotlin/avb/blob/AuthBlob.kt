@@ -8,8 +8,8 @@ import java.security.MessageDigest
 
 @OptIn(ExperimentalUnsignedTypes::class)
 data class AuthBlob(
-        var offset: ULong = 0U,
-        var size: ULong = 0U,
+        var offset: Long = 0,
+        var size: Long = 0,
         var hash: String? = null,
         var signature: String? = null) {
     companion object {

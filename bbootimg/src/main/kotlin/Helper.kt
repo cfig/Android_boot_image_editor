@@ -205,6 +205,15 @@ class Helper {
             }
         }
 
+        fun round_to_multiple(size: Int, page: Int): Int {
+            val remainder = size % page
+            return if (remainder == 0) {
+                size
+            } else {
+                size + page - remainder
+            }
+        }
+
         /*
             read RSA private key
             assert exp == 65537

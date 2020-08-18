@@ -7,23 +7,23 @@ import java.io.InputStream
 //avbtool::AvbVBMetaHeader
 @OptIn(ExperimentalUnsignedTypes::class)
 data class Header(
-        var required_libavb_version_major: UInt = Avb.AVB_VERSION_MAJOR,
-        var required_libavb_version_minor: UInt = 0U,
-        var authentication_data_block_size: ULong = 0U,
-        var auxiliary_data_block_size: ULong = 0U,
-        var algorithm_type: UInt = 0U,
-        var hash_offset: ULong = 0U,
-        var hash_size: ULong = 0U,
-        var signature_offset: ULong = 0U,
-        var signature_size: ULong = 0U,
-        var public_key_offset: ULong = 0U,
-        var public_key_size: ULong = 0U,
-        var public_key_metadata_offset: ULong = 0U,
-        var public_key_metadata_size: ULong = 0U,
-        var descriptors_offset: ULong = 0U,
-        var descriptors_size: ULong = 0U,
-        var rollback_index: ULong = 0U,
-        var flags: UInt = 0U,
+        var required_libavb_version_major: Int = Avb.AVB_VERSION_MAJOR,
+        var required_libavb_version_minor: Int = 0,
+        var authentication_data_block_size: Long = 0,
+        var auxiliary_data_block_size: Long = 0,
+        var algorithm_type: Int = 0,
+        var hash_offset: Long = 0,
+        var hash_size: Long = 0,
+        var signature_offset: Long = 0,
+        var signature_size: Long = 0,
+        var public_key_offset: Long = 0,
+        var public_key_size: Long = 0,
+        var public_key_metadata_offset: Long = 0,
+        var public_key_metadata_size: Long = 0,
+        var descriptors_offset: Long = 0,
+        var descriptors_size: Long = 0,
+        var rollback_index: Long = 0,
+        var flags: Int = 0,
         var release_string: String = "avbtool ${Avb.AVB_VERSION_MAJOR}.${Avb.AVB_VERSION_MINOR}.${Avb.AVB_VERSION_SUB}") {
     @Throws(IllegalArgumentException::class)
     constructor(iS: InputStream) : this() {
@@ -32,23 +32,23 @@ data class Header(
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like valid VBMeta Header")
         }
-        this.required_libavb_version_major = info[1] as UInt
-        this.required_libavb_version_minor = info[2] as UInt
-        this.authentication_data_block_size = info[3] as ULong
-        this.auxiliary_data_block_size = info[4] as ULong
-        this.algorithm_type = info[5] as UInt
-        this.hash_offset = info[6] as ULong
-        this.hash_size = info[7] as ULong
-        this.signature_offset = info[8] as ULong
-        this.signature_size = info[9] as ULong
-        this.public_key_offset = info[10] as ULong
-        this.public_key_size = info[11] as ULong
-        this.public_key_metadata_offset = info[12] as ULong
-        this.public_key_metadata_size = info[13] as ULong
-        this.descriptors_offset = info[14] as ULong
-        this.descriptors_size = info[15] as ULong
-        this.rollback_index = info[16] as ULong
-        this.flags = info[17] as UInt
+        this.required_libavb_version_major = (info[1] as UInt).toInt()
+        this.required_libavb_version_minor = (info[2] as UInt).toInt()
+        this.authentication_data_block_size = (info[3] as ULong).toLong()
+        this.auxiliary_data_block_size = (info[4] as ULong).toLong()
+        this.algorithm_type = (info[5] as UInt).toInt()
+        this.hash_offset = (info[6] as ULong).toLong()
+        this.hash_size = (info[7] as ULong).toLong()
+        this.signature_offset = (info[8] as ULong).toLong()
+        this.signature_size = (info[9] as ULong).toLong()
+        this.public_key_offset = (info[10] as ULong).toLong()
+        this.public_key_size = (info[11] as ULong).toLong()
+        this.public_key_metadata_offset = (info[12] as ULong).toLong()
+        this.public_key_metadata_size = (info[13] as ULong).toLong()
+        this.descriptors_offset = (info[14] as ULong).toLong()
+        this.descriptors_size = (info[15] as ULong).toLong()
+        this.rollback_index = (info[16] as ULong).toLong()
+        this.flags = (info[17] as UInt).toInt()
         //padding: info[18]
         this.release_string = info[19] as String
     }
@@ -72,7 +72,7 @@ data class Header(
                 null)                                                                   //${REVERSED}x
     }
 
-    fun bump_required_libavb_version_minor(minor: UInt) {
+    fun bump_required_libavb_version_minor(minor: Int) {
         this.required_libavb_version_minor = maxOf(required_libavb_version_minor, minor)
     }
 

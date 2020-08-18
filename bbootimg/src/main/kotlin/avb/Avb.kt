@@ -74,9 +74,9 @@ class Avb {
 
         // + AvbFooter + padding
         newAvbInfo.footer!!.apply {
-            originalImageSize = newImageSize.toULong()
-            vbMetaOffset = vbmetaOffset.toULong()
-            vbMetaSize = vbmetaBlob.size.toULong()
+            originalImageSize = newImageSize
+            vbMetaOffset = vbmetaOffset
+            vbMetaSize = vbmetaBlob.size.toLong()
         }
         log.info(newAvbInfo.footer.toString())
         val footerBlobWithPadding = newAvbInfo.footer!!.encode().paddingWith(BLOCK_SIZE.toUInt(), true)
@@ -113,7 +113,7 @@ class Avb {
             FileOutputStream(File(image_file), true).channel.use { fc ->
                 log.info("original image $image_file has AVB footer, " +
                         "truncate it to original SIZE: ${it.originalImageSize}")
-                fc.truncate(it.originalImageSize.toLong())
+                fc.truncate(it.originalImageSize)
             }
         }
     }
@@ -146,7 +146,7 @@ class Avb {
         log.info("parsing $image_file ...")
         val jsonFile = getJsonFileName(image_file)
         var footer: Footer? = null
-        var vbMetaOffset: ULong = 0U
+        var vbMetaOffset: Long = 0
         // footer
         FileInputStream(image_file).use { fis ->
             fis.skip(File(image_file).length() - Footer.SIZE)
@@ -160,26 +160,26 @@ class Avb {
         }
 
         // header
-        var vbMetaHeader = Header()
+        var vbMetaHeader: Header
         FileInputStream(image_file).use { fis ->
-            fis.skip(vbMetaOffset.toLong())
+            fis.skip(vbMetaOffset)
             vbMetaHeader = Header(fis)
         }
         log.info(vbMetaHeader.toString())
         log.debug(ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(vbMetaHeader))
 
-        val authBlockOffset = vbMetaOffset + Header.SIZE.toUInt()
+        val authBlockOffset = vbMetaOffset + Header.SIZE
         val auxBlockOffset = authBlockOffset + vbMetaHeader.authentication_data_block_size
         val descStartOffset = auxBlockOffset + vbMetaHeader.descriptors_offset
 
         val ai = AVBInfo(vbMetaHeader, null, AuxBlob(), footer)
 
         // Auth blob
-        if (vbMetaHeader.authentication_data_block_size > 0U) {
+        if (vbMetaHeader.authentication_data_block_size > 0) {
             FileInputStream(image_file).use { fis ->
-                fis.skip(vbMetaOffset.toLong())
+                fis.skip(vbMetaOffset)
                 fis.skip(Header.SIZE.toLong())
-                fis.skip(vbMetaHeader.hash_offset.toLong())
+                fis.skip(vbMetaHeader.hash_offset)
                 val ba = ByteArray(vbMetaHeader.hash_size.toInt())
                 fis.read(ba)
                 log.debug("Parsed Auth Hash (Header & Aux Blob): " + Hex.encodeHexString(ba))
@@ -197,10 +197,10 @@ class Avb {
 
         // aux - desc
         var descriptors: List<Any> = mutableListOf()
-        if (vbMetaHeader.descriptors_size > 0U) {
+        if (vbMetaHeader.descriptors_size > 0) {
             FileInputStream(image_file).use { fis ->
-                fis.skip(descStartOffset.toLong())
-                descriptors = UnknownDescriptor.parseDescriptors2(fis, vbMetaHeader.descriptors_size.toLong())
+                fis.skip(descStartOffset)
+                descriptors = UnknownDescriptor.parseDescriptors2(fis, vbMetaHeader.descriptors_size)
             }
             descriptors.forEach {
                 log.debug(it.toString())
@@ -230,28 +230,28 @@ class Avb {
             }
         }
         // aux - pubkey
-        if (vbMetaHeader.public_key_size > 0U) {
+        if (vbMetaHeader.public_key_size > 0) {
             ai.auxBlob!!.pubkey = AuxBlob.PubKeyInfo()
-            ai.auxBlob!!.pubkey!!.offset = vbMetaHeader.public_key_offset.toLong()
-            ai.auxBlob!!.pubkey!!.size = vbMetaHeader.public_key_size.toLong()
+            ai.auxBlob!!.pubkey!!.offset = vbMetaHeader.public_key_offset
+            ai.auxBlob!!.pubkey!!.size = vbMetaHeader.public_key_size
 
             FileInputStream(image_file).use { fis ->
-                fis.skip(auxBlockOffset.toLong())
-                fis.skip(vbMetaHeader.public_key_offset.toLong())
+                fis.skip(auxBlockOffset)
+                fis.skip(vbMetaHeader.public_key_offset)
                 ai.auxBlob!!.pubkey!!.pubkey = ByteArray(vbMetaHeader.public_key_size.toInt())
                 fis.read(ai.auxBlob!!.pubkey!!.pubkey)
                 log.debug("Parsed Pub Key: " + Hex.encodeHexString(ai.auxBlob!!.pubkey!!.pubkey))
             }
         }
         // aux - pkmd
-        if (vbMetaHeader.public_key_metadata_size > 0U) {
+        if (vbMetaHeader.public_key_metadata_size > 0) {
             ai.auxBlob!!.pubkeyMeta = AuxBlob.PubKeyMetadataInfo()
-            ai.auxBlob!!.pubkeyMeta!!.offset = vbMetaHeader.public_key_metadata_offset.toLong()
-            ai.auxBlob!!.pubkeyMeta!!.size = vbMetaHeader.public_key_metadata_size.toLong()
+            ai.auxBlob!!.pubkeyMeta!!.offset = vbMetaHeader.public_key_metadata_offset
+            ai.auxBlob!!.pubkeyMeta!!.size = vbMetaHeader.public_key_metadata_size
 
             FileInputStream(image_file).use { fis ->
-                fis.skip(auxBlockOffset.toLong())
-                fis.skip(vbMetaHeader.public_key_metadata_offset.toLong())
+                fis.skip(auxBlockOffset)
+                fis.skip(vbMetaHeader.public_key_metadata_offset)
                 ai.auxBlob!!.pubkeyMeta!!.pkmd = ByteArray(vbMetaHeader.public_key_metadata_size.toInt())
                 fis.read(ai.auxBlob!!.pubkeyMeta!!.pkmd)
                 log.debug("Parsed Pub Key Metadata: " + Helper.toHexString(ai.auxBlob!!.pubkeyMeta!!.pkmd))
@@ -271,30 +271,30 @@ class Avb {
 
     private fun packVbMeta(info: AVBInfo? = null, image_file: String? = null): ByteArray {
         val ai = info ?: ObjectMapper().readValue(File(getJsonFileName(image_file!!)), AVBInfo::class.java)
-        val alg = Algorithms.get(ai.header!!.algorithm_type.toInt())!!
+        val alg = Algorithms.get(ai.header!!.algorithm_type)!!
 
         //3 - whole aux blob
         val auxBlob = ai.auxBlob?.encode(alg) ?: byteArrayOf()
 
         //1 - whole header blob
         val headerBlob = ai.header!!.apply {
-            auxiliary_data_block_size = auxBlob.size.toULong()
+            auxiliary_data_block_size = auxBlob.size.toLong()
             authentication_data_block_size = Helper.round_to_multiple(
-                    (alg.hash_num_bytes + alg.signature_num_bytes).toLong(), 64).toULong()
+                    (alg.hash_num_bytes + alg.signature_num_bytes).toLong(), 64)
 
-            descriptors_offset = 0U
-            descriptors_size = ai.auxBlob?.descriptorSize?.toULong() ?: 0U
+            descriptors_offset = 0
+            descriptors_size = ai.auxBlob?.descriptorSize?.toLong() ?: 0
 
-            hash_offset = 0U
-            hash_size = alg.hash_num_bytes.toULong()
+            hash_offset = 0
+            hash_size = alg.hash_num_bytes.toLong()
 
-            signature_offset = alg.hash_num_bytes.toULong()
-            signature_size = alg.signature_num_bytes.toULong()
+            signature_offset = alg.hash_num_bytes.toLong()
+            signature_size = alg.signature_num_bytes.toLong()
 
             public_key_offset = descriptors_size
-            public_key_size = AuxBlob.encodePubKey(alg).size.toULong()
+            public_key_size = AuxBlob.encodePubKey(alg).size.toLong()
 
-            public_key_metadata_size = ai.auxBlob!!.pubkeyMeta?.pkmd?.size?.toULong() ?: 0U
+            public_key_metadata_size = ai.auxBlob!!.pubkeyMeta?.pkmd?.size?.toLong() ?: 0L
             public_key_metadata_offset = public_key_offset + public_key_size
             log.info("pkmd size: $public_key_metadata_size, pkmd offset : $public_key_metadata_offset")
         }.encode()
@@ -316,8 +316,8 @@ class Avb {
 
     companion object {
         private val log = LoggerFactory.getLogger(Avb::class.java)
-        const val AVB_VERSION_MAJOR = 1U
-        const val AVB_VERSION_MINOR = 1U
+        const val AVB_VERSION_MAJOR = 1
+        const val AVB_VERSION_MINOR = 1
         const val AVB_VERSION_SUB = 0
 
         fun getJsonFileName(image_file: String): String {

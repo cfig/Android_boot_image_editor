@@ -7,12 +7,12 @@ import java.io.InputStream
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class BootHeaderV3(
-        var kernelSize: UInt = 0U,
-        var ramdiskSize: UInt = 0U,
+        var kernelSize: Int = 0,
+        var ramdiskSize: Int = 0,
         var osVersion: String = "",
         var osPatchLevel: String = "",
-        var headerSize: UInt = 0U,
-        var headerVersion: UInt = 0U,
+        var headerSize: Int = 0,
+        var headerVersion: Int = 0,
         var cmdline: String = ""
 ) {
     @Throws(IllegalArgumentException::class)
@@ -26,20 +26,20 @@ class BootHeaderV3(
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like Android Boot Image V3 Header")
         }
-        this.kernelSize = info[1] as UInt
-        this.ramdiskSize = info[2] as UInt
+        this.kernelSize = (info[1] as UInt).toInt()
+        this.ramdiskSize = (info[2] as UInt).toInt()
         val osNPatch = info[3] as UInt
         if (0U != osNPatch) { //treated as 'reserved' in this boot image
             this.osVersion = Common.parseOsVersion(osNPatch.toInt() shr 11)
             this.osPatchLevel = Common.parseOsPatchLevel((osNPatch and 0x7ff.toUInt()).toInt())
         }
-        this.headerSize = info[4] as UInt
+        this.headerSize = (info[4] as UInt).toInt()
         //5,6,7,8 reserved
-        this.headerVersion = info[9] as UInt
+        this.headerVersion = (info[9] as UInt).toInt()
 
         this.cmdline = info[10] as String
 
-        assert(this.headerSize.toInt() in intArrayOf(BOOT_IMAGE_HEADER_V3_SIZE))
+        assert(this.headerSize in intArrayOf(BOOT_IMAGE_HEADER_V3_SIZE))
     }
 
     fun encode(): ByteArray {
@@ -70,7 +70,7 @@ class BootHeaderV3(
                 "I" +  //header version
                 "1536s"     //cmdline
         private const val BOOT_IMAGE_HEADER_V3_SIZE = 1580
-        val pageSize: UInt = 4096U
+        const val pageSize: Int = 4096
 
         init {
             assert(BOOT_IMAGE_HEADER_V3_SIZE == Struct3(FORMAT_STRING).calcSize()) {

@@ -1,4 +1,4 @@
-dist: bionic
+dist: focal
 language: java
 before_install:
   - sudo apt -qq update
