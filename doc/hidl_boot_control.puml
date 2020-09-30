@@ -1,0 +1,63 @@
+@startuml
+
+package services {
+    class android_hardware_boot_1_1_service {
+        *cc_binary
+    }
+    class android_hardware_boot_1_0_service {
+        *cc_binary
+    }
+}
+
+
+package impls {
+    class android_hardware_boot_1_0_impl {
+        *cc_library
+    }
+
+    class android_hardware_boot_1_1_impl {
+        *cc_library
+    }
+}
+
+
+package hidl_interface {
+    class android_hardware_boot_1_0 {
+        *hidl_interface
+    }
+
+    class android_hardware_boot_1_1 {
+        *hidl_interface
+    }
+}
+
+
+android_hardware_boot_1_0_impl --> android_hardware_boot_1_0
+
+android_hardware_boot_1_0_service --> android_hardware_boot_1_0
+
+
+
+android_hardware_boot_1_1_impl --> android_hardware_boot_1_0
+android_hardware_boot_1_1_impl --> android_hardware_boot_1_1
+android_hardware_boot_1_1_impl --> libboot_control
+android_hardware_boot_1_1_impl ..> libboot_control_defaults
+
+
+android_hardware_boot_1_1_service --> android_hardware_boot_1_0
+android_hardware_boot_1_1_service --> android_hardware_boot_1_1
+class libboot_control_defaults {
+    *cc_defaults
+}
+libboot_control_defaults --> android_hardware_boot_1_1
+libboot_control_defaults --> libbootloader_message_vendor
+class libboot_control {
+    *cc_library_static
+}
+libboot_control ..> libboot_control_defaults
+class bootctrl_default {
+    *cc_library
+}
+bootctrl_default --> libboot_control
+bootctrl_default ..> libboot_control_defaults
+@enduml
