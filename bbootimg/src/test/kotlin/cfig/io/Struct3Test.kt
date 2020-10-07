@@ -103,9 +103,9 @@ class Struct3Test {
 
         //pack legal
         Assert.assertEquals("61",
-                Helper.toHexString(Struct3("!c").pack(Character('a'))))
+                Helper.toHexString(Struct3("!c").pack('a')))
         Assert.assertEquals("61",
-                Helper.toHexString(Struct3("c").pack(Character('a'))))
+                Helper.toHexString(Struct3("c").pack('a')))
         Assert.assertEquals("616263",
                 Helper.toHexString(Struct3("3c").pack('a', 'b', 'c')))
 

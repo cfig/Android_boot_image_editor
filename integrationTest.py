@@ -62,8 +62,8 @@ def verifySingleJson(jsonFile):
             decompressXZ(it + ".xz", v)
         else:
             raise
-    subprocess.check_call("gradle unpack", shell = True)
-    subprocess.check_call("gradle pack", shell = True)
+    subprocess.check_call("./gradlew unpack", shell = True)
+    subprocess.check_call("./gradlew pack", shell = True)
     for k, v in verifyItems["hash"].items():
         log.info("%s : %s" % (k, v))
         unittest.TestCase().assertEqual(v, hashFile(k))

@@ -196,7 +196,7 @@ class Avb {
         }
 
         // aux - desc
-        var descriptors: List<Any> = mutableListOf()
+        var descriptors = listOf<Any>()
         if (vbMetaHeader.descriptors_size > 0) {
             FileInputStream(image_file).use { fis ->
                 fis.skip(descStartOffset)
