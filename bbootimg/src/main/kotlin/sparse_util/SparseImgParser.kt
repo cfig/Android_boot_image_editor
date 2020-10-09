@@ -20,7 +20,7 @@ class SparseImgParser : IPackable {
     }
 
     override fun capabilities(): List<String> {
-        return listOf("^(system|vendor|product|cache|userdata|super)\\.img$")
+        return listOf("^(system|system_ext|system_other|vendor|product|cache|userdata|super)\\.img$")
     }
 
     override fun unpack(fileName: String) {
