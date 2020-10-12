@@ -4,7 +4,7 @@ import avb.AVBInfo
 import avb.alg.Algorithms
 import cfig.Avb
 import cfig.Avb.Companion.getJsonFileName
-import cfig.Helper
+import cfig.helper.Helper
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor

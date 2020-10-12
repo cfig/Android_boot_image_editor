@@ -1,4 +1,4 @@
-import cfig.Helper
+import cfig.helper.Helper
 import cfig.io.Struct3
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.Assert

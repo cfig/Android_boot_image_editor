@@ -7,7 +7,8 @@ import avb.blob.AuxBlob
 import avb.blob.Footer
 import avb.blob.Header
 import avb.desc.*
-import cfig.Helper.Companion.paddingWith
+import cfig.helper.Helper
+import cfig.helper.Helper.Companion.paddingWith
 import cfig.io.Struct3
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
@@ -26,6 +27,7 @@ class Avb {
     private val MAX_VBMETA_SIZE = 64 * 1024
     private val MAX_FOOTER_SIZE = 4096
     private val BLOCK_SIZE = 4096
+    private val DEBUG = false
 
     //migrated from: avbtool::Avb::addHashFooter
     fun addHashFooter(image_file: String,
@@ -59,7 +61,9 @@ class Avb {
 
         val vbmetaBlob = packVbMeta(newAvbInfo)
         log.debug("vbmeta_blob: " + Helper.toHexString(vbmetaBlob))
-        Helper.dumpToFile("hashDescriptor.vbmeta.blob", vbmetaBlob)
+        if (DEBUG) {
+            Helper.dumpToFile("hashDescriptor.vbmeta.blob", vbmetaBlob)
+        }
 
         // image + padding
         val imgPaddingNeeded = Helper.round_to_multiple(newImageSize, BLOCK_SIZE) - newImageSize
@@ -196,7 +200,7 @@ class Avb {
         }
 
         // aux - desc
-        var descriptors = listOf<Any>()
+        var descriptors: List<Any>
         if (vbMetaHeader.descriptors_size > 0) {
             FileInputStream(image_file).use { fis ->
                 fis.skip(descStartOffset)

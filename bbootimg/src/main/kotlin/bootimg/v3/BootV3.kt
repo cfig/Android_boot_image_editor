@@ -1,7 +1,7 @@
 package cfig.bootimg.v3
 
 import cfig.Avb
-import cfig.Helper
+import cfig.helper.Helper
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Common.Companion.getPaddingSize
 import cfig.bootimg.Signer

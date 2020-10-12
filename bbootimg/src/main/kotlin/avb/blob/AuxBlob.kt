@@ -2,9 +2,8 @@ package avb.blob
 
 import avb.alg.Algorithm
 import avb.desc.*
-import cfig.Helper
+import cfig.helper.Helper
 import cfig.io.Struct3
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.slf4j.LoggerFactory
 import java.nio.file.Files

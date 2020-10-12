@@ -1,7 +1,6 @@
 package avb.alg
 
-import avb.alg.Algorithms
-import cfig.Helper
+import cfig.helper.Helper
 import org.junit.Assert
 import org.junit.Test
 

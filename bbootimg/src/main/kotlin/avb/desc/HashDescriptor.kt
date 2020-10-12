@@ -1,7 +1,7 @@
 package avb.desc
 
 import avb.blob.Header
-import cfig.Helper
+import cfig.helper.Helper
 import cfig.io.Struct3
 import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
@@ -76,6 +76,7 @@ class HashDescriptor(var flags: Int = 0,
         hasher.update(this.salt)
         hasher.update(File(image_file).readBytes())
         val digest = hasher.digest()
+        log.info("digest:" + Helper.toHexString(digest))
     }
 
     fun update(image_file: String, use_persistent_digest: Boolean = false): HashDescriptor {

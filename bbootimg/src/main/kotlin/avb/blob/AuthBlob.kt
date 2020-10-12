@@ -1,7 +1,7 @@
 package avb.blob
 
 import avb.alg.Algorithms
-import cfig.Helper
+import cfig.helper.Helper
 import cfig.io.Struct3
 import org.slf4j.LoggerFactory
 import java.security.MessageDigest

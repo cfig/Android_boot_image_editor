@@ -83,6 +83,7 @@ def verifySingleDir(inResourceDir, inImageDir):
         log.warning("calling %s" % pyFile)
         subprocess.check_call(pyFile, shell = True)
         cleanUp()
+    log.info("Leave %s" % os.path.join(resDir, imgDir))
 
 def decompressXZ(inFile, outFile):
     with lzma.open(inFile) as f:
@@ -114,6 +115,8 @@ def main():
     verifySingleDir(resDir, "Q_preview_blueline_qpp2.190228.023")
     # 10
     verifySingleDir(resDir, "10.0.0_coral-qq1d.200205.002")
+    # 11
+    verifySingleDir(resDir, "11.0.0_redfin.rd1a.200810.021.a1")
 
     log.info(successLogo)
 

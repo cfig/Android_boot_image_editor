@@ -1,5 +1,6 @@
-package cfig
+package cfig.helper
 
+import cfig.KeyUtil
 import cfig.io.Struct3
 import com.google.common.math.BigIntegerMath
 import org.apache.commons.codec.binary.Hex
@@ -14,8 +15,12 @@ import org.slf4j.LoggerFactory
 import java.io.*
 import java.math.BigInteger
 import java.math.RoundingMode
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermission
+import java.security.MessageDigest
 import java.util.*
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
@@ -89,138 +94,6 @@ class Helper {
                 i += 2
             }
             return data
-        }
-
-        fun isGZ(compressedFile: String): Boolean {
-            return try {
-                GZIPInputStream(FileInputStream(compressedFile)).use { }
-                true
-            } catch (e: ZipException) {
-                false
-            }
-        }
-
-        fun isXZ(compressedFile: String): Boolean {
-            return try {
-                XZCompressorInputStream(FileInputStream(compressedFile)).use { }
-                true
-            } catch (e: ZipException) {
-                false
-            }
-        }
-
-        fun isLZ4(compressedFile: String): Boolean {
-            return try {
-                "lz4 -t $compressedFile".check_call()
-                true
-            } catch (e: Exception) {
-                false
-            }
-        }
-
-        fun decompressLZ4(lz4File: String, outFile: String) {
-            "lz4 -d -fv $lz4File $outFile".check_call()
-        }
-
-        fun compressLZ4(lz4File: String, inputStream: InputStream) {
-            val fos = FileOutputStream(File(lz4File))
-            val baosE = ByteArrayOutputStream()
-            DefaultExecutor().let { exec ->
-                exec.streamHandler = PumpStreamHandler(fos, baosE, inputStream)
-                val cmd = CommandLine.parse("lz4 -l -12 --favor-decSpeed")
-                log.info(cmd.toString())
-                exec.execute(cmd)
-            }
-            baosE.toByteArray().let {
-                if (it.isNotEmpty()) {
-                    log.warn(String(it))
-                }
-            }
-            fos.close()
-        }
-
-        @Throws(IOException::class)
-        fun gnuZipFile(compressedFile: String, decompressedFile: String) {
-            val buffer = ByteArray(1024)
-            FileOutputStream(compressedFile).use { fos ->
-                GZIPOutputStream(fos).use { gos ->
-                    FileInputStream(decompressedFile).use { fis ->
-                        var bytesRead: Int
-                        while (true) {
-                            bytesRead = fis.read(buffer)
-                            if (bytesRead <= 0) break
-                            gos.write(buffer, 0, bytesRead)
-                        }
-                        gos.finish()
-                        log.info("gzip done: $decompressedFile -> $compressedFile")
-                    }//file-input-stream
-                }//gzip-output-stream
-            }//file-output-stream
-        }
-
-        @Throws(IOException::class)
-        fun unGnuzipFile(compressedFile: String, decompressedFile: String) {
-            val buffer = ByteArray(1024)
-            FileInputStream(compressedFile).use { fileIn ->
-                //src
-                GZIPInputStream(fileIn).use { gZIPInputStream ->
-                    //src
-                    FileOutputStream(decompressedFile).use { fileOutputStream ->
-                        var bytesRead: Int
-                        while (true) {
-                            bytesRead = gZIPInputStream.read(buffer)
-                            if (bytesRead <= 0) break
-                            fileOutputStream.write(buffer, 0, bytesRead)
-                        }
-                        log.info("decompress(gz) done: $compressedFile -> $decompressedFile")
-                    }
-                }
-            }
-        }
-
-        /*
-            caution: about gzip header - OS (Operating System)
-
-            According to https://docs.oracle.com/javase/8/docs/api/java/util/zip/package-summary.html and
-            GZIP spec RFC-1952(http://www.ietf.org/rfc/rfc1952.txt), gzip files created from java.util.zip.GZIPOutputStream
-            will mark the OS field with
-                0 - FAT filesystem (MS-DOS, OS/2, NT/Win32)
-            But default image built from Android source code has the OS field:
-                3 - Unix
-            This MAY not be a problem, at least we didn't find it till now.
-         */
-        @Throws(IOException::class)
-        @Deprecated("this function misses features")
-        fun gnuZipFile(compressedFile: String, fis: InputStream) {
-            val buffer = ByteArray(1024)
-            FileOutputStream(compressedFile).use { fos ->
-                GZIPOutputStream(fos).use { gos ->
-                    var bytesRead: Int
-                    while (true) {
-                        bytesRead = fis.read(buffer)
-                        if (bytesRead <= 0) break
-                        gos.write(buffer, 0, bytesRead)
-                    }
-                    log.info("compress(gz) done: $compressedFile")
-                }
-            }
-        }
-
-        fun gnuZipFile2(compressedFile: String, fis: InputStream) {
-            val buffer = ByteArray(1024)
-            val p = GzipParameters()
-            p.operatingSystem = 3
-            FileOutputStream(compressedFile).use { fos ->
-                GzipCompressorOutputStream(fos, p).use { gos ->
-                    var bytesRead: Int
-                    while (true) {
-                        bytesRead = fis.read(buffer)
-                        if (bytesRead <= 0) break
-                        gos.write(buffer, 0, bytesRead)
-                    }
-                    log.info("compress(gz) done: $compressedFile")
-                }
-            }
         }
 
         fun extractFile(fileName: String, outImgName: String, offset: Long, length: Int) {
@@ -354,12 +227,23 @@ class Helper {
             log.info("Dumping data to $dumpFile done")
         }
 
-        fun String.check_call(): Boolean {
+        fun String.deleteIfExists() {
+            if (File(this).exists()) {
+                log.info("deleting $this")
+                File(this).delete()
+            }
+        }
+
+        fun String.check_call(inWorkdir: String? = null): Boolean {
             val ret: Boolean
             try {
                 val cmd = CommandLine.parse(this)
-                log.info(cmd.toString())
-                DefaultExecutor().execute(cmd)
+                log.run {
+                    info("CMD: $cmd, workDir: $inWorkdir")
+                }
+                val exec = DefaultExecutor()
+                inWorkdir?.let { exec.workingDirectory = File(it) }
+                exec.execute(cmd)
                 ret = true
             } catch (e: java.lang.IllegalArgumentException) {
                 log.error("$e: can not parse command: [$this]")
@@ -381,9 +265,142 @@ class Helper {
                 it.streamHandler = PumpStreamHandler(outputStream)
                 it.execute(CommandLine.parse(this))
             }
-            log.info(outputStream.toString())
+            log.info(outputStream.toString().trim())
             return outputStream.toString().trim()
         }
+
+        fun String.pumpRun(): Array<ByteArrayOutputStream> {
+            val outStream = ByteArrayOutputStream()
+            val errStream = ByteArrayOutputStream()
+            log.info("CMD: $this")
+            DefaultExecutor().let {
+                it.streamHandler = PumpStreamHandler(outStream, errStream)
+                it.execute(CommandLine.parse(this))
+            }
+            log.info("stdout [$outStream]")
+            log.info("stderr [$errStream]")
+            return arrayOf(outStream, errStream)
+        }
+
+        fun powerRun3(cmdline: CommandLine, inputStream: InputStream?): Array<Any> {
+            var ret = true
+            val outStream = ByteArrayOutputStream()
+            val errStream = ByteArrayOutputStream()
+            log.info("CMD: $cmdline")
+            try {
+                DefaultExecutor().let {
+                    it.streamHandler = PumpStreamHandler(outStream, errStream, inputStream)
+                    it.execute(cmdline)
+                }
+            } catch (e: ExecuteException) {
+                log.error("fail to execute [${cmdline}]")
+                ret = false
+            }
+            log.debug("stdout [$outStream]")
+            log.debug("stderr [$errStream]")
+            return arrayOf(ret, outStream.toByteArray(), errStream.toByteArray())
+        }
+
+        fun powerRun2(cmd: String, inputStream: InputStream?): Array<Any> {
+            var ret = true
+            val outStream = ByteArrayOutputStream()
+            val errStream = ByteArrayOutputStream()
+            log.info("CMD: $cmd")
+            try {
+                DefaultExecutor().let {
+                    it.streamHandler = PumpStreamHandler(outStream, errStream, inputStream)
+                    it.execute(CommandLine.parse(cmd))
+                }
+            } catch (e: ExecuteException) {
+                log.error("fail to execute [$cmd]")
+                ret = false
+            }
+            log.debug("stdout [$outStream]")
+            log.debug("stderr [$errStream]")
+            return arrayOf(ret, outStream.toByteArray(), errStream.toByteArray())
+        }
+
+        fun powerRun(cmd: String, inputStream: InputStream?): Array<ByteArray> {
+            val outStream = ByteArrayOutputStream()
+            val errStream = ByteArrayOutputStream()
+            log.info("CMD: $cmd")
+            try {
+                DefaultExecutor().let {
+                    it.streamHandler = PumpStreamHandler(outStream, errStream, inputStream)
+                    it.execute(CommandLine.parse(cmd))
+                }
+            } catch (e: ExecuteException) {
+                log.error("fail to execute [$cmd]")
+            }
+            log.debug("stdout [$outStream]")
+            log.debug("stderr [$errStream]")
+            return arrayOf(outStream.toByteArray(), errStream.toByteArray())
+        }
+
+        fun hashFileAndSize(vararg inFiles: String?): ByteArray {
+            val md = MessageDigest.getInstance("SHA1")
+            for (item in inFiles) {
+                if (null == item) {
+                    md.update(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+                            .putInt(0)
+                            .array())
+                    log.debug("update null $item: " + toHexString((md.clone() as MessageDigest).digest()))
+                } else {
+                    val currentFile = File(item)
+                    FileInputStream(currentFile).use { iS ->
+                        var byteRead: Int
+                        val dataRead = ByteArray(1024)
+                        while (true) {
+                            byteRead = iS.read(dataRead)
+                            if (-1 == byteRead) {
+                                break
+                            }
+                            md.update(dataRead, 0, byteRead)
+                        }
+                        log.debug("update file $item: " + toHexString((md.clone() as MessageDigest).digest()))
+                        md.update(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+                                .putInt(currentFile.length().toInt())
+                                .array())
+                        log.debug("update SIZE $item: " + toHexString((md.clone() as MessageDigest).digest()))
+                    }
+                }
+            }
+
+            return md.digest()
+        }
+
+        fun assertFileEquals(file1: String, file2: String) {
+            val hash1 = hashFileAndSize(file1)
+            val hash2 = hashFileAndSize(file2)
+            log.info("$file1 hash ${toHexString(hash1)}, $file2 hash ${toHexString(hash2)}")
+            if (hash1.contentEquals(hash2)) {
+                log.info("Hash verification passed: ${toHexString(hash1)}")
+            } else {
+                log.error("Hash verification failed")
+                throw UnknownError("Do not know why hash verification fails, maybe a bug")
+            }
+        }
+
+        fun modeToPermissions(inMode: Int): Set<PosixFilePermission> {
+            var mode = inMode
+            val PERMISSIONS_MASK = 4095
+            // setgid/setuid/sticky are not supported.
+            val MAX_SUPPORTED_MODE = 511
+            mode = mode and PERMISSIONS_MASK
+            if (mode and MAX_SUPPORTED_MODE != mode) {
+                throw IOException("Invalid mode: $mode")
+            }
+            val allPermissions = PosixFilePermission.values()
+            val result: MutableSet<PosixFilePermission> = EnumSet.noneOf(PosixFilePermission::class.java)
+            for (i in allPermissions.indices) {
+                if (mode and 1 == 1) {
+                    result.add(allPermissions[allPermissions.size - i - 1])
+                }
+                mode = mode shr 1
+            }
+            return result
+        }
+
 
         private val log = LoggerFactory.getLogger("Helper")
     }

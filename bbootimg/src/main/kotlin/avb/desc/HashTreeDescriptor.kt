@@ -1,7 +1,7 @@
 package avb.desc
 
 import avb.blob.Header
-import cfig.Helper
+import cfig.helper.Helper
 import cfig.io.Struct3
 import java.io.InputStream
 import java.util.*

@@ -3,7 +3,7 @@ package cfig.packable
 import avb.AVBInfo
 import avb.blob.Footer
 import cfig.Avb
-import cfig.Helper
+import cfig.helper.Helper
 import cfig.bootimg.Common.Companion.probeHeaderVersion
 import cfig.bootimg.v2.BootV2
 import cfig.bootimg.v3.BootV3
@@ -95,8 +95,8 @@ class BootImgParser() : IPackable {
         private val log = LoggerFactory.getLogger(BootImgParser::class.java)
 
         fun updateVbmeta(fileName: String) {
-            log.info("Updating vbmeta.img side by side ...")
             if (File("vbmeta.img").exists()) {
+                log.info("Updating vbmeta.img side by side ...")
                 val partitionName = ObjectMapper().readValue(File(Avb.getJsonFileName(fileName)), AVBInfo::class.java).let {
                     it.auxBlob!!.hashDescriptors.get(0).partition_name
                 }
@@ -118,6 +118,8 @@ class BootImgParser() : IPackable {
                     this.auxBlob!!.hashDescriptors.add(hd)
                 }
                 Avb().packVbMetaWithPadding("vbmeta.img", mainVBMeta)
+            } else {
+                log.info("no companion vbmeta.img")
             }
         }
     }

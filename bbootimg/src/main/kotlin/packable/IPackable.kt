@@ -1,8 +1,8 @@
 package cfig.packable
 
-import cfig.Helper
-import cfig.Helper.Companion.check_call
-import cfig.Helper.Companion.check_output
+import cfig.helper.Helper
+import cfig.helper.Helper.Companion.check_call
+import cfig.helper.Helper.Companion.check_output
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File

@@ -1,8 +1,10 @@
 package cfig.bootimg
 
 import cfig.EnvironmentVerifier
-import cfig.Helper
 import cfig.dtb_util.DTC
+import cfig.helper.Helper
+import cfig.helper.Helper.Companion.check_call
+import cfig.helper.ZipHelper
 import cfig.io.Struct3.InputStreamExt.Companion.getInt
 import cfig.kernel_util.KernelExtractor
 import org.apache.commons.exec.CommandLine
@@ -110,14 +112,14 @@ class Common {
             var ret = "gz"
             Helper.extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
             when {
-                Helper.isGZ(s.dumpFile) -> {
+                ZipHelper.isGZ(s.dumpFile) -> {
                     File(s.dumpFile).renameTo(File(s.dumpFile + ".gz"))
-                    Helper.unGnuzipFile(s.dumpFile + ".gz", s.dumpFile)
+                    ZipHelper.unGnuzipFile(s.dumpFile + ".gz", s.dumpFile)
                 }
-                Helper.isLZ4(s.dumpFile) -> {
+                ZipHelper.isLZ4(s.dumpFile) -> {
                     log.info("ramdisk is compressed lz4")
                     File(s.dumpFile).renameTo(File(s.dumpFile + ".lz4"))
-                    Helper.decompressLZ4(s.dumpFile + ".lz4", s.dumpFile)
+                    ZipHelper.decompressLZ4Ext(s.dumpFile + ".lz4", s.dumpFile)
                     ret = "lz4"
                 }
                 else -> {
@@ -201,10 +203,10 @@ class Common {
             }
             when {
                 ramdiskGz.endsWith(".gz") -> {
-                    Helper.gnuZipFile2(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
+                    ZipHelper.gnuZipFile2(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
                 }
                 ramdiskGz.endsWith(".lz4") -> {
-                    Helper.compressLZ4(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
+                    ZipHelper.compressLZ4(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
                 }
                 else -> {
                     throw IllegalArgumentException("$ramdiskGz is not supported")
@@ -249,7 +251,7 @@ class Common {
             }
         }
 
-        fun unpackRamdisk(ramdisk: String, root: String) {
+        private fun unpackRamdisk(ramdisk: String, root: String) {
             val rootFile = File(root).apply {
                 if (exists()) {
                     log.info("Cleaning [$root] before ramdisk unpacking")
@@ -258,11 +260,9 @@ class Common {
                 mkdirs()
             }
 
-            DefaultExecutor().let { exe ->
-                exe.workingDirectory = rootFile
-                exe.execute(CommandLine.parse("cpio -i -m -F " + File(ramdisk).canonicalPath))
-                log.info(" ramdisk extracted : $ramdisk -> ${rootFile}")
-            }
+            //("cpio -idmv -F " + File(ramdisk).canonicalPath).check_call(rootFile.canonicalPath)
+            ZipHelper.decompressCPIO(File(ramdisk).canonicalPath, rootFile.canonicalPath, File(ramdisk).canonicalPath + ".filelist")
+            log.info(" ramdisk extracted : $ramdisk -> $rootFile")
         }
 
         fun probeHeaderVersion(fileName: String): Int {

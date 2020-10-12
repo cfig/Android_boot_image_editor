@@ -1,7 +1,7 @@
 package cfig.kernel_util
 
 import cfig.EnvironmentVerifier
-import cfig.Helper
+import cfig.helper.Helper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.Logger

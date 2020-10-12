@@ -1,8 +1,8 @@
 package cfig.packable
 
 import cfig.EnvironmentVerifier
-import cfig.Helper
 import cfig.dtb_util.DTC
+import cfig.helper.Helper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.LoggerFactory

@@ -19,6 +19,7 @@ class Reboot {
         const val lastRebootReasonKey = "persist.sys.boot.reason"
 
         private fun doReboot(cmd: RB_TYPE, reason: String, rebootTarget: String) {
+            log.info("DoReboot: cmd=$cmd, reason=$reason, tgt=$rebootTarget")
             val reasons = reason.split(",").toTypedArray()
             val props = Properties()
             props.setProperty(lastRebootReasonKey, reason)

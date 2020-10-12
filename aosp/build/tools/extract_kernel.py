@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 #
 # Copyright (C) 2018 The Android Open Source Project
 #
@@ -100,23 +100,17 @@ def dump_configs(input_bytes):
   return o
 
 
-def try_decompress_bytes(cmd, input_bytes):
+def try_decompress(cmd, search_bytes, input_bytes):
+  idx = input_bytes.find(search_bytes)
+  if idx < 0:
+    return None
+
+  idx = 0
   sp = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
-  o, _ = sp.communicate(input=input_bytes)
+  o, _ = sp.communicate(input=input_bytes[idx:])
   # ignore errors
   return o
-
-
-def try_decompress(cmd, search_bytes, input_bytes):
-  idx = 0
-  while True:
-    idx = input_bytes.find(search_bytes, idx)
-    if idx < 0:
-      raise StopIteration()
-
-    yield try_decompress_bytes(cmd, input_bytes[idx:])
-    idx += 1
 
 
 def decompress_dump(func, input_bytes):
@@ -128,15 +122,15 @@ def decompress_dump(func, input_bytes):
   if o:
     return o
   for cmd, search_bytes in COMPRESSION_ALGO:
-    for decompressed in try_decompress(cmd, search_bytes, input_bytes):
-      if decompressed:
-        o = decompress_dump(func, decompressed)
-        if o:
-          return o
-    # Force decompress the whole file even if header doesn't match
-    decompressed = try_decompress_bytes(cmd, input_bytes)
+    decompressed = try_decompress(cmd, search_bytes, input_bytes)
     if decompressed:
-      o = decompress_dump(func, decompressed)
+      o = func(decompressed)
+      if o:
+        return o
+    # Force decompress the whole file even if header doesn't match
+    decompressed = try_decompress(cmd, b"", input_bytes)
+    if decompressed:
+      o = func(decompressed)
       if o:
         return o
 

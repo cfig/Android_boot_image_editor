@@ -1,6 +1,6 @@
 package cfig.packable
 
-import cfig.Helper
+import cfig.helper.Helper
 import cfig.bootimg.v3.VendorBoot
 import cfig.packable.BootImgParser.Companion.updateVbmeta
 import com.fasterxml.jackson.databind.ObjectMapper

@@ -1,6 +1,6 @@
 package cfig.bootimg.v2
 
-import cfig.Helper
+import cfig.helper.Helper
 import cfig.bootimg.Common
 import cfig.io.Struct3
 import org.slf4j.LoggerFactory

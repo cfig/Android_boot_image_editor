@@ -3,7 +3,7 @@ package cfig.sparse_util
 import cfig.EnvironmentVerifier
 import cfig.packable.IPackable
 import org.slf4j.LoggerFactory
-import cfig.Helper.Companion.check_call
+import cfig.helper.Helper.Companion.check_call
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class SparseImgParser : IPackable {

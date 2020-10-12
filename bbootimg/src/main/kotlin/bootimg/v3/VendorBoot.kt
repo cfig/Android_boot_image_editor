@@ -1,9 +1,9 @@
 package cfig.bootimg.v3
 
 import cfig.Avb
-import cfig.Helper
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
+import cfig.helper.Helper
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -101,10 +101,13 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
         }
         //data
         log.info("Writing data ...")
-        val bf = ByteBuffer.allocate(1024 * 1024 * 128)//assume total SIZE small than 64MB
-        bf.order(ByteOrder.LITTLE_ENDIAN)
-        C.writePaddedFile(bf, this.ramdisk.file, this.info.pageSize)
-        C.writePaddedFile(bf, this.dtb.file, this.info.pageSize)
+        //assume total SIZE is smaller than 64MB
+        val bf = ByteBuffer.allocate(1024 * 1024 * 128).let {
+            it.order(ByteOrder.LITTLE_ENDIAN)
+            C.writePaddedFile(it, this.ramdisk.file, this.info.pageSize)
+            C.writePaddedFile(it, this.dtb.file, this.info.pageSize)
+           it
+        }
         //write
         FileOutputStream("${this.info.output}.clear", true).use { fos ->
             fos.write(bf.array(), 0, bf.position())
@@ -210,8 +213,8 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
 
     private fun toCommandLine(): CommandLine {
         return CommandLine(Helper.prop("mkbootimg"))
-                .addArgument("--vendor_ramdisk").addArgument(this.ramdisk.file)
-                .addArgument("--dtb").addArgument(this.dtb.file)
+                .addArgument("--vendor_ramdisk").addArgument(ramdisk.file)
+                .addArgument("--dtb").addArgument(dtb.file)
                 .addArgument("--vendor_cmdline").addArgument(info.cmdline, false)
                 .addArgument("--header_version").addArgument(info.headerVersion.toString())
                 .addArgument("--base").addArgument("0")
@@ -219,6 +222,7 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
                 .addArgument("--kernel_offset").addArgument(info.kernelLoadAddr.toString())
                 .addArgument("--ramdisk_offset").addArgument(ramdisk.loadAddr.toString())
                 .addArgument("--dtb_offset").addArgument(dtb.loadAddr.toString())
+                .addArgument("--pagesize").addArgument(info.pageSize.toString())
                 .addArgument("--vendor_boot")
     }
 }

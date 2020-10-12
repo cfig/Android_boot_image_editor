@@ -1,12 +1,11 @@
 package cfig.bootimg.v2
 
 import cfig.Avb
-import cfig.Helper
+import cfig.helper.Helper
 import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Common.Slice
 import cfig.bootimg.Signer
-import cfig.bootimg.v3.BootV3
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable

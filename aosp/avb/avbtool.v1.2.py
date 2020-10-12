@@ -2385,12 +2385,13 @@ class Avb(object):
     misc_image.seek(self.AB_MISC_METADATA_OFFSET)
     misc_image.write(ab_data)
 
-  def info_image(self, image_filename, output):
+  def info_image(self, image_filename, output, atx):
     """Implements the 'info_image' command.
 
     Arguments:
       image_filename: Image file to get information from (file object).
       output: Output file to write human-readable information to (file object).
+      atx: If True, show information about Android Things eXtension (ATX).
     """
     image = ImageHandler(image_filename, read_only=True)
     o = output
@@ -2442,6 +2443,31 @@ class Avb(object):
       num_printed += 1
     if num_printed == 0:
       o.write('    (none)\n')
+
+    if atx and header.public_key_metadata_size:
+      o.write('Android Things eXtension (ATX):\n')
+      key_metadata_offset = (header.SIZE +
+                             header.authentication_data_block_size +
+                             header.public_key_metadata_offset)
+      key_metadata_blob = vbmeta_blob[key_metadata_offset: key_metadata_offset
+                                      + header.public_key_metadata_size]
+      version, pik, psk = struct.unpack('<I1620s1620s', key_metadata_blob)
+      o.write('    Metadata version:        {}\n'.format(version))
+
+      def print_atx_certificate(cert):
+        version, public_key, subject, usage, key_version, _signature = \
+            struct.unpack('<I1032s32s32sQ512s', cert)
+        o.write('      Version:               {}\n'.format(version))
+        o.write('      Public key (sha1):     {}\n'.format(
+            hashlib.sha1(public_key).hexdigest()))
+        o.write('      Subject:               {}\n'.format(subject.hex()))
+        o.write('      Usage:                 {}\n'.format(usage.hex()))
+        o.write('      Key version:           {}\n'.format(key_version))
+
+      o.write('    Product Intermediate Key:\n')
+      print_atx_certificate(pik)
+      o.write('    Product Signing Key:\n')
+      print_atx_certificate(psk)
 
   def verify_image(self, image_filename, key_path, expected_chain_partitions,
                    follow_chain_partitions, accept_zeroed_hashtree):
@@ -4428,6 +4454,10 @@ class AvbTool(object):
                             help='Write info to file',
                             type=argparse.FileType('wt'),
                             default=sys.stdout)
+    sub_parser.add_argument('--atx',
+                            help=('Show information about Android Things '
+                                  'eXtension (ATX).'),
+                            action='store_true')
     sub_parser.set_defaults(func=self.info_image)
 
     sub_parser = subparsers.add_parser(
@@ -4765,7 +4795,7 @@ class AvbTool(object):
 
   def info_image(self, args):
     """Implements the 'info_image' sub-command."""
-    self.avb.info_image(args.image.name, args.output)
+    self.avb.info_image(args.image.name, args.output, args.atx)
 
   def verify_image(self, args):
     """Implements the 'verify_image' sub-command."""
