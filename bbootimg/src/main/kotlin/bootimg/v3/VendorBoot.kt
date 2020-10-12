@@ -121,7 +121,8 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
     }
 
     fun sign(): VendorBoot {
-        Signer.signAVB(info.output, this.info.imageSize)
+        val avbtool = String.format(Helper.prop("avbtool"), "v1.2")
+        Signer.signAVB(info.output, this.info.imageSize, avbtool)
         return this
     }
 

@@ -16,8 +16,7 @@ class Signer {
     companion object {
         private val log = LoggerFactory.getLogger(Signer::class.java)
 
-        fun signAVB(output: String, imageSize: Long) {
-            val avbtool = Helper.prop("avbtool")
+        fun signAVB(output: String, imageSize: Long, avbtool: String) {
             log.info("Adding hash_footer with verified-boot 2.0 style")
             val ai = ObjectMapper().readValue(File(getJsonFileName(output)), AVBInfo::class.java)
             val alg = Algorithms.get(ai.header!!.algorithm_type.toInt())
@@ -38,6 +37,7 @@ class Signer {
                 addArguments("--partition_name ${bootDesc.partition_name}")
                 addArguments("--hash_algorithm ${bootDesc.hash_algorithm}")
                 addArguments("--algorithm ${alg!!.name}")
+                addArguments("--rollback_index ${ai.header!!.rollback_index}")
                 if (alg.defaultKey.isNotBlank()) {
                     addArguments("--key ${alg.defaultKey}")
                 }

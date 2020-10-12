@@ -78,7 +78,7 @@ data class BootV2(
                     theInfo.osPatchLevel = bh2.osPatchLevel
                     if (Avb.hasAvbFooter(fileName)) {
                         theInfo.verify = "VB2.0"
-                        Avb.verifyAVBIntegrity(fileName, Helper.prop("avbtool"))
+                        Avb.verifyAVBIntegrity(fileName, String.format(Helper.prop("avbtool"), "v1.2"))
                     } else {
                         theInfo.verify = "VB1.0"
                     }
@@ -194,10 +194,14 @@ data class BootV2(
     }
 
     fun extractVBMeta(): BootV2 {
-        Avb().parseVbMeta(info.output)
-        if (File("vbmeta.img").exists()) {
-            log.warn("Found vbmeta.img, parsing ...")
-            VBMetaParser().unpack("vbmeta.img")
+        if (this.info.verify == "VB2.0") {
+            Avb().parseVbMeta(info.output)
+            if (File("vbmeta.img").exists()) {
+                log.warn("Found vbmeta.img, parsing ...")
+                VBMetaParser().unpack("vbmeta.img")
+            }
+        } else {
+            log.info("verify type is ${this.info.verify}, skip AVB parsing")
         }
         return this
     }
@@ -469,8 +473,9 @@ data class BootV2(
     }
 
     fun sign(): BootV2 {
+        val avbtool = String.format(Helper.prop("avbtool"), if (parseOsMajor() > 10) "v1.2" else "v1.1")
         if (info.verify == "VB2.0") {
-            Signer.signAVB(info.output, this.info.imageSize)
+            Signer.signAVB(info.output, this.info.imageSize, avbtool)
             log.info("Adding hash_footer with verified-boot 2.0 style")
         } else {
             Signer.signVB1(info.output + ".clear", info.output + ".signed")

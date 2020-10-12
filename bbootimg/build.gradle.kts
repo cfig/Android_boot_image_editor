@@ -22,6 +22,7 @@ dependencies {
     implementation("com.google.guava:guava:18.0")
     implementation("org.apache.commons:commons-exec:1.3")
     implementation("org.apache.commons:commons-compress:1.16.1")
+    implementation("org.tukaani:xz:1.8")
     implementation("commons-codec:commons-codec:1.11")
     implementation("junit:junit:4.12")
     implementation("org.bouncycastle:bcprov-jdk15on:1.57")

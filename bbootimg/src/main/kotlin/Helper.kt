@@ -5,6 +5,7 @@ import com.google.common.math.BigIntegerMath
 import org.apache.commons.codec.binary.Hex
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipParameters
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.ExecuteException
@@ -18,6 +19,7 @@ import java.nio.file.Paths
 import java.util.*
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+import java.util.zip.ZipException
 import javax.crypto.Cipher
 
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -87,6 +89,54 @@ class Helper {
                 i += 2
             }
             return data
+        }
+
+        fun isGZ(compressedFile: String): Boolean {
+            return try {
+                GZIPInputStream(FileInputStream(compressedFile)).use { }
+                true
+            } catch (e: ZipException) {
+                false
+            }
+        }
+
+        fun isXZ(compressedFile: String): Boolean {
+            return try {
+                XZCompressorInputStream(FileInputStream(compressedFile)).use { }
+                true
+            } catch (e: ZipException) {
+                false
+            }
+        }
+
+        fun isLZ4(compressedFile: String): Boolean {
+            return try {
+                "lz4 -t $compressedFile".check_call()
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+        fun decompressLZ4(lz4File: String, outFile: String) {
+            "lz4 -d -fv $lz4File $outFile".check_call()
+        }
+
+        fun compressLZ4(lz4File: String, inputStream: InputStream) {
+            val fos = FileOutputStream(File(lz4File))
+            val baosE = ByteArrayOutputStream()
+            DefaultExecutor().let { exec ->
+                exec.streamHandler = PumpStreamHandler(fos, baosE, inputStream)
+                val cmd = CommandLine.parse("lz4 -l -12 --favor-decSpeed")
+                log.info(cmd.toString())
+                exec.execute(cmd)
+            }
+            baosE.toByteArray().let {
+                if (it.isNotEmpty()) {
+                    log.warn(String(it))
+                }
+            }
+            fos.close()
         }
 
         @Throws(IOException::class)

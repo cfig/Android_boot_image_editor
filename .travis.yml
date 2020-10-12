@@ -3,10 +3,12 @@ os:
   - linux
   - osx
 dist: focal
+osx_image: xcode12.2
 addons:
   apt:
     packages:
       - cpio
+      - xz-utils
       - libblkid-dev
       - liblz4-tool
       - device-tree-compiler

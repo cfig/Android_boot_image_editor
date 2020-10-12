@@ -9,14 +9,12 @@ import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.PumpStreamHandler
 import org.slf4j.LoggerFactory
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileInputStream
+import java.io.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.security.MessageDigest
 import java.util.regex.Pattern
+
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class Common {
@@ -108,10 +106,25 @@ class Common {
             parseKernelInfo(s.dumpFile)
         }
 
-        fun dumpRamdisk(s: Slice, root: String) {
+        fun dumpRamdisk(s: Slice, root: String): String {
+            var ret = "gz"
             Helper.extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
-            Helper.unGnuzipFile(s.dumpFile, s.dumpFile.removeSuffix(".gz"))
+            when {
+                Helper.isGZ(s.dumpFile) -> {
+                    Helper.unGnuzipFile(s.dumpFile, s.dumpFile.removeSuffix(".gz"))
+                }
+                Helper.isLZ4(s.dumpFile) -> {
+                    log.info("ramdisk is compressed lz4")
+                    Helper.decompressLZ4(s.dumpFile, s.dumpFile.removeSuffix(".gz"))
+                    File(s.dumpFile).renameTo(File(s.dumpFile.replace(".gz", ".lz4")))
+                    ret = "lz4"
+                }
+                else -> {
+                    throw IllegalArgumentException("ramdisk is in unknown format")
+                }
+            }
             unpackRamdisk(s.dumpFile.removeSuffix(".gz"), root)
+            return ret
         }
 
         fun dumpDtb(s: Slice) {
@@ -185,7 +198,17 @@ class Common {
                 log.info("CMD: $cmdline -> PIPE -> $ramdiskGz")
                 exec.execute(CommandLine.parse(cmdline))
             }
-            Helper.gnuZipFile2(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
+            when {
+                ramdiskGz.endsWith(".gz") -> {
+                    Helper.gnuZipFile2(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
+                }
+                ramdiskGz.endsWith(".lz4") -> {
+                    Helper.compressLZ4(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
+                }
+                else -> {
+                    throw IllegalArgumentException("$ramdiskGz is not supported")
+                }
+            }
             log.info("$ramdiskGz is ready")
         }
 

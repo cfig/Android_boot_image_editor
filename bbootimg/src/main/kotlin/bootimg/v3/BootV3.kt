@@ -87,7 +87,7 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
             log.warn("Use prebuilt ramdisk file: ${this.ramdisk.file}")
         } else {
             File(this.ramdisk.file).deleleIfExists()
-            File(this.ramdisk.file.removeSuffix(".gz")).deleleIfExists()
+            File(this.ramdisk.file.replaceFirst("[.][^.]+$", "")).deleleIfExists()
             C.packRootfs("$workDir/root", this.ramdisk.file, parseOsMajor())
         }
         this.kernel.size = File(this.kernel.file).length().toInt()
@@ -124,7 +124,8 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
     }
 
     fun sign(fileName: String): BootV3 {
-        Signer.signAVB(fileName, this.info.imageSize)
+        val avbtool = String.format(Helper.prop("avbtool"), "v1.2")
+        Signer.signAVB(fileName, this.info.imageSize, avbtool)
         return this
     }
 
@@ -146,7 +147,14 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
         //kernel
         C.dumpKernel(C.Slice(info.output, kernel.position, kernel.size, kernel.file))
         //ramdisk
-        C.dumpRamdisk(C.Slice(info.output, ramdisk.position, ramdisk.size, ramdisk.file), "${workDir}root")
+        val fmt = C.dumpRamdisk(C.Slice(info.output, ramdisk.position, ramdisk.size, ramdisk.file), "${workDir}root")
+        if (fmt in listOf("xz", "lzma", "bz2", "lz4")) {
+            this.ramdisk.file = this.ramdisk.file.replace(".gz", ".$fmt")
+            //dump info again
+            ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
+        } else {
+            throw IllegalArgumentException("unknown format $fmt")
+        }
         return this
     }
 
