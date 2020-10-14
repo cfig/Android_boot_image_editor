@@ -111,19 +111,20 @@ class Common {
             Helper.extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
             when {
                 Helper.isGZ(s.dumpFile) -> {
-                    Helper.unGnuzipFile(s.dumpFile, s.dumpFile.removeSuffix(".gz"))
+                    File(s.dumpFile).renameTo(File(s.dumpFile + ".gz"))
+                    Helper.unGnuzipFile(s.dumpFile + ".gz", s.dumpFile)
                 }
                 Helper.isLZ4(s.dumpFile) -> {
                     log.info("ramdisk is compressed lz4")
-                    Helper.decompressLZ4(s.dumpFile, s.dumpFile.removeSuffix(".gz"))
-                    File(s.dumpFile).renameTo(File(s.dumpFile.replace(".gz", ".lz4")))
+                    File(s.dumpFile).renameTo(File(s.dumpFile + ".lz4"))
+                    Helper.decompressLZ4(s.dumpFile + ".lz4", s.dumpFile)
                     ret = "lz4"
                 }
                 else -> {
                     throw IllegalArgumentException("ramdisk is in unknown format")
                 }
             }
-            unpackRamdisk(s.dumpFile.removeSuffix(".gz"), root)
+            unpackRamdisk(s.dumpFile, root)
             return ret
         }
 

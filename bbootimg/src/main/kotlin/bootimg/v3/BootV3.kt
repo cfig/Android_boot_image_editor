@@ -45,7 +45,7 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
                 ret.kernel.size = header.kernelSize
                 ret.kernel.position = BootHeaderV3.pageSize
                 //ramdisk
-                ret.ramdisk.file = workDir + "ramdisk.img.gz"
+                ret.ramdisk.file = workDir + "ramdisk.img"
                 ret.ramdisk.size = header.ramdiskSize
                 ret.ramdisk.position = ret.kernel.position + header.kernelSize +
                         getPaddingSize(header.kernelSize, BootHeaderV3.pageSize)
@@ -82,7 +82,7 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
     }
 
     fun pack(): BootV3 {
-        if (File( this.ramdisk.file).exists() && !File(workDir + "root").exists()) {
+        if (File(this.ramdisk.file).exists() && !File(workDir + "root").exists()) {
             //do nothing if we have ramdisk.img.gz but no /root
             log.warn("Use prebuilt ramdisk file: ${this.ramdisk.file}")
         } else {
@@ -91,7 +91,7 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
             C.packRootfs("$workDir/root", this.ramdisk.file, parseOsMajor())
         }
         this.kernel.size = File(this.kernel.file).length().toInt()
-        this.ramdisk.size = File( this.ramdisk.file).length().toInt()
+        this.ramdisk.size = File(this.ramdisk.file).length().toInt()
 
         //header
         FileOutputStream(this.info.output + ".clear", false).use { fos ->
@@ -147,14 +147,11 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
         //kernel
         C.dumpKernel(C.Slice(info.output, kernel.position, kernel.size, kernel.file))
         //ramdisk
-        val fmt = C.dumpRamdisk(C.Slice(info.output, ramdisk.position, ramdisk.size, ramdisk.file), "${workDir}root")
-        if (fmt in listOf("xz", "lzma", "bz2", "lz4")) {
-            this.ramdisk.file = this.ramdisk.file.replace(".gz", ".$fmt")
-            //dump info again
-            ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
-        } else {
-            throw IllegalArgumentException("unknown format $fmt")
-        }
+        val fmt = C.dumpRamdisk(
+                C.Slice(info.output, ramdisk.position, ramdisk.size, ramdisk.file), "${workDir}root")
+        this.ramdisk.file = this.ramdisk.file + ".$fmt"
+        //dump info again
+        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         return this
     }
 

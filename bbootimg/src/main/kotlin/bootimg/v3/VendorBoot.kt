@@ -57,7 +57,7 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
                 ret.info.pageSize = header.pageSize
                 ret.info.headerVersion = header.headerVersion
                 //ramdisk
-                ret.ramdisk.file = workDir + "ramdisk.img.gz"
+                ret.ramdisk.file = workDir + "ramdisk.img"
                 ret.ramdisk.size = header.vndRamdiskSize
                 ret.ramdisk.loadAddr = header.ramdiskLoadAddr
                 ret.ramdisk.position = Helper.round_to_multiple(
@@ -145,11 +145,13 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
     fun extractImages(): VendorBoot {
         val workDir = Helper.prop("workDir")
         //header
-        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(
-                File(workDir + this.info.json), this)
+        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         //ramdisk
-        C.dumpRamdisk(C.Slice(info.output, ramdisk.position.toInt(), ramdisk.size.toInt(), ramdisk.file),
+        val fmt = C.dumpRamdisk(C.Slice(info.output, ramdisk.position.toInt(), ramdisk.size.toInt(), ramdisk.file),
                 "${workDir}root")
+        this.ramdisk.file = this.ramdisk.file + ".$fmt"
+        //dump info again
+        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         //dtb
         C.dumpDtb(C.Slice(info.output, dtb.position.toInt(), dtb.size.toInt(), dtb.file))
         return this

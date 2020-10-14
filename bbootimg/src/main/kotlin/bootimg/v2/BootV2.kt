@@ -6,6 +6,7 @@ import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Common.Slice
 import cfig.bootimg.Signer
+import cfig.bootimg.v3.BootV3
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -94,7 +95,7 @@ data class BootV2(
                     theRamdisk.loadOffset = bh2.ramdiskOffset
                     theRamdisk.position = ret.getRamdiskPosition()
                     if (bh2.ramdiskLength > 0) {
-                        theRamdisk.file = "${workDir}ramdisk.img.gz"
+                        theRamdisk.file = "${workDir}ramdisk.img"
                     }
                 }
                 if (bh2.secondBootloaderLength > 0) {
@@ -168,8 +169,11 @@ data class BootV2(
         Common.dumpKernel(Slice(info.output, kernel.position.toInt(), kernel.size, kernel.file!!))
         //ramdisk
         if (this.ramdisk.size > 0) {
-            Common.dumpRamdisk(Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file!!),
+            val fmt = Common.dumpRamdisk(Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file!!),
                     "${workDir}root")
+            this.ramdisk.file = this.ramdisk.file!! + ".$fmt"
+            //dump info again
+            ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         }
         //second bootloader
         secondBootloader?.let {
