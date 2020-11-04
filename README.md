@@ -11,7 +11,7 @@ A tool for reverse engineering Android ROM images.  (working on ![Linux](doc/lin
 * install required packages
 
   ```bash
-  sudo apt install device-tree-compiler lz4 xz zlib1g-dev cpio
+  sudo apt install device-tree-compiler lz4 xz zlib1g-dev
   ```
 
 * get the tool
