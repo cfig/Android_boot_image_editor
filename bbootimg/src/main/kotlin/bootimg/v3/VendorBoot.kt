@@ -150,13 +150,13 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
         //header
         ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         //ramdisk
-        val fmt = C.dumpRamdisk(C.Slice(info.output, ramdisk.position.toInt(), ramdisk.size.toInt(), ramdisk.file),
+        val fmt = C.dumpRamdisk(C.Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file),
                 "${workDir}root")
         this.ramdisk.file = this.ramdisk.file + ".$fmt"
         //dump info again
         ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         //dtb
-        C.dumpDtb(C.Slice(info.output, dtb.position.toInt(), dtb.size.toInt(), dtb.file))
+        C.dumpDtb(C.Slice(info.output, dtb.position.toInt(), dtb.size, dtb.file))
         return this
     }
 

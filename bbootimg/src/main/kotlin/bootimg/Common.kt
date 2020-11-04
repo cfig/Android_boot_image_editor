@@ -3,7 +3,6 @@ package cfig.bootimg
 import cfig.EnvironmentVerifier
 import cfig.dtb_util.DTC
 import cfig.helper.Helper
-import cfig.helper.Helper.Companion.check_call
 import cfig.helper.ZipHelper
 import cfig.io.Struct3.InputStreamExt.Companion.getInt
 import cfig.kernel_util.KernelExtractor
@@ -11,7 +10,10 @@ import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.PumpStreamHandler
 import org.slf4j.LoggerFactory
-import java.io.*
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.security.MessageDigest
@@ -36,6 +38,7 @@ class Common {
 
     companion object {
         private val log = LoggerFactory.getLogger(Common::class.java)
+        private const val MAX_ANDROID_VER = 11
 
         @Throws(IllegalArgumentException::class)
         fun packOsVersion(x: String?): Int {
@@ -269,6 +272,28 @@ class Common {
             return FileInputStream(fileName).let { fis ->
                 fis.skip(40)
                 fis.getInt(ByteOrder.LITTLE_ENDIAN)
+            }
+        }
+
+        fun parseOsMajor(osVersion: String): Int {
+            return try {
+                log.info("OS Major: " + osVersion.split(".")[0])
+                val ret = Integer.parseInt(osVersion.split(".")[0])
+                when {
+                    ret > MAX_ANDROID_VER -> {
+                        log.warn("Os Major exceeds current max $MAX_ANDROID_VER")
+                        MAX_ANDROID_VER
+                    }
+                    ret < 10 -> {
+                        10
+                    }
+                    else -> {
+                        ret
+                    }
+                }
+            } catch (e: Exception) {
+                log.warn("can not parse osVersion from $osVersion")
+                10
             }
         }
     }

@@ -85,12 +85,12 @@ data class BootV2(
                 }
                 ret.kernel.let { theKernel ->
                     theKernel.file = "${workDir}kernel"
-                    theKernel.size = bh2.kernelLength.toInt()
+                    theKernel.size = bh2.kernelLength
                     theKernel.loadOffset = bh2.kernelOffset
                     theKernel.position = ret.getKernelPosition()
                 }
                 ret.ramdisk.let { theRamdisk ->
-                    theRamdisk.size = bh2.ramdiskLength.toInt()
+                    theRamdisk.size = bh2.ramdiskLength
                     theRamdisk.loadOffset = bh2.ramdiskOffset
                     theRamdisk.position = ret.getRamdiskPosition()
                     if (bh2.ramdiskLength > 0) {
@@ -99,7 +99,7 @@ data class BootV2(
                 }
                 if (bh2.secondBootloaderLength > 0) {
                     ret.secondBootloader = CommArgs()
-                    ret.secondBootloader!!.size = bh2.secondBootloaderLength.toInt()
+                    ret.secondBootloader!!.size = bh2.secondBootloaderLength
                     ret.secondBootloader!!.loadOffset = bh2.secondBootloaderOffset
                     ret.secondBootloader!!.file = "${workDir}second"
                     ret.secondBootloader!!.position = ret.getSecondBootloaderPosition()
@@ -178,19 +178,19 @@ data class BootV2(
         secondBootloader?.let {
             Helper.extractFile(info.output,
                     secondBootloader!!.file!!,
-                    secondBootloader!!.position.toLong(),
+                    secondBootloader!!.position,
                     secondBootloader!!.size)
         }
         //recovery dtbo
         recoveryDtbo?.let {
             Helper.extractFile(info.output,
                     recoveryDtbo!!.file!!,
-                    recoveryDtbo!!.position.toLong(),
-                    recoveryDtbo!!.size.toInt())
+                    recoveryDtbo!!.position,
+                    recoveryDtbo!!.size)
         }
         //dtb
         this.dtb?.let { _ ->
-            Common.dumpDtb(Slice(info.output, dtb!!.position.toInt(), dtb!!.size.toInt(), dtb!!.file!!))
+            Common.dumpDtb(Slice(info.output, dtb!!.position.toInt(), dtb!!.size, dtb!!.file!!))
         }
 
         return this
@@ -309,16 +309,6 @@ data class BootV2(
         )
     }
 
-    fun parseOsMajor(): Int {
-        return try {
-            log.info("OS Major: " + (info.osVersion?.split(".")?.get(0) ?: "null"))
-            val ret = Integer.parseInt(info.osVersion!!.split(".")[0])
-            if (ret <= 10) 10 else ret
-        } catch (e: Exception) {
-            10
-        }
-    }
-
     fun pack(): BootV2 {
         //refresh kernel size
         this.kernel.size = File(this.kernel.file!!).length().toInt()
@@ -333,7 +323,7 @@ data class BootV2(
             } else {
                 File(this.ramdisk.file!!).deleleIfExists()
                 File(this.ramdisk.file!!.removeSuffix(".gz")).deleleIfExists()
-                Common.packRootfs("${workDir}/root", this.ramdisk.file!!, parseOsMajor())
+                Common.packRootfs("${workDir}/root", this.ramdisk.file!!, Common.parseOsMajor(info.osVersion.toString()))
             }
             this.ramdisk.size = File(this.ramdisk.file!!).length().toInt()
         }
@@ -449,11 +439,11 @@ data class BootV2(
                 ret.addArgument("--dtb ")
                 ret.addArgument(dtb!!.file!!)
                 ret.addArgument("--dtb_offset ")
-                ret.addArgument("0x" + java.lang.Long.toHexString(dtb!!.loadOffset.toLong()))
+                ret.addArgument("0x" + java.lang.Long.toHexString(dtb!!.loadOffset))
             }
         }
         ret.addArgument(" --pagesize ")
-        ret.addArgument(Integer.toString(info.pageSize.toInt()))
+        ret.addArgument(info.pageSize.toString())
         ret.addArgument(" --cmdline ")
         ret.addArgument(info.cmdline, false)
         if (!info.osVersion.isNullOrBlank()) {
@@ -476,7 +466,7 @@ data class BootV2(
     }
 
     fun sign(): BootV2 {
-        val avbtool = String.format(Helper.prop("avbtool"), if (parseOsMajor() > 10) "v1.2" else "v1.1")
+        val avbtool = String.format(Helper.prop("avbtool"), if (Common.parseOsMajor(info.osVersion.toString()) > 10) "v1.2" else "v1.1")
         if (info.verify == "VB2.0") {
             Signer.signAVB(info.output, this.info.imageSize, avbtool)
             log.info("Adding hash_footer with verified-boot 2.0 style")
