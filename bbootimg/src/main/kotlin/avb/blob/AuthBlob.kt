@@ -2,8 +2,11 @@ package avb.blob
 
 import avb.alg.Algorithms
 import cfig.helper.Helper
+import cfig.helper.KeyHelper2
 import cfig.io.Struct3
 import org.slf4j.LoggerFactory
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.security.MessageDigest
 
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -32,7 +35,8 @@ data class AuthBlob(
                     update(header_data_blob)
                     update(aux_data_blob)
                 }.digest()
-                binarySignature = Helper.rawSign(alg.defaultKey.replace(".pem", ".pk8"), Helper.join(alg.padding, binaryHash))
+                val k = KeyHelper2.parseRsaPk8(Files.readAllBytes(Paths.get(alg.defaultKey.replace(".pem", ".pk8"))))
+                binarySignature = KeyHelper2.rawSign(k, Helper.join(alg.padding, binaryHash))
             }
             val authData = Helper.join(binaryHash, binarySignature)
             return Helper.join(authData, Struct3("${authBlockSize - authData.size}x").pack(0))

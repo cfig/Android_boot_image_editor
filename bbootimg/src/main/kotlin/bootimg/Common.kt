@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
+import java.lang.NumberFormatException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.security.MessageDigest
@@ -291,7 +292,7 @@ class Common {
                         ret
                     }
                 }
-            } catch (e: Exception) {
+            } catch (e: NumberFormatException) {
                 log.warn("can not parse osVersion from $osVersion")
                 10
             }

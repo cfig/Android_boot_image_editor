@@ -1,6 +1,5 @@
 package cfig.helper
 
-import cfig.KeyUtil
 import cfig.io.Struct3
 import com.google.common.math.BigIntegerMath
 import org.apache.commons.codec.binary.Hex
@@ -135,77 +134,6 @@ class Helper {
             } else {
                 size + page - remainder
             }
-        }
-
-        /*
-            read RSA private key
-            assert exp == 65537
-            num_bits = log2(modulus)
-
-            @return: AvbRSAPublicKeyHeader formatted bytearray
-                    https://android.googlesource.com/platform/external/avb/+/master/libavb/avb_crypto.h#158
-            from avbtool::encode_rsa_key()
-         */
-        fun encodeRSAkey(key: ByteArray): ByteArray {
-            val rsa = KeyUtil.parsePemPrivateKey(ByteArrayInputStream(key))
-            assert(65537.toBigInteger() == rsa.publicExponent)
-            val numBits: Int = BigIntegerMath.log2(rsa.modulus, RoundingMode.CEILING)
-            log.debug("modulus: " + rsa.modulus)
-            log.debug("numBits: $numBits")
-            val b = BigInteger.valueOf(2).pow(32)
-            val n0inv = (b - rsa.modulus.modInverse(b)).toLong()
-            log.debug("n0inv = $n0inv")
-            val r = BigInteger.valueOf(2).pow(numBits)
-            val rrModn = (r * r).mod(rsa.modulus)
-            log.debug("BB: " + numBits / 8 + ", mod_len: " + rsa.modulus.toByteArray().size + ", rrmodn = " + rrModn.toByteArray().size)
-            val unsignedModulo = rsa.modulus.toByteArray().sliceArray(1..numBits / 8) //remove sign byte
-            log.debug("unsigned modulo: " + Hex.encodeHexString(unsignedModulo))
-            val ret = Struct3("!II${numBits / 8}b${numBits / 8}b").pack(
-                    numBits,
-                    n0inv,
-                    unsignedModulo,
-                    rrModn.toByteArray())
-            log.debug("rrmodn: " + Hex.encodeHexString(rrModn.toByteArray()))
-            log.debug("RSA: " + Hex.encodeHexString(ret))
-            return ret
-        }
-
-        //inspired by
-        //  https://stackoverflow.com/questions/40242391/how-can-i-sign-a-raw-message-without-first-hashing-it-in-bouncy-castle
-        // "specifying Cipher.ENCRYPT mode or Cipher.DECRYPT mode doesn't make a difference;
-        //      both simply perform modular exponentiation"
-        fun rawSign(keyPath: String, data: ByteArray): ByteArray {
-            val privk = KeyUtil.parsePk8PrivateKey(Files.readAllBytes(Paths.get(keyPath)))
-            val cipher = Cipher.getInstance("RSA/ECB/NoPadding").apply {
-                this.init(Cipher.ENCRYPT_MODE, privk)
-                this.update(data)
-            }
-            return cipher.doFinal()
-        }
-
-        fun rawSignOpenSsl(keyPath: String, data: ByteArray): ByteArray {
-            log.debug("raw input: " + Hex.encodeHexString(data))
-            log.debug("Raw sign data size = ${data.size}, key = $keyPath")
-            var ret = byteArrayOf()
-            val exe = DefaultExecutor()
-            val stdin = ByteArrayInputStream(data)
-            val stdout = ByteArrayOutputStream()
-            val stderr = ByteArrayOutputStream()
-            exe.streamHandler = PumpStreamHandler(stdout, stderr, stdin)
-            try {
-                exe.execute(CommandLine.parse("openssl rsautl -sign -inkey $keyPath -raw"))
-                ret = stdout.toByteArray()
-                log.debug("Raw signature size = " + ret.size)
-            } catch (e: ExecuteException) {
-                log.error("Execute error")
-            } finally {
-                log.debug("OUT: " + Hex.encodeHexString(stdout.toByteArray()))
-                log.debug("ERR: " + String(stderr.toByteArray()))
-            }
-
-            if (ret.isEmpty()) throw RuntimeException("raw sign failed")
-
-            return ret
         }
 
         fun pyAlg2java(alg: String): String {
@@ -400,7 +328,6 @@ class Helper {
             }
             return result
         }
-
 
         private val log = LoggerFactory.getLogger("Helper")
     }

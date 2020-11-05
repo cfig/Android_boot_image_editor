@@ -3,6 +3,8 @@ package avb.blob
 import avb.alg.Algorithm
 import avb.desc.*
 import cfig.helper.Helper
+import cfig.helper.KeyHelper
+import cfig.helper.KeyHelper2
 import cfig.io.Struct3
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.slf4j.LoggerFactory
@@ -94,7 +96,7 @@ class AuxBlob(
                 if (key == null) {
                     algKey = Files.readAllBytes((Paths.get(alg.defaultKey)))
                 }
-                encodedKey = Helper.encodeRSAkey(algKey!!)
+                encodedKey = KeyHelper.encodeRSAkey(algKey!!)
                 log.info("encodePubKey(): size = ${alg.public_key_num_bytes}, algorithm key size: ${encodedKey.size}")
                 assert(alg.public_key_num_bytes == encodedKey.size)
             } else {

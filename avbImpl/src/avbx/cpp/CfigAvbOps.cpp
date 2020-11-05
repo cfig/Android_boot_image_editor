@@ -206,7 +206,7 @@ static AvbIOResult read_from_partitionX(AvbOps *,
     //seek
     if (lseek(fd, offset, SEEK_SET) != offset) {
         fprintf(stderr,
-                "[%s()]: Error seeking to pos %lld in file %s: %s\n",
+                "[%s()]: Error seeking to pos %ld in file %s: %s\n",
                 __FUNCTION__,
                 offset,
                 partitionFile.c_str(),
@@ -215,7 +215,7 @@ static AvbIOResult read_from_partitionX(AvbOps *,
         return AVB_IO_RESULT_ERROR_IO;
     }
     ssize_t num_read = read(fd, buffer, num_bytes);
-    if (num_read < 0) {
+    if (num_read < 0 || num_read != num_bytes) {
         fprintf(stderr,
                 "[%s()]: Error reading %zd bytes from pos %" PRId64 " in file %s: %s\n",
                 __FUNCTION__,
@@ -333,7 +333,7 @@ bool CfigAvbOps::preload_partition(std::string partition) {
 
     auto *buffer = static_cast<uint8_t *>(malloc(file_size));
     ssize_t num_read = read(fd, buffer, file_size);
-    if (num_read != file_size) {
+    if (num_read < 0 || num_read != file_size) {
         fprintf(stderr,
                 "[%s()]: Error reading %lld bytes from file '%s': %s\n",
                 __FUNCTION__,
