@@ -95,6 +95,7 @@ def main():
     # from volunteers
     verifySingleDir(resDir, "recovery_image_from_s-trace")
     verifySingleDir(resDir, "boot_img_from_gesangtome") # android 9, no ramdisk
+    verifySingleDir(resDir, "issue_47")
     # 5.0
     verifySingleDir(resDir, "5.0_fugu_lrx21m")
     # 6.0
