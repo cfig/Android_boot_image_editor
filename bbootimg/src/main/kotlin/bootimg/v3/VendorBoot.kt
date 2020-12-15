@@ -87,7 +87,10 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
         } else {
             File(this.ramdisk.file).deleleIfExists()
             File(this.ramdisk.file.removeSuffix(".gz")).deleleIfExists()
-            C.packRootfs("$workDir/root", this.ramdisk.file, parseOsMajor())
+            //TODO: remove cpio in C/C++
+            //C.packRootfs("$workDir/root", this.ramdisk.file, parseOsMajor())
+            //enable advance JAVA cpio
+            C.packRootfs("$workDir/root", this.ramdisk.file)
         }
         this.ramdisk.size = File(this.ramdisk.file).length().toInt()
         this.dtb.size = File(this.dtb.file).length().toInt()

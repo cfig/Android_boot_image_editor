@@ -1,11 +1,11 @@
 package cfig.bootimg.v2
 
 import cfig.Avb
-import cfig.helper.Helper
 import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Common.Slice
 import cfig.bootimg.Signer
+import cfig.helper.Helper
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -323,7 +323,8 @@ data class BootV2(
             } else {
                 File(this.ramdisk.file!!).deleleIfExists()
                 File(this.ramdisk.file!!.removeSuffix(".gz")).deleleIfExists()
-                Common.packRootfs("${workDir}/root", this.ramdisk.file!!, Common.parseOsMajor(info.osVersion.toString()))
+                //Common.packRootfs("${workDir}/root", this.ramdisk.file!!, Common.parseOsMajor(info.osVersion.toString()))
+                Common.packRootfs("${workDir}/root", this.ramdisk.file!!)
             }
             this.ramdisk.size = File(this.ramdisk.file!!).length().toInt()
         }

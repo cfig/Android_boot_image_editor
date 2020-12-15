@@ -1,9 +1,12 @@
 package cfig.helper
 
+import cfig.bootimg.cpio.AndroidCpioEntry
 import cfig.helper.Helper.Companion.check_call
 import cfig.helper.Helper.Companion.check_output
 import cfig.io.Struct3
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream
+import org.apache.commons.compress.archivers.cpio.CpioConstants
 import org.apache.commons.compress.archivers.zip.*
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipParameters
@@ -122,7 +125,11 @@ class ZipHelper {
             }
         }
 
-        fun ZipArchiveOutputStream.packFile(inFile: File, entryName: String, zipMethod: ZipMethod = ZipMethod.DEFLATED) {
+        fun ZipArchiveOutputStream.packFile(
+            inFile: File,
+            entryName: String,
+            zipMethod: ZipMethod = ZipMethod.DEFLATED
+        ) {
             log.info("packing $entryName($zipMethod) from file $inFile (size=${inFile.length()} ...")
             val entry = ZipArchiveEntry(inFile, entryName)
             entry.method = zipMethod.ordinal
@@ -131,7 +138,11 @@ class ZipHelper {
             this.closeArchiveEntry()
         }
 
-        fun ZipArchiveOutputStream.packEntry(inBuf: ByteArray, entryName: String, zipMethod: ZipMethod = ZipMethod.DEFLATED) {
+        fun ZipArchiveOutputStream.packEntry(
+            inBuf: ByteArray,
+            entryName: String,
+            zipMethod: ZipMethod = ZipMethod.DEFLATED
+        ) {
             log.info("packing $entryName($zipMethod) from memory data (size=${inBuf.size}...")
             val entry = ZipArchiveEntry(entryName)
             entry.method = zipMethod.ordinal
@@ -140,7 +151,11 @@ class ZipHelper {
             this.closeArchiveEntry()
         }
 
-        fun ZipArchiveOutputStream.packStream(inStream: InputStream, entryName: String, zipMethod: ZipMethod = ZipMethod.DEFLATED) {
+        fun ZipArchiveOutputStream.packStream(
+            inStream: InputStream,
+            entryName: String,
+            zipMethod: ZipMethod = ZipMethod.DEFLATED
+        ) {
             log.info("packing $entryName($zipMethod) from input stream (size=unknown...")
             val entry = ZipArchiveEntry(entryName)
             entry.method = zipMethod.ordinal
@@ -264,7 +279,8 @@ class ZipHelper {
 
         fun decompressLZ4(framedLz4: String, outFile: String) {
             FramedLZ4CompressorInputStream(
-                    Files.newInputStream(Paths.get(framedLz4))).use { zIn ->
+                Files.newInputStream(Paths.get(framedLz4))
+            ).use { zIn ->
                 Files.newOutputStream(Paths.get(outFile)).use { out ->
                     log.info("decompress lz4: $framedLz4 -> $outFile")
                     val buffer = ByteArray(8192)
@@ -360,57 +376,5 @@ class ZipHelper {
             }
         }
 
-        fun decompressCPIO(cpioFile: String, outDir: String, fileList: String? = null) {
-            run { //clean up
-                if (File(outDir).exists()) {
-                    log.info("Cleaning $outDir ...")
-                    File(outDir).deleteRecursively()
-                }
-                File(outDir).mkdir()
-            }
-            val cis = CpioArchiveInputStream(FileInputStream(cpioFile))
-            val fileListDump = if (fileList != null) FileOutputStream(fileList) else null
-
-            data class CpioEntryInfo(var type: String = "", var mode: String = "",
-                                     var uid_gid: String = "", var name: String = "",
-                                     var size: Long = 0, var linkTarget: String = "")
-            while (true) {
-                val entry = cis.nextCPIOEntry ?: break
-                val entryInfo = CpioEntryInfo(name = entry.name,
-                        size = entry.size,
-                        mode = String.format("%6s", java.lang.Long.toOctalString(entry.mode)),
-                        uid_gid = "${entry.uid}/${entry.gid}")
-                if (!cis.canReadEntryData(entry)) {
-                    throw RuntimeException("can not read entry ??")
-                }
-                val buffer = ByteArray(entry.size.toInt())
-                cis.read(buffer)
-                val outEntryName = File(outDir + "/" + entry.name).path
-                when {
-                    entry.isRegularFile -> {
-                        entryInfo.type = "REG"
-                        File(outEntryName).writeBytes(buffer)
-                        Files.setPosixFilePermissions(Paths.get(outEntryName),
-                                Helper.modeToPermissions((entry.mode and 0xfff).toInt()))
-                    }
-                    entry.isSymbolicLink -> {
-                        entryInfo.type = "LNK"
-                        entryInfo.linkTarget = String(buffer)
-                        Files.createSymbolicLink(Paths.get(outEntryName), Paths.get(String(buffer)))
-                    }
-                    entry.isDirectory -> {
-                        entryInfo.type = "DIR"
-                        File(outEntryName).mkdir()
-                        Files.setPosixFilePermissions(Paths.get(outEntryName),
-                                Helper.modeToPermissions((entry.mode and 0xfff).toInt()))
-                    }
-                    else -> throw IllegalArgumentException("??? type unknown")
-                }
-                File(outEntryName).setLastModified(entry.time)
-                log.debug(entryInfo.toString() + (", read " + cis.bytesRead))
-                fileListDump?.write((entryInfo.toString() + ", read " + cis.bytesRead + "\n").toByteArray())
-            }
-            fileListDump?.close()
-        }
     }
 }

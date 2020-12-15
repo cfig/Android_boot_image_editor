@@ -5,6 +5,7 @@ import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.PumpStreamHandler
 
 val GROUP_ANDROID = "android"
+val localHack = false
 if (parseGradleVersion(gradle.gradleVersion) < 6) {
     logger.error("ERROR: Gradle Version MUST >= 6.0, current is {}", gradle.gradleVersion)
     throw RuntimeException("ERROR: Gradle Version")
@@ -73,10 +74,12 @@ tasks {
     pullTask.dependsOn("bbootimg:jar")
 
     //sparse image dependencies
-    packTask.dependsOn("aosp:mkbootfs.10:mkbootfsExecutable")
-    packTask.dependsOn("aosp:mkbootfs.11:mkbootfsExecutable")
-    unpackTask.dependsOn("aosp:mkbootfs.10:mkbootfsExecutable")
-    unpackTask.dependsOn("aosp:mkbootfs.11:mkbootfsExecutable")
+    if (localHack) {
+        packTask.dependsOn("aosp:mkbootfs.10:mkbootfsExecutable")
+        packTask.dependsOn("aosp:mkbootfs.11:mkbootfsExecutable")
+        unpackTask.dependsOn("aosp:mkbootfs.10:mkbootfsExecutable")
+        unpackTask.dependsOn("aosp:mkbootfs.11:mkbootfsExecutable")
+    }
     if (System.getProperty("os.name").contains("Mac")) {
         unpackTask.dependsOn("aosp:libsparse:simg2img:installReleaseMacos")
         packTask.dependsOn("aosp:libsparse:img2simg:installReleaseMacos")

@@ -1,6 +1,7 @@
 package cfig.bootimg
 
 import cfig.EnvironmentVerifier
+import cfig.bootimg.cpio.AndroidCpio
 import cfig.dtb_util.DTC
 import cfig.helper.Helper
 import cfig.helper.ZipHelper
@@ -24,17 +25,18 @@ import java.util.regex.Pattern
 @OptIn(ExperimentalUnsignedTypes::class)
 class Common {
     data class VeritySignature(
-            var type: String = "dm-verity",
-            var path: String = "/boot",
-            var verity_pk8: String = "",
-            var verity_pem: String = "",
-            var jarPath: String = "")
+        var type: String = "dm-verity",
+        var path: String = "/boot",
+        var verity_pk8: String = "",
+        var verity_pem: String = "",
+        var jarPath: String = ""
+    )
 
     data class Slice(
-            var srcFile: String,
-            var offset: Int,
-            var length: Int,
-            var dumpFile: String
+        var srcFile: String,
+        var offset: Int,
+        var length: Int,
+        var dumpFile: String
     )
 
     companion object {
@@ -155,9 +157,11 @@ class Common {
             val md = MessageDigest.getInstance("SHA1")
             for (item in inFiles) {
                 if (null == item) {
-                    md.update(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+                    md.update(
+                        ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
                             .putInt(0)
-                            .array())
+                            .array()
+                    )
                     log.debug("update null $item: " + Helper.toHexString((md.clone() as MessageDigest).digest()))
                 } else {
                     val currentFile = File(item)
@@ -172,9 +176,11 @@ class Common {
                             md.update(dataRead, 0, byteRead)
                         }
                         log.debug("update file $item: " + Helper.toHexString((md.clone() as MessageDigest).digest()))
-                        md.update(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+                        md.update(
+                            ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
                                 .putInt(currentFile.length().toInt())
-                                .array())
+                                .array()
+                        )
                         log.debug("update SIZE $item: " + Helper.toHexString((md.clone() as MessageDigest).digest()))
                     }
                 }
@@ -195,6 +201,7 @@ class Common {
             }
         }
 
+        //using mkbootfs
         fun packRootfs(rootDir: String, ramdiskGz: String, osMajor: Int = 10) {
             val mkbootfs = String.format(Helper.prop("mkbootfsBin"), osMajor)
             log.info("Packing rootfs $rootDir ...")
@@ -211,6 +218,28 @@ class Common {
                 }
                 ramdiskGz.endsWith(".lz4") -> {
                     ZipHelper.compressLZ4(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
+                }
+                else -> {
+                    throw IllegalArgumentException("$ramdiskGz is not supported")
+                }
+            }
+            log.info("$ramdiskGz is ready")
+        }
+
+        //using preset fs_config
+        fun packRootfs(rootDir: String, ramdiskGz: String) {
+            log.info("Packing rootfs $rootDir ...")
+            val fsConfig = File(ramdiskGz).parentFile.path + "/ramdisk_filelist.txt"
+            when {
+                ramdiskGz.endsWith(".gz") -> {
+                    val f = ramdiskGz.removeSuffix(".gz")
+                    AndroidCpio().pack(rootDir, f, fsConfig)
+                    ZipHelper.gnuZipFile2(ramdiskGz, FileInputStream(f))
+                }
+                ramdiskGz.endsWith(".lz4") -> {
+                    val f = ramdiskGz.removeSuffix(".lz4")
+                    AndroidCpio().pack(rootDir, f, fsConfig)
+                    ZipHelper.compressLZ4(ramdiskGz, FileInputStream(f))
                 }
                 else -> {
                     throw IllegalArgumentException("$ramdiskGz is not supported")
@@ -264,8 +293,11 @@ class Common {
                 mkdirs()
             }
 
-            //("cpio -idmv -F " + File(ramdisk).canonicalPath).check_call(rootFile.canonicalPath)
-            ZipHelper.decompressCPIO(File(ramdisk).canonicalPath, rootFile.canonicalPath, File(ramdisk).canonicalPath + ".filelist")
+            AndroidCpio.decompressCPIO(
+                File(ramdisk).canonicalPath,
+                rootFile.canonicalPath,
+                File(ramdisk).canonicalPath.removeSuffix(".img") + "_filelist.txt"
+            )
             log.info(" ramdisk extracted : $ramdisk -> $rootFile")
         }
 

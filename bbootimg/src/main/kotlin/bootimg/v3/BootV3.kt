@@ -79,7 +79,10 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
         } else {
             File(this.ramdisk.file).deleleIfExists()
             File(this.ramdisk.file.replaceFirst("[.][^.]+$", "")).deleleIfExists()
-            C.packRootfs("$workDir/root", this.ramdisk.file, C.parseOsMajor(info.osVersion))
+            //TODO: remove cpio in C/C++
+            //C.packRootfs("$workDir/root", this.ramdisk.file, C.parseOsMajor(info.osVersion))
+            // enable advance JAVA cpio
+            C.packRootfs("$workDir/root", this.ramdisk.file)
         }
         this.kernel.size = File(this.kernel.file).length().toInt()
         this.ramdisk.size = File(this.ramdisk.file).length().toInt()

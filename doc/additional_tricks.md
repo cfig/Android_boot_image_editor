@@ -62,3 +62,5 @@ This part is contributed by @Surendrajat, thanks!
 ## using pre-packed ramdisk.img.gz
 place 'ramdisk.img.gz' in directory, delete "root/", program will use it as prebuilt.
 
+## cpio
+decompress cpio with commandline `cpio -idmv -F <file>`

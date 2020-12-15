@@ -17,7 +17,7 @@ data class BootloaderMsg(//offset 0, size 2k
 ) {
     companion object {
         private const val FORMAT_STRING = "32s32s768s32s1184b"
-        private const val miscFile = "misc.file"
+        const val miscFile = "misc.file"
         const val SIZE = 2048
         private val log = LoggerFactory.getLogger("BootloaderMsg")
 

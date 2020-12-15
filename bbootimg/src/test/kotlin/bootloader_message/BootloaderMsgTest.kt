@@ -1,13 +1,21 @@
 package bootloader_message
 
+import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootloader_message.BootloaderMsg
+import org.junit.After
 import org.junit.Test
 
 import org.junit.Assert.*
 import org.slf4j.LoggerFactory
+import java.io.File
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class BootloaderMsgTest {
+    @After
+    fun tearDown() {
+        File(BootloaderMsg.miscFile).deleleIfExists()
+    }
+
     private val log = LoggerFactory.getLogger(BootloaderMsgTest::class.java)
 
     @Test
