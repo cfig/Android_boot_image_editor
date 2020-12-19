@@ -5,6 +5,7 @@ import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.PumpStreamHandler
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
+import kotlin.system.exitProcess
 
 class EnvironmentVerifier {
     val hasXz: Boolean
@@ -73,6 +74,30 @@ class EnvironmentVerifier {
 
     val isMacOS: Boolean
         get() = System.getProperty("os.name").contains("Mac")
+
+    private fun getJavaVersion(): Int {
+        return System.getProperty("java.version").let { version ->
+            if (version.startsWith("1.")) {
+                version.substring(2, 3)
+            } else {
+                val dot = version.indexOf(".")
+                if (dot != -1) {
+                    version.substring(0, dot)
+                } else {
+                    version
+                }
+            }
+        }.toInt()
+    }
+
+    init {
+        if (getJavaVersion() < 9) {
+            log.error("Java 9+ is required, while it's " + System.getProperty("java.version"))
+            exitProcess(1)
+        } else {
+            log.debug("Java version " + System.getProperty("java.version"))
+        }
+    }
 
     companion object {
         private val log = LoggerFactory.getLogger("EnvironmentVerifier")
