@@ -40,35 +40,62 @@ COMPRESSION_ALGO = (
 # LINUX_COMPILE_HOST ") (" LINUX_COMPILER ") " UTS_VERSION "\n";
 LINUX_BANNER_PREFIX = b'Linux version '
 LINUX_BANNER_REGEX = LINUX_BANNER_PREFIX + \
-    r'([0-9]+[.][0-9]+[.][0-9]+).* \(.*@.*\) \(.*\) .*\n'
+    b'(?P<release>(?P<version>[0-9]+[.][0-9]+[.][0-9]+).*) \(.*@.*\) \((?P<compiler>.*)\) .*\n'
 
 
-def get_version(input_bytes, start_idx):
-  null_idx = input_bytes.find('\x00', start_idx)
+def get_from_release(input_bytes, start_idx, key):
+  null_idx = input_bytes.find(b'\x00', start_idx)
   if null_idx < 0:
     return None
   try:
-    linux_banner = input_bytes[start_idx:null_idx].decode()
+    linux_banner = input_bytes[start_idx:null_idx]
   except UnicodeDecodeError:
     return None
   mo = re.match(LINUX_BANNER_REGEX, linux_banner)
   if mo:
-    return mo.group(1)
+    return mo.group(key)
   return None
 
 
-def dump_version(input_bytes):
+def dump_from_release(input_bytes, key):
+  """
+  Helper of dump_version and dump_release
+  """
   idx = 0
   while True:
     idx = input_bytes.find(LINUX_BANNER_PREFIX, idx)
     if idx < 0:
       return None
 
-    version = get_version(input_bytes, idx)
-    if version:
-      return version
+    value = get_from_release(input_bytes, idx, key)
+    if value:
+      return value
 
     idx += len(LINUX_BANNER_PREFIX)
+
+
+def dump_version(input_bytes):
+  """
+  Dump kernel version, w.x.y, from input_bytes. Search for the string
+  "Linux version " and do pattern matching after it. See LINUX_BANNER_REGEX.
+  """
+  return dump_from_release(input_bytes, "version")
+
+
+def dump_compiler(input_bytes):
+  """
+  Dump kernel version, w.x.y, from input_bytes. Search for the string
+  "Linux version " and do pattern matching after it. See LINUX_BANNER_REGEX.
+  """
+  return dump_from_release(input_bytes, "compiler")
+
+
+def dump_release(input_bytes):
+  """
+  Dump kernel release, w.x.y-..., from input_bytes. Search for the string
+  "Linux version " and do pattern matching after it. See LINUX_BANNER_REGEX.
+  """
+  return dump_from_release(input_bytes, "release")
 
 
 def dump_configs(input_bytes):
@@ -100,17 +127,23 @@ def dump_configs(input_bytes):
   return o
 
 
-def try_decompress(cmd, search_bytes, input_bytes):
-  idx = input_bytes.find(search_bytes)
-  if idx < 0:
-    return None
-
-  idx = 0
+def try_decompress_bytes(cmd, input_bytes):
   sp = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
-  o, _ = sp.communicate(input=input_bytes[idx:])
+  o, _ = sp.communicate(input=input_bytes)
   # ignore errors
   return o
+
+
+def try_decompress(cmd, search_bytes, input_bytes):
+  idx = 0
+  while True:
+    idx = input_bytes.find(search_bytes, idx)
+    if idx < 0:
+      return
+
+    yield try_decompress_bytes(cmd, input_bytes[idx:])
+    idx += 1
 
 
 def decompress_dump(func, input_bytes):
@@ -122,17 +155,34 @@ def decompress_dump(func, input_bytes):
   if o:
     return o
   for cmd, search_bytes in COMPRESSION_ALGO:
-    decompressed = try_decompress(cmd, search_bytes, input_bytes)
-    if decompressed:
-      o = func(decompressed)
-      if o:
-        return o
+    for decompressed in try_decompress(cmd, search_bytes, input_bytes):
+      if decompressed:
+        o = decompress_dump(func, decompressed)
+        if o:
+          return o
     # Force decompress the whole file even if header doesn't match
-    decompressed = try_decompress(cmd, b"", input_bytes)
+    decompressed = try_decompress_bytes(cmd, input_bytes)
     if decompressed:
-      o = func(decompressed)
+      o = decompress_dump(func, decompressed)
       if o:
         return o
+
+
+def dump_to_file(f, dump_fn, input_bytes, desc):
+  """
+  Call decompress_dump(dump_fn, input_bytes) and write to f. If it fails, return
+  False; otherwise return True.
+  """
+  if f is not None:
+    o = decompress_dump(dump_fn, input_bytes)
+    if o:
+      f.write(o)
+    else:
+      sys.stderr.write(
+          "Cannot extract kernel {}".format(desc))
+      return False
+  return True
+
 
 def main():
   parser = argparse.ArgumentParser(
@@ -159,6 +209,20 @@ def main():
                       nargs='?',
                       type=argparse.FileType('wb'),
                       const=sys.stdout)
+  parser.add_argument('--output-release',
+                      help='If specified, write kernel release. Use stdout if '
+                           'no file is specified.',
+                      metavar='FILE',
+                      nargs='?',
+                      type=argparse.FileType('wb'),
+                      const=sys.stdout)
+  parser.add_argument('--output-compiler',
+                      help='If specified, write the compiler information. Use stdout if no file '
+                           'is specified.',
+                      metavar='FILE',
+                      nargs='?',
+                      type=argparse.FileType('wb'),
+                      const=sys.stdout)
   parser.add_argument('--tools',
                       help='Decompression tools to use. If not specified, PATH '
                            'is searched.',
@@ -175,25 +239,22 @@ def main():
   input_bytes = args.input.read()
 
   ret = 0
-  if args.output_configs is not None:
-    o = decompress_dump(dump_configs, input_bytes)
-    if o:
-      args.output_configs.write(o)
-    else:
-      sys.stderr.write(
-          "Cannot extract kernel configs in {}".format(args.input.name))
-      ret = 1
-  if args.output_version is not None:
-    o = decompress_dump(dump_version, input_bytes)
-    if o:
-      args.output_version.write(o)
-    else:
-      sys.stderr.write(
-          "Cannot extract kernel versions in {}".format(args.input.name))
-      ret = 1
+  if not dump_to_file(args.output_configs, dump_configs, input_bytes,
+                      "configs in {}".format(args.input.name)):
+    ret = 1
+  if not dump_to_file(args.output_version, dump_version, input_bytes,
+                      "version in {}".format(args.input.name)):
+    ret = 1
+  if not dump_to_file(args.output_release, dump_release, input_bytes,
+                      "kernel release in {}".format(args.input.name)):
+    ret = 1
+
+  if not dump_to_file(args.output_compiler, dump_compiler, input_bytes,
+                      "kernel compiler in {}".format(args.input.name)):
+    ret = 1
 
   return ret
 
 
 if __name__ == '__main__':
-  exit(main())
+  sys.exit(main())
