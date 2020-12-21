@@ -11,12 +11,12 @@ import java.io.File
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class BootloaderMsgTest {
+    private val log = LoggerFactory.getLogger(BootloaderMsgTest::class.java)
+
     @After
     fun tearDown() {
         File(BootloaderMsg.miscFile).deleleIfExists()
     }
-
-    private val log = LoggerFactory.getLogger(BootloaderMsgTest::class.java)
 
     @Test
     fun writeRebootBootloaderTest() {

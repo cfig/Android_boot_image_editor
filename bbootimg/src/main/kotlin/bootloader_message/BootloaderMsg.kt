@@ -64,6 +64,7 @@ data class BootloaderMsg(//offset 0, size 2k
             this.recovery = info[2] as String
             this.stage = info[3] as String
             this.reserved = info[4] as ByteArray
+            fis.close()
         } else {
             log.info("$miscFile missing")
         }
