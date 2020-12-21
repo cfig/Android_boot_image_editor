@@ -2,27 +2,18 @@
 [![Build Status](https://travis-ci.org/cfig/Android_boot_image_editor.svg?branch=master)](https://travis-ci.org/cfig/Android_boot_image_editor)
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-A tool for reverse engineering Android ROM images.  (working on ![Linux](doc/linux24.png)(Ubuntu 18.04+) and ![Mac](doc/apple24.png))
+A tool for reverse engineering Android ROM images.
 
 ## Getting Started
 
-#### Installation
-* install required packages
+#### install required packages
 
-  ```bash
-  sudo apt install device-tree-compiler lz4 xz zlib1g-dev
-  ```
+Mac: `brew install lz4 xz`
 
-* get the tool
-  ```bash
-  git clone https://github.com/cfig/Android_boot_image_editor.git --depth=1
-  ```
+Linux: `sudo apt install device-tree-compiler lz4 xz zlib1g-dev openjdk-11-jdk`
 
-  or clone it from mirror:
-
-  ```bash
-  git clone https://gitee.com/cfig/Android_boot_image_editor.git --depth=1
-  ```
+Windows: Make sure you have `python3`, `JDK9+` and `openssl` properly installed.
+An easy way is to install [Anaconda](https://www.anaconda.com/products/individual#windows) and [Oracle JDK 11](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html), then run the program under anaconda PowerShell.
 
 #### Parsing and packing
 

@@ -1,6 +1,7 @@
 package cfig.bootimg.cpio
 
 import cfig.helper.Helper
+import cfig.EnvironmentVerifier
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream
@@ -37,8 +38,12 @@ class AndroidCpio {
                 }
             }
         } else { //later visit
-            log.debug(item.path + " ~ " + root.path)
-            val newOutname = item.path.substring(root.path.length + 1) //remove leading slash
+            val newOutname = if (EnvironmentVerifier().isWindows) {
+                item.path.substring(root.path.length + 1).replace("\\", "/")
+            } else {
+                item.path.substring(root.path.length + 1) //remove leading slash
+            }
+            log.debug(item.path + " ~ " + root.path + " => " + newOutname)
             val entry = when {
                 Files.isSymbolicLink(item.toPath()) -> {
                     val target = Files.readSymbolicLink(Paths.get(item.path))
@@ -202,23 +207,35 @@ class AndroidCpio {
                 when {
                     entry.isSymbolicLink -> {
                         entryInfo.note = ("LNK " + entryInfo.note)
-                        Files.createSymbolicLink(Paths.get(outEntryName), Paths.get(String(buffer)))
+                        if (EnvironmentVerifier().isWindows) {
+                            File(outEntryName).writeBytes(buffer)
+                        } else {
+                            Files.createSymbolicLink(Paths.get(outEntryName), Paths.get(String(buffer)))
+                        }
                     }
                     entry.isRegularFile -> {
                         entryInfo.note = ("REG " + entryInfo.note)
                         File(outEntryName).writeBytes(buffer)
-                        Files.setPosixFilePermissions(
-                            Paths.get(outEntryName),
-                            Helper.modeToPermissions((entry.mode and 0xfff).toInt())
-                        )
+                        if (EnvironmentVerifier().isWindows) {
+                            //Windows: Posix not supported
+                        } else {
+                            Files.setPosixFilePermissions(
+                                Paths.get(outEntryName),
+                                Helper.modeToPermissions((entry.mode and 0xfff).toInt())
+                            )
+                        }
                     }
                     entry.isDirectory -> {
                         entryInfo.note = ("DIR " + entryInfo.note)
                         File(outEntryName).mkdir()
-                        Files.setPosixFilePermissions(
-                            Paths.get(outEntryName),
-                            Helper.modeToPermissions((entry.mode and 0xfff).toInt())
-                        )
+                        if (!EnvironmentVerifier().isWindows) {
+                            Files.setPosixFilePermissions(
+                                Paths.get(outEntryName),
+                                Helper.modeToPermissions((entry.mode and 0xfff).toInt())
+                            )
+                        } else {
+                            //Windows
+                        }
                     }
                     else -> throw IllegalArgumentException("??? type unknown")
                 }

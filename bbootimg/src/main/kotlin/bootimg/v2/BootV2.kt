@@ -404,7 +404,8 @@ data class BootV2(
     }
 
     private fun toCommandLine(): CommandLine {
-        val ret = CommandLine(Helper.prop("mkbootimg"))
+        val ret = CommandLine("python")
+        ret.addArgument(Helper.prop("mkbootimg"))
         ret.addArgument(" --header_version ")
         ret.addArgument(info.headerVersion.toString())
         ret.addArgument(" --base ")
@@ -467,7 +468,8 @@ data class BootV2(
     }
 
     fun sign(): BootV2 {
-        val avbtool = String.format(Helper.prop("avbtool"), if (Common.parseOsMajor(info.osVersion.toString()) > 10) "v1.2" else "v1.1")
+        //unify with v1.1/v1.2 avbtool
+        val avbtool = String.format(Helper.prop("avbtool"), "v1.2")
         if (info.verify == "VB2.0") {
             Signer.signAVB(info.output, this.info.imageSize, avbtool)
             log.info("Adding hash_footer with verified-boot 2.0 style")

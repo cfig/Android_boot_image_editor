@@ -16,6 +16,7 @@ import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import cfig.bootimg.Common as C
+import cfig.EnvironmentVerifier
 
 @OptIn(ExperimentalUnsignedTypes::class)
 data class VendorBoot(var info: MiscInfo = MiscInfo(),
@@ -215,17 +216,19 @@ data class VendorBoot(var info: MiscInfo = MiscInfo(),
     }
 
     private fun toCommandLine(): CommandLine {
-        return CommandLine(Helper.prop("mkbootimg"))
-                .addArgument("--vendor_ramdisk").addArgument(ramdisk.file)
-                .addArgument("--dtb").addArgument(dtb.file)
-                .addArgument("--vendor_cmdline").addArgument(info.cmdline, false)
-                .addArgument("--header_version").addArgument(info.headerVersion.toString())
-                .addArgument("--base").addArgument("0")
-                .addArgument("--tags_offset").addArgument(info.tagsLoadAddr.toString())
-                .addArgument("--kernel_offset").addArgument(info.kernelLoadAddr.toString())
-                .addArgument("--ramdisk_offset").addArgument(ramdisk.loadAddr.toString())
-                .addArgument("--dtb_offset").addArgument(dtb.loadAddr.toString())
-                .addArgument("--pagesize").addArgument(info.pageSize.toString())
-                .addArgument("--vendor_boot")
+        val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""
+        return CommandLine.parse(cmdPrefix + Helper.prop("mkbootimg")).apply {
+                addArgument("--vendor_ramdisk").addArgument(ramdisk.file)
+                addArgument("--dtb").addArgument(dtb.file)
+                addArgument("--vendor_cmdline").addArgument(info.cmdline, false)
+                addArgument("--header_version").addArgument(info.headerVersion.toString())
+                addArgument("--base").addArgument("0")
+                addArgument("--tags_offset").addArgument(info.tagsLoadAddr.toString())
+                addArgument("--kernel_offset").addArgument(info.kernelLoadAddr.toString())
+                addArgument("--ramdisk_offset").addArgument(ramdisk.loadAddr.toString())
+                addArgument("--dtb_offset").addArgument(dtb.loadAddr.toString())
+                addArgument("--pagesize").addArgument(info.pageSize.toString())
+                addArgument("--vendor_boot")
+        }
     }
 }

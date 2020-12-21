@@ -226,7 +226,10 @@ class ZipHelper {
 
         fun isGZ(compressedFile: String): Boolean {
             return try {
-                GZIPInputStream(FileInputStream(compressedFile)).use { }
+                FileInputStream(compressedFile).use { fis ->
+                    GZIPInputStream(fis).use {
+                    }
+                }
                 true
             } catch (e: ZipException) {
                 false
@@ -235,7 +238,10 @@ class ZipHelper {
 
         fun isXZ(compressedFile: String): Boolean {
             return try {
-                XZCompressorInputStream(FileInputStream(compressedFile)).use { }
+                FileInputStream(compressedFile).use { fis ->
+                    XZCompressorInputStream(fis).use {
+                    }
+                }
                 true
             } catch (e: ZipException) {
                 false

@@ -1,12 +1,20 @@
 package init
 
+import org.junit.Test
+import org.junit.After
+import java.io.File
+import java.util.*
 import cfig.bootloader_message.BootloaderMsg
 import cfig.init.Reboot
-import org.junit.Test
-import java.util.*
+import cfig.bootimg.Common.Companion.deleleIfExists
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class RebootTest {
+    @After
+    fun tearDown() {
+        File(BootloaderMsg.miscFile).deleleIfExists()
+    }
+
     @Test
     fun testDifferentModes() {
         Reboot.handlePowerctlMessage("reboot,recovery")

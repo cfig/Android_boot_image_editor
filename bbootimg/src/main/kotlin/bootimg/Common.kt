@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.io.FileInputStream
 import java.lang.NumberFormatException
 import java.nio.ByteBuffer
@@ -119,12 +121,16 @@ class Common {
             Helper.extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
             when {
                 ZipHelper.isGZ(s.dumpFile) -> {
-                    File(s.dumpFile).renameTo(File(s.dumpFile + ".gz"))
+                    Files.move(
+                        Paths.get(s.dumpFile), Paths.get(s.dumpFile + ".gz"),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING)
                     ZipHelper.unGnuzipFile(s.dumpFile + ".gz", s.dumpFile)
                 }
                 ZipHelper.isLZ4(s.dumpFile) -> {
                     log.info("ramdisk is compressed lz4")
-                    File(s.dumpFile).renameTo(File(s.dumpFile + ".lz4"))
+                    Files.move(
+                        Paths.get(s.dumpFile), Paths.get(s.dumpFile + ".lz4"),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING)
                     ZipHelper.decompressLZ4Ext(s.dumpFile + ".lz4", s.dumpFile)
                     ret = "lz4"
                 }

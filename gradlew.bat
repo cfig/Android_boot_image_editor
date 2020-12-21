@@ -21,6 +21,9 @@
 @rem
 @rem ##########################################################################
 
+@rem set path for lz4
+@IF EXIST tools\bin SET PATH=%PATH%;tools\bin
+
 @rem Set local scope for the variables with windows NT shell
 if "%OS%"=="Windows_NT" setlocal
 

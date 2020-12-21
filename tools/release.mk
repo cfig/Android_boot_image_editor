@@ -2,7 +2,6 @@
 # release.mk
 # yu, 2020-12-20 00:19
 #
-
 define gw
 #!/usr/bin/env sh\n
 if [ "x$$1" = "xassemble" ]; then\n
@@ -20,7 +19,12 @@ fi\n
 java -jar bbootimg/bbootimg.jar $$*
 
 endef
-export gw
+
+define gw_win
+@IF EXIST tools\\bin SET PATH=%PATH%;tools\\bin\n
+@java -jar bbootimg/bbootimg.jar %*
+endef
+export gw gw_win
 all:
 	cd ../bbootimg && gradle build
 	cp ../bbootimg/build/libs/bbootimg.jar .
@@ -33,7 +37,9 @@ all:
 	mkdir ../bbootimg && mv bbootimg.jar ../bbootimg/
 	echo $$gw > gradlew
 	chmod 755 gradlew
+	echo $$gw_win > gradlew.bat
 	mv gradlew ../
+	mv gradlew.bat ../
 
 # vim:ft=make
 #

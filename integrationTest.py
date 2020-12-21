@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import shutil, os.path, json, subprocess, hashlib, glob
-import unittest, logging, sys, lzma
+import unittest, logging, sys, lzma, time
 
 successLogo = """
       +----------------------------------+
@@ -24,8 +24,14 @@ def hashFile(fileName):
     return hasher.hexdigest()
 
 def deleteIfExists(inFile):
-    if os.path.isfile(inFile):
-        os.remove(inFile)
+    for i in range(3):
+        try:
+            if os.path.isfile(inFile):
+                os.remove(inFile)
+            return
+        except Exception as e:
+            log.warn("Exception in cleaning up %s" % inFile)
+            time.sleep(3)
 
 def cleanUp():
     log.info("clean up ...")
@@ -62,8 +68,12 @@ def verifySingleJson(jsonFile):
             decompressXZ(it + ".xz", v)
         else:
             raise
-    subprocess.check_call("./gradlew unpack", shell = True)
-    subprocess.check_call("./gradlew pack", shell = True)
+    if sys.platform == "win32":
+        gradleWrapper = "gradlew.bat"
+    else:
+        gradleWrapper = "./gradlew"
+    subprocess.check_call(gradleWrapper + " unpack", shell = True)
+    subprocess.check_call(gradleWrapper + " pack", shell = True)
     for k, v in verifyItems["hash"].items():
         log.info("%s : %s" % (k, v))
         unittest.TestCase().assertEqual(v, hashFile(k))
@@ -81,7 +91,11 @@ def verifySingleDir(inResourceDir, inImageDir):
     for pyFile in pyFiles:
         cleanUp()
         log.warning("calling %s" % pyFile)
-        subprocess.check_call(pyFile, shell = True)
+        if sys.platform == "win32":
+            theCmd = "python " + pyFile
+        else:
+            theCmd = pyFile
+        subprocess.check_call(theCmd, shell = True)
         cleanUp()
     log.info("Leave %s" % os.path.join(resDir, imgDir))
 
@@ -90,6 +104,14 @@ def decompressXZ(inFile, outFile):
         file_content = f.read()
         with open(outFile, "wb") as f2:
             f2.write(file_content)
+
+def seekedCopy(inFile, outFile, offset):
+    print(inFile + " -> " + outFile)
+    with open(inFile, "rb") as reader:
+        reader.seek(offset)
+        content = reader.read()
+        with open(outFile, "wb") as writer:
+            writer.write(content)
 
 def main():
     # from volunteers
@@ -102,11 +124,13 @@ def main():
     verifySingleDir(resDir, "6.0.0_bullhead_mda89e")
     # 7.0 special boot
     cleanUp()
-    subprocess.check_call("dd if=%s/7.1.1_volantis_n9f27m/boot.img of=boot.img bs=256 skip=1" % resDir, shell = True)
-    verifySingleJson("%s/7.1.1_volantis_n9f27m/boot.json" % resDir)
+    #subprocess.check_call("dd if=%s/7.1.1_volantis_n9f27m/boot.img of=boot.img bs=256 skip=1" % resDir, shell = True)
+    seekedCopy(os.path.join(resDir, "7.1.1_volantis_n9f27m", "boot.img"), "boot.img", 256)
+    verifySingleJson(resDir + "/7.1.1_volantis_n9f27m/boot.json")
     # 7.0 special recovery
     cleanUp()
-    subprocess.check_call("dd if=%s/7.1.1_volantis_n9f27m/recovery.img of=recovery.img bs=256 skip=1" % resDir, shell = True)
+    #subprocess.check_call("dd if=%s/7.1.1_volantis_n9f27m/recovery.img of=recovery.img bs=256 skip=1" % resDir, shell = True)
+    seekedCopy(os.path.join(resDir, "7.1.1_volantis_n9f27m", "recovery.img"), "recovery.img", 256)
     verifySingleJson("%s/7.1.1_volantis_n9f27m/recovery.json" % resDir)
     # 8.0
     verifySingleDir(resDir, "8.0.0_fugu_opr2.170623.027")

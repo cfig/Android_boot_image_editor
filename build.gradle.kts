@@ -83,9 +83,11 @@ tasks {
     if (System.getProperty("os.name").contains("Mac")) {
         unpackTask.dependsOn("aosp:libsparse:simg2img:installReleaseMacos")
         packTask.dependsOn("aosp:libsparse:img2simg:installReleaseMacos")
-    } else {
+    } else if (System.getProperty("os.name").contains("Linux")) {
         unpackTask.dependsOn("aosp:libsparse:simg2img:installReleaseLinux")
         packTask.dependsOn("aosp:libsparse:img2simg:installReleaseLinux")
+    } else {
+        logger.info("Disable C++ modules on Window$")
     }
 }
 

@@ -63,9 +63,9 @@ class EnvironmentVerifier {
             } catch (e: Exception) {
                 log.warn("'dtc' not installed. Please install it manually to analyze DTB files")
                 if (isMacOS) {
-                    log.warn("For Mac OS: \n\n\tbrew install dtc\n")
-                } else {
-                    log.warn("Like this: \n\n\t$ sudo apt install device-tree-compiler")
+                    log.warn("For Mac OS: \n\tbrew install dtc\n")
+                } else if (isLinux) {
+                    log.warn("Like this: \n\t$ sudo apt install device-tree-compiler")
                 }
                 return false
             }
@@ -74,6 +74,12 @@ class EnvironmentVerifier {
 
     val isMacOS: Boolean
         get() = System.getProperty("os.name").contains("Mac")
+
+    val isLinux: Boolean
+        get() = System.getProperty("os.name").contains("Linux")
+
+    val isWindows: Boolean
+        get() = System.getProperty("os.name").contains("Windows")
 
     private fun getJavaVersion(): Int {
         return System.getProperty("java.version").let { version ->

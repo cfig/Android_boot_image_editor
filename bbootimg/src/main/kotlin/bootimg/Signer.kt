@@ -10,6 +10,7 @@ import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.LoggerFactory
 import java.io.File
+import cfig.EnvironmentVerifier
 
 class Signer {
     @OptIn(ExperimentalUnsignedTypes::class)
@@ -30,7 +31,8 @@ class Signer {
                     partition_name = bootDesc.partition_name,
                     newAvbInfo = newAvbInfo)
             //original signer
-            CommandLine.parse("$avbtool add_hash_footer").apply {
+            val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""
+            CommandLine.parse(cmdPrefix + "$avbtool add_hash_footer").apply {
                 addArguments("--image ${output}.signed2")
                 addArguments("--partition_size ${imageSize}")
                 addArguments("--salt ${Helper.toHexString(bootDesc.salt)}")
