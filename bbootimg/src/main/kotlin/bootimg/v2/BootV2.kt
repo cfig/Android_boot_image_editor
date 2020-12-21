@@ -404,7 +404,8 @@ data class BootV2(
     }
 
     private fun toCommandLine(): CommandLine {
-        val ret = CommandLine(Helper.prop("mkbootimg"))
+        val ret = CommandLine("python")
+        ret.addArgument(Helper.prop("mkbootimg"))
         ret.addArgument(" --header_version ")
         ret.addArgument(info.headerVersion.toString())
         ret.addArgument(" --base ")

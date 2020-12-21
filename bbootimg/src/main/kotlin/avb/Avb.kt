@@ -340,7 +340,7 @@ class Avb {
         }
 
         fun verifyAVBIntegrity(fileName: String, avbtool: String) {
-            val cmdline = "$avbtool verify_image --image $fileName"
+            val cmdline = "python $avbtool verify_image --image $fileName"
             log.info(cmdline)
             try {
                 DefaultExecutor().execute(CommandLine.parse(cmdline))

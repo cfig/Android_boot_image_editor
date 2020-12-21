@@ -75,6 +75,12 @@ class EnvironmentVerifier {
     val isMacOS: Boolean
         get() = System.getProperty("os.name").contains("Mac")
 
+    val isLinux: Boolean
+        get() = System.getProperty("os.name").contains("Linux")
+
+    val isWindows: Boolean
+        get() = System.getProperty("os.name").contains("Windows")
+
     private fun getJavaVersion(): Int {
         return System.getProperty("java.version").let { version ->
             if (version.startsWith("1.")) {

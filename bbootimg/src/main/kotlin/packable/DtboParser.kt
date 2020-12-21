@@ -36,8 +36,11 @@ class DtboParser(val workDir: File) : IPackable {
         }
         execInDirectory(cmd, this.workDir)
 
-        val props = Properties()
-        props.load(FileInputStream(File(headerPath)))
+        val props = Properties().apply {
+            FileInputStream(File(headerPath)).use { fis ->
+                load(fis)
+            }
+        }
         if (envv.hasDtc) {
             for (i in 0 until Integer.parseInt(props.getProperty("dt_entry_count"))) {
                 val inputDtb = "$dtbPath.$i"
@@ -56,8 +59,11 @@ class DtboParser(val workDir: File) : IPackable {
         }
 
         val headerPath = File("${outDir}/dtbo.header").path
-        val props = Properties()
-        props.load(FileInputStream(File(headerPath)))
+        val props = Properties().apply {
+            FileInputStream(File(headerPath)).use { fis ->
+                load(fis)
+            }
+        }
         val cmd = CommandLine.parse("$dtboMaker create $fileName.clear").let {
             it.addArguments("--version=1")
             for (i in 0 until Integer.parseInt(props.getProperty("dt_entry_count"))) {

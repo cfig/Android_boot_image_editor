@@ -204,7 +204,8 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
     }
 
     private fun toCommandLine(): CommandLine {
-        return CommandLine(Helper.prop("mkbootimg")).let { ret ->
+        return CommandLine("python").let { ret ->
+            ret.addArgument(Helper.prop("mkbootimg"))
             ret.addArgument("--header_version")
             ret.addArgument(info.headerVersion.toString())
             if (kernel.size > 0) {

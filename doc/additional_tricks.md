@@ -64,3 +64,16 @@ place 'ramdisk.img.gz' in directory, delete "root/", program will use it as preb
 
 ## cpio
 decompress cpio with commandline `cpio -idmv -F <file>`
+
+### cpio on windows
+* got `java.nio.file.FileSystemException` and says "A required privilege is not held by the client"
+```
+ java.base/java.nio.file.Files.createSymbolicLink(Files.java:1058)
+```
+Solution:
+Avoid using this feature on Windows, create regular file instead.
+
+* File.renameTo() is problematic, use Files.move() instead.
+
+* remember to close File streams to avoid any potential problems
+

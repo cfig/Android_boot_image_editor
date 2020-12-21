@@ -30,7 +30,7 @@ class Signer {
                     partition_name = bootDesc.partition_name,
                     newAvbInfo = newAvbInfo)
             //original signer
-            CommandLine.parse("$avbtool add_hash_footer").apply {
+            CommandLine.parse("python $avbtool add_hash_footer").apply {
                 addArguments("--image ${output}.signed2")
                 addArguments("--partition_size ${imageSize}")
                 addArguments("--salt ${Helper.toHexString(bootDesc.salt)}")

@@ -1,6 +1,7 @@
 package cfig.bootimg.cpio
 
 import cfig.helper.Helper
+import cfig.EnvironmentVerifier
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream
@@ -202,23 +203,36 @@ class AndroidCpio {
                 when {
                     entry.isSymbolicLink -> {
                         entryInfo.note = ("LNK " + entryInfo.note)
-                        Files.createSymbolicLink(Paths.get(outEntryName), Paths.get(String(buffer)))
+                        log.info("lnk: " +  outEntryName + " -> " + String(buffer))
+                        if (EnvironmentVerifier().isWindows) {
+                            File(outEntryName).writeBytes(buffer)
+                        } else {
+                            Files.createSymbolicLink(Paths.get(outEntryName), Paths.get(String(buffer)))
+                        }
                     }
                     entry.isRegularFile -> {
                         entryInfo.note = ("REG " + entryInfo.note)
                         File(outEntryName).writeBytes(buffer)
-                        Files.setPosixFilePermissions(
-                            Paths.get(outEntryName),
-                            Helper.modeToPermissions((entry.mode and 0xfff).toInt())
-                        )
+                        if (EnvironmentVerifier().isWindows) {
+                            //TODO: Windows
+                        } else {
+                            Files.setPosixFilePermissions(
+                                Paths.get(outEntryName),
+                                Helper.modeToPermissions((entry.mode and 0xfff).toInt())
+                            )
+                        }
                     }
                     entry.isDirectory -> {
                         entryInfo.note = ("DIR " + entryInfo.note)
                         File(outEntryName).mkdir()
-                        Files.setPosixFilePermissions(
-                            Paths.get(outEntryName),
-                            Helper.modeToPermissions((entry.mode and 0xfff).toInt())
-                        )
+                        if (!EnvironmentVerifier().isWindows) {
+                            Files.setPosixFilePermissions(
+                                Paths.get(outEntryName),
+                                Helper.modeToPermissions((entry.mode and 0xfff).toInt())
+                            )
+                        } else {
+                            //Windows
+                        }
                     }
                     else -> throw IllegalArgumentException("??? type unknown")
                 }
