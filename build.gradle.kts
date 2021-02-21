@@ -15,7 +15,7 @@ if (parseGradleVersion(gradle.gradleVersion) < 6) {
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath("org.apache.commons:commons-exec:1.3")
