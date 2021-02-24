@@ -1,6 +1,7 @@
 package cfig.bootimg.v2
 
 import cfig.Avb
+import cfig.EnvironmentVerifier
 import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Common.Slice
@@ -20,40 +21,43 @@ import java.nio.ByteOrder
 
 @OptIn(ExperimentalUnsignedTypes::class)
 data class BootV2(
-        var info: MiscInfo = MiscInfo(),
-        var kernel: CommArgs = CommArgs(),
-        var ramdisk: CommArgs = CommArgs(),
-        var secondBootloader: CommArgs? = null,
-        var recoveryDtbo: CommArgsLong? = null,
-        var dtb: CommArgsLong? = null
+    var info: MiscInfo = MiscInfo(),
+    var kernel: CommArgs = CommArgs(),
+    var ramdisk: CommArgs = CommArgs(),
+    var secondBootloader: CommArgs? = null,
+    var recoveryDtbo: CommArgsLong? = null,
+    var dtb: CommArgsLong? = null
 ) {
     data class MiscInfo(
-            var output: String = "",
-            var json: String = "",
-            var headerVersion: Int = 0,
-            var headerSize: Int = 0,
-            var loadBase: Long = 0,
-            var tagsOffset: Long = 0,
-            var board: String? = null,
-            var pageSize: Int = 0,
-            var cmdline: String = "",
-            var osVersion: String? = null,
-            var osPatchLevel: String? = null,
-            var hash: ByteArray? = byteArrayOf(),
-            var verify: String = "",
-            var imageSize: Long = 0)
+        var output: String = "",
+        var json: String = "",
+        var headerVersion: Int = 0,
+        var headerSize: Int = 0,
+        var loadBase: Long = 0,
+        var tagsOffset: Long = 0,
+        var board: String? = null,
+        var pageSize: Int = 0,
+        var cmdline: String = "",
+        var osVersion: String? = null,
+        var osPatchLevel: String? = null,
+        var hash: ByteArray? = byteArrayOf(),
+        var verify: String = "",
+        var imageSize: Long = 0
+    )
 
     data class CommArgs(
-            var file: String? = null,
-            var position: Long = 0,
-            var size: Int = 0,
-            var loadOffset: Long = 0)
+        var file: String? = null,
+        var position: Long = 0,
+        var size: Int = 0,
+        var loadOffset: Long = 0
+    )
 
     data class CommArgsLong(
-            var file: String? = null,
-            var position: Long = 0,
-            var size: Int = 0,
-            var loadOffset: Long = 0)
+        var file: String? = null,
+        var position: Long = 0,
+        var size: Int = 0,
+        var loadOffset: Long = 0
+    )
 
     companion object {
         private val log = LoggerFactory.getLogger(BootV2::class.java)
@@ -168,25 +172,31 @@ data class BootV2(
         Common.dumpKernel(Slice(info.output, kernel.position.toInt(), kernel.size, kernel.file!!))
         //ramdisk
         if (this.ramdisk.size > 0) {
-            val fmt = Common.dumpRamdisk(Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file!!),
-                    "${workDir}root")
+            val fmt = Common.dumpRamdisk(
+                Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file!!),
+                "${workDir}root"
+            )
             this.ramdisk.file = this.ramdisk.file!! + ".$fmt"
             //dump info again
             ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         }
         //second bootloader
         secondBootloader?.let {
-            Helper.extractFile(info.output,
-                    secondBootloader!!.file!!,
-                    secondBootloader!!.position,
-                    secondBootloader!!.size)
+            Helper.extractFile(
+                info.output,
+                secondBootloader!!.file!!,
+                secondBootloader!!.position,
+                secondBootloader!!.size
+            )
         }
         //recovery dtbo
         recoveryDtbo?.let {
-            Helper.extractFile(info.output,
-                    recoveryDtbo!!.file!!,
-                    recoveryDtbo!!.position,
-                    recoveryDtbo!!.size)
+            Helper.extractFile(
+                info.output,
+                recoveryDtbo!!.file!!,
+                recoveryDtbo!!.position,
+                recoveryDtbo!!.size
+            )
         }
         //dtb
         this.dtb?.let { _ ->
@@ -280,32 +290,34 @@ data class BootV2(
                 ""
             }
         }
-        log.info("\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}",
-                tableHeader.render(), tab.render(), tabVBMeta)
+        log.info(
+            "\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}",
+            tableHeader.render(), tab.render(), tabVBMeta
+        )
         return this
     }
 
     private fun toHeader(): BootHeaderV2 {
         return BootHeaderV2(
-                kernelLength = kernel.size,
-                kernelOffset = kernel.loadOffset,
-                ramdiskLength = ramdisk.size,
-                ramdiskOffset = ramdisk.loadOffset,
-                secondBootloaderLength = if (secondBootloader != null) secondBootloader!!.size else 0,
-                secondBootloaderOffset = if (secondBootloader != null) secondBootloader!!.loadOffset else 0,
-                recoveryDtboLength = if (recoveryDtbo != null) recoveryDtbo!!.size else 0,
-                recoveryDtboOffset = if (recoveryDtbo != null) recoveryDtbo!!.loadOffset else 0,
-                dtbLength = if (dtb != null) dtb!!.size else 0,
-                dtbOffset = if (dtb != null) dtb!!.loadOffset else 0,
-                tagsOffset = info.tagsOffset,
-                pageSize = info.pageSize,
-                headerSize = info.headerSize,
-                headerVersion = info.headerVersion,
-                board = info.board.toString(),
-                cmdline = info.cmdline,
-                hash = info.hash,
-                osVersion = info.osVersion,
-                osPatchLevel = info.osPatchLevel
+            kernelLength = kernel.size,
+            kernelOffset = kernel.loadOffset,
+            ramdiskLength = ramdisk.size,
+            ramdiskOffset = ramdisk.loadOffset,
+            secondBootloaderLength = if (secondBootloader != null) secondBootloader!!.size else 0,
+            secondBootloaderOffset = if (secondBootloader != null) secondBootloader!!.loadOffset else 0,
+            recoveryDtboLength = if (recoveryDtbo != null) recoveryDtbo!!.size else 0,
+            recoveryDtboOffset = if (recoveryDtbo != null) recoveryDtbo!!.loadOffset else 0,
+            dtbLength = if (dtb != null) dtb!!.size else 0,
+            dtbOffset = if (dtb != null) dtb!!.loadOffset else 0,
+            tagsOffset = info.tagsOffset,
+            pageSize = info.pageSize,
+            headerSize = info.headerSize,
+            headerVersion = info.headerVersion,
+            board = info.board.toString(),
+            cmdline = info.cmdline,
+            hash = info.hash,
+            osVersion = info.osVersion,
+            osPatchLevel = info.osPatchLevel
         )
     }
 
@@ -348,12 +360,16 @@ data class BootV2(
                 Common.hashFileAndSize(kernel.file, ramdisk.file, secondBootloader?.file)
             }
             1 -> {
-                Common.hashFileAndSize(kernel.file, ramdisk.file,
-                        secondBootloader?.file, recoveryDtbo?.file)
+                Common.hashFileAndSize(
+                    kernel.file, ramdisk.file,
+                    secondBootloader?.file, recoveryDtbo?.file
+                )
             }
             2 -> {
-                Common.hashFileAndSize(kernel.file, ramdisk.file,
-                        secondBootloader?.file, recoveryDtbo?.file, dtb?.file)
+                Common.hashFileAndSize(
+                    kernel.file, ramdisk.file,
+                    secondBootloader?.file, recoveryDtbo?.file, dtb?.file
+                )
             }
             else -> {
                 throw IllegalArgumentException("headerVersion ${info.headerVersion} illegal")
@@ -370,23 +386,23 @@ data class BootV2(
 
         log.info("Writing data ...")
         val bytesV2 = ByteBuffer.allocate(1024 * 1024 * 64)//assume total SIZE small than 64MB
-                .let { bf ->
-                    bf.order(ByteOrder.LITTLE_ENDIAN)
-                    Common.writePaddedFile(bf, kernel.file!!, info.pageSize)
-                    if (ramdisk.size > 0) {
-                        Common.writePaddedFile(bf, ramdisk.file!!, info.pageSize)
-                    }
-                    secondBootloader?.let {
-                        Common.writePaddedFile(bf, secondBootloader!!.file!!, info.pageSize)
-                    }
-                    recoveryDtbo?.let {
-                        Common.writePaddedFile(bf, recoveryDtbo!!.file!!, info.pageSize)
-                    }
-                    dtb?.let {
-                        Common.writePaddedFile(bf, dtb!!.file!!, info.pageSize)
-                    }
-                    bf
+            .let { bf ->
+                bf.order(ByteOrder.LITTLE_ENDIAN)
+                Common.writePaddedFile(bf, kernel.file!!, info.pageSize)
+                if (ramdisk.size > 0) {
+                    Common.writePaddedFile(bf, ramdisk.file!!, info.pageSize)
                 }
+                secondBootloader?.let {
+                    Common.writePaddedFile(bf, secondBootloader!!.file!!, info.pageSize)
+                }
+                recoveryDtbo?.let {
+                    Common.writePaddedFile(bf, recoveryDtbo!!.file!!, info.pageSize)
+                }
+                dtb?.let {
+                    Common.writePaddedFile(bf, dtb!!.file!!, info.pageSize)
+                }
+                bf
+            }
         //write
         FileOutputStream("${info.output}.clear", true).use { fos ->
             fos.write(bytesV2.array(), 0, bytesV2.position())
@@ -404,8 +420,8 @@ data class BootV2(
     }
 
     private fun toCommandLine(): CommandLine {
-        val ret = CommandLine("python")
-        ret.addArgument(Helper.prop("mkbootimg"))
+        val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""
+        val ret = CommandLine(cmdPrefix + Helper.prop("mkbootimg"))
         ret.addArgument(" --header_version ")
         ret.addArgument(info.headerVersion.toString())
         ret.addArgument(" --base ")

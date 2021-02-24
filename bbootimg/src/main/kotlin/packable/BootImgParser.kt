@@ -29,18 +29,18 @@ class BootImgParser() : IPackable {
             log.info("header version $hv")
             if (hv == 3) {
                 val b3 = BootV3
-                        .parse(fileName)
-                        .extractImages()
-                        .extractVBMeta()
-                        .printSummary()
+                    .parse(fileName)
+                    .extractImages()
+                    .extractVBMeta()
+                    .printSummary()
                 log.debug(b3.toString())
                 return
             } else {
                 val b2 = BootV2
-                        .parse(fileName)
-                        .extractImages()
-                        .extractVBMeta()
-                        .printSummary()
+                    .parse(fileName)
+                    .extractImages()
+                    .extractVBMeta()
+                    .printSummary()
                 log.debug(b2.toString())
             }
         } catch (e: IllegalArgumentException) {
@@ -54,15 +54,14 @@ class BootImgParser() : IPackable {
         log.info("Loading config from $cfgFile")
         if (3 == probeHeaderVersion(fileName)) {
             ObjectMapper().readValue(File(cfgFile), BootV3::class.java)
-                    .pack()
-                    .sign(fileName)
-            updateVbmeta(fileName)
+                .pack()
+                .sign(fileName)
         } else {
             ObjectMapper().readValue(File(cfgFile), BootV2::class.java)
-                    .pack()
-                    .sign()
-            updateVbmeta(fileName)
+                .pack()
+                .sign()
         }
+        Avb.updateVbmeta(fileName)
     }
 
     override fun flash(fileName: String, deviceName: String) {
@@ -93,34 +92,5 @@ class BootImgParser() : IPackable {
 
     companion object {
         private val log = LoggerFactory.getLogger(BootImgParser::class.java)
-
-        fun updateVbmeta(fileName: String) {
-            if (File("vbmeta.img").exists()) {
-                log.info("Updating vbmeta.img side by side ...")
-                val partitionName = ObjectMapper().readValue(File(Avb.getJsonFileName(fileName)), AVBInfo::class.java).let {
-                    it.auxBlob!!.hashDescriptors.get(0).partition_name
-                }
-                val newHashDesc = Avb().parseVbMeta("$fileName.signed", dumpFile = false)
-                assert(newHashDesc.auxBlob!!.hashDescriptors.size == 1)
-                val mainVBMeta = ObjectMapper().readValue(File(Avb.getJsonFileName("vbmeta.img")), AVBInfo::class.java).apply {
-                    val itr = this.auxBlob!!.hashDescriptors.iterator()
-                    var seq = 0
-                    while (itr.hasNext()) {
-                        val itrValue = itr.next()
-                        if (itrValue.partition_name == partitionName) {
-                            log.info("Found $partitionName in vbmeta, update it")
-                            seq = itrValue.sequence
-                            itr.remove()
-                            break
-                        }
-                    }
-                    val hd = newHashDesc.auxBlob!!.hashDescriptors.get(0).apply { this.sequence = seq }
-                    this.auxBlob!!.hashDescriptors.add(hd)
-                }
-                Avb().packVbMetaWithPadding("vbmeta.img", mainVBMeta)
-            } else {
-                log.info("no companion vbmeta.img")
-            }
-        }
     }
 }

@@ -124,14 +124,14 @@ class Common {
                     Files.move(
                         Paths.get(s.dumpFile), Paths.get(s.dumpFile + ".gz"),
                         java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-                    ZipHelper.unGnuzipFile(s.dumpFile + ".gz", s.dumpFile)
+                    ZipHelper.zcat(s.dumpFile + ".gz", s.dumpFile)
                 }
-                ZipHelper.isLZ4(s.dumpFile) -> {
+                ZipHelper.isLz4(s.dumpFile) -> {
                     log.info("ramdisk is compressed lz4")
                     Files.move(
                         Paths.get(s.dumpFile), Paths.get(s.dumpFile + ".lz4"),
                         java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-                    ZipHelper.decompressLZ4Ext(s.dumpFile + ".lz4", s.dumpFile)
+                    ZipHelper.lz4cat(s.dumpFile + ".lz4", s.dumpFile)
                     ret = "lz4"
                 }
                 else -> {
@@ -220,10 +220,10 @@ class Common {
             }
             when {
                 ramdiskGz.endsWith(".gz") -> {
-                    ZipHelper.gnuZipFile2(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
+                    ZipHelper.minigzip(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
                 }
                 ramdiskGz.endsWith(".lz4") -> {
-                    ZipHelper.compressLZ4(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
+                    ZipHelper.lz4(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
                 }
                 else -> {
                     throw IllegalArgumentException("$ramdiskGz is not supported")
@@ -240,12 +240,12 @@ class Common {
                 ramdiskGz.endsWith(".gz") -> {
                     val f = ramdiskGz.removeSuffix(".gz")
                     AndroidCpio().pack(rootDir, f, fsConfig)
-                    ZipHelper.gnuZipFile2(ramdiskGz, FileInputStream(f))
+                    ZipHelper.minigzip(ramdiskGz, FileInputStream(f))
                 }
                 ramdiskGz.endsWith(".lz4") -> {
                     val f = ramdiskGz.removeSuffix(".lz4")
                     AndroidCpio().pack(rootDir, f, fsConfig)
-                    ZipHelper.compressLZ4(ramdiskGz, FileInputStream(f))
+                    ZipHelper.lz4(ramdiskGz, FileInputStream(f))
                 }
                 else -> {
                     throw IllegalArgumentException("$ramdiskGz is not supported")

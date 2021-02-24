@@ -3,7 +3,6 @@ package bootimg
 import cfig.bootimg.cpio.AndroidCpio
 import cfig.bootimg.cpio.AndroidCpioEntry
 import cfig.helper.Helper
-import org.junit.Assert
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -13,8 +12,8 @@ class AndroidCpioEntryTest {
         run {//dir, fileMode 040755
             val entry1 = AndroidCpioEntry(name = "acct", statMode = 0x41ed, data = byteArrayOf(), ino = 300000)
             val exp = Helper.fromHexString("3037303730313030303439336530303030303431656430303030303030303030303030303030303030303030303130303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030353030303030303030616363740000")
-            Assert.assertTrue(entry1.encode().contentEquals(exp))
-            Assert.assertTrue(entry1.encode2().contentEquals(exp))
+            assertTrue(entry1.encode().contentEquals(exp))
+            assertTrue(entry1.encode2().contentEquals(exp))
         }
 
         run {//dir, fileMode 040755

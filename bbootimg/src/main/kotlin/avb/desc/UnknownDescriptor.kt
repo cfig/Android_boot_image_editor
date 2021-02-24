@@ -82,7 +82,7 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 
         }
 
         fun parseDescriptors2(stream: InputStream, totalSize: Long): List<Descriptor> {
-            log.info("Parse descriptors stream, SIZE = $totalSize")
+            log.debug("Parse descriptors stream, SIZE = $totalSize")
             val ret: MutableList<Descriptor> = mutableListOf()
             var currentSize = 0L
             var seq = 0

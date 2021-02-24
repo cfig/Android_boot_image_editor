@@ -1,5 +1,5 @@
 # Android_boot_image_editor
-[![Build Status](https://travis-ci.org/cfig/Android_boot_image_editor.svg?branch=master)](https://travis-ci.org/cfig/Android_boot_image_editor)
+[![Build Status](https://www.travis-ci.com/cfig/Android_boot_image_editor.svg?branch=master)](https://www.travis-ci.com/cfig/Android_boot_image_editor)
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 A tool for reverse engineering Android ROM images.
@@ -10,7 +10,7 @@ A tool for reverse engineering Android ROM images.
 
 Mac: `brew install lz4 xz`
 
-Linux: `sudo apt install device-tree-compiler lz4 xz zlib1g-dev openjdk-11-jdk`
+Linux: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-11-jdk gcc g++ python3`
 
 Windows: Make sure you have `python3`, `JDK9+` and `openssl` properly installed.
 An easy way is to install [Anaconda](https://www.anaconda.com/products/individual#windows) and [Oracle JDK 11](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html), then run the program under anaconda PowerShell.
@@ -60,7 +60,6 @@ Well done you did it! The last step is to star this repo :smile
 | boot images     | boot.img, vendor_boot.img           |      |
 | recovery images | recovery.img, recovery-two-step.img |      |
 | vbmeta images   | vbmeta.img, vbmeta_system.img etc.  |      |
-| sparse images   | system.img, vendor.img etc.         |      |
 | dtbo images     | dtbo.img                            |      |
 
 Please note that the boot.img MUST follows AOSP verified boot flow, either [Boot image signature](https://source.android.com/security/verifiedboot/verified-boot#signature_format) in VBoot 1.0 or [AVB HASH footer](https://android.googlesource.com/platform/external/avb/+/master/README.md#The-VBMeta-struct) (a.k.a. AVB) in VBoot 2.0.
@@ -105,20 +104,6 @@ cp <your_vbmeta_image> vbmeta.img
 ./gradlew pack
 ```
 Your boot.img.signed and vbmeta.img.signd will be updated together.
-
-* sparse vendor.img
-
-```bash
-cp <your_vendor_image> vendor.img
-./gradlew unpack
-./gradlew pack
-```
-
-You get vendor.img.unsparse, then you can mount it.
-```bash
-mkdir mnt
-sudo mount -o ro vendor.img mnt
-```
 
 ## boot.img layout
 Read [layout](doc/layout.md) of Android boot.img and vendor\_boot.img.

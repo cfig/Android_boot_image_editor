@@ -44,11 +44,10 @@ static AvbIOResult read_is_device_unlockedX(AvbOps *, bool *out_is_unlocked) {
     std::string line = read_line(lockStatusFile);
     if ("0" == line) {
         *out_is_unlocked = true;
-        std::cout << "[" << __FUNCTION__ << "], device is unlocked" << std::endl;
     } else {
         *out_is_unlocked = false;
-        std::cout << "[" << __FUNCTION__ << "], device is locked" << std::endl;
     }
+    std::cout << "[" << __FUNCTION__ << "], device is " << ((*out_is_unlocked) ? "unlocked" : "locked") << std::endl;
 
     return AVB_IO_RESULT_OK;
 }
@@ -152,16 +151,16 @@ static AvbIOResult get_size_of_partitionX(AvbOps *,
     auto file_size = get_file_size(partitionFile.c_str());
     if (-1 == file_size) {
         std::cout << "[" << __FUNCTION__ << "(" << partition << ")]: ";
-        std::cout << ": error when accessing file [" << partitionFile << "]" << std::endl;
+        std::cout << "error when accessing file [" << partitionFile << "]" << std::endl;
         return AVB_IO_RESULT_ERROR_IO;
     } else {
         std::cout << "[" << __FUNCTION__ << "(" << partition << ")]: ";
-        std::cout << ": partition " << partitionFile << " size: " << file_size << std::endl;
+        std::cout << "partition " << partitionFile << " size: " << file_size << std::endl;
         if (out_size_num_bytes != nullptr) {
             *out_size_num_bytes = file_size;
         } else {
             std::cerr << "[" << __FUNCTION__ << "(" << partition << ")]: ";
-            std::cerr << ": size is not passed back" << std::endl;
+            std::cerr << "size is not passed back" << std::endl;
         }
     }
     return AVB_IO_RESULT_OK;
@@ -215,7 +214,7 @@ static AvbIOResult read_from_partitionX(AvbOps *,
         return AVB_IO_RESULT_ERROR_IO;
     }
     ssize_t num_read = read(fd, buffer, num_bytes);
-    if (num_read < 0 || num_read != num_bytes) {
+    if (num_read < 0) {
         fprintf(stderr,
                 "[%s()]: Error reading %zd bytes from pos %" PRId64 " in file %s: %s\n",
                 __FUNCTION__,
@@ -230,11 +229,21 @@ static AvbIOResult read_from_partitionX(AvbOps *,
     if (out_num_read != nullptr) {
         *out_num_read = num_read;
     }
-    fprintf(stdout,
-            "[%s()]: Read %ld bytes from partition %s\n",
-            __FUNCTION__,
-            num_read,
-            partition);
+    if (num_read != num_bytes) {
+        fprintf(stderr,
+                "[%s()]: read fewer bytes from pos %" PRId64 " in file %s: exp=%zd, act=%zd\n",
+                __FUNCTION__,
+                offset,
+                partitionFile.c_str(),
+                num_bytes,
+                num_read);
+    } else {
+        fprintf(stdout,
+                "[%s()]: Read %ld bytes from partition %s\n",
+                __FUNCTION__,
+                num_read,
+                partition);
+    }
 //    cout << hexStr((unsigned char *) buffer, num_read) << endl;
 
     return AVB_IO_RESULT_OK;

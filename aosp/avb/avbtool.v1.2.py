@@ -27,6 +27,7 @@
 import argparse
 import binascii
 import bisect
+import binascii
 import hashlib
 import json
 import math
@@ -577,6 +578,7 @@ def verify_vbmeta_signature(vbmeta_header, vbmeta_blob):
   ha.update(header_blob)
   ha.update(aux_blob)
   computed_digest = ha.digest()
+  print("computed %s hash : %s" % (alg.hash_name, binascii.hexlify(computed_digest)))
 
   if computed_digest != digest_blob:
     return False
@@ -586,6 +588,7 @@ def verify_vbmeta_signature(vbmeta_header, vbmeta_blob):
   (num_bits,) = struct.unpack('!I', pubkey_blob[0:4])
   modulus_blob = pubkey_blob[8:8 + num_bits//8]
   modulus = decode_long(modulus_blob)
+  print("modulus = %s" % modulus)
   exponent = 65537
 
   # We used to have this:
@@ -2528,6 +2531,8 @@ class Avb(object):
     if not verify_vbmeta_signature(header, vbmeta_blob):
       raise AvbError('Signature check failed for {} vbmeta struct {}'
                      .format(alg_name, image_filename))
+    else:
+      print("Sig check done")
 
     if key_blob:
       # The embedded public key is in the auxiliary block at an offset.

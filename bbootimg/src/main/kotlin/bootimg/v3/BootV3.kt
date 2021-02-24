@@ -1,6 +1,7 @@
 package cfig.bootimg.v3
 
 import cfig.Avb
+import cfig.EnvironmentVerifier
 import cfig.helper.Helper
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Common.Companion.getPaddingSize
@@ -204,8 +205,8 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
     }
 
     private fun toCommandLine(): CommandLine {
-        return CommandLine("python").let { ret ->
-            ret.addArgument(Helper.prop("mkbootimg"))
+        val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""
+        return CommandLine(cmdPrefix + Helper.prop("mkbootimg")).let { ret ->
             ret.addArgument("--header_version")
             ret.addArgument(info.headerVersion.toString())
             if (kernel.size > 0) {

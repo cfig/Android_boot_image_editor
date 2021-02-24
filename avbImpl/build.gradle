@@ -37,7 +37,7 @@ model {
 
 task v1(type:Exec) {
     workingDir "."
-    environment preloads: "vbmeta boot", requests: "boot dtbo", suffix: ""
+    environment preloads: "vbmeta boot", requests: "boot dtbo vendor_boot", suffix: ""
     commandLine "./build/exe/avbVerifier/avbVerifier"
 }
 

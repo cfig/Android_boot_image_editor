@@ -1,8 +1,8 @@
 package cfig.packable
 
+import cfig.Avb
 import cfig.helper.Helper
 import cfig.bootimg.v3.VendorBoot
-import cfig.packable.BootImgParser.Companion.updateVbmeta
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -31,6 +31,19 @@ class VendorBootParser : IPackable {
         ObjectMapper().readValue(File(cfgFile), VendorBoot::class.java)
                 .pack()
                 .sign()
-        updateVbmeta(fileName)
+        Avb.updateVbmeta(fileName)
+    }
+
+    override fun pull(fileName: String, deviceName: String) {
+        super.pull(fileName, deviceName)
+    }
+
+    override fun flash(fileName: String, deviceName: String) {
+        val stem = fileName.substring(0, fileName.indexOf("."))
+        super.flash("$fileName.signed", stem)
+
+        if (File("vbmeta.img.signed").exists()) {
+            super.flash("vbmeta.img.signed", "vbmeta")
+        }
     }
 }

@@ -1,30 +1,17 @@
 package cfig.helper
 
 import cfig.io.Struct3
-import com.google.common.math.BigIntegerMath
-import org.apache.commons.codec.binary.Hex
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
-import org.apache.commons.compress.compressors.gzip.GzipParameters
-import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.ExecuteException
 import org.apache.commons.exec.PumpStreamHandler
 import org.slf4j.LoggerFactory
 import java.io.*
-import java.math.BigInteger
-import java.math.RoundingMode
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission
 import java.security.MessageDigest
 import java.util.*
-import java.util.zip.GZIPInputStream
-import java.util.zip.GZIPOutputStream
-import java.util.zip.ZipException
-import javax.crypto.Cipher
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class Helper {

@@ -69,9 +69,9 @@ int main(int, char**) {
         }
     }
 
-    bool isDeviceLocked = true;
-    cfigOps.avb_ops_.read_is_device_unlocked(NULL, &isDeviceLocked);
-    if (isDeviceLocked) {
+    bool isDeviceUnlocked = false;
+    cfigOps.avb_ops_.read_is_device_unlocked(NULL, &isDeviceUnlocked);
+    if (isDeviceUnlocked) {
         flags |= AVB_SLOT_VERIFY_FLAGS_ALLOW_VERIFICATION_ERROR;
     }
     std::cout << "[" << __FUNCTION__ << "]: flags: " << flags << std::endl;
@@ -94,6 +94,28 @@ int main(int, char**) {
         std::cout << "Run:\n  python -m json.tool " << outFile << std::endl;
     }
     if (slotData) { avb_slot_verify_data_free(slotData); }
-    std::cerr << "\n\tVerify Result: " << toString(result) << std::endl;
+    std::cout << "\n\tVerify Result: " << toString(result) << std::endl;
+    if (isDeviceUnlocked) {
+        switch (result) {
+            case AVB_SLOT_VERIFY_RESULT_OK:
+                std::cout << "\tVerify Flow: [orange] continue";
+                break;
+            case AVB_SLOT_VERIFY_RESULT_ERROR_VERIFICATION:
+            case AVB_SLOT_VERIFY_RESULT_ERROR_PUBLIC_KEY_REJECTED:
+            case AVB_SLOT_VERIFY_RESULT_ERROR_ROLLBACK_INDEX:
+                std::cout << "\tVerify Flow: [orange] allowed errors found: " << toString(result) << std::endl;
+                break;
+            default:
+                std::cout<< "\tVerify Flow: [orange] but fatal errors found" << std::endl;
+        }
+    } else {
+        switch (result) {
+            case AVB_SLOT_VERIFY_RESULT_OK:
+                std::cout << "\tVerify Flow: [green] continue";
+                break;
+            default:
+                std::cout << "\tVerify Flow: [?????] halt";
+        }
+    }
     return 0;
 }

@@ -69,7 +69,7 @@ def dump_from_release(input_bytes, key):
 
     value = get_from_release(input_bytes, idx, key)
     if value:
-      return value
+      return value.encode()
 
     idx += len(LINUX_BANNER_PREFIX)
 
@@ -176,16 +176,18 @@ def dump_to_file(f, dump_fn, input_bytes, desc):
   if f is not None:
     o = decompress_dump(dump_fn, input_bytes)
     if o:
-      if isinstance(o, str):
-        f.write(o.encode())
-      else:
-        f.write(o)
+      f.write(o)
     else:
       sys.stderr.write(
           "Cannot extract kernel {}".format(desc))
       return False
   return True
 
+def to_bytes_io(b):
+  """
+  Make b, which is either sys.stdout or sys.stdin, receive bytes as arguments.
+  """
+  return b.buffer if sys.version_info.major == 3 else b
 
 def main():
   parser = argparse.ArgumentParser(
@@ -197,35 +199,35 @@ def main():
                       help='Input kernel image. If not specified, use stdin',
                       metavar='FILE',
                       type=argparse.FileType('rb'),
-                      default=sys.stdin)
+                      default=to_bytes_io(sys.stdin))
   parser.add_argument('--output-configs',
                       help='If specified, write configs. Use stdout if no file '
                            'is specified.',
                       metavar='FILE',
                       nargs='?',
                       type=argparse.FileType('wb'),
-                      const=sys.stdout)
+                      const=to_bytes_io(sys.stdout))
   parser.add_argument('--output-version',
                       help='If specified, write version. Use stdout if no file '
                            'is specified.',
                       metavar='FILE',
                       nargs='?',
                       type=argparse.FileType('wb'),
-                      const=sys.stdout)
+                      const=to_bytes_io(sys.stdout))
   parser.add_argument('--output-release',
                       help='If specified, write kernel release. Use stdout if '
                            'no file is specified.',
                       metavar='FILE',
                       nargs='?',
                       type=argparse.FileType('wb'),
-                      const=sys.stdout)
+                      const=to_bytes_io(sys.stdout))
   parser.add_argument('--output-compiler',
                       help='If specified, write the compiler information. Use stdout if no file '
                            'is specified.',
                       metavar='FILE',
                       nargs='?',
                       type=argparse.FileType('wb'),
-                      const=sys.stdout)
+                      const=to_bytes_io(sys.stdout))
   parser.add_argument('--tools',
                       help='Decompression tools to use. If not specified, PATH '
                            'is searched.',

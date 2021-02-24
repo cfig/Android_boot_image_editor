@@ -7,7 +7,9 @@ import cfig.helper.KeyHelper
 import cfig.helper.KeyHelper2
 import cfig.io.Struct3
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import org.bouncycastle.asn1.pkcs.RSAPrivateKey
 import org.slf4j.LoggerFactory
+import java.io.ByteArrayInputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -91,13 +93,13 @@ class AuxBlob(
     companion object {
         fun encodePubKey(alg: Algorithm, key: ByteArray? = null): ByteArray {
             var encodedKey = byteArrayOf()
-            var algKey: ByteArray? = key
             if (alg.public_key_num_bytes > 0) {
+                var algKey: ByteArray? = key
                 if (key == null) {
                     algKey = Files.readAllBytes((Paths.get(alg.defaultKey)))
                 }
-                encodedKey = KeyHelper.encodeRSAkey(algKey!!)
-                log.info("encodePubKey(): size = ${alg.public_key_num_bytes}, algorithm key size: ${encodedKey.size}")
+                val rsa = KeyHelper.parse(algKey!!) as RSAPrivateKey //BC RSA
+                encodedKey = KeyHelper.encodeRSAkey(rsa)
                 assert(alg.public_key_num_bytes == encodedKey.size)
             } else {
                 log.info("encodePubKey(): No key to encode for algorithm " + alg.name)

@@ -9,6 +9,7 @@ import avb.blob.Header
 import avb.desc.*
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.paddingWith
+import cfig.helper.KeyHelper
 import cfig.io.Struct3
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
@@ -30,10 +31,12 @@ class Avb {
     private val DEBUG = false
 
     //migrated from: avbtool::Avb::addHashFooter
-    fun addHashFooter(image_file: String,
-                      partition_size: Long, //aligned by Avb::BLOCK_SIZE
-                      partition_name: String,
-                      newAvbInfo: AVBInfo) {
+    fun addHashFooter(
+        image_file: String,
+        partition_size: Long, //aligned by Avb::BLOCK_SIZE
+        partition_name: String,
+        newAvbInfo: AVBInfo
+    ) {
         log.info("addHashFooter($image_file) ...")
 
         imageSizeCheck(partition_size, image_file)
@@ -115,8 +118,10 @@ class Avb {
         }
         footer?.let {
             FileOutputStream(File(image_file), true).channel.use { fc ->
-                log.info("original image $image_file has AVB footer, " +
-                        "truncate it to original SIZE: ${it.originalImageSize}")
+                log.info(
+                    "original image $image_file has AVB footer, " +
+                            "truncate it to original SIZE: ${it.originalImageSize}"
+                )
                 fc.truncate(it.originalImageSize)
             }
         }
@@ -126,8 +131,10 @@ class Avb {
         //image size sanity check
         val maxMetadataSize = MAX_VBMETA_SIZE + MAX_FOOTER_SIZE
         if (partition_size < maxMetadataSize) {
-            throw IllegalArgumentException("Parition SIZE of $partition_size is too small. " +
-                    "Needs to be at least $maxMetadataSize")
+            throw IllegalArgumentException(
+                "Parition SIZE of $partition_size is too small. " +
+                        "Needs to be at least $maxMetadataSize"
+            )
         }
         val maxImageSize = partition_size - maxMetadataSize
         log.info("max_image_size: $maxImageSize")
@@ -135,14 +142,18 @@ class Avb {
         //TODO: typical block size = 4096L, from avbtool::Avb::ImageHandler::block_size
         //since boot.img is not in sparse format, we are safe to hardcode it to 4096L for now
         if (partition_size % BLOCK_SIZE != 0L) {
-            throw IllegalArgumentException("Partition SIZE of $partition_size is not " +
-                    "a multiple of the image block SIZE 4096")
+            throw IllegalArgumentException(
+                "Partition SIZE of $partition_size is not " +
+                        "a multiple of the image block SIZE 4096"
+            )
         }
 
         val originalFileSize = File(image_file).length()
         if (originalFileSize > maxImageSize) {
-            throw IllegalArgumentException("Image size of $originalFileSize exceeds maximum image size " +
-                    "of $maxImageSize in order to fit in a partition size of $partition_size.")
+            throw IllegalArgumentException(
+                "Image size of $originalFileSize exceeds maximum image size " +
+                        "of $maxImageSize in order to fit in a partition size of $partition_size."
+            )
         }
     }
 
@@ -169,7 +180,7 @@ class Avb {
             fis.skip(vbMetaOffset)
             vbMetaHeader = Header(fis)
         }
-        log.info(vbMetaHeader.toString())
+        log.debug(vbMetaHeader.toString())
         log.debug(ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(vbMetaHeader))
 
         val authBlockOffset = vbMetaOffset + Header.SIZE
@@ -262,6 +273,39 @@ class Avb {
             }
         }
 
+        //FIXME
+        val declaredAlg = Algorithms.get(ai.header!!.algorithm_type)
+        if (declaredAlg!!.public_key_num_bytes > 0) {
+            if (AuxBlob.encodePubKey(declaredAlg).contentEquals(ai.auxBlob!!.pubkey!!.pubkey)) {
+                log.warn("VERIFY: vbmeta is signed with the same key as us")
+                val calcHash =
+                    AuthBlob.calcHash(ai.header!!.encode(), ai.auxBlob!!.encode(declaredAlg), declaredAlg.name)
+                val calcSig = AuthBlob.calcSignature(calcHash, declaredAlg.name)
+                if (Helper.toHexString(calcHash) != ai.authBlob!!.hash) {
+                    log.error("calculated AuthBlob hash mismatch")
+                    throw IllegalArgumentException("calculated AuthBlob hash mismatch")
+                } else {
+                    log.info("VERIFY: AuthBlob hash matches")
+                }
+                if (Helper.toHexString(calcSig) != ai.authBlob!!.signature) {
+                    log.error("calculated AuthBlob signature mismatch")
+                    throw IllegalArgumentException("calculated AuthBlob signature mismatch")
+                } else {
+                    log.info("VERIFY: AuthBlob signature matches")
+                }
+            } else {
+                val custPubKey = KeyHelper.decodeRSAkey(ai.auxBlob!!.pubkey!!.pubkey)
+                log.warn("VERIFY: vbmeta is signed with different key as us")
+                log.debug("modulus  :" + custPubKey.modulus)
+                log.debug("exponent :" + custPubKey.publicExponent)
+            }
+            //FIXME
+            ai.auxBlob!!.pubkey
+        } else {
+            log.debug("no key for current algorithm")
+        }
+        //FIXME
+
         if (dumpFile) {
             ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(jsonFile), ai)
             log.info("vbmeta info of [$image_file] has been analyzed")
@@ -284,7 +328,8 @@ class Avb {
         val headerBlob = ai.header!!.apply {
             auxiliary_data_block_size = auxBlob.size.toLong()
             authentication_data_block_size = Helper.round_to_multiple(
-                    (alg.hash_num_bytes + alg.signature_num_bytes).toLong(), 64)
+                (alg.hash_num_bytes + alg.signature_num_bytes).toLong(), 64
+            )
 
             descriptors_offset = 0
             descriptors_size = ai.auxBlob?.descriptorSize?.toLong() ?: 0
@@ -346,6 +391,42 @@ class Avb {
                 DefaultExecutor().execute(CommandLine.parse(cmdline))
             } catch (e: Exception) {
                 throw IllegalArgumentException("$fileName failed integrity check by \"$cmdline\"")
+            }
+        }
+
+        fun updateVbmeta(fileName: String) {
+            if (File("vbmeta.img").exists()) {
+                log.info("Updating vbmeta.img side by side ...")
+                val partitionName =
+                    ObjectMapper().readValue(File(getJsonFileName(fileName)), AVBInfo::class.java).let {
+                        it.auxBlob!!.hashDescriptors.get(0).partition_name
+                    }
+                val newHashDesc = Avb().parseVbMeta("$fileName.signed", dumpFile = false)
+                assert(newHashDesc.auxBlob!!.hashDescriptors.size == 1)
+                var seq = -1 //means not found
+                //main vbmeta
+                ObjectMapper().readValue(File(getJsonFileName("vbmeta.img")), AVBInfo::class.java).apply {
+                    val itr = this.auxBlob!!.hashDescriptors.iterator()
+                    while (itr.hasNext()) {
+                        val itrValue = itr.next()
+                        if (itrValue.partition_name == partitionName) {
+                            log.info("Found $partitionName in vbmeta, update it")
+                            seq = itrValue.sequence
+                            itr.remove()
+                            break
+                        }
+                    }
+                    if (-1 == seq) {
+                        log.warn("main vbmeta doesn't have $partitionName hashDescriptor, skip")
+                    } else {
+                        val hd = newHashDesc.auxBlob!!.hashDescriptors.get(0).apply { this.sequence = seq }
+                        this.auxBlob!!.hashDescriptors.add(hd)
+                        Avb().packVbMetaWithPadding("vbmeta.img", this)
+                        log.info("Updating vbmeta.img side by side (partition=$partitionName, seq=$seq) done")
+                    }
+                }
+            } else {
+                log.info("no companion vbmeta.img")
             }
         }
     }

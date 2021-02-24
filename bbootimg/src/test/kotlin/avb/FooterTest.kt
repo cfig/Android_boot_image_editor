@@ -1,14 +1,10 @@
 package avb
 
 import avb.blob.Footer
-import cfig.bootimg.cpio.AndroidCpioEntry
 import org.apache.commons.codec.binary.Hex
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
 import java.io.ByteArrayInputStream
-import java.nio.file.Files
-import java.nio.file.Paths
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class FooterTest {

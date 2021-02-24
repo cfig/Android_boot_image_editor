@@ -19,8 +19,8 @@ addons:
       - python-all
 before_install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update          ; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install lz4 dtc gradle; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install lz4 dtc ; fi
+before_script:
+ - ./gradlew check && ./gradlew clean
 script:
-  - ./gradlew check
-  - ./gradlew clean
-  - ./integrationTest.py
+ - ./integrationTest.py

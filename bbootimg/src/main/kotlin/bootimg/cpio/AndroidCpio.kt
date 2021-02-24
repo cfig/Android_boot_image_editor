@@ -8,6 +8,7 @@ import org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream
 import org.apache.commons.compress.archivers.cpio.CpioConstants
 import org.slf4j.LoggerFactory
 import java.io.*
+import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.regex.Pattern
@@ -246,18 +247,19 @@ class AndroidCpio {
             }
             val bytesRead = cis.bytesRead
             cis.close()
-            val fis = FileInputStream(cpioFile)
-            fis.skip(bytesRead - 128)
-            val remaining = fis.readAllBytes()
-            val foundIndex = String(remaining).lastIndexOf("070701")
+            val remaining = FileInputStream(cpioFile).use { fis ->
+                fis.skip(bytesRead - 128)
+                fis.readBytes()
+            }
+            val foundIndex = String(remaining, Charsets.UTF_8).lastIndexOf("070701")
             val entryInfo = AndroidCpioEntry(
                 name = CpioConstants.CPIO_TRAILER,
                 statMode = java.lang.Long.valueOf("755", 8)
             )
             if (foundIndex != -1) {
-                entryInfo.statMode =
-                    java.lang.Long.valueOf(String(remaining).substring(foundIndex + 14, foundIndex + 22), 16)
-                log.info("cpio trailer found, mode=" + String(remaining).substring(foundIndex + 14, foundIndex + 22))
+                val statusModeStr = String(remaining, Charsets.UTF_8).substring(foundIndex + 14, foundIndex + 22)
+                entryInfo.statMode = java.lang.Long.valueOf(statusModeStr, 16)
+                log.info("cpio trailer found, mode=$statusModeStr")
             } else {
                 log.error("no cpio trailer found")
             }
