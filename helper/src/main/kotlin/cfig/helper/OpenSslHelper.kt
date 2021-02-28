@@ -35,7 +35,7 @@ class OpenSslHelper {
             if (format != KeyFormat.PEM) {
                 throw IllegalArgumentException("can not handle $format private key")
             }
-            val ret = Helper.powerRun("openssl rsa -in - -pubout -outform ${pubKeyFormat.name}",
+            val ret = Helper.powerRun("openssl rsa -in $stdin -pubout -outform ${pubKeyFormat.name}",
                     ByteArrayInputStream(data))
             log.info("privateToPublic:stderr: ${String(ret[1])}")
             return PK1PubKey(format = pubKeyFormat, data = ret[0])
@@ -51,7 +51,7 @@ class OpenSslHelper {
             if (this.format != KeyFormat.PEM) {
                 throw java.lang.IllegalArgumentException("Only PEM key is supported")
             }
-            val ret = Helper.powerRun2("openssl rsa -in - -pubout",
+            val ret = Helper.powerRun2("openssl rsa -in $stdin -pubout",
                     ByteArrayInputStream(data))
             if (ret[0] as Boolean) {
                 log.info("getPk8PublicKey:error: ${String(ret[2] as ByteArray)}")
@@ -70,7 +70,7 @@ class OpenSslHelper {
                 openssl pkcs8 -nocrypt -in - -topk8 -outform DER
          */
         fun toPk8(pk8Format: KeyFormat): PK8RsaKey {
-            val ret = Helper.powerRun("openssl pkcs8 -nocrypt -in - -topk8 -outform ${pk8Format.name}",
+            val ret = Helper.powerRun("openssl pkcs8 -nocrypt -in $stdin -topk8 -outform ${pk8Format.name}",
                     ByteArrayInputStream(data))
             log.info("toPk8Private:stderr: ${String(ret[1])}")
             return PK8RsaKey(format = pk8Format, data = ret[0])
@@ -78,7 +78,7 @@ class OpenSslHelper {
 
         fun toCsr(): Csr {
             val info = "/C=CN/ST=Shanghai/L=Shanghai/O=XXX/OU=infra/CN=gerrit/emailAddress=webmaster@XX.com"
-            val cmdLine = CommandLine.parse("openssl req -new -key - -subj").apply {
+            val cmdLine = CommandLine.parse("openssl req -new -key $stdin -subj").apply {
                 this.addArgument("$info", true)
             }
             val ret = Helper.powerRun3(cmdLine, ByteArrayInputStream(data))
@@ -103,7 +103,7 @@ class OpenSslHelper {
             val tmpFile = File.createTempFile("pk1.", ".csr")
             tmpFile.writeBytes(csr.data)
             tmpFile.deleteOnExit()
-            val ret = Helper.powerRun2("openssl x509 -req -in ${tmpFile.path} -signkey - -days 180",
+            val ret = Helper.powerRun2("openssl x509 -req -in ${tmpFile.path} -signkey $stdin -days 180",
                     ByteArrayInputStream(data))
             if (ret[0] as Boolean) {
                 log.info("toCrt:error: ${String(ret[2] as ByteArray)}")
@@ -143,7 +143,7 @@ class OpenSslHelper {
             if (this.format != KeyFormat.PEM) {
                 throw IllegalArgumentException("Only pk8+pem can be converted to RSA")
             }
-            val ret = Helper.powerRun2("openssl rsa -in -",
+            val ret = Helper.powerRun2("openssl rsa -in $stdin",
                     ByteArrayInputStream(data))
             if (ret[0] as Boolean) {
                 log.info("toRsaPrivate:error: ${String(ret[2] as ByteArray)}")
@@ -159,7 +159,7 @@ class OpenSslHelper {
             openssl pkcs8 -nocrypt -in - -inform DER
          */
         fun transform(inFormat: KeyFormat, outFormat: KeyFormat): PK8RsaKey {
-            val ret = Helper.powerRun2("openssl pkcs8 -nocrypt -in - -inform ${inFormat.name} -outform ${outFormat.name}",
+            val ret = Helper.powerRun2("openssl pkcs8 -nocrypt -in $stdin -inform ${inFormat.name} -outform ${outFormat.name}",
                     ByteArrayInputStream(data))
             if (ret[0] as Boolean) {
                 log.info("transform:error: ${String(ret[2] as ByteArray)}")
@@ -181,7 +181,7 @@ class OpenSslHelper {
             if (this.format != KeyFormat.PEM) {
                 throw java.lang.IllegalArgumentException("Only PEM key is supported")
             }
-            val ret = Helper.powerRun2("openssl rsa -in - -pubout",
+            val ret = Helper.powerRun2("openssl rsa -in $stdin -pubout",
                     ByteArrayInputStream(data))
             if (ret[0] as Boolean) {
                 log.info("getPublicKey:error: ${String(ret[2] as ByteArray)}")
@@ -308,6 +308,8 @@ class OpenSslHelper {
 
     companion object {
         private val log = LoggerFactory.getLogger(OpenSslHelper::class.java)
+        val stdin = if (System.getProperty("os.name").contains("Mac")) "/dev/stdin" else "-"
+
         fun decodePem(keyText: String): ByteArray {
             val publicKeyPEM = keyText
                     .replace("-----BEGIN .*-----".toRegex(), "")
