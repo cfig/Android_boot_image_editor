@@ -10,11 +10,15 @@ import org.apache.commons.compress.archivers.zip.ZipFile
 import org.apache.commons.compress.archivers.zip.ZipMethod
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipParameters
+import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream
+import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
+import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.PumpStreamHandler
 import org.slf4j.LoggerFactory
+import org.tukaani.xz.XZFormatException
 import java.io.*
 import java.lang.RuntimeException
 import java.net.URI
@@ -164,7 +168,7 @@ class ZipHelper {
                 if (ignoreError) {
                     log.info("dumping entry: $entryName : entry not found, skip")
                 } else {
-                   throw IllegalArgumentException("$entryName doesn't exist")
+                    throw IllegalArgumentException("$entryName doesn't exist")
                 }
             }
         }
@@ -195,6 +199,52 @@ class ZipHelper {
             this.closeArchiveEntry()
         }
 
+        fun isLzma(compressedFile: String): Boolean {
+            return try {
+                FileInputStream(compressedFile).use { fis ->
+                    LZMACompressorInputStream(fis).use {
+                    }
+                }
+                true
+            } catch (e: IOException) {
+                false
+            }
+        }
+
+        fun lzma(compressedFile: String, fis: InputStream) {
+            log.info("Compress(lzma) ... ")
+            FileOutputStream(compressedFile).use { fos ->
+                LZMACompressorOutputStream(fos).use { gos ->
+                    val buffer = ByteArray(1024)
+                    while (true) {
+                        val bytesRead = fis.read(buffer)
+                        if (bytesRead <= 0) break
+                        gos.write(buffer, 0, bytesRead)
+                    }
+                }
+            }
+            log.info("compress(lzma) done: $compressedFile")
+        }
+
+        /*
+            @function: lzcat compressedFile > decompressedFile
+         */
+        fun lzcat(compressedFile: String, decompressedFile: String) {
+            FileInputStream(compressedFile).use { fileIn ->
+                LZMACompressorInputStream(fileIn).use { lzmaInputStream ->
+                    FileOutputStream(decompressedFile).use { fileOutputStream ->
+                        val buffer = ByteArray(1024)
+                        while (true) {
+                            val bytesRead = lzmaInputStream.read(buffer)
+                            if (bytesRead <= 0) break
+                            fileOutputStream.write(buffer, 0, bytesRead)
+                        }
+                    }
+                }
+            }
+            log.info("decompress(lzma) done: $compressedFile -> $decompressedFile")
+        }
+
         fun isXz(compressedFile: String): Boolean {
             return try {
                 FileInputStream(compressedFile).use { fis ->
@@ -202,9 +252,43 @@ class ZipHelper {
                     }
                 }
                 true
-            } catch (e: ZipException) {
+            } catch (e: XZFormatException) {
                 false
             }
+        }
+
+        fun xz(compressedFile: String, fis: InputStream) {
+            log.info("Compress(xz) ... ")
+            FileOutputStream(compressedFile).use { fos ->
+                XZCompressorOutputStream(fos).use { gos ->
+                    val buffer = ByteArray(1024)
+                    while (true) {
+                        val bytesRead = fis.read(buffer)
+                        if (bytesRead <= 0) break
+                        gos.write(buffer, 0, bytesRead)
+                    }
+                }
+            }
+            log.info("compress(xz) done: $compressedFile")
+        }
+
+        /*
+            @function: xzcat compressedFile > decompressedFile
+         */
+        fun xzcat(compressedFile: String, decompressedFile: String) {
+            FileInputStream(compressedFile).use { fileIn ->
+                XZCompressorInputStream(fileIn).use { zis ->
+                    FileOutputStream(decompressedFile).use { fileOutputStream ->
+                        val buffer = ByteArray(1024)
+                        while (true) {
+                            val bytesRead = zis.read(buffer)
+                            if (bytesRead <= 0) break
+                            fileOutputStream.write(buffer, 0, bytesRead)
+                        }
+                    }
+                }
+            }
+            log.info("decompress(xz) done: $compressedFile -> $decompressedFile")
         }
 
         fun isLz4(compressedFile: String): Boolean {
@@ -267,10 +351,10 @@ class ZipHelper {
                             if (bytesRead <= 0) break
                             fileOutputStream.write(buffer, 0, bytesRead)
                         }
-                        log.info("decompress(gz) done: $compressedFile -> $decompressedFile")
                     }
                 }
             }
+            log.info("decompress(gz) done: $compressedFile -> $decompressedFile")
         }
 
         /*

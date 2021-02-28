@@ -426,7 +426,7 @@ class Avb {
                     }
                 }
             } else {
-                log.info("no companion vbmeta.img")
+                log.debug("no companion vbmeta.img")
             }
         }
     }

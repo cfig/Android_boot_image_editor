@@ -31,7 +31,7 @@ dependencies {
 }
 
 application {
-    mainClassName = "cfig.packable.PackableLauncherKt"
+    mainClass.set("cfig.packable.PackableLauncherKt")
 }
 
 tasks.withType<KotlinCompile>().all {

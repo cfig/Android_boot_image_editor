@@ -19,6 +19,7 @@ dependencies {
     implementation("org.apache.commons:commons-exec:1.3")
     implementation("org.bouncycastle:bcprov-jdk15on:1.57")
     implementation("org.apache.commons:commons-compress:1.20")
+    implementation("org.tukaani:xz:1.8")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")

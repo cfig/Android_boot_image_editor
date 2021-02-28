@@ -123,14 +123,34 @@ class Common {
                 ZipHelper.isGZ(s.dumpFile) -> {
                     Files.move(
                         Paths.get(s.dumpFile), Paths.get(s.dumpFile + ".gz"),
-                        java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                    )
                     ZipHelper.zcat(s.dumpFile + ".gz", s.dumpFile)
+                }
+                ZipHelper.isXz(s.dumpFile) -> {
+                    log.info("ramdisk is compressed xz")
+                    Files.move(
+                        Paths.get(s.dumpFile), Paths.get(s.dumpFile + ".xz"),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                    )
+                    ZipHelper.xzcat(s.dumpFile + ".xz", s.dumpFile)
+                    ret = "xz"
+                }
+                ZipHelper.isLzma(s.dumpFile) -> {
+                    log.info("ramdisk is compressed lzma")
+                    Files.move(
+                        Paths.get(s.dumpFile), Paths.get(s.dumpFile + ".lzma"),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                    )
+                    ZipHelper.lzcat(s.dumpFile + ".lzma", s.dumpFile)
+                    ret = "lzma"
                 }
                 ZipHelper.isLz4(s.dumpFile) -> {
                     log.info("ramdisk is compressed lz4")
                     Files.move(
                         Paths.get(s.dumpFile), Paths.get(s.dumpFile + ".lz4"),
-                        java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                    )
                     ZipHelper.lz4cat(s.dumpFile + ".lz4", s.dumpFile)
                     ret = "lz4"
                 }
@@ -234,18 +254,30 @@ class Common {
 
         //using preset fs_config
         fun packRootfs(rootDir: String, ramdiskGz: String) {
-            log.info("Packing rootfs $rootDir ...")
+            val root = File(rootDir).path
+            log.info("Packing rootfs $root ...")
             val fsConfig = File(ramdiskGz).parentFile.path + "/ramdisk_filelist.txt"
             when {
                 ramdiskGz.endsWith(".gz") -> {
                     val f = ramdiskGz.removeSuffix(".gz")
-                    AndroidCpio().pack(rootDir, f, fsConfig)
-                    ZipHelper.minigzip(ramdiskGz, FileInputStream(f))
+                    AndroidCpio().pack(root, f, fsConfig)
+                    FileInputStream(f).use { ZipHelper.minigzip(ramdiskGz, it) }
+
                 }
                 ramdiskGz.endsWith(".lz4") -> {
                     val f = ramdiskGz.removeSuffix(".lz4")
-                    AndroidCpio().pack(rootDir, f, fsConfig)
-                    ZipHelper.lz4(ramdiskGz, FileInputStream(f))
+                    AndroidCpio().pack(root, f, fsConfig)
+                    FileInputStream(f).use { ZipHelper.lz4(ramdiskGz, it) }
+                }
+                ramdiskGz.endsWith(".lzma") -> {
+                    val f = ramdiskGz.removeSuffix(".lzma")
+                    AndroidCpio().pack(root, f, fsConfig)
+                    FileInputStream(f).use { ZipHelper.lzma(ramdiskGz, it) }
+                }
+                ramdiskGz.endsWith(".xz") -> {
+                    val f = ramdiskGz.removeSuffix(".xz")
+                    AndroidCpio().pack(root, f, fsConfig)
+                    FileInputStream(f).use { ZipHelper.xz(ramdiskGz, it) }
                 }
                 else -> {
                     throw IllegalArgumentException("$ramdiskGz is not supported")
