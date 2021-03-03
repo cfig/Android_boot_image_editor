@@ -76,7 +76,7 @@ class KeyUtilTest {
             "28e17bc57406650ed78785fd558e7c1861cc4014c900d72b61c03cdbab1039e713b5bb19b556d04d276b46aae9b8a3999ccbac533a1cce00f83cfb83e2beb35ed7329f71ffec04fc2839a9b44e50abd66ea6c3d3bea6705e93e9139ecd0331170db18eba36a85a78bc49a5447260a30ed19d956cb2f8a71f6b19e57fdca43e052d1bb7840bf4c3efb47111f4d77764236d2e013fbf3b2577e4a3e01c9d166a5e890ef96210882e6e88ceca2fe3a2201f4961210d4ec6167f5dfd0e038e4a146f960caecab7d15ba65f6edcf5dbd25f5af543cfb8da4338bdbc872eec3f8e72aa8db679099e70952d3f7176c0b9111bf20ad1390eab1d09a859105816fdf92fbb"
         val privkFile = "../" + Algorithms.get("SHA256_RSA2048")!!.defaultKey.replace("pem", "pk8")
         val k = KeyHelper.parse(Files.readAllBytes(Paths.get(privkFile))) as PrivateKey
-        val encData = KeyHelper2.rawSign(k, data)
+        val encData = KeyHelper2.rawRsa(k, data)
         assertEquals(expectedSig, Helper.toHexString(encData))
     }
 

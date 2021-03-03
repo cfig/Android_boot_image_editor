@@ -9,8 +9,8 @@ repositories {
 }
 
 dependencies {
-    implementation("org.bouncycastle:bcprov-jdk15on:1.57")
-    implementation("org.bouncycastle:bcpkix-jdk15on:1.57")
+    implementation("org.bouncycastle:bcprov-jdk15on:1.68")
+    implementation("org.bouncycastle:bcpkix-jdk15on:1.68")
 }
 
 val fatJar = task("fatJar", type = Jar::class) {

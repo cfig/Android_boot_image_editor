@@ -10,6 +10,7 @@ import avb.desc.*
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.paddingWith
 import cfig.helper.KeyHelper
+import cfig.helper.KeyHelper2
 import cfig.io.Struct3
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
@@ -22,6 +23,7 @@ import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
+import java.security.PrivateKey
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class Avb {
@@ -273,38 +275,45 @@ class Avb {
             }
         }
 
-        //FIXME
+        //integrity check
         val declaredAlg = Algorithms.get(ai.header!!.algorithm_type)
         if (declaredAlg!!.public_key_num_bytes > 0) {
             if (AuxBlob.encodePubKey(declaredAlg).contentEquals(ai.auxBlob!!.pubkey!!.pubkey)) {
-                log.warn("VERIFY: vbmeta is signed with the same key as us")
-                val calcHash =
-                    AuthBlob.calcHash(ai.header!!.encode(), ai.auxBlob!!.encode(declaredAlg), declaredAlg.name)
-                val calcSig = AuthBlob.calcSignature(calcHash, declaredAlg.name)
-                if (Helper.toHexString(calcHash) != ai.authBlob!!.hash) {
-                    log.error("calculated AuthBlob hash mismatch")
-                    throw IllegalArgumentException("calculated AuthBlob hash mismatch")
-                } else {
-                    log.info("VERIFY: AuthBlob hash matches")
+                log.info("VERIFY: signed with dev key: " + declaredAlg.defaultKey)
+            } else {
+                log.info("VERIFY: signed with release key")
+            }
+            val headerBlob = ByteArray(Header.SIZE).apply {
+                FileInputStream(image_file).use { fis ->
+                    fis.skip(vbMetaOffset)
+                    fis.read(this)
                 }
-                if (Helper.toHexString(calcSig) != ai.authBlob!!.signature) {
-                    log.error("calculated AuthBlob signature mismatch")
-                    throw IllegalArgumentException("calculated AuthBlob signature mismatch")
+            }
+            val auxBlob = ByteArray(vbMetaHeader.auxiliary_data_block_size.toInt()).apply {
+                FileInputStream(image_file).use { fis ->
+                    fis.skip(auxBlockOffset)
+                    fis.read(this)
+                }
+            }
+            val calcHash = Helper.join(declaredAlg.padding, AuthBlob.calcHash(headerBlob, auxBlob, declaredAlg.name))
+            val readHash = Helper.join(declaredAlg.padding, Helper.fromHexString(ai.authBlob!!.hash!!))
+            if (calcHash.contentEquals(readHash)) {
+                log.info("VERIFY: vbmeta hash... PASS")
+                val readPubKey = KeyHelper.decodeRSAkey(ai.auxBlob!!.pubkey!!.pubkey)
+                val hashFromSig = KeyHelper2.rawRsa(readPubKey, Helper.fromHexString(ai.authBlob!!.signature!!))
+                if (hashFromSig.contentEquals(readHash)) {
+                    log.info("VERIFY: vbmeta signature... PASS")
                 } else {
-                    log.info("VERIFY: AuthBlob signature matches")
+                    log.warn("read=" + Helper.toHexString(readHash) + ", calc=" + Helper.toHexString(calcHash))
+                    log.warn("VERIFY: vbmeta signature... FAIL")
                 }
             } else {
-                val custPubKey = KeyHelper.decodeRSAkey(ai.auxBlob!!.pubkey!!.pubkey)
-                log.warn("VERIFY: vbmeta is signed with different key as us")
-                log.debug("modulus  :" + custPubKey.modulus)
-                log.debug("exponent :" + custPubKey.publicExponent)
+                log.warn("read=" + ai.authBlob!!.hash!! + ", calc=" + Helper.toHexString(calcHash))
+                log.warn("VERIFY: vbmeta hash... FAIL")
             }
-            //FIXME
-            ai.auxBlob!!.pubkey
         } else {
-            log.debug("no key for current algorithm")
+            log.warn("no signing key for current algorithm")
         }
-        //FIXME
 
         if (dumpFile) {
             ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(jsonFile), ai)

@@ -109,31 +109,28 @@ Your boot.img.signed and vbmeta.img.signd will be updated together.
 Read [layout](doc/layout.md) of Android boot.img and vendor\_boot.img.
 
 ## References
+<details>
+  <summary>more ...</summary>
 
-boot\_signer
-https://android.googlesource.com/platform/system/extras
+Android version list https://source.android.com/source/build-numbers.html<br/>
+Android build-numbers https://source.android.com/setup/start/build-numbers
 
-cpio / fs\_config
-https://android.googlesource.com/platform/system/core
-https://www.kernel.org/doc/Documentation/early-userspace/buffer-format.txt
+cpio & fs\_config<br>
+https://android.googlesource.com/platform/system/core<br/>
+https://www.kernel.org/doc/Documentation/early-userspace/buffer-format.txt<br/>
+AVB<br/>
+https://android.googlesource.com/platform/external/avb/<br/>
+boot\_signer<br/>
+https://android.googlesource.com/platform/system/extras<br/>
+mkbootimg<br/>
+https://android.googlesource.com/platform/system/tools/mkbootimg/+/refs/heads/master/<br/>
+kernel info extractor<br/>
+https://android.googlesource.com/platform/build/+/refs/heads/master/tools/extract_kernel.py<br/>
+mkdtboimg<br/>
+https://android.googlesource.com/platform/system/libufdt/<br/>
+libsparse<br/>
+https://android.googlesource.com/platform/system/core/+/refs/heads/master/libsparse/<br/>
+Android Nexus/Pixle factory images<br/>
+https://developers.google.cn/android/images<br/>
 
-AVB
-https://android.googlesource.com/platform/external/avb/
-
-mkbootimg
-https://android.googlesource.com/platform/system/tools/mkbootimg/+/refs/heads/master/
-
-Android version list
-https://source.android.com/source/build-numbers.html
-
-kernel info extractor
-https://android.googlesource.com/platform/build/+/refs/heads/master/tools/extract_kernel.py
-
-mkdtboimg
-https://android.googlesource.com/platform/system/libufdt/
-
-libsparse
-https://android.googlesource.com/platform/system/core/+/refs/heads/master/libsparse/
-
-Android Nexus/Pixle factory images
-https://developers.google.cn/android/images
+</details>

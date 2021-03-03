@@ -45,7 +45,7 @@ data class AuthBlob(
                 byteArrayOf()
             } else {
                 val k = KeyHelper.parse(Files.readAllBytes(Paths.get(alg.defaultKey.replace(".pem", ".pk8")))) as PrivateKey
-                KeyHelper2.rawSign(k, Helper.join(alg.padding, hash))
+                KeyHelper2.rawRsa(k, Helper.join(alg.padding, hash))
             }
         }
 

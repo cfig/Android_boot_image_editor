@@ -8,23 +8,28 @@ import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
-import java.security.PrivateKey
-import java.security.PublicKey
-import java.security.Signature
-import java.util.*
 import javax.crypto.Cipher
 
 class KeyHelper2 {
     companion object {
         private val log = LoggerFactory.getLogger(KeyHelper2::class.java)
 
-        //inspired by
-        //  https://stackoverflow.com/questions/40242391/how-can-i-sign-a-raw-message-without-first-hashing-it-in-bouncy-castle
-        // "specifying Cipher.ENCRYPT mode or Cipher.DECRYPT mode doesn't make a difference;
-        //      both simply perform modular exponentiation"
-        fun rawSign(privk: java.security.PrivateKey, data: ByteArray): ByteArray {
+        /* inspired by
+         https://stackoverflow.com/questions/40242391/how-can-i-sign-a-raw-message-without-first-hashing-it-in-bouncy-castle
+         "specifying Cipher.ENCRYPT mode or Cipher.DECRYPT mode doesn't make a difference;
+              both simply perform modular exponentiation"
+
+        python counterpart:
+          import Crypto.PublicKey.RSA
+          key = Crypto.PublicKey.RSA.construct((modulus, exponent))
+          vRet = key.verify(decode_long(padding_and_digest), (decode_long(sig_blob), None))
+          print("verify padded digest: %s" % binascii.hexlify(padding_and_digest))
+          print("verify sig: %s" % binascii.hexlify(sig_blob))
+          print("X: Verify: %s" % vRet)
+         */
+        fun rawRsa(key: java.security.Key, data: ByteArray): ByteArray {
             return Cipher.getInstance("RSA/ECB/NoPadding").let { cipher ->
-                cipher.init(Cipher.ENCRYPT_MODE, privk)
+                cipher.init(Cipher.ENCRYPT_MODE, key)
                 cipher.update(data)
                 cipher.doFinal()
             }
@@ -67,8 +72,8 @@ class KeyHelper2 {
         }
 
         /*
-    openssl dgst -sha256 <file>
- */
+            openssl dgst -sha256 <file>
+        */
         fun sha256(inData: ByteArray): ByteArray {
             return MessageDigest.getInstance("SHA-256").digest(inData)
         }
@@ -82,42 +87,6 @@ class KeyHelper2 {
 
         fun sha256rsa(inData: ByteArray, inKey: java.security.PrivateKey): ByteArray {
             return rsa(sha256(inData), inKey)
-        }
-
-        fun sign(inData: ByteArray, privateKey: PrivateKey): String {
-            val signature = Signature.getInstance("SHA256withRSA").let {
-                it.initSign(privateKey)
-                it.update(inData)
-                it.sign()
-            }
-            return Base64.getEncoder().encodeToString(signature)
-        }
-
-        fun verify(inData: ByteArray, signature: ByteArray, pubKey: PublicKey): Boolean {
-            return Signature.getInstance("SHA256withRSA").let {
-                it.initVerify(pubKey)
-                it.update(inData)
-                it.verify(signature)
-            }
-        }
-
-
-        fun verify(inData: ByteArray, base64Signature: String, pubKey: PublicKey): Boolean {
-            val signatureBytes = Base64.getDecoder().decode(base64Signature)
-            return Signature.getInstance("SHA256withRSA").let {
-                it.initVerify(pubKey)
-                it.update(inData)
-                it.verify(signatureBytes)
-            }
-        }
-
-        fun verify2(inData: ByteArray, encrypedHash: ByteArray, inKey: java.security.PublicKey): Boolean {
-            val calcHash = sha256(inData)
-            val decrypedHash = Cipher.getInstance("RSA").let {
-                it.init(Cipher.DECRYPT_MODE, inKey)
-                it.doFinal(encrypedHash)
-            }
-            return calcHash.contentEquals(decrypedHash)
         }
     }
 }
