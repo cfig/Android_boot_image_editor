@@ -136,15 +136,6 @@ class Common {
                     ZipHelper.xzcat(s.dumpFile + ".xz", s.dumpFile)
                     ret = "xz"
                 }
-                ZipHelper.isLzma(s.dumpFile) -> {
-                    log.info("ramdisk is compressed lzma")
-                    Files.move(
-                        Paths.get(s.dumpFile), Paths.get(s.dumpFile + ".lzma"),
-                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
-                    )
-                    ZipHelper.lzcat(s.dumpFile + ".lzma", s.dumpFile)
-                    ret = "lzma"
-                }
                 ZipHelper.isLz4(s.dumpFile) -> {
                     log.info("ramdisk is compressed lz4")
                     Files.move(
@@ -153,6 +144,15 @@ class Common {
                     )
                     ZipHelper.lz4cat(s.dumpFile + ".lz4", s.dumpFile)
                     ret = "lz4"
+                }
+                ZipHelper.isLzma(s.dumpFile) -> {
+                    log.info("ramdisk is compressed lzma")
+                    Files.move(
+                        Paths.get(s.dumpFile), Paths.get(s.dumpFile + ".lzma"),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                    )
+                    ZipHelper.lzcat(s.dumpFile + ".lzma", s.dumpFile)
+                    ret = "lzma"
                 }
                 else -> {
                     throw IllegalArgumentException("ramdisk is in unknown format")
