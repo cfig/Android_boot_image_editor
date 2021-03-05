@@ -421,7 +421,7 @@ data class BootV2(
 
     private fun toCommandLine(): CommandLine {
         val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""
-        val ret = CommandLine(cmdPrefix + Helper.prop("mkbootimg"))
+        val ret = CommandLine.parse(cmdPrefix + Helper.prop("mkbootimg"))
         ret.addArgument(" --header_version ")
         ret.addArgument(info.headerVersion.toString())
         ret.addArgument(" --base ")

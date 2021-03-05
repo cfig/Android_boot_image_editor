@@ -206,7 +206,7 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
 
     private fun toCommandLine(): CommandLine {
         val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""
-        return CommandLine(cmdPrefix + Helper.prop("mkbootimg")).let { ret ->
+        return CommandLine.parse(cmdPrefix + Helper.prop("mkbootimg")).let { ret ->
             ret.addArgument("--header_version")
             ret.addArgument(info.headerVersion.toString())
             if (kernel.size > 0) {

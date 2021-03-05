@@ -1,5 +1,5 @@
 # Android_boot_image_editor
-[![Build Status](https://www.travis-ci.com/cfig/Android_boot_image_editor.svg?branch=master)](https://www.travis-ci.com/cfig/Android_boot_image_editor)
+[![CI](https://github.com/cfig/Android_boot_image_editor/actions/workflows/main.yml/badge.svg)](https://github.com/cfig/Android_boot_image_editor/actions/workflows/main.yml)
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 A tool for reverse engineering Android ROM images.
@@ -8,7 +8,7 @@ A tool for reverse engineering Android ROM images.
 
 #### install required packages
 
-Mac: `brew install lz4 xz`
+Mac: `brew install lz4 xz dtc`
 
 Linux: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-11-jdk gcc g++ python3`
 

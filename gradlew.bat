@@ -14,6 +14,10 @@
 @rem limitations under the License.
 @rem
 
+@rem set path for lz4
+@IF EXIST tools\bin SET PATH=%PATH%;tools\bin
+
+
 @if "%DEBUG%" == "" @echo off
 @rem ##########################################################################
 @rem

@@ -77,16 +77,24 @@ tasks {
     if (bHackingMode) {
         logger.info("Hacking mode!")
         //C++ mkbootfs
-        packTask.dependsOn("aosp:mkbootfs.10:mkbootfsExecutable")
-        packTask.dependsOn("aosp:mkbootfs.11:mkbootfsExecutable")
-        unpackTask.dependsOn("aosp:mkbootfs.10:mkbootfsExecutable")
-        unpackTask.dependsOn("aosp:mkbootfs.11:mkbootfsExecutable")
         if (System.getProperty("os.name").contains("Mac")) {
+            //mac
             unpackTask.dependsOn("aosp:libsparse:simg2img:installReleaseMacos")
             packTask.dependsOn("aosp:libsparse:img2simg:installReleaseMacos")
+            // common
+            packTask.dependsOn("aosp:mkbootfs.10:mkbootfsExecutable")
+            packTask.dependsOn("aosp:mkbootfs.11:mkbootfsExecutable")
+            unpackTask.dependsOn("aosp:mkbootfs.10:mkbootfsExecutable")
+            unpackTask.dependsOn("aosp:mkbootfs.11:mkbootfsExecutable")
         } else if (System.getProperty("os.name").contains("Linux")) {
+            //linux
             unpackTask.dependsOn("aosp:libsparse:simg2img:installReleaseLinux")
             packTask.dependsOn("aosp:libsparse:img2simg:installReleaseLinux")
+            // common
+            packTask.dependsOn("aosp:mkbootfs.10:mkbootfsExecutable")
+            packTask.dependsOn("aosp:mkbootfs.11:mkbootfsExecutable")
+            unpackTask.dependsOn("aosp:mkbootfs.10:mkbootfsExecutable")
+            unpackTask.dependsOn("aosp:mkbootfs.11:mkbootfsExecutable")
         } else {
             logger.info("Disable C++ modules on Window$")
         }
