@@ -44,7 +44,7 @@ class Signer {
                     addArguments("--key ${alg.defaultKey}")
                 }
                 newAvbInfo.auxBlob?.let { newAuxblob ->
-                    newAuxblob.propertyDescriptor.forEach { newProp ->
+                    newAuxblob.propertyDescriptors.forEach { newProp ->
                         addArguments(arrayOf("--prop", "${newProp.key}:${newProp.value}"))
                     }
                 }

@@ -1,8 +1,11 @@
 package cfig.packable
 
+import avb.blob.Footer
 import cfig.EnvironmentVerifier
 import cfig.dtb_util.DTC
 import cfig.helper.Helper
+import cfig.Avb
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.LoggerFactory
@@ -73,6 +76,23 @@ class DtboParser(val workDir: File) : IPackable {
             it
         }
         execInDirectory(cmd, this.workDir)
+    }
+
+    override fun `@verify`(fileName: String) {
+        super.`@verify`(fileName)
+    }
+
+    // invoked solely by reflection
+    fun `@footer`(fileName: String) {
+        FileInputStream(fileName).use { fis ->
+            fis.skip(File(fileName).length() - Footer.SIZE)
+            try {
+                val footer = Footer(fis)
+                log.info("\n" + ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(footer))
+            } catch (e: IllegalArgumentException) {
+                log.info("image $fileName has no AVB Footer")
+            }
+        }
     }
 
     private fun execInDirectory(cmd: CommandLine, inWorkDir: File) {

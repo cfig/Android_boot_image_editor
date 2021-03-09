@@ -1,6 +1,5 @@
 package avb.blob
 
-import avb.alg.Algorithm
 import avb.alg.Algorithms
 import cfig.helper.Helper
 import cfig.helper.KeyHelper
@@ -63,7 +62,7 @@ data class AuthBlob(
 
             //hash & signature
             val binaryHash = calcHash(header_data_blob, aux_data_blob, algorithm_name)
-            var binarySignature = calcSignature(binaryHash, algorithm_name)
+            val binarySignature = calcSignature(binaryHash, algorithm_name)
             val authData = Helper.join(binaryHash, binarySignature)
             return Helper.join(authData, Struct3("${authBlockSize - authData.size}x").pack(0))
         }

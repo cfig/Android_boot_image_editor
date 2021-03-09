@@ -4,26 +4,24 @@ import avb.alg.Algorithm
 import avb.desc.*
 import cfig.helper.Helper
 import cfig.helper.KeyHelper
-import cfig.helper.KeyHelper2
 import cfig.io.Struct3
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey
 import org.slf4j.LoggerFactory
-import java.io.ByteArrayInputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 
 @OptIn(ExperimentalUnsignedTypes::class)
 @JsonIgnoreProperties("descriptorSize")
 class AuxBlob(
-        var pubkey: PubKeyInfo? = null,
-        var pubkeyMeta: PubKeyMetadataInfo? = null,
-        var propertyDescriptor: MutableList<PropertyDescriptor> = mutableListOf(),
-        var hashTreeDescriptor: MutableList<HashTreeDescriptor> = mutableListOf(),
-        var hashDescriptors: MutableList<HashDescriptor> = mutableListOf(),
-        var kernelCmdlineDescriptor: MutableList<KernelCmdlineDescriptor> = mutableListOf(),
-        var chainPartitionDescriptor: MutableList<ChainPartitionDescriptor> = mutableListOf(),
-        var unknownDescriptors: MutableList<UnknownDescriptor> = mutableListOf()) {
+    var pubkey: PubKeyInfo? = null,
+    var pubkeyMeta: PubKeyMetadataInfo? = null,
+    var propertyDescriptors: MutableList<PropertyDescriptor> = mutableListOf(),
+    var hashTreeDescriptors: MutableList<HashTreeDescriptor> = mutableListOf(),
+    var hashDescriptors: MutableList<HashDescriptor> = mutableListOf(),
+    var kernelCmdlineDescriptors: MutableList<KernelCmdlineDescriptor> = mutableListOf(),
+    var chainPartitionDescriptors: MutableList<ChainPartitionDescriptor> = mutableListOf(),
+    var unknownDescriptors: MutableList<UnknownDescriptor> = mutableListOf()) {
 
     val descriptorSize: Int
         get(): Int {
@@ -44,12 +42,12 @@ class AuxBlob(
 
     private fun encodeDescriptors(): ByteArray {
         return mutableListOf<Descriptor>().let { descList ->
-            arrayOf(this.propertyDescriptor,        //tag 0
-                    this.hashTreeDescriptor,        //tag 1
-                    this.hashDescriptors,           //tag 2
-                    this.kernelCmdlineDescriptor,   //tag 3
-                    this.chainPartitionDescriptor,  //tag 4
-                    this.unknownDescriptors         //tag X
+            arrayOf(this.propertyDescriptors,        //tag 0
+                    this.hashTreeDescriptors,        //tag 1
+                    this.hashDescriptors,            //tag 2
+                    this.kernelCmdlineDescriptors,   //tag 3
+                    this.chainPartitionDescriptors,  //tag 4
+                    this.unknownDescriptors          //tag X
             ).forEach { typedList ->
                 typedList.forEach { descList.add(it) }
             }

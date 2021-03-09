@@ -4,6 +4,11 @@ import cfig.EnvironmentVerifier
 import cfig.packable.IPackable
 import org.slf4j.LoggerFactory
 import cfig.helper.Helper.Companion.check_call
+import java.io.FileInputStream
+import java.io.File
+import com.fasterxml.jackson.databind.ObjectMapper
+import avb.blob.Footer
+import cfig.Avb
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class SparseImgParser : IPackable {
@@ -30,6 +35,23 @@ class SparseImgParser : IPackable {
 
     override fun pack(fileName: String) {
         img2simg("$fileName.unsparse", "$fileName.new")
+    }
+
+    // invoked solely by reflection
+    fun `@footer`(fileName: String) {
+        FileInputStream(fileName).use { fis ->
+            fis.skip(File(fileName).length() - Footer.SIZE)
+            try {
+                val footer = Footer(fis)
+                log.info("\n" + ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(footer))
+            } catch (e: IllegalArgumentException) {
+                log.info("image $fileName has no AVB Footer")
+            }
+        }
+    }
+
+    override fun `@verify`(fileName: String) {
+        super.`@verify`(fileName)
     }
 
     private fun simg2img(sparseIn: String, flatOut: String) {

@@ -2,26 +2,30 @@ package avb.desc
 
 import avb.blob.Header
 import cfig.helper.Helper
+import cfig.helper.KeyHelper2
 import cfig.io.Struct3
-import java.io.InputStream
+import org.slf4j.LoggerFactory
+import java.io.*
+import java.security.MessageDigest
 import java.util.*
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class HashTreeDescriptor(
-        var flags: Int = 0,
-        var dm_verity_version: Int = 0,
-        var image_size: Long = 0,
-        var tree_offset: Long = 0,
-        var tree_size: Long = 0,
-        var data_block_size: Int = 0,
-        var hash_block_size: Int = 0,
-        var fec_num_roots: Int = 0,
-        var fec_offset: Long = 0,
-        var fec_size: Long = 0,
-        var hash_algorithm: String = "",
-        var partition_name: String = "",
-        var salt: ByteArray = byteArrayOf(),
-        var root_digest: ByteArray = byteArrayOf()) : Descriptor(TAG, 0, 0) {
+    var flags: Int = 0,
+    var dm_verity_version: Int = 0,
+    var image_size: Long = 0,
+    var tree_offset: Long = 0,
+    var tree_size: Long = 0,
+    var data_block_size: Int = 0,
+    var hash_block_size: Int = 0,
+    var fec_num_roots: Int = 0,
+    var fec_offset: Long = 0,
+    var fec_size: Long = 0,
+    var hash_algorithm: String = "",
+    var partition_name: String = "",
+    var salt: ByteArray = byteArrayOf(),
+    var root_digest: ByteArray = byteArrayOf()
+) : Descriptor(TAG, 0, 0) {
     var flagsInterpretation: String = ""
         get() {
             var ret = ""
@@ -52,7 +56,8 @@ class HashTreeDescriptor(
         val salt_len = info[13] as UInt
         val root_digest_len = info[14] as UInt
         this.flags = (info[15] as UInt).toInt()
-        val expectedSize = Helper.round_to_multiple(SIZE.toUInt() - 16U + partition_name_len + salt_len + root_digest_len, 8U)
+        val expectedSize =
+            Helper.round_to_multiple(SIZE.toUInt() - 16U + partition_name_len + salt_len + root_digest_len, 8U)
         if (this.tag != TAG || this.num_bytes_following != expectedSize.toLong()) {
             throw IllegalArgumentException("Given data does not look like a hashtree descriptor")
         }
@@ -68,29 +73,148 @@ class HashTreeDescriptor(
         val nbf_with_padding = Helper.round_to_multiple(this.num_bytes_following.toLong(), 8)
         val padding_size = nbf_with_padding - this.num_bytes_following.toLong()
         val desc = Struct3(FORMAT_STRING).pack(
-                TAG,
-                nbf_with_padding.toULong(),
-                this.dm_verity_version,
-                this.image_size,
-                this.tree_offset,
-                this.tree_size,
-                this.data_block_size,
-                this.hash_block_size,
-                this.fec_num_roots,
-                this.fec_offset,
-                this.fec_size,
-                this.hash_algorithm,
-                this.partition_name.length,
-                this.salt.size,
-                this.root_digest.size,
-                this.flags,
-                null)
+            TAG,
+            nbf_with_padding.toULong(),
+            this.dm_verity_version,
+            this.image_size,
+            this.tree_offset,
+            this.tree_size,
+            this.data_block_size,
+            this.hash_block_size,
+            this.fec_num_roots,
+            this.fec_offset,
+            this.fec_size,
+            this.hash_algorithm,
+            this.partition_name.length,
+            this.salt.size,
+            this.root_digest.size,
+            this.flags,
+            null
+        )
         val padding = Struct3("${padding_size}x").pack(null)
         return Helper.join(desc, this.partition_name.toByteArray(), this.salt, this.root_digest, padding)
     }
 
+    fun verify(fileNames: List<String>, parent: String = ""): Array<Any> {
+        for (item in fileNames) {
+            if (File(item).exists()) {
+                val trimmedHash = this.genMerkleTree(item, "hash.tree")
+                val readTree = ByteArray(this.tree_size.toInt())
+                FileInputStream(item).use { fis ->
+                    fis.skip(this.tree_offset)
+                    fis.read(readTree)
+                }
+                val ourHtHash = KeyHelper2.sha256(File("hash.tree").readBytes())
+                val diskHtHash = KeyHelper2.sha256(readTree)
+                if (!ourHtHash.contentEquals(diskHtHash)) {
+                    return arrayOf(false, "MerkleTree corrupted")
+                } else {
+                    log.info("VERIFY($parent): MerkleTree integrity check... PASS")
+                }
+                if (!this.root_digest.contentEquals(trimmedHash)) {
+                    return arrayOf(false, "MerkleTree root hash mismatch")
+                } else {
+                    log.info("VERIFY($parent): MerkleTree root hash check... PASS")
+                }
+                return arrayOf(true, "")
+            }
+        }
+        return arrayOf(false, "file not found")
+    }
+
+    private fun calcSingleHashSize(padded: Boolean = false): Int {
+        val digSize = MessageDigest.getInstance(KeyHelper2.pyAlg2java(this.hash_algorithm)).digest().size
+        val padSize = Helper.round_to_pow2(digSize.toLong()) - digSize
+        return (digSize + (if (padded) padSize else 0)).toInt()
+    }
+
+    private fun calcStreamHashSize(inStreamSize: Long, inBlockSize: Int): Long {
+        val blockCount = (inStreamSize + inBlockSize - 1) / inBlockSize
+        return Helper.round_to_multiple(blockCount * calcSingleHashSize(true), inBlockSize)
+    }
+
+    fun hashStream(
+        inputStream: InputStream,
+        streamSz: Long,
+        blockSz: Int
+    ): ByteArray {
+        val hashSize = calcStreamHashSize(streamSz, blockSz)
+        val bos = ByteArrayOutputStream(hashSize.toInt())
+        run hashing@{
+            val padSz = calcSingleHashSize(true) - calcSingleHashSize(false)
+            val padding = Struct3("${padSz}x").pack(0)
+            var totalRead = 0L
+            while (true) {
+                val data = ByteArray(blockSz)
+                MessageDigest.getInstance(KeyHelper2.pyAlg2java(this.hash_algorithm)).let {
+                    val bytesRead = inputStream.read(data)
+                    if (bytesRead <= 0) {
+                        return@hashing
+                    }
+                    totalRead += bytesRead
+                    if (totalRead > streamSz) {
+                        return@hashing
+                    }
+                    it.update(this.salt)
+                    it.update(data)
+                    val dg = it.digest()
+                    bos.write(dg)
+                    bos.write(padding)
+                    //log.info(Helper.toHexString(dg))
+                }
+            }
+        }//hashing
+
+        if (hashSize > bos.size()) {
+            bos.write(Struct3("${hashSize - bos.size()}x").pack(0))
+        }
+        return bos.toByteArray()
+    }
+
+    fun genMerkleTree(fileName: String, treeFile: String? = null): ByteArray {
+        log.info("generate Merkle tree()")
+        val plannedTree = calcMerkleTree(this.image_size, this.hash_block_size, calcSingleHashSize(true))
+        val calcRootHash: ByteArray
+        treeFile?.let { File(treeFile).let { if (it.exists()) it.delete() }}
+        val raf = if (treeFile.isNullOrBlank()) null else RandomAccessFile(treeFile, "rw")
+        val l0: ByteArray
+        log.info("Hashing Level #${plannedTree.size}..." + plannedTree.get(plannedTree.size - 1))
+        FileInputStream(fileName).use { fis ->
+            l0 = hashStream(
+                fis, this.image_size,
+                this.data_block_size
+            )
+        }
+        if (DEBUG) FileOutputStream("hash.file" + plannedTree.size).use { it.write(l0) }
+        raf?.seek(plannedTree.get(plannedTree.size - 1).hashOffset)
+        raf?.write(l0)
+        var dataToHash: ByteArray = l0
+        var i = plannedTree.size - 1
+        while (true) {
+            val levelHash = hashStream(dataToHash.inputStream(), dataToHash.size.toLong(), this.hash_block_size)
+            if (DEBUG) FileOutputStream("hash.file$i").use { it.write(levelHash) }
+            if (dataToHash.size <= this.hash_block_size) {
+                log.debug("Got root hash: " + Helper.toHexString(levelHash))
+                calcRootHash = levelHash
+                break
+            }
+            log.info("Hashing Level #$i..." + plannedTree.get(i - 1))
+            raf?.seek(plannedTree.get(i - 1).hashOffset)
+            raf?.write(levelHash)
+            dataToHash = levelHash
+            i--
+        }
+        raf?.close()
+        raf?.let { log.info("MerkleTree(${this.partition_name}) saved to $treeFile") }
+        return calcRootHash.sliceArray(0 until calcSingleHashSize(false))
+    }
+
     override fun toString(): String {
-        return "HashTreeDescriptor(dm_verity_version=$dm_verity_version, image_size=$image_size, tree_offset=$tree_offset, tree_size=$tree_size, data_block_size=$data_block_size, hash_block_size=$hash_block_size, fec_num_roots=$fec_num_roots, fec_offset=$fec_offset, fec_size=$fec_size, hash_algorithm='$hash_algorithm', partition_name='$partition_name', salt=${Arrays.toString(salt)}, root_digest=${Arrays.toString(root_digest)}, flags=$flags)"
+        return "HashTreeDescriptor(dm_verity_version=$dm_verity_version, image_size=$image_size, " +
+                "tree_offset=$tree_offset, tree_size=$tree_size, data_block_size=$data_block_size, " +
+                "hash_block_size=$hash_block_size, fec_num_roots=$fec_num_roots, fec_offset=$fec_offset, " +
+                "fec_size=$fec_size, hash_algorithm='$hash_algorithm', partition_name='$partition_name', " +
+                "salt=${salt.contentToString()}, root_digest=${Arrays.toString(root_digest)}, flags=$flags)"
     }
 
     companion object {
@@ -98,5 +222,51 @@ class HashTreeDescriptor(
         private const val RESERVED = 60L
         private const val SIZE = 120 + RESERVED
         private const val FORMAT_STRING = "!2QL3Q3L2Q32s4L${RESERVED}x"
+        private val log = LoggerFactory.getLogger(HashTreeDescriptor::class.java)
+        private const val DEBUG = false
+
+        class MerkleTree(
+            var dataSize: Long = 0,
+            var dataBlockCount: Long = 0,
+            var hashSize: Long = 0,
+            var hashOffset: Long = 0
+        ) {
+            override fun toString(): String {
+                return String.format(
+                    "MT{data: %10s(%6s blocks), hash: %7s @%-5s}",
+                    dataSize,
+                    dataBlockCount,
+                    hashSize,
+                    hashOffset
+                )
+            }
+        }
+
+        fun calcMerkleTree(fileSize: Long, blockSize: Int, digestSize: Int): List<MerkleTree> {
+            var levelDataSize: Long = fileSize
+            var levelNo = 0
+            val tree: MutableList<MerkleTree> = mutableListOf()
+            while (true) {
+                //raw data in page of blockSize
+                val blockCount = (levelDataSize + blockSize - 1) / blockSize
+                if (1L == blockCount) {
+                    break
+                }
+                //digest size in page of blockSize
+                val hashSize = Helper.round_to_multiple(blockCount * digestSize, blockSize)
+                tree.add(0, MerkleTree(levelDataSize, blockCount, hashSize))
+                levelDataSize = hashSize
+                levelNo++
+            }
+            for (i in 1 until tree.size) {
+                tree[i].hashOffset = tree[i - 1].hashOffset + tree[i - 1].hashSize
+            }
+            tree.forEachIndexed { index, merkleTree ->
+                log.info("Level #${index + 1}: $merkleTree")
+            }
+            val treeSize = tree.sumOf { it.hashSize }
+            log.info("tree size: $treeSize(" + Helper.humanReadableByteCountBin(treeSize) + ")")
+            return tree
+        }
     }
 }

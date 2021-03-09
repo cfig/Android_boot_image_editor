@@ -12,6 +12,9 @@ import java.nio.ByteOrder
 import java.nio.file.attribute.PosixFilePermission
 import java.security.MessageDigest
 import java.util.*
+import kotlin.math.pow
+import java.text.StringCharacterIterator
+import java.text.CharacterIterator
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class Helper {
@@ -121,6 +124,10 @@ class Helper {
             } else {
                 size + page - remainder
             }
+        }
+
+        fun round_to_pow2(num: Long): Long {
+            return 2.0.pow((num - 1).toBigInteger().bitLength().toDouble()).toLong()
         }
 
         fun pyAlg2java(alg: String): String {
@@ -256,9 +263,11 @@ class Helper {
             val md = MessageDigest.getInstance("SHA1")
             for (item in inFiles) {
                 if (null == item) {
-                    md.update(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+                    md.update(
+                        ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
                             .putInt(0)
-                            .array())
+                            .array()
+                    )
                     log.debug("update null $item: " + toHexString((md.clone() as MessageDigest).digest()))
                 } else {
                     val currentFile = File(item)
@@ -273,9 +282,11 @@ class Helper {
                             md.update(dataRead, 0, byteRead)
                         }
                         log.debug("update file $item: " + toHexString((md.clone() as MessageDigest).digest()))
-                        md.update(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
+                        md.update(
+                            ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
                                 .putInt(currentFile.length().toInt())
-                                .array())
+                                .array()
+                        )
                         log.debug("update SIZE $item: " + toHexString((md.clone() as MessageDigest).digest()))
                     }
                 }
@@ -314,6 +325,26 @@ class Helper {
                 mode = mode shr 1
             }
             return result
+        }
+
+        /*
+          https://stackoverflow.com/questions/3758606/how-can-i-convert-byte-size-into-a-human-readable-format-in-java
+         */
+        fun humanReadableByteCountBin(bytes: Long): String {
+            val absB = if (bytes == Long.MIN_VALUE) Long.MAX_VALUE else Math.abs(bytes)
+            if (absB < 1024) {
+                return "$bytes B"
+            }
+            var value = absB
+            val ci: CharacterIterator = StringCharacterIterator("KMGTPE")
+            var i = 40
+            while (i >= 0 && absB > 0xfffccccccccccccL shr i) {
+                value = value shr 10
+                ci.next()
+                i -= 10
+            }
+            value *= java.lang.Long.signum(bytes).toLong()
+            return String.format("%.1f %ciB", value / 1024.0, ci.current())
         }
 
         private val log = LoggerFactory.getLogger("Helper")

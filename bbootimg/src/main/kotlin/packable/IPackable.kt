@@ -1,5 +1,6 @@
 package cfig.packable
 
+import cfig.Avb
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.check_call
 import cfig.helper.Helper.Companion.check_output
@@ -44,6 +45,12 @@ interface IPackable {
         "adb shell dd if=/dev/block/by-name/$deviceName$slotSuffix of=/cache/file.to.pull".check_call()
         "adb pull /cache/file.to.pull $fileName".check_call()
         "adb shell rm /cache/file.to.pull".check_call()
+    }
+
+    // invoked solely by reflection
+    fun `@verify`(fileName: String) {
+        val ai = Avb().parseVbMeta(fileName, true)
+        Avb().verify(ai, fileName)
     }
 
     fun cleanUp() {

@@ -31,6 +31,10 @@ class VBMetaParser: IPackable {
         super.flash("$fileName.signed", stem)
     }
 
+    override fun `@verify`(fileName: String) {
+        super.`@verify`(fileName)
+    }
+
     override fun pull(fileName: String, deviceName: String) {
         super.pull(fileName, deviceName)
     }

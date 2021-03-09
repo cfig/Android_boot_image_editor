@@ -71,12 +71,28 @@ class HashDescriptor(var flags: Int = 0,
         return Helper.join(desc, partition_name.toByteArray(), this.salt, this.digest, padding)
     }
 
-    fun verify(image_file: String) {
-        val hasher = MessageDigest.getInstance(Helper.pyAlg2java(hash_algorithm))
-        hasher.update(this.salt)
-        hasher.update(File(image_file).readBytes())
-        val digest = hasher.digest()
-        log.info("digest:" + Helper.toHexString(digest))
+    fun verify(image_files: List<String>, parent: String = ""): Array<Any> {
+        val ret: Array<Any> = arrayOf(false, "file not found")
+        for (item in image_files) {
+            if (File(item).exists()) {
+                val hasher = MessageDigest.getInstance(Helper.pyAlg2java(hash_algorithm))
+                hasher.update(this.salt)
+                FileInputStream(item).use { fis ->
+                    val data = ByteArray(this.image_size.toInt())
+                    fis.read(data)
+                    hasher.update(data)
+                }
+                val dg = hasher.digest()
+                if (dg.contentEquals(this.digest)) {
+                    ret[0] = true
+                    ret[1] = "PASS"
+                } else {
+                    ret[1] = "hash mismatch"
+                }
+                return ret
+            }
+        }
+        return ret
     }
 
     fun update(image_file: String, use_persistent_digest: Boolean = false): HashDescriptor {
