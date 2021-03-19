@@ -7,22 +7,23 @@ import java.io.InputStream
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class BootHeaderV3(
-        var kernelSize: Int = 0,
-        var ramdiskSize: Int = 0,
-        var osVersion: String = "",
-        var osPatchLevel: String = "",
-        var headerSize: Int = 0,
-        var headerVersion: Int = 0,
-        var cmdline: String = ""
+    var kernelSize: Int = 0,
+    var ramdiskSize: Int = 0,
+    var osVersion: String = "",
+    var osPatchLevel: String = "",
+    var headerSize: Int = 0,
+    var headerVersion: Int = 0,
+    var cmdline: String = "",
+    var signatureSize: Int = 0
 ) {
     @Throws(IllegalArgumentException::class)
     constructor(iS: InputStream?) : this() {
         if (iS == null) {
             return
         }
-        log.warn("BootImgHeaderV3 constructor")
+        log.warn("BootImgHeaderV3/V4 constructor")
         val info = Struct3(FORMAT_STRING).unpack(iS)
-        assert(11 == info.size)
+        assert(12 == info.size)
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like Android Boot Image V3 Header")
         }
@@ -39,22 +40,26 @@ class BootHeaderV3(
 
         this.cmdline = info[10] as String
 
-        assert(this.headerSize in intArrayOf(BOOT_IMAGE_HEADER_V3_SIZE))
+        this.signatureSize = (info[11] as UInt).toInt()
+
+        assert(this.headerSize in intArrayOf(BOOT_IMAGE_HEADER_V3_SIZE, BOOT_IMAGE_HEADER_V4_SIZE))
     }
 
     fun encode(): ByteArray {
         return Struct3(FORMAT_STRING).pack(
-                magic,
-                kernelSize,
-                ramdiskSize,
-                (Common.packOsVersion(osVersion) shl 11) or Common.packOsPatchLevel(osPatchLevel),
-                headerSize,
-                0,
-                0,
-                0,
-                0,
-                headerVersion,
-                cmdline)
+            magic,
+            kernelSize,
+            ramdiskSize,
+            (Common.packOsVersion(osVersion) shl 11) or Common.packOsPatchLevel(osPatchLevel),
+            headerSize,
+            0,
+            0,
+            0,
+            0,
+            headerVersion,
+            cmdline,
+            signatureSize
+        )
     }
 
     override fun toString(): String {
@@ -65,16 +70,18 @@ class BootHeaderV3(
         internal val log = LoggerFactory.getLogger(BootHeaderV3::class.java)
         const val magic = "ANDROID!"
         const val FORMAT_STRING = "8s" + //"ANDROID!"
-                "4I" + //kernel size, ramdisk size, os_version/patch, header size
-                "4I" + //reserved
-                "I" +  //header version
-                "1536s"     //cmdline
+                "4I" +    //kernel size, ramdisk size, os_version/patch, header size
+                "4I" +    //reserved
+                "I" +     //header version
+                "1536s" + //cmdline
+                "I"       //signature size
         private const val BOOT_IMAGE_HEADER_V3_SIZE = 1580
+        private const val BOOT_IMAGE_HEADER_V4_SIZE = 1584
         const val pageSize: Int = 4096
 
         init {
-            assert(BOOT_IMAGE_HEADER_V3_SIZE == Struct3(FORMAT_STRING).calcSize()) {
-                "internal error: expected size $BOOT_IMAGE_HEADER_V3_SIZE "
+            assert(BOOT_IMAGE_HEADER_V4_SIZE == Struct3(FORMAT_STRING).calcSize()) {
+                "internal error: expected size $BOOT_IMAGE_HEADER_V4_SIZE "
             }
         }
     }

@@ -41,6 +41,7 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
                 ret.info.osVersion = header.osVersion
                 ret.info.osPatchLevel = header.osPatchLevel
                 ret.info.pageSize = BootHeaderV3.pageSize
+                ret.info.signatureSize = header.signatureSize
                 //kernel
                 ret.kernel.file = workDir + "kernel"
                 ret.kernel.size = header.kernelSize
@@ -65,7 +66,8 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
             var cmdline: String = "",
             var osVersion: String = "",
             var osPatchLevel: String = "",
-            var imageSize: Long = 0
+            var imageSize: Long = 0,
+            var signatureSize: Int = 0
     )
 
     data class CommArgs(

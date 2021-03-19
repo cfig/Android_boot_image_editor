@@ -68,6 +68,7 @@ Please note that the boot.img MUST follows AOSP verified boot flow, either [Boot
 
 | Device Model                   | Manufacturer | Compatible           | Android Version          | Note |
 |--------------------------------|--------------|----------------------|--------------------------|------|
+| Pixel 3 (blueline)             | Google       | Y                    | 12 (spp2.210219.008, <Br>2021)| |
 | Pixel 3 (blueline)             | Google       | Y                    | 11 (RP1A.200720.009, <Br>2020)| [more ...](doc/additional_tricks.md#pixel-3-blueline) |
 | Pixel 3 (blueline)             | Google       | Y                    | Q preview (qpp2.190228.023, <Br>2019)| [more ...](doc/additional_tricks.md#pixel-3-blueline) |
 | Pixel XL (marlin)              | HTC          | Y                    | 9.0.0 (PPR2.180905.006, <Br>Sep 2018)| [more ...](doc/additional_tricks.md#pixel-xl-marlin) |
@@ -79,31 +80,64 @@ Please note that the boot.img MUST follows AOSP verified boot flow, either [Boot
 | X7 (PD1602_A_3.12.8)           | VIVO         | N                    | ?                        | [Issue 35](https://github.com/cfig/Android_boot_image_editor/issues/35) |
 
 ## more examples
+<details>
+  <summary>working with recovery.img</summary>
 
-* recovery.img
-
-If you are working with recovery.img, the steps are similar:
-
-    cp <your_recovery_image> recovery.img
-    ./gradlew unpack
-    ./gradlew pack
-
-* vbmeta.img
+Please remember to clean the work directory first.
 
 ```bash
+rm *.img
+cp <your_recovery_image> recovery.img
+./gradlew unpack
+./gradlew pack
+```
+
+</details>
+
+<details>
+  <summary>working with vbmeta.img</summary>
+
+
+```bash
+rm *.img
 cp <your_vbmeta_image> vbmeta.img
 ./gradlew unpack
 ./gradlew pack
 ```
 
-* boot.img and vbmeta.img
+</details>
+
+<details>
+  <summary>working with boot.img and vbmeta.img</summary>
+
+If your vbmeta.img contains hash of boot.img, you MUST update vbmeta image together.
+
 ```bash
+rm *.img
 cp <your_boot_image> boot.img
 cp <your_vbmeta_image> vbmeta.img
 ./gradlew unpack
 ./gradlew pack
 ```
-Your boot.img.signed and vbmeta.img.signd will be updated together.
+Your boot.img.signed and vbmeta.img.signd will be updated together, then you can flash them to your device.
+
+</details>
+
+<details>
+  <summary>How to disable AVB verification</summary>
+
+The idea is to set flag=2 in main vbmeta.
+
+```bash
+rm *.img
+cp <your_vbmeta_image> vbmeta.img
+./gradlew unpack
+vim -u NONE -N build/unzip_boot/vbmeta.avb.json  -c ":19s/0/2/g" -c ":wq"
+./gradlew pack
+```
+Then flash vbmeta.img.signed to your device.
+
+</details>
 
 ## boot.img layout
 Read [layout](doc/layout.md) of Android boot.img and vendor\_boot.img.

@@ -27,21 +27,20 @@ class BootImgParser() : IPackable {
         try {
             val hv = probeHeaderVersion(fileName)
             log.info("header version $hv")
-            if (hv == 3) {
-                val b3 = BootV3
-                    .parse(fileName)
-                    .extractImages()
-                    .extractVBMeta()
-                    .printSummary()
-                log.debug(b3.toString())
-                return
-            } else {
+            if (hv in 0..2) {
                 val b2 = BootV2
                     .parse(fileName)
                     .extractImages()
                     .extractVBMeta()
                     .printSummary()
                 log.debug(b2.toString())
+            } else {
+                val b3 = BootV3
+                    .parse(fileName)
+                    .extractImages()
+                    .extractVBMeta()
+                    .printSummary()
+                log.debug(b3.toString())
             }
         } catch (e: IllegalArgumentException) {
             log.error(e.message)
