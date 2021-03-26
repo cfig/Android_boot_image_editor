@@ -124,6 +124,24 @@ Your boot.img.signed and vbmeta.img.signd will be updated together, then you can
 </details>
 
 <details>
+  <summary>working with vendor_boot.img + vbmeta.img (Pixel 5 etc.)</summary>
+Most devices include hash descriptor of vendor_boot.img in vbmeta.img, so if you need to modify vendor_boot.img, you need to update vbmeta.img together.
+
+```bash
+rm *.img
+cp <your_vendor_boot_image> vendor_boot.img
+cp <your_vbmeta_image> vbmeta.img
+./gradlew unpack
+./gradlew pack
+./gradlew flash
+```
+
+Please note that to use 'gradle flash', your host machine must be connectted to your DUT with adb, and you already 'adb root'.
+
+</details>
+
+
+<details>
   <summary>How to disable AVB verification</summary>
 
 The idea is to set flag=2 in main vbmeta.
@@ -158,6 +176,8 @@ boot\_signer<br/>
 https://android.googlesource.com/platform/system/extras<br/>
 mkbootimg<br/>
 https://android.googlesource.com/platform/system/tools/mkbootimg/+/refs/heads/master/<br/>
+boot header definition<br/>
+https://android.googlesource.com/platform/system/tools/mkbootimg/+/refs/heads/master/include/bootimg/bootimg.h<br/>
 kernel info extractor<br/>
 https://android.googlesource.com/platform/build/+/refs/heads/master/tools/extract_kernel.py<br/>
 mkdtboimg<br/>

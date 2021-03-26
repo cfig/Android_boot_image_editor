@@ -4,7 +4,6 @@ import cfig.Avb
 import cfig.EnvironmentVerifier
 import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
-import cfig.bootimg.Common.Slice
 import cfig.bootimg.Signer
 import cfig.helper.Helper
 import cfig.packable.VBMetaParser
@@ -169,12 +168,11 @@ data class BootV2(
         //info
         ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + info.json), this)
         //kernel
-        Common.dumpKernel(Slice(info.output, kernel.position.toInt(), kernel.size, kernel.file!!))
+        Common.dumpKernel(Helper.Slice(info.output, kernel.position.toInt(), kernel.size, kernel.file!!))
         //ramdisk
         if (this.ramdisk.size > 0) {
             val fmt = Common.dumpRamdisk(
-                Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file!!),
-                "${workDir}root"
+                Helper.Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file!!), "${workDir}root"
             )
             this.ramdisk.file = this.ramdisk.file!! + ".$fmt"
             //dump info again
@@ -200,7 +198,7 @@ data class BootV2(
         }
         //dtb
         this.dtb?.let { _ ->
-            Common.dumpDtb(Slice(info.output, dtb!!.position.toInt(), dtb!!.size, dtb!!.file!!))
+            Common.dumpDtb(Helper.Slice(info.output, dtb!!.position.toInt(), dtb!!.size, dtb!!.file!!))
         }
 
         return this

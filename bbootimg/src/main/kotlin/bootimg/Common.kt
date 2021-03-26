@@ -23,7 +23,6 @@ import java.nio.ByteOrder
 import java.security.MessageDigest
 import java.util.regex.Pattern
 
-
 @OptIn(ExperimentalUnsignedTypes::class)
 class Common {
     data class VeritySignature(
@@ -32,13 +31,6 @@ class Common {
         var verity_pk8: String = "",
         var verity_pem: String = "",
         var jarPath: String = ""
-    )
-
-    data class Slice(
-        var srcFile: String,
-        var offset: Int,
-        var length: Int,
-        var dumpFile: String
     )
 
     companion object {
@@ -111,12 +103,12 @@ class Common {
             return listOf()
         }
 
-        fun dumpKernel(s: Slice) {
+        fun dumpKernel(s: Helper.Slice) {
             Helper.extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
             parseKernelInfo(s.dumpFile)
         }
 
-        fun dumpRamdisk(s: Slice, root: String): String {
+        fun dumpRamdisk(s: Helper.Slice, root: String): String {
             var ret = "gz"
             Helper.extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
             when {
@@ -162,7 +154,7 @@ class Common {
             return ret
         }
 
-        fun dumpDtb(s: Slice) {
+        fun dumpDtb(s: Helper.Slice) {
             Helper.extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
             //extract DTB
             if (EnvironmentVerifier().hasDtc) {

@@ -125,7 +125,6 @@ Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read fi
 
 ### data
 
-```
     +-----------------------------------------------------------+    --> pagesize
     |<kernel>                        |   kernel length          |
     +-----------------------------------------------------------+
@@ -136,7 +135,6 @@ Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read fi
 
     padding calculation:
     |<padding>                       | min(n * page_size - len) |
-```
 
 
 
@@ -156,7 +154,7 @@ Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read fi
     |--------------------------------+--------------------------|    --> 20
     |<ramdisk load addr>             |     4                    |
     |--------------------------------+--------------------------|    --> 24
-    |<vendor ramdisk size>           |     4                    |
+    |<vendor ramdisk total size>     |     4                    |
     |--------------------------------+--------------------------|    --> 28
     |<vendor cmdline>                |     2048                 |
     |--------------------------------+--------------------------|    --> 2076
@@ -184,17 +182,28 @@ Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read fi
 
 ### data
 
-```
-    +-----------------------------------------------------------+    --> pagesize
-    |<vendor ramdisk section>        |   padded len             |
-    +--------------------------------+--------------------------+
+
+    +------------------+-------------+--------------------------+    --> pagesize
+    |                  | ramdisk 1   |                          |
+    |                  +-------------+                          |
+    |                  | ramdisk 2   |                          |
+    |<vendor ramdisks> +-------------+   padded len             |
+    |                  | ramdisk n   |                          |
+    |                  +-------------+                          |    --> pagesize + vendor_ramdisk_total_size
+    |                  | padding     |                          |
+    +--------------------------------+--------------------------+    --> pagesize + vendor_ramdisk_total_size + padding
     |<dtb>                           |   padded len             |
+    +--------------------------------+--------------------------+    --> dtb offset + dtb size + padding
+    |<vendor ramdisk > | entry 1     |                          |
+    |     table>       +-------------+                          |
+    |                  | entry 2     |   padded len             |
+    |                  +-------------+                          |
+    |                  | entry n     |                          |
+    |      (v4)        +-------------+                          |
+    |                  | padding     |                          |
+    +-----------------------------------------------------------+    --> vrt offset + vrt size + padding
+    |<bootconfig>            (v4)    |   padded len             |
     +--------------------------------+--------------------------+
-    |<vendor ramdisk table>          |   padded len             |
-    +-----------------------------------------------------------+
-    |<bootconfig>                    |   padded len             |
-    +--------------------------------+--------------------------+
-```
 
 
 

@@ -77,3 +77,14 @@ Avoid using this feature on Windows, create regular file instead.
 
 * remember to close File streams to avoid any potential problems
 
+## Boot image signature in BootImage V4
+"boot signature" is designed for GKI, it's to be verified by VTS, not bootloader, so this part can be seen as part of the raw boot.img for bootloader.
+
+Emulate creating GKI image:
+```
+out/host/linux-x86/bin/mkbootimg --kernel out/target/product/vsoc_arm64/kernel  --ramdisk out/target/product/vsoc_arm64/ramdisk.img --gki_signing_key external/avb/test/data/testkey_rsa4096.pem --gki_signing_algorithm SHA256_RSA4096 --os_version 11 --os_patch_level 2021-03-05 --header_version 4 --output out/target/product/vsoc_arm64/boot.img
+out/host/linux-x86/bin/avbtool add_hash_footer --image out/target/product/vsoc_arm64/boot.img --partition_size   67108864 --partition_name boot --algorithm SHA256_RSA2048 --key external/avb/test/data/testkey_rsa2048.pem --prop com.android.build.boot.fingerprint:nicefinger --prop com.android.build.boot.os_version:11 --rollback_index 1614902400
+```
+As it's only used for GKI verification, I don't want to spend too much time on any special steps in 'gradle pack' flow, as long as DUT can boot up properly.
+
+

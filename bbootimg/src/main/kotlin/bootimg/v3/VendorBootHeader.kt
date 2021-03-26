@@ -10,7 +10,7 @@ class VendorBootHeader(
     var pageSize: Int = 0,
     var kernelLoadAddr: Long = 0,
     var ramdiskLoadAddr: Long = 0,
-    var vndRamdiskSize: Int = 0,
+    var vndRamdiskTotalSize: Int = 0,
     var cmdline: String = "",
     var tagsLoadAddr: Long = 0,
     var product: String = "",
@@ -37,7 +37,7 @@ class VendorBootHeader(
         this.pageSize = (info[2] as UInt).toInt()
         this.kernelLoadAddr = (info[3] as UInt).toLong()
         this.ramdiskLoadAddr = (info[4] as UInt).toLong()
-        this.vndRamdiskSize = (info[5] as UInt).toInt()
+        this.vndRamdiskTotalSize = (info[5] as UInt).toInt()
         this.cmdline = info[6] as String
         this.tagsLoadAddr = (info[7] as UInt).toLong()
         this.product = info[8] as String
@@ -64,7 +64,7 @@ class VendorBootHeader(
             pageSize,
             kernelLoadAddr,
             ramdiskLoadAddr,
-            vndRamdiskSize,
+            vndRamdiskTotalSize,
             cmdline,
             tagsLoadAddr,
             product,
@@ -106,7 +106,7 @@ class VendorBootHeader(
     }
 
     override fun toString(): String {
-        return "VendorBootHeader(headerVersion=$headerVersion, pageSize=$pageSize, kernelLoadAddr=$kernelLoadAddr, ramdiskLoadAddr=$ramdiskLoadAddr, vndRamdiskSize=$vndRamdiskSize, cmdline='$cmdline', tagsLoadAddr=$tagsLoadAddr, product='$product', headerSize=$headerSize, dtbSize=$dtbSize, dtbLoadAddr=$dtbLoadAddr, vrtSize=$vrtSize, vrtEntryNum=$vrtEntryNum, vrtEntrySize=$vrtEntrySize, bootconfigSize=$bootconfigSize)"
+        return "VendorBootHeader(headerVersion=$headerVersion, pageSize=$pageSize, kernelLoadAddr=$kernelLoadAddr, ramdiskLoadAddr=$ramdiskLoadAddr, vndRamdiskSize=$vndRamdiskTotalSize, cmdline='$cmdline', tagsLoadAddr=$tagsLoadAddr, product='$product', headerSize=$headerSize, dtbSize=$dtbSize, dtbLoadAddr=$dtbLoadAddr, vrtSize=$vrtSize, vrtEntryNum=$vrtEntryNum, vrtEntrySize=$vrtEntrySize, bootconfigSize=$bootconfigSize)"
     }
 
 

@@ -18,6 +18,13 @@ import java.text.CharacterIterator
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class Helper {
+    data class Slice(
+        var srcFile: String,
+        var offset: Int,
+        var length: Int,
+        var dumpFile: String
+    )
+
     companion object {
         private val gcfg: Properties = Properties().apply {
             load(Helper::class.java.classLoader.getResourceAsStream("general.cfg"))
@@ -83,6 +90,10 @@ class Helper {
                 i += 2
             }
             return data
+        }
+
+        fun extractFile(s: Slice) {
+           return extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
         }
 
         fun extractFile(fileName: String, outImgName: String, offset: Long, length: Int) {

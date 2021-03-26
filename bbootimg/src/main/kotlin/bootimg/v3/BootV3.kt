@@ -20,9 +20,11 @@ import java.nio.ByteOrder
 import cfig.bootimg.Common as C
 
 @OptIn(ExperimentalUnsignedTypes::class)
-data class BootV3(var info: MiscInfo = MiscInfo(),
-                  var kernel: CommArgs = CommArgs(),
-                  val ramdisk: CommArgs = CommArgs()
+data class BootV3(
+    var info: MiscInfo = MiscInfo(),
+    var kernel: CommArgs = CommArgs(),
+    val ramdisk: CommArgs = CommArgs(),
+    var bootSignature: CommArgs = CommArgs()
 ) {
     companion object {
         private val log = LoggerFactory.getLogger(BootV3::class.java)
@@ -51,6 +53,13 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
                 ret.ramdisk.size = header.ramdiskSize
                 ret.ramdisk.position = ret.kernel.position + header.kernelSize +
                         getPaddingSize(header.kernelSize, BootHeaderV3.pageSize)
+                //boot signature
+                if (header.signatureSize > 0) {
+                    ret.bootSignature.file = workDir + "bootsig"
+                    ret.bootSignature.size = header.signatureSize
+                    ret.bootSignature.position = ret.ramdisk.position + ret.ramdisk.size +
+                            getPaddingSize(header.ramdiskSize, BootHeaderV3.pageSize)
+                }
             }
             ret.info.imageSize = File(fileName).length()
             return ret
@@ -58,22 +67,23 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
     }
 
     data class MiscInfo(
-            var output: String = "",
-            var json: String = "",
-            var headerVersion: Int = 0,
-            var headerSize: Int = 0,
-            var pageSize: Int = 0,
-            var cmdline: String = "",
-            var osVersion: String = "",
-            var osPatchLevel: String = "",
-            var imageSize: Long = 0,
-            var signatureSize: Int = 0
+        var output: String = "",
+        var json: String = "",
+        var headerVersion: Int = 0,
+        var headerSize: Int = 0,
+        var pageSize: Int = 0,
+        var cmdline: String = "",
+        var osVersion: String = "",
+        var osPatchLevel: String = "",
+        var imageSize: Long = 0,
+        var signatureSize: Int = 0
     )
 
     data class CommArgs(
-            var file: String = "",
-            var position: Int = 0,
-            var size: Int = 0)
+        var file: String = "",
+        var position: Int = 0,
+        var size: Int = 0
+    )
 
     fun pack(): BootV3 {
         if (File(this.ramdisk.file).exists() && !File(workDir + "root").exists()) {
@@ -94,9 +104,9 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
         FileOutputStream(this.info.output + ".clear", false).use { fos ->
             val encodedHeader = this.toHeader().encode()
             fos.write(encodedHeader)
-            fos.write(ByteArray(
-                    Helper.round_to_multiple(encodedHeader.size,
-                            this.info.pageSize) - encodedHeader.size))
+            fos.write(
+                ByteArray(Helper.round_to_multiple(encodedHeader.size, this.info.pageSize) - encodedHeader.size)
+            )
         }
 
         //data
@@ -128,13 +138,14 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
 
     private fun toHeader(): BootHeaderV3 {
         return BootHeaderV3(
-                kernelSize = kernel.size,
-                ramdiskSize = ramdisk.size,
-                headerVersion = info.headerVersion,
-                osVersion = info.osVersion,
-                osPatchLevel = info.osPatchLevel,
-                headerSize = info.headerSize,
-                cmdline = info.cmdline)
+            kernelSize = kernel.size,
+            ramdiskSize = ramdisk.size,
+            headerVersion = info.headerVersion,
+            osVersion = info.osVersion,
+            osPatchLevel = info.osPatchLevel,
+            headerSize = info.headerSize,
+            cmdline = info.cmdline
+        )
     }
 
     fun extractImages(): BootV3 {
@@ -142,11 +153,21 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
         //info
         ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         //kernel
-        C.dumpKernel(C.Slice(info.output, kernel.position, kernel.size, kernel.file))
+        C.dumpKernel(Helper.Slice(info.output, kernel.position, kernel.size, kernel.file))
         //ramdisk
         val fmt = C.dumpRamdisk(
-                C.Slice(info.output, ramdisk.position, ramdisk.size, ramdisk.file), "${workDir}root")
+            Helper.Slice(info.output, ramdisk.position, ramdisk.size, ramdisk.file), "${workDir}root"
+        )
         this.ramdisk.file = this.ramdisk.file + ".$fmt"
+        //bootsig
+        if (info.signatureSize > 0) {
+            Helper.extractFile(
+                info.output, this.bootSignature.file,
+                this.bootSignature.position.toLong(), this.bootSignature.size
+            )
+            Avb().parseVbMeta(this.bootSignature.file)
+        }
+
         //dump info again
         ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         return this
@@ -187,6 +208,13 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
             it.addRow("ramdisk", this.ramdisk.file)
             it.addRow("\\-- extracted ramdisk rootfs", "${workDir}root")
             it.addRule()
+
+            if (this.info.signatureSize > 0) {
+                it.addRow("boot signature", this.bootSignature.file)
+                it.addRow("\\-- decoded boot signature", Avb.getJsonFileName(this.bootSignature.file))
+                it.addRule()
+            }
+
             it.addRow("AVB info", Avb.getJsonFileName(info.output))
             it.addRule()
             it
@@ -201,8 +229,10 @@ data class BootV3(var info: MiscInfo = MiscInfo(),
                 ""
             }
         }
-        log.info("\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}",
-                tableHeader.render(), tab.render(), tabVBMeta)
+        log.info(
+            "\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}",
+            tableHeader.render(), tab.render(), tabVBMeta
+        )
         return this
     }
 

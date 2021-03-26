@@ -642,6 +642,15 @@ def verify_vbmeta_signature(vbmeta_header, vbmeta_blob):
   return True
 
 
+def create_avb_hashtree_hasher(algorithm, salt):
+  """Create the hasher for AVB hashtree based on the input algorithm."""
+
+  if algorithm.lower() == 'blake2b-256':
+    return hashlib.new('blake2b', salt, digest_size=32)
+
+  return hashlib.new(algorithm, salt)
+
+
 class ImageChunk(object):
   """Data structure used for representing chunks in Android sparse files.
 
@@ -1406,7 +1415,8 @@ class AvbHashtreeDescriptor(AvbDescriptor):
       self.salt = data[(self.SIZE + o):(self.SIZE + o + salt_len)]
       o += salt_len
       self.root_digest = data[(self.SIZE + o):(self.SIZE + o + root_digest_len)]
-      if root_digest_len != len(hashlib.new(self.hash_algorithm).digest()):
+
+      if root_digest_len != self._hashtree_digest_size():
         if root_digest_len != 0:
           raise LookupError('root_digest_len doesn\'t match hash algorithm')
 
@@ -1425,6 +1435,9 @@ class AvbHashtreeDescriptor(AvbDescriptor):
       self.salt = b''
       self.root_digest = b''
       self.flags = 0
+
+  def _hashtree_digest_size(self):
+    return len(create_avb_hashtree_hasher(self.hash_algorithm, b'').digest())
 
   def print_desc(self, o):
     """Print the descriptor.
@@ -1496,7 +1509,7 @@ class AvbHashtreeDescriptor(AvbDescriptor):
       image_filename = os.path.join(image_dir, self.partition_name + image_ext)
       image = ImageHandler(image_filename, read_only=True)
     # Generate the hashtree and checks that it matches what's in the file.
-    digest_size = len(hashlib.new(self.hash_algorithm).digest())
+    digest_size = self._hashtree_digest_size()
     digest_padding = round_to_pow2(digest_size) - digest_size
     (hash_level_offsets, tree_size) = calc_hash_level_offsets(
         self.image_size, self.data_block_size, digest_size + digest_padding)
@@ -3579,7 +3592,8 @@ class Avb(object):
       print('1.{}'.format(required_libavb_version_minor))
       return
 
-    digest_size = len(hashlib.new(hash_algorithm).digest())
+    digest_size = len(create_avb_hashtree_hasher(hash_algorithm, b'')
+                      .digest())
     digest_padding = round_to_pow2(digest_size) - digest_size
 
     # If |partition_size| is given (e.g. not 0), calculate the maximum image
@@ -4064,7 +4078,7 @@ def generate_hash_tree(image, image_size, block_size, hash_alg_name, salt,
     level_output_list = []
     remaining = hash_src_size
     while remaining > 0:
-      hasher = hashlib.new(hash_alg_name, salt)
+      hasher = create_avb_hashtree_hasher(hash_alg_name, salt)
       # Only read from the file for the first level - for subsequent
       # levels, access the array we're building.
       if level_num == 0:
@@ -4096,7 +4110,7 @@ def generate_hash_tree(image, image_size, block_size, hash_alg_name, salt,
     hash_src_size = len(level_output)
     level_num += 1
 
-  hasher = hashlib.new(hash_alg_name, salt)
+  hasher = create_avb_hashtree_hasher(hash_alg_name, salt)
   hasher.update(level_output)
   return hasher.digest(), bytes(hash_ret)
 
