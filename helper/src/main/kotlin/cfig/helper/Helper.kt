@@ -93,7 +93,7 @@ class Helper {
         }
 
         fun extractFile(s: Slice) {
-           return extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
+            return extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
         }
 
         fun extractFile(fileName: String, outImgName: String, offset: Long, length: Int) {
@@ -320,12 +320,10 @@ class Helper {
 
         fun modeToPermissions(inMode: Int): Set<PosixFilePermission> {
             var mode = inMode
-            val PERMISSIONS_MASK = 4095
-            // setgid/setuid/sticky are not supported.
-            val MAX_SUPPORTED_MODE = 511
-            mode = mode and PERMISSIONS_MASK
-            if (mode and MAX_SUPPORTED_MODE != mode) {
-                throw IOException("Invalid mode: $mode")
+            mode = mode and Integer.valueOf("7777", 8) //trim to xxxx
+            val maxSupportedMode = Integer.valueOf("777", 8) //setgid/setuid/sticky are not supported
+            if (mode and maxSupportedMode != mode) {
+                throw IOException("Invalid mode(oct): ${Integer.toOctalString(mode)}")
             }
             val allPermissions = PosixFilePermission.values()
             val result: MutableSet<PosixFilePermission> = EnumSet.noneOf(PosixFilePermission::class.java)

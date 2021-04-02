@@ -484,7 +484,7 @@ class Avb {
                         }
                     }
                     if (-1 == seq) {
-                        log.warn("main vbmeta doesn't have $partitionName hashDescriptor, skip")
+                        log.warn("main vbmeta doesn't have $partitionName hashDescriptor, won't update vbmeta.img")
                     } else {
                         val hd = newHashDesc.auxBlob!!.hashDescriptors.get(0).apply { this.sequence = seq }
                         this.auxBlob!!.hashDescriptors.add(hd)

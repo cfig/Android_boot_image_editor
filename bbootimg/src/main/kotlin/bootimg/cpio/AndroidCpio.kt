@@ -180,6 +180,7 @@ class AndroidCpio {
 
     companion object {
         private val log = LoggerFactory.getLogger(AndroidCpio::class.java)
+        private val PERM_MASK = java.lang.Long.valueOf("777", 8)
         fun decompressCPIO(cpioFile: String, outDir: String, fileList: String? = null) {
             run { //clean up
                 if (File(outDir).exists()) {
@@ -222,7 +223,7 @@ class AndroidCpio {
                         } else {
                             Files.setPosixFilePermissions(
                                 Paths.get(outEntryName),
-                                Helper.modeToPermissions((entry.mode and 0xfff).toInt())
+                                Helper.modeToPermissions((entry.mode and PERM_MASK).toInt())
                             )
                         }
                     }
@@ -232,7 +233,7 @@ class AndroidCpio {
                         if (!EnvironmentVerifier().isWindows) {
                             Files.setPosixFilePermissions(
                                 Paths.get(outEntryName),
-                                Helper.modeToPermissions((entry.mode and 0xfff).toInt())
+                                Helper.modeToPermissions((entry.mode and PERM_MASK).toInt())
                             )
                         } else {
                             //Windows

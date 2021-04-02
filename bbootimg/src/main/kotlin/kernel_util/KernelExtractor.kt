@@ -29,7 +29,7 @@ class KernelExtractor {
             it.addArgument("--output-version")
             it.addArgument(kernelVersionFile)
         }
-        DefaultExecutor().let {
+        DefaultExecutor().let { it ->
             it.workingDirectory = workDir ?: File("../")
             try {
                 it.execute(cmd)
@@ -41,6 +41,11 @@ class KernelExtractor {
                 ret.add(kernelVersionFile)
                 ret.add(kernelConfigFile)
             } catch (e: org.apache.commons.exec.ExecuteException) {
+                listOf(kernelConfigFile, kernelVersionFile).forEach { fn ->
+                    File(fn).let { f ->
+                        if (f.exists()) f.delete()
+                    }
+                }
                 log.warn("can not parse kernel info")
             }
         }

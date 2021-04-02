@@ -65,6 +65,9 @@ place 'ramdisk.img.gz' in directory, delete "root/", program will use it as preb
 ## cpio
 decompress cpio with commandline `cpio -idmv -F <file>`
 
+Some file system(also java) doesn't support special file permissions, https://docs.oracle.com/cd/E19455-01/805-7229/secfiles-69/index.html
+So we have to save the file perms in `build/unzip_boot/ramdisk_filelist.txt`, and use it when doing 'pack'.
+
 ### cpio on windows
 * got `java.nio.file.FileSystemException` and says "A required privilege is not held by the client"
 ```
@@ -86,5 +89,4 @@ out/host/linux-x86/bin/mkbootimg --kernel out/target/product/vsoc_arm64/kernel  
 out/host/linux-x86/bin/avbtool add_hash_footer --image out/target/product/vsoc_arm64/boot.img --partition_size   67108864 --partition_name boot --algorithm SHA256_RSA2048 --key external/avb/test/data/testkey_rsa2048.pem --prop com.android.build.boot.fingerprint:nicefinger --prop com.android.build.boot.os_version:11 --rollback_index 1614902400
 ```
 As it's only used for GKI verification, I don't want to spend too much time on any special steps in 'gradle pack' flow, as long as DUT can boot up properly.
-
 
