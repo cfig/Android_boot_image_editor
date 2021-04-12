@@ -3,6 +3,7 @@ package cfig.helper
 import cfig.helper.OpenSslHelper.Companion.decodePem
 import org.junit.Test
 import org.slf4j.LoggerFactory
+import java.io.File
 import kotlin.test.assertTrue
 
 class OpenSslHelperTest {
@@ -30,6 +31,12 @@ class OpenSslHelperTest {
 
         //check equality: 1,3 == 2
         assertTrue(decodeFromPem.contentEquals(rsaPubDer.data))
+
+        run {
+            File("1_rsa.key").delete()
+            File("2_rsa_pub.pem.key").delete()
+            File("3_rsa_pub.der.key").delete()
+        }
     }
 
     @Test

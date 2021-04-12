@@ -206,6 +206,13 @@ class AndroidCpio {
                 val buffer = ByteArray(entry.size.toInt())
                 cis.read(buffer)
                 val outEntryName = File(outDir + "/" + entry.name).path
+                if (((entry.mode and PERM_MASK).shr(7)).toInt() != 0b11) {
+                    //@formatter:off
+                    log.warn("  root/${entry.name} has improper file mode "
+                            + String.format("%03o, ", entry.mode and PERM_MASK) + "fix it"
+                    )
+                    //@formatter:on
+                }
                 when {
                     entry.isSymbolicLink -> {
                         entryInfo.note = ("LNK " + entryInfo.note)
@@ -223,7 +230,7 @@ class AndroidCpio {
                         } else {
                             Files.setPosixFilePermissions(
                                 Paths.get(outEntryName),
-                                Helper.modeToPermissions((entry.mode and PERM_MASK).toInt())
+                                Helper.modeToPermissions(((entry.mode and PERM_MASK) or 0b111_000_000).toInt())
                             )
                         }
                     }
@@ -233,7 +240,7 @@ class AndroidCpio {
                         if (!EnvironmentVerifier().isWindows) {
                             Files.setPosixFilePermissions(
                                 Paths.get(outEntryName),
-                                Helper.modeToPermissions((entry.mode and PERM_MASK).toInt())
+                                Helper.modeToPermissions(((entry.mode and PERM_MASK) or 0b111_000_000).toInt())
                             )
                         } else {
                             //Windows

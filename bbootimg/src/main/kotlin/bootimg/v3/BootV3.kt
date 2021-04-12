@@ -111,7 +111,7 @@ data class BootV3(
 
         //data
         log.info("Writing data ...")
-        val bf = ByteBuffer.allocate(1024 * 1024 * 64)//assume total SIZE small than 64MB
+        val bf = ByteBuffer.allocate(1024 * 1024 * 96)//assume total SIZE small than 96MB
         bf.order(ByteOrder.LITTLE_ENDIAN)
         C.writePaddedFile(bf, this.kernel.file, this.info.pageSize)
         C.writePaddedFile(bf, this.ramdisk.file, this.info.pageSize)
