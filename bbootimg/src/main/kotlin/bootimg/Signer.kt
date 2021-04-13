@@ -32,8 +32,9 @@ class Signer {
                     newAvbInfo = newAvbInfo)
             //original signer
             val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""
-            CommandLine.parse(cmdPrefix + "$avbtool add_hash_footer").apply {
+            CommandLine.parse("$cmdPrefix$avbtool add_hash_footer").apply {
                 addArguments("--image ${output}.signed2")
+                addArguments("--flags ${ai.header!!.flags}")
                 addArguments("--partition_size ${imageSize}")
                 addArguments("--salt ${Helper.toHexString(bootDesc.salt)}")
                 addArguments("--partition_name ${bootDesc.partition_name}")

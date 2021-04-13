@@ -119,6 +119,7 @@ def main():
     verifySingleDir(resDir, "boot_img_from_gesangtome") # android 9, no ramdisk
     verifySingleDir(resDir, "issue_47")
     verifySingleDir(resDir, "issue_52")
+    verifySingleDir(resDir, "issue_54")
     # 5.0
     verifySingleDir(resDir, "5.0_fugu_lrx21m")
     # 6.0
