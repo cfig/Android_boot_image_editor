@@ -106,5 +106,10 @@ class OpenSslHelperTest {
             this.generate(pk1, crt)
         }
         pfx.toJks().writeTo("platform.jks")
+        File("platform.jks").let {
+            if (it.exists()) {
+                it.delete()
+            }
+        }
     }
 }

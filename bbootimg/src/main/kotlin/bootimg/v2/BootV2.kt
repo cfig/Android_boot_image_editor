@@ -383,7 +383,8 @@ data class BootV2(
         }
 
         log.info("Writing data ...")
-        val bytesV2 = ByteBuffer.allocate(1024 * 1024 * 64)//assume total SIZE small than 64MB
+        //boot image size may > 64MB. Fix issue #57
+        val bytesV2 = ByteBuffer.allocate(maxOf(1024 * 1024 * 64, info.imageSize.toInt()))
             .let { bf ->
                 bf.order(ByteOrder.LITTLE_ENDIAN)
                 Common.writePaddedFile(bf, kernel.file!!, info.pageSize)
