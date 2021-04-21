@@ -1,13 +1,13 @@
 package cfig.packable
 
-import avb.AVBInfo
 import avb.blob.Footer
 import cfig.Avb
-import cfig.helper.Helper
 import cfig.bootimg.Common.Companion.probeHeaderVersion
 import cfig.bootimg.v2.BootV2
 import cfig.bootimg.v3.BootV3
+import cfig.helper.Helper
 import com.fasterxml.jackson.databind.ObjectMapper
+import de.vandermeer.asciitable.AsciiTable
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -51,6 +51,16 @@ class BootImgParser() : IPackable {
     override fun pack(fileName: String) {
         val cfgFile = workDir + fileName.removeSuffix(".img") + ".json"
         log.info("Loading config from $cfgFile")
+        if (!File(cfgFile).exists()) {
+            val tab = AsciiTable().let {
+                it.addRule()
+                it.addRow("'$cfgFile' doesn't exist, did you forget to 'unpack' ?")
+                it.addRule()
+                it
+            }
+            log.info("\n{}", tab.render())
+            return
+        }
         if (3 == probeHeaderVersion(fileName)) {
             ObjectMapper().readValue(File(cfgFile), BootV3::class.java)
                 .pack()
