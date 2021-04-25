@@ -69,6 +69,7 @@ Please note that the boot.img MUST follows AOSP verified boot flow, either [Boot
 
 | Device Model                   | Manufacturer | Compatible           | Android Version          | Note |
 |--------------------------------|--------------|----------------------|--------------------------|------|
+| ADT-3 (adt3)                   | Askey/Google | Y                    | 12 (spp2.210219.010)     | amlogic inside, <Br>Android TV |
 | Pixel 3 (blueline)             | Google       | Y                    | 12 (spp2.210219.008, <Br>2021)| |
 | Pixel 3 (blueline)             | Google       | Y                    | 11 (RP1A.200720.009, <Br>2020)| [more ...](doc/additional_tricks.md#pixel-3-blueline) |
 | Pixel 3 (blueline)             | Google       | Y                    | Q preview (qpp2.190228.023, <Br>2019)| [more ...](doc/additional_tricks.md#pixel-3-blueline) |

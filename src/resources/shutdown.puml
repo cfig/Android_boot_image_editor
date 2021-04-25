@@ -1,0 +1,20 @@
+@startuml
+'comment
+
+autonumber
+
+participant "system/core/reboot/reboot.c" as reboot_c
+participant "init/reboot.cpp" as init_reboot
+participant "init/reboot_utils.cpp" as init_reboot_utils
+participant "bionic/libc/bionic/reboot.cpp" as bionic_reboot
+entity "kernel/reboot.c" as kernel
+
+reboot_c -> init_reboot : property_set()\nargs="sys.powerctl","shutdown,tired"
+note left: reboot -p tired
+init_reboot -> init_reboot_utils: HandlePowerctlMessage()\nargs="shutdown,tired"
+init_reboot_utils -> bionic_reboot: RebootSystem()
+init_reboot_utils -> bionic_reboot: reboot(RB_POWER_OFF)
+bionic_reboot -> kernel: reboot()\nmode=LINUX_REBOOT_CMD_POWER_OFF
+bionic_reboot -> kernel: __reboot()\n  args=(LINUX_REBOOT_MAGIC1,\n  LINUX_REBOOT_MAGIC2,\n  mode,  nullptr)
+note right: kernel_power_off()
+@enduml

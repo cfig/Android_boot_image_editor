@@ -42,7 +42,7 @@ class Reboot {
             val args = inValue.split(",").toTypedArray()
             var cmd: String
             var rebootTarget = ""
-            if (args.size > 3) {
+            if (args.size > 4) {
                 throw java.lang.IllegalArgumentException("powerctl: unrecognized command $args")
             }
             when (args[0]) {
@@ -89,15 +89,17 @@ class Reboot {
                             }
                             "sideload", "sideload-auto-reboot" -> {
                                 BootloaderMsg().writeBootloaderMessage(
-                                        arrayOf("--" + rebootTarget.replace("-", "_")))
+                                    arrayOf("--" + rebootTarget.replace("-", "_"))
+                                )
                                 rebootTarget = "recovery"
                             }
                             else -> {
                             }
                         }//end-of-when-rebootTarget
-                        if (args.size == 3 && args[2].isNotBlank()) {
-                            log.info("rebootTarget: append " + args[2])
-                            rebootTarget += ("," + args[2])
+
+                        for (i in 2 until args.size) {
+                            log.info("rebootTarget: append " + args[i])
+                            rebootTarget += ("," + args[i])
                         }
                     }//end-of-cmd
                 }//end-of-cmd=reboot

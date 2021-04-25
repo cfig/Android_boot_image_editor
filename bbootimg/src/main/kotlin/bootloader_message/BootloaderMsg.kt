@@ -112,6 +112,9 @@ data class BootloaderMsg(//offset 0, size 2k
         }
     }
 
+    /*
+        https://android-review.googlesource.com/c/platform/bootable/recovery/+/735984
+     */
     fun updateBootFastboot() {
         this.command = "boot-fastboot"
         this.recovery = ""
