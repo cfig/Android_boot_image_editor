@@ -2,10 +2,10 @@ package cfig.bootimg.v3
 
 import cfig.Avb
 import cfig.EnvironmentVerifier
-import cfig.helper.Helper
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Common.Companion.getPaddingSize
 import cfig.bootimg.Signer
+import cfig.helper.Helper
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -112,7 +112,7 @@ data class BootV3(
         //data
         log.info("Writing data ...")
         //BootV3 should have correct image size
-        val bf = ByteBuffer.allocate(maxOf(info.imageSize.toInt(), 64 *1024 *1024))
+        val bf = ByteBuffer.allocate(maxOf(info.imageSize.toInt(), 64 * 1024 * 1024))
         bf.order(ByteOrder.LITTLE_ENDIAN)
         C.writePaddedFile(bf, this.kernel.file, this.info.pageSize)
         C.writePaddedFile(bf, this.ramdisk.file, this.info.pageSize)
@@ -132,8 +132,16 @@ data class BootV3(
     }
 
     fun sign(fileName: String): BootV3 {
-        val avbtool = String.format(Helper.prop("avbtool"), "v1.2")
-        Signer.signAVB(fileName, this.info.imageSize, avbtool)
+        val tab = AsciiTable().let {
+            it.addRule()
+            it.addRow("")
+            it
+        }
+        if (File(Avb.getJsonFileName(info.output)).exists()) {
+            Signer.signAVB(fileName, this.info.imageSize, String.format(Helper.prop("avbtool"), "v1.2"))
+        } else {
+            log.warn("no AVB info found, assume it's clear image")
+        }
         return this
     }
 
@@ -175,10 +183,15 @@ data class BootV3(
     }
 
     fun extractVBMeta(): BootV3 {
-        Avb().parseVbMeta(info.output)
-        if (File("vbmeta.img").exists()) {
-            log.warn("Found vbmeta.img, parsing ...")
-            VBMetaParser().unpack("vbmeta.img")
+        try {
+            Avb().parseVbMeta(info.output)
+            if (File("vbmeta.img").exists()) {
+                log.warn("Found vbmeta.img, parsing ...")
+                VBMetaParser().unpack("vbmeta.img")
+            }
+        } catch (e: IllegalArgumentException) {
+            log.warn(e.message)
+            log.warn("failed to parse vbmeta info")
         }
         return this
     }
@@ -215,8 +228,9 @@ data class BootV3(
                 it.addRow("\\-- decoded boot signature", Avb.getJsonFileName(this.bootSignature.file))
                 it.addRule()
             }
-
-            it.addRow("AVB info", Avb.getJsonFileName(info.output))
+            Avb.getJsonFileName(info.output).let { jsonFile ->
+                it.addRow("AVB info", if (File(jsonFile).exists()) jsonFile else "NONE")
+            }
             it.addRule()
             it
         }

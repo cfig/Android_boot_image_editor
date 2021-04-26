@@ -65,6 +65,16 @@ class BootImgParser() : IPackable {
             ObjectMapper().readValue(File(cfgFile), BootV3::class.java)
                 .pack()
                 .sign(fileName)
+                .let {
+                    val tab = AsciiTable().let { tab ->
+                        tab.addRule()
+                        val outFileSuffix = if (File(Avb.getJsonFileName(it.info.output)).exists()) ".signed" else ""
+                        tab.addRow("${it.info.output}${outFileSuffix} is ready")
+                        tab.addRule()
+                        tab
+                    }
+                    log.info("\n{}", tab.render())
+                }
         } else {
             ObjectMapper().readValue(File(cfgFile), BootV2::class.java)
                 .pack()
