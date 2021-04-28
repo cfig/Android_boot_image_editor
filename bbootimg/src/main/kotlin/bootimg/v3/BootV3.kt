@@ -132,11 +132,6 @@ data class BootV3(
     }
 
     fun sign(fileName: String): BootV3 {
-        val tab = AsciiTable().let {
-            it.addRule()
-            it.addRow("")
-            it
-        }
         if (File(Avb.getJsonFileName(info.output)).exists()) {
             Signer.signAVB(fileName, this.info.imageSize, String.format(Helper.prop("avbtool"), "v1.2"))
         } else {
@@ -174,7 +169,11 @@ data class BootV3(
                 info.output, this.bootSignature.file,
                 this.bootSignature.position.toLong(), this.bootSignature.size
             )
-            Avb().parseVbMeta(this.bootSignature.file)
+            try {
+                Avb().parseVbMeta(this.bootSignature.file)
+            } catch (e: IllegalArgumentException) {
+                log.warn("boot signature is invalid")
+            }
         }
 
         //dump info again
@@ -225,7 +224,9 @@ data class BootV3(
 
             if (this.info.signatureSize > 0) {
                 it.addRow("boot signature", this.bootSignature.file)
-                it.addRow("\\-- decoded boot signature", Avb.getJsonFileName(this.bootSignature.file))
+                Avb.getJsonFileName(this.bootSignature.file).let { jsFile ->
+                    it.addRow("\\-- decoded boot signature", if (File(jsFile).exists()) jsFile else "N/A")
+                }
                 it.addRule()
             }
             Avb.getJsonFileName(info.output).let { jsonFile ->

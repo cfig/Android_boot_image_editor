@@ -9,6 +9,7 @@ successLogo = """
       +----------------------------------+
 """
 resDir = "src/integrationTest/resources"
+resDir2 = "src/integrationTest/resources_2"
 log = logging.getLogger('TEST')
 log.setLevel(logging.DEBUG)
 consoleHandler = logging.StreamHandler(sys.stdout)
@@ -54,7 +55,7 @@ def cleanUp():
     deleteIfExists("vendor_boot.img.signed")
     deleteIfExists("vendor_boot.img.signed2")
 
-def verifySingleJson(jsonFile):
+def verifySingleJson(jsonFile, func = None):
     log.info(jsonFile)
     imgDir = os.path.dirname(jsonFile)
     verifyItems = json.load(open(jsonFile))
@@ -73,6 +74,8 @@ def verifySingleJson(jsonFile):
     else:
         gradleWrapper = "./gradlew"
     subprocess.check_call(gradleWrapper + " unpack", shell = True)
+    if func:
+        func()
     subprocess.check_call(gradleWrapper + " pack", shell = True)
     for k, v in verifyItems["hash"].items():
         log.info("%s : %s" % (k, v))
@@ -114,6 +117,9 @@ def seekedCopy(inFile, outFile, offset):
             writer.write(content)
 
 def main():
+    #########################################
+    #   resource_1
+    #########################################
     # from volunteers
     verifySingleDir(resDir, "recovery_image_from_s-trace")
     verifySingleDir(resDir, "boot_img_from_gesangtome") # android 9, no ramdisk
@@ -144,6 +150,11 @@ def main():
     verifySingleDir(resDir, "10.0.0_coral-qq1d.200205.002")
     # 11
     verifySingleDir(resDir, "11.0.0_redfin.rd1a.200810.021.a1")
+
+    #########################################
+    #   resource_2
+    #########################################
+    verifySingleJson("%s/issue_59/recovery.json" % resDir2, func = lambda: shutil.rmtree("build/unzip_boot/root", ignore_errors = False))
 
     log.info(successLogo)
 

@@ -1,3 +1,6 @@
 [submodule "src/integrationTest/resources"]
 	path = src/integrationTest/resources
 	url = https://github.com/cfig/android_image_res
+[submodule "src/integrationTest/resources_2"]
+	path = src/integrationTest/resources_2
+	url = https://gitee.com/cfig/android_image_res2.git

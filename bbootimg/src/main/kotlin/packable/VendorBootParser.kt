@@ -12,7 +12,7 @@ class VendorBootParser : IPackable {
     private val log = LoggerFactory.getLogger(VendorBootParser::class.java)
     private val workDir = Helper.prop("workDir")
     override fun capabilities(): List<String> {
-        return listOf("^vendor_boot\\.img$")
+        return listOf("^vendor_boot(-debug)?\\.img$")
     }
 
     override fun unpack(fileName: String) {

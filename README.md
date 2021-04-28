@@ -165,7 +165,7 @@ Then flash vbmeta.img.signed to your device.
 ## boot.img layout
 Read [layout](doc/layout.md) of Android boot.img and vendor\_boot.img.
 
-## References
+## References and Acknowledgement
 <details>
   <summary>more ...</summary>
 
@@ -191,5 +191,12 @@ libsparse<br/>
 https://android.googlesource.com/platform/system/core/+/refs/heads/master/libsparse/<br/>
 Android Nexus/Pixle factory images<br/>
 https://developers.google.cn/android/images<br/>
+
+This project is developed with products by Jetbrains.
+
+
+<a href="https://jb.gg/OpenSource">
+  <img src="https://user-images.githubusercontent.com/1133314/116802621-c076be80-ab46-11eb-8a14-9454a933de7d.png" alt="drawing" width="80">
+</a>
 
 </details>
