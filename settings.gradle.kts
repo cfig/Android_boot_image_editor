@@ -1,3 +1,4 @@
+rootProject.name = "boot"
 include("bbootimg")
 include("aosp:boot_signer")
 include("aosp:mkbootfs.10")

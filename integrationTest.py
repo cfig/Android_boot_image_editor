@@ -28,32 +28,23 @@ def deleteIfExists(inFile):
     for i in range(3):
         try:
             if os.path.isfile(inFile):
+                log.info("rm %s" % inFile)
                 os.remove(inFile)
             return
         except Exception as e:
-            log.warn("Exception in cleaning up %s" % inFile)
+            log.warning("Exception in cleaning up %s" % inFile)
             time.sleep(3)
 
 def cleanUp():
     log.info("clean up ...")
     shutil.rmtree("build", ignore_errors = True)
-    deleteIfExists("boot.img")
-    deleteIfExists("boot.img.clear")
-    deleteIfExists("boot.img.google")
-    deleteIfExists("boot.img.signed")
-    deleteIfExists("boot.img.signed2")
-    deleteIfExists("recovery.img")
-    deleteIfExists("recovery.img.clear")
-    deleteIfExists("recovery.img.google")
-    deleteIfExists("recovery.img.signed")
-    deleteIfExists("recovery.img.signed2")
-    deleteIfExists("vbmeta.img")
-    deleteIfExists("vbmeta.img.signed")
-    deleteIfExists("vendor_boot.img")
-    deleteIfExists("vendor_boot.img.clear")
-    deleteIfExists("vendor_boot.img.google")
-    deleteIfExists("vendor_boot.img.signed")
-    deleteIfExists("vendor_boot.img.signed2")
+    [deleteIfExists(item) for item in [
+        "boot.img", "boot.img.clear", "boot.img.google", "boot.img.signed", "boot.img.signed2",
+        "recovery.img", "recovery.img.clear", "recovery.img.google", "recovery.img.signed", "recovery.img.signed2",
+        "vbmeta.img", "vbmeta.img.signed",
+        "vendor_boot.img", "vendor_boot.img.clear", "vendor_boot.img.google", "vendor_boot.img.signed", "vendor_boot.img.signed2",
+        "boot-debug.img", "boot-debug.img.clear", "boot-debug.img.google",
+        "vendor_boot-debug.img", "vendor_boot-debug.img.clear", "vendor_boot-debug.img.google" ]]
 
 def verifySingleJson(jsonFile, func = None):
     log.info(jsonFile)

@@ -10,8 +10,15 @@ repositories {
 }
 
 dependencies {
+    constraints {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    }
+
+    //kotlin
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+
     implementation("org.slf4j:slf4j-simple:1.7.30")
     implementation("org.slf4j:slf4j-api:1.7.30")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.12.1")
@@ -46,6 +53,7 @@ tasks {
         }
         from(configurations.runtimeClasspath.get().map({ if (it.isDirectory) it else zipTree(it) }))
         excludes.addAll(mutableSetOf("META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.DSA"))
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         dependsOn(":helper:jar")
     }
     test {
