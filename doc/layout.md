@@ -132,11 +132,8 @@ Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read fi
     +-----------------------------------------------------------+
     |<boot signature>   (v4 only)    |   boot signature length  |
     +--------------------------------+--------------------------+
-
-    padding calculation:
     |<padding>                       | min(n * page_size - len) |
-
-
+    +-----------------------------------------------------------+
 
 ## 3. vendor\_boot.img v3-v4
 

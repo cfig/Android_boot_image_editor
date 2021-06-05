@@ -22,6 +22,8 @@ endef
 
 define gw_win
 @IF EXIST tools\\bin SET PATH=%PATH%;tools\\bin\n
+if "%1" == "check" exit 0\n
+if "%1" == "clean" exit 0\n
 @java -jar bbootimg/bbootimg.jar %*
 endef
 export gw gw_win

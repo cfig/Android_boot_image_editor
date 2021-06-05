@@ -76,6 +76,7 @@ Please note that the boot.img MUST follows AOSP verified boot flow, either [Boot
 | Pixel 3 (blueline)             | Google       | Y                    | 11 (RP1A.200720.009, <Br>2020)| [more ...](doc/additional_tricks.md#pixel-3-blueline) |
 | Pixel 3 (blueline)             | Google       | Y                    | Q preview (qpp2.190228.023, <Br>2019)| [more ...](doc/additional_tricks.md#pixel-3-blueline) |
 | Redmi K30 4G (phoenix[n])      | XiaoMi       | Y                    | 10 | [verified](https://github.com/cfig/Android_boot_image_editor/issues/17#issuecomment-817169307) by @eebssk1 |
+| TS10                           | Topway       | Y                    | 10                       | car headunit, @mariodantas |
 | Pixel XL (marlin)              | HTC          | Y                    | 9.0.0 (PPR2.180905.006, <Br>Sep 2018)| [more ...](doc/additional_tricks.md#pixel-xl-marlin) |
 | K3 (CPH1955)                   | OPPO         | Y for recovery.img<Br> N for boot.img  | Pie    | [more](doc/additional_tricks.md#k3-cph1955) |
 | Z18 (NX606J)                    | ZTE          | Y                    | 8.1.0                    | [more...](doc/additional_tricks.md#nx606j) |
