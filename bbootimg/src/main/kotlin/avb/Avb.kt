@@ -465,14 +465,16 @@ class Avb {
             }
         }
 
-        fun verifyAVBIntegrity(fileName: String, avbtool: String) {
+        fun verifyAVBIntegrity(fileName: String, avbtool: String): Boolean {
             val cmdline = "python $avbtool verify_image --image $fileName"
             log.info(cmdline)
             try {
                 DefaultExecutor().execute(CommandLine.parse(cmdline))
             } catch (e: Exception) {
-                throw IllegalArgumentException("$fileName failed integrity check by \"$cmdline\"")
+                log.error("$fileName failed integrity check by \"$cmdline\"")
+                return false
             }
+            return true
         }
 
         fun updateVbmeta(fileName: String) {

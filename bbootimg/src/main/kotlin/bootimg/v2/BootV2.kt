@@ -95,7 +95,11 @@ data class BootV2(
                     theInfo.osPatchLevel = bh2.osPatchLevel
                     if (Avb.hasAvbFooter(fileName)) {
                         theInfo.verify = "VB2.0"
-                        Avb.verifyAVBIntegrity(fileName, String.format(Helper.prop("avbtool"), "v1.2"))
+                        if (Avb.verifyAVBIntegrity(fileName, String.format(Helper.prop("avbtool"), "v1.2"))) {
+                            theInfo.verify += " PASS"
+                        } else {
+                            theInfo.verify += " FAIL"
+                        }
                     } else {
                         theInfo.verify = "VB1.0"
                     }
@@ -219,7 +223,7 @@ data class BootV2(
     }
 
     fun extractVBMeta(): BootV2 {
-        if (this.info.verify == "VB2.0") {
+        if (this.info.verify.startsWith("VB2.0")) {
             Avb().parseVbMeta(info.output)
             if (File("vbmeta.img").exists()) {
                 log.warn("Found vbmeta.img, parsing ...")
@@ -241,9 +245,14 @@ data class BootV2(
         val tab = AsciiTable().let {
             it.addRule()
             it.addRow("image info", workDir + info.output.removeSuffix(".img") + ".json")
-            if (this.info.verify == "VB2.0") {
+            if (this.info.verify.startsWith("VB2.0")) {
                 it.addRule()
-                it.addRow("AVB info", Avb.getJsonFileName(info.output))
+                val verifyStatus = if (this.info.verify.contains("PASS")) {
+                    "verified"
+                } else {
+                    "verify fail"
+                }
+                it.addRow("AVB info [$verifyStatus]", Avb.getJsonFileName(info.output))
             }
             //kernel
             it.addRule()
@@ -499,7 +508,7 @@ data class BootV2(
     fun sign(): BootV2 {
         //unify with v1.1/v1.2 avbtool
         val avbtool = String.format(Helper.prop("avbtool"), "v1.2")
-        if (info.verify == "VB2.0") {
+        if (info.verify.startsWith("VB2.0")) {
             Signer.signAVB(info.output, this.info.imageSize, avbtool)
             log.info("Adding hash_footer with verified-boot 2.0 style")
         } else {

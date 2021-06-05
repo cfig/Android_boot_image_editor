@@ -51,11 +51,8 @@ class BootHeaderV3(
         this.headerSize = (info[4] as UInt).toInt()
         //5,6,7,8 reserved
         this.headerVersion = (info[9] as UInt).toInt()
-
         this.cmdline = info[10] as String
-
         this.signatureSize = (info[11] as UInt).toInt()
-
         assert(this.headerSize in intArrayOf(BOOT_IMAGE_HEADER_V3_SIZE, BOOT_IMAGE_HEADER_V4_SIZE))
     }
 
