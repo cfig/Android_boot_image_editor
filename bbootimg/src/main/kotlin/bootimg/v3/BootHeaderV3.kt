@@ -19,7 +19,6 @@ import cfig.io.Struct3
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class BootHeaderV3(
     var kernelSize: Int = 0,
     var ramdiskSize: Int = 0,

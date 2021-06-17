@@ -37,7 +37,6 @@ import java.nio.ByteOrder
 import java.security.MessageDigest
 import java.util.regex.Pattern
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class Common {
     data class VeritySignature(
         var type: String = "dm-verity",

@@ -22,7 +22,6 @@ import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.security.MessageDigest
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class HashTreeDescriptorTest {
 
     @Test

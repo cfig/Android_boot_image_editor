@@ -22,7 +22,6 @@ import java.io.InputStream
 import java.security.MessageDigest
 import org.slf4j.LoggerFactory
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class ChainPartitionDescriptor(
         var rollback_index_location: Int = 0,
         var partition_name_len: Int = 0,

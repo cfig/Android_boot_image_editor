@@ -20,7 +20,6 @@ import org.junit.Test
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class HashDescriptorTest {
     private val log = LoggerFactory.getLogger(HashDescriptorTest::class.java)
 

@@ -27,7 +27,6 @@ import java.io.File
 import cfig.EnvironmentVerifier
 
 class Signer {
-    @OptIn(ExperimentalUnsignedTypes::class)
     companion object {
         private val log = LoggerFactory.getLogger(Signer::class.java)
 

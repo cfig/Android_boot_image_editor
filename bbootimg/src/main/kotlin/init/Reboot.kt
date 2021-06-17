@@ -26,7 +26,6 @@ class Reboot {
         ANDROID_RB_THERMOFF
     }
 
-    @OptIn(ExperimentalUnsignedTypes::class)
     companion object {
         private val log = LoggerFactory.getLogger(Reboot::class.java)
         const val dynamicPartitionKey = "ro.boot.dynamic_partitions"

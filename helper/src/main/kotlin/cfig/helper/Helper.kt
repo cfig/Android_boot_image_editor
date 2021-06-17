@@ -30,7 +30,6 @@ import kotlin.math.pow
 import java.text.StringCharacterIterator
 import java.text.CharacterIterator
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class Helper {
     data class Slice(
         var srcFile: String,

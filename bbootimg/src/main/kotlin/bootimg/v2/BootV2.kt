@@ -32,7 +32,6 @@ import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-@OptIn(ExperimentalUnsignedTypes::class)
 data class BootV2(
     var info: MiscInfo = MiscInfo(),
     var kernel: CommArgs = CommArgs(),

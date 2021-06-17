@@ -21,7 +21,6 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.IllegalStateException
 
-@OptIn(ExperimentalUnsignedTypes::class)
 data class BootloaderMsg(//offset 0, size 2k
         var command: String = "",
         var status: String = "",

@@ -18,7 +18,6 @@ import cfig.io.Struct3
 import org.slf4j.LoggerFactory
 import java.io.FileInputStream
 
-@OptIn(ExperimentalUnsignedTypes::class)
 data class VirtualABMsg(
         var version: Int = 0,
         var magic: ByteArray = byteArrayOf(),

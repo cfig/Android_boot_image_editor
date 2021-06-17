@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 0) {
     @Throws(IllegalArgumentException::class)
     constructor(stream: InputStream, seq: Int = 0) : this() {

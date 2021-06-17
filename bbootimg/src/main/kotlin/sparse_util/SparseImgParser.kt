@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import avb.blob.Footer
 import cfig.Avb
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class SparseImgParser : IPackable {
     override val loopNo: Int
         get() = 0

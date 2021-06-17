@@ -22,7 +22,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 
-@OptIn(ExperimentalUnsignedTypes::class)
 interface IPackable {
     val loopNo: Int
     fun capabilities(): List<String> {

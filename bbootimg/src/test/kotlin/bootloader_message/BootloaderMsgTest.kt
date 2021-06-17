@@ -21,7 +21,6 @@ import org.junit.Test
 import org.slf4j.LoggerFactory
 import java.io.File
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class BootloaderMsgTest {
     private val log = LoggerFactory.getLogger(BootloaderMsgTest::class.java)
 

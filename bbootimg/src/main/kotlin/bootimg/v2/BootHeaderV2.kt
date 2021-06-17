@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory
 import java.io.InputStream
 import kotlin.math.pow
 
-@OptIn(ExperimentalUnsignedTypes::class)
 open class BootHeaderV2(
         var kernelLength: Int = 0,
         var kernelOffset: Long = 0L, //UInt

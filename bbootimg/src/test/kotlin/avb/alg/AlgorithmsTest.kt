@@ -18,7 +18,6 @@ import cfig.helper.Helper
 import org.junit.Assert
 import org.junit.Test
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class AlgorithmsTest {
     @Test
     fun test1() {

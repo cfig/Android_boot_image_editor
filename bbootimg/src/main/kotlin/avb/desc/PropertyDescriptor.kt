@@ -18,7 +18,6 @@ import cfig.helper.Helper
 import cfig.io.Struct3
 import java.io.InputStream
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class PropertyDescriptor(
         var key: String = "",
         var value: String = "") : Descriptor(TAG, 0, 0) {

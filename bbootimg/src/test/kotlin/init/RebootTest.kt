@@ -23,7 +23,6 @@ import cfig.init.Reboot
 import cfig.bootimg.Common.Companion.deleleIfExists
 import org.slf4j.LoggerFactory
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class RebootTest {
     private val log = LoggerFactory.getLogger(RebootTest::class.java)
 

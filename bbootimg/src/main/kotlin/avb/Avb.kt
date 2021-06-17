@@ -39,7 +39,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class Avb {
     private val MAX_VBMETA_SIZE = 64 * 1024
     private val MAX_FOOTER_SIZE = 4096

@@ -18,7 +18,6 @@ import cfig.io.Struct3
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class VendorBootHeader(
     var headerVersion: Int = 0,
     var pageSize: Int = 0,

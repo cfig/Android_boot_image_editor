@@ -33,7 +33,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import cfig.bootimg.Common as C
 
-@OptIn(ExperimentalUnsignedTypes::class)
 data class BootV3(
     var info: MiscInfo = MiscInfo(),
     var kernel: CommArgs = CommArgs(),

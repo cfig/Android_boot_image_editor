@@ -25,7 +25,6 @@ import java.nio.file.Paths
 import java.security.MessageDigest
 import java.security.PrivateKey
 
-@OptIn(ExperimentalUnsignedTypes::class)
 data class AuthBlob(
     var offset: Long = 0,
     var size: Long = 0,

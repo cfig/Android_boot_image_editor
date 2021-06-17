@@ -23,7 +23,6 @@ import java.io.*
 import java.security.MessageDigest
 import java.util.*
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class HashTreeDescriptor(
     var flags: Int = 0,
     var dm_verity_version: Int = 0,

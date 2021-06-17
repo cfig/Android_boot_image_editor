@@ -34,7 +34,6 @@ import cfig.EnvironmentVerifier
 import cfig.io.Struct3
 import java.io.InputStream
 
-@OptIn(ExperimentalUnsignedTypes::class)
 data class VendorBoot(
     var info: MiscInfo = MiscInfo(),
     var ramdisk: CommArgs = CommArgs(),

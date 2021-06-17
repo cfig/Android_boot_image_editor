@@ -24,7 +24,6 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.security.MessageDigest
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class HashDescriptor(var flags: Int = 0,
                      var partition_name: String = "",
                      var hash_algorithm: String = "",

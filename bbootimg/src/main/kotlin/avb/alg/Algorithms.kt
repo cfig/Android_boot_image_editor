@@ -17,7 +17,6 @@ package avb.alg
 import cfig.io.Struct3
 
 class Algorithms {
-    @OptIn(ExperimentalUnsignedTypes::class)
     companion object {
         private val algMap = mutableMapOf<String, Algorithm>()
         fun get(name: String): Algorithm? {

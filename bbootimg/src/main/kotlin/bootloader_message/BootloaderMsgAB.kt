@@ -18,7 +18,6 @@ import cfig.io.Struct3
 import org.slf4j.LoggerFactory
 import java.io.FileInputStream
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class BootloaderMsgAB( //offset 2k, size 2k
         var slotSuffix: String = "",
         var updateChannel: String = "",

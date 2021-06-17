@@ -24,7 +24,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.ByteArrayInputStream
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class BlobTest {
     @Test
     fun testEncodedKey2048() {
