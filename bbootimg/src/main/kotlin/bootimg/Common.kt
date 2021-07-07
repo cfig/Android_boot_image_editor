@@ -261,27 +261,25 @@ class Common {
         fun packRootfs(rootDir: String, ramdiskGz: String) {
             val root = File(rootDir).path
             log.info("Packing rootfs $root ...")
-            val fsConfig = File(ramdiskGz).parentFile.path + "/ramdisk_filelist.txt"
             when {
                 ramdiskGz.endsWith(".gz") -> {
                     val f = ramdiskGz.removeSuffix(".gz")
-                    AndroidCpio().pack(root, f, fsConfig)
+                    AndroidCpio().pack(root, f, "${f}_filelist.txt")
                     FileInputStream(f).use { ZipHelper.minigzip(ramdiskGz, it) }
-
                 }
                 ramdiskGz.endsWith(".lz4") -> {
                     val f = ramdiskGz.removeSuffix(".lz4")
-                    AndroidCpio().pack(root, f, fsConfig)
+                    AndroidCpio().pack(root, f, "${f}_filelist.txt")
                     FileInputStream(f).use { ZipHelper.lz4(ramdiskGz, it) }
                 }
                 ramdiskGz.endsWith(".lzma") -> {
                     val f = ramdiskGz.removeSuffix(".lzma")
-                    AndroidCpio().pack(root, f, fsConfig)
+                    AndroidCpio().pack(root, f, "${f}_filelist.txt")
                     FileInputStream(f).use { ZipHelper.lzma(ramdiskGz, it) }
                 }
                 ramdiskGz.endsWith(".xz") -> {
                     val f = ramdiskGz.removeSuffix(".xz")
-                    AndroidCpio().pack(root, f, fsConfig)
+                    AndroidCpio().pack(root, f, "${f}_filelist.txt")
                     FileInputStream(f).use { ZipHelper.xz(ramdiskGz, it) }
                 }
                 else -> {
@@ -327,6 +325,23 @@ class Common {
             }
         }
 
+        fun writePaddedFiles(inBF: ByteBuffer, srcFiles: List<String>, padding: Int) {
+            srcFiles.forEach { srcFile ->
+                FileInputStream(srcFile).use { iS ->
+                    var byteRead: Int
+                    val dataRead = ByteArray(128)
+                    while (true) {
+                        byteRead = iS.read(dataRead)
+                        if (-1 == byteRead) {
+                            break
+                        }
+                        inBF.put(dataRead, 0, byteRead)
+                    }
+                }
+            }
+            padFile(inBF, padding)
+        }
+
         private fun unpackRamdisk(ramdisk: String, root: String) {
             val rootFile = File(root).apply {
                 if (exists()) {
@@ -339,7 +354,7 @@ class Common {
             AndroidCpio.decompressCPIO(
                 File(ramdisk).canonicalPath,
                 rootFile.canonicalPath,
-                File(ramdisk).canonicalPath.removeSuffix(".img") + "_filelist.txt"
+                File(ramdisk).canonicalPath + "_filelist.txt"
             )
             log.info(" ramdisk extracted : $ramdisk -> $rootFile")
         }

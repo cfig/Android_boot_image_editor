@@ -159,7 +159,8 @@ Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read fi
     |--------------------------------+--------------------------|    --> 2080
     |<board name>                    |     16                   |
     |--------------------------------+--------------------------|    --> 2096
-    |<header size>                   |     4 (value=2112)       |
+    |<header size>                   |     4 (v3: value=2112)   |
+    |                                |     4 (v4: value=2128)   |
     |--------------------------------+--------------------------|    --> 2100
     |<dtb size>                      |     4                    |
     |--------------------------------+--------------------------|    --> 2104
@@ -182,23 +183,25 @@ Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read fi
 
     +------------------+-------------+--------------------------+    --> pagesize
     |                  | ramdisk 1   |                          |
-    |                  +-------------+                          |
+    |                  |-------------+                          |
     |                  | ramdisk 2   |                          |
-    |<vendor ramdisks> +-------------+   padded len             |
+    |<vendor ramdisks> |-------------+   padded len             |
     |                  | ramdisk n   |                          |
-    |                  +-------------+                          |    --> pagesize + vendor_ramdisk_total_size
+    |                  |-------------+                          |    --> pagesize + vendor_ramdisk_total_size
     |                  | padding     |                          |
-    +--------------------------------+--------------------------+    --> pagesize + vendor_ramdisk_total_size + padding
-    |<dtb>                           |   padded len             |
-    +--------------------------------+--------------------------+    --> dtb offset + dtb size + padding
+    +------------------+-------------+--------------------------+    --> pagesize + vendor_ramdisk_total_size + padding
+    |                  |   dtb       |                          |
+    |<dtb>             |-------------+   padded len             |
+    |                  | padding     |                          |
+    +------------------+-------------+--------------------------+    --> dtb offset + dtb size + padding
     |<vendor ramdisk > | entry 1     |                          |
-    |     table>       +-------------+                          |
+    |     table>       |-------------+                          |
     |                  | entry 2     |   padded len             |
-    |                  +-------------+                          |
+    |                  |-------------+                          |
     |                  | entry n     |                          |
-    |      (v4)        +-------------+                          |
+    |      (v4)        |-------------+                          |
     |                  | padding     |                          |
-    +-----------------------------------------------------------+    --> vrt offset + vrt size + padding
+    +------------------+----------------------------------------+    --> vrt offset + vrt size + padding
     |<bootconfig>            (v4)    |   padded len             |
     +--------------------------------+--------------------------+
 

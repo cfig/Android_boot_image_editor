@@ -15,24 +15,22 @@
 package cfig.bootimg.v3
 
 import cfig.Avb
+import cfig.EnvironmentVerifier
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
 import cfig.helper.Helper
+import cfig.io.Struct3
+import cfig.io.Struct3.ByteArrayExt.Companion.toCString
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.LoggerFactory
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import java.io.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import cfig.bootimg.Common as C
-import cfig.EnvironmentVerifier
-import cfig.io.Struct3
-import java.io.InputStream
 
 data class VendorBoot(
     var info: MiscInfo = MiscInfo(),
@@ -82,26 +80,52 @@ data class VendorBoot(
 
     class Vrt(
         var size: Int = 0,
+        var eachEntrySize: Int = 0,
         var position: Long = 0,
         var ramdidks: MutableList<VrtEntry> = mutableListOf()
-    )
+    ) {
+        fun update(): Vrt {
+            var totalSz = 0
+            this.ramdidks.forEachIndexed { _, vrtEntry ->
+                vrtEntry.offset = totalSz
+                vrtEntry.size = File(vrtEntry.file).length().toInt()
+                totalSz += vrtEntry.size
+            }
+            return this
+        }
+
+        fun encode(inPageSize: Int): ByteArray {
+            val bf = ByteBuffer.allocate(8192)
+            this.ramdidks.forEach {
+                bf.put(it.encode())
+            }
+            val realSize = bf.position()
+            val ret = ByteArray(Helper.round_to_multiple(realSize, inPageSize))
+            bf.array().copyInto(ret, 0, 0, realSize)
+            return ret
+        }
+    }
 
     class VrtEntry(
         var size: Int = 0,
         var offset: Int = 0,
         var type: VrtType = VrtType.NONE,
         var name: String = "", //32s
-        var boardId: Array<Int> = arrayOf(), //16I
+        var boardId: ByteArray = byteArrayOf(), //16I (aka. 64 bytes)
+        var boardIdStr: String = "",
         var file: String = ""
     ) {
         companion object {
             private val log = LoggerFactory.getLogger(VrtEntry::class.java)
             const val VENDOR_RAMDISK_NAME_SIZE = 32
             const val VENDOR_RAMDISK_TABLE_ENTRY_BOARD_ID_SIZE = 16
-            const val FORMAT_STRING = "3I${VENDOR_RAMDISK_NAME_SIZE}s${VENDOR_RAMDISK_TABLE_ENTRY_BOARD_ID_SIZE}I"
+
+            //const val FORMAT_STRING = "3I${VENDOR_RAMDISK_NAME_SIZE}s${VENDOR_RAMDISK_TABLE_ENTRY_BOARD_ID_SIZE}I"
+            const val FORMAT_STRING = "3I${VENDOR_RAMDISK_NAME_SIZE}s${VENDOR_RAMDISK_TABLE_ENTRY_BOARD_ID_SIZE * 4}b"
+            const val SIZE = 108
 
             init {
-                log.info(Struct3(FORMAT_STRING).calcSize().toString())
+                assert(Struct3(FORMAT_STRING).calcSize() == SIZE)
             }
         }
 
@@ -110,25 +134,31 @@ data class VendorBoot(
                 return
             }
             val info = Struct3(FORMAT_STRING).unpack(iS)
-            assert((3 + 1 + VENDOR_RAMDISK_TABLE_ENTRY_BOARD_ID_SIZE) == info.size)
+            assert((3 + 1 + 1) == info.size)
             this.size = (info[0] as UInt).toInt()
             this.offset = (info[1] as UInt).toInt()
             this.type = VrtType.fromInt((info[2] as UInt).toInt())
             this.name = info[3] as String
+            this.boardId = info[4] as ByteArray
+            this.boardIdStr = boardId.toCString()
             this.file = dumpFile
         }
 
-        override fun toString(): String {
-            return "VrtEntry(ramdiskSize=$size, ramdiskOffset=$offset, ramdiskType=$type, ramdiskName='$name', boardId=${boardId.contentToString()})"
+        fun encode(): ByteArray {
+            return Struct3(FORMAT_STRING).pack(this.size, this.offset, this.type.ordinal, this.name, this.boardId)
         }
 
+        override fun toString(): String {
+            return "VrtEntry(size=$size, offset=$offset, type=$type, name='$name', boardIdStr='$boardIdStr', file='$file')"
+        }
     }
 
     companion object {
         private val log = LoggerFactory.getLogger(VendorBoot::class.java)
+        private val workDir = Helper.prop("workDir")
+        private val VENDOR_RAMDISK_TABLE_ENTRY_V4_SIZE = 108
         fun parse(fileName: String): VendorBoot {
             val ret = VendorBoot()
-            val workDir = Helper.prop("workDir")
             FileInputStream(fileName).use { fis ->
                 val header = VendorBootHeader(fis)
                 ret.info.output = File(fileName).name
@@ -155,8 +185,9 @@ data class VendorBoot(
                 //vrt
                 if (header.vrtSize > 0) {
                     ret.ramdisk_table.size = header.vrtSize
+                    ret.ramdisk_table.eachEntrySize = header.vrtEntrySize
                     ret.ramdisk_table.position =
-                        ret.dtb.position + Helper.round_to_multiple(ret.ramdisk_table.size, header.pageSize)
+                        ret.dtb.position + Helper.round_to_multiple(ret.dtb.size, header.pageSize)
                     FileInputStream(ret.info.output).use {
                         it.skip(ret.ramdisk_table.position)
                         for (item in 0 until header.vrtEntryNum) {
@@ -181,19 +212,30 @@ data class VendorBoot(
     }
 
     fun pack(): VendorBoot {
-        val workDir = Helper.prop("workDir")
-        if (File(workDir + this.ramdisk.file).exists() && !File(workDir + "root").exists()) {
-            //do nothing if we have ramdisk.img.gz but no /root
-            log.warn("Use prebuilt ramdisk file: ${this.ramdisk.file}")
-        } else {
-            File(this.ramdisk.file).deleleIfExists()
-            File(this.ramdisk.file.removeSuffix(".gz")).deleleIfExists()
-            //Fixed: remove cpio in C/C++
-            //C.packRootfs("$workDir/root", this.ramdisk.file, parseOsMajor())
-            //enable advance JAVA cpio
-            C.packRootfs("$workDir/root", this.ramdisk.file)
+        when (this.info.headerVersion) {
+            3 -> {
+                if (File(workDir + this.ramdisk.file).exists() && !File(workDir + "root").exists()) {
+                    //do nothing if we have ramdisk.img.gz but no /root
+                    log.warn("Use prebuilt ramdisk file: ${this.ramdisk.file}")
+                } else {
+                    File(this.ramdisk.file).deleleIfExists()
+                    File(this.ramdisk.file.removeSuffix(".gz")).deleleIfExists()
+                    //Fixed: remove cpio in C/C++
+                    //C.packRootfs("$workDir/root", this.ramdisk.file, parseOsMajor())
+                    //enable advance JAVA cpio
+                    C.packRootfs("$workDir/root", this.ramdisk.file)
+                }
+                this.ramdisk.size = File(this.ramdisk.file).length().toInt()
+            }
+            else -> {
+                this.ramdisk_table.ramdidks.forEachIndexed { index, it ->
+                    File(it.file).deleleIfExists()
+                    log.info(workDir + "root.${index + 1} -> " + it.file)
+                    C.packRootfs(workDir + "root.${index + 1}", it.file)
+                }
+                this.ramdisk.size = this.ramdisk_table.ramdidks.sumOf { File(it.file).length() }.toInt()
+            }
         }
-        this.ramdisk.size = File(this.ramdisk.file).length().toInt()
         this.dtb.size = File(this.dtb.file).length().toInt()
         //header
         FileOutputStream(this.info.output + ".clear", false).use { fos ->
@@ -203,12 +245,30 @@ data class VendorBoot(
         }
         //data
         log.info("Writing data ...")
-        //assume total SIZE is smaller than 64MB
-        val bf = ByteBuffer.allocate(1024 * 1024 * 128).let {
-            it.order(ByteOrder.LITTLE_ENDIAN)
-            C.writePaddedFile(it, this.ramdisk.file, this.info.pageSize)
-            C.writePaddedFile(it, this.dtb.file, this.info.pageSize)
-            it
+        val bf = when (this.info.headerVersion) {
+            //assume total SIZE is smaller than 128MB
+            3 -> {
+                ByteBuffer.allocate(1024 * 1024 * 128).let {
+                    it.order(ByteOrder.LITTLE_ENDIAN)
+                    //1. vendor ramdisks and dtb
+                    C.writePaddedFile(it, this.ramdisk.file, this.info.pageSize)
+                    C.writePaddedFile(it, this.dtb.file, this.info.pageSize)
+                    it
+                }
+            }
+            else -> {
+                ByteBuffer.allocate(1024 * 1024 * 128).let {
+                    it.order(ByteOrder.LITTLE_ENDIAN)
+                    //1. vendor ramdisks and dtb
+                    C.writePaddedFiles(it, this.ramdisk_table.ramdidks.map { rd -> rd.file }, this.info.pageSize)
+                    C.writePaddedFile(it, this.dtb.file, this.info.pageSize)
+                    //2. vrt
+                    it.put(this.ramdisk_table.update().encode(this.info.pageSize))
+                    //3. bootconfig
+                    C.writePaddedFile(it, this.bootconfig.file, this.info.pageSize)
+                    it
+                }
+            }
         }
         //write
         FileOutputStream("${this.info.output}.clear", true).use { fos ->
@@ -243,12 +303,15 @@ data class VendorBoot(
             product = info.product,
             headerSize = info.headerSize,
             dtbSize = dtb.size,
-            dtbLoadAddr = dtb.loadAddr
+            dtbLoadAddr = dtb.loadAddr,
+            vrtSize = ramdisk_table.eachEntrySize * ramdisk_table.ramdidks.size,
+            vrtEntryNum = ramdisk_table.ramdidks.size,
+            vrtEntrySize = ramdisk_table.eachEntrySize,
+            bootconfigSize = File(bootconfig.file).length().toInt()
         )
     }
 
     fun extractImages(): VendorBoot {
-        val workDir = Helper.prop("workDir")
         //header
         ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         //ramdisk
@@ -257,8 +320,6 @@ data class VendorBoot(
             Helper.Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file), "${workDir}root")
         //@formatter:on
         this.ramdisk.file = this.ramdisk.file + ".$fmt"
-        //dump info again
-        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         //dtb
         C.dumpDtb(Helper.Slice(info.output, dtb.position.toInt(), dtb.size, dtb.file))
         //vrt
@@ -266,6 +327,7 @@ data class VendorBoot(
             log.info("dumping vendor ramdisk ${index + 1}/${this.ramdisk_table.ramdidks.size} ...")
             val s = Helper.Slice(ramdisk.file, it.offset, it.size, it.file)
             C.dumpRamdisk(s, workDir + "root.${index + 1}")
+            it.file = it.file + ".$fmt"
         }
         //bootconfig
         if (bootconfig.size > 0) {
@@ -273,6 +335,8 @@ data class VendorBoot(
                 Helper.extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
             }
         }
+        //dump info again
+        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         return this
     }
 
@@ -290,7 +354,6 @@ data class VendorBoot(
     }
 
     fun printSummary(): VendorBoot {
-        val workDir = Helper.prop("workDir")
         val tableHeader = AsciiTable().apply {
             addRule()
             addRow("What", "Where")
@@ -303,7 +366,7 @@ data class VendorBoot(
             it.addRow("ramdisk", this.ramdisk.file)
             if (this.ramdisk_table.size > 0) {
                 this.ramdisk_table.ramdidks.forEachIndexed { index, entry ->
-                    it.addRow("-- ramdisk[${index + 1}/${this.ramdisk_table.ramdidks.size}]", entry.file)
+                    it.addRow("-- ${entry.type} ramdisk[${index + 1}/${this.ramdisk_table.ramdidks.size}]", entry.file)
                     it.addRow("------- extracted rootfs", "${workDir}root.${index + 1}")
                 }
             } else {
@@ -340,7 +403,25 @@ data class VendorBoot(
     private fun toCommandLine(): CommandLine {
         val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""
         return CommandLine.parse(cmdPrefix + Helper.prop("mkbootimg")).apply {
-            addArgument("--vendor_ramdisk").addArgument(ramdisk.file)
+            when (info.headerVersion) {
+                3 -> {
+                    addArgument("--vendor_ramdisk").addArgument(ramdisk.file)
+                }
+                else -> {
+                    ramdisk_table.ramdidks.forEachIndexed { index, it ->
+                        log.info("dumping vendor ramdisk ${index + 1}/${ramdisk_table.ramdidks.size} ...")
+                        addArgument("--ramdisk_type").addArgument(it.type.toString())
+                        Struct3("${VrtEntry.VENDOR_RAMDISK_TABLE_ENTRY_BOARD_ID_SIZE}i").unpack(ByteArrayInputStream(it.boardId))
+                            .forEachIndexed { boardIdIndex, boardIdValue ->
+                                addArgument("--board_id$boardIdIndex")
+                                addArgument("0x" + Integer.toHexString((boardIdValue as Int)))
+                            }
+                        addArgument("--ramdisk_name").addArgument(it.name, true)
+                        addArgument("--vendor_ramdisk_fragment").addArgument(it.file)
+                    }
+                    addArgument("--vendor_bootconfig").addArgument(bootconfig.file)
+                }
+            }
             addArgument("--dtb").addArgument(dtb.file)
             addArgument("--vendor_cmdline").addArgument(info.cmdline, false)
             addArgument("--header_version").addArgument(info.headerVersion.toString())

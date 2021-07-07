@@ -136,10 +136,10 @@ class AndroidCpio {
                         }
                     }
                     entry.statMode = ftBits.toLong() or java.lang.Long.valueOf(matches[0].mode, 8)
-                    log.debug("${entry.name} ~ " + matches.map { it.prefix }.reduce { acc, s -> "$acc, $s" }
+                    log.warn("${entry.name} ~ " + matches.map { it.prefix }.reduce { acc, s -> "$acc, $s" }
                             + ", stMode=" + java.lang.Long.toOctalString(entry.statMode))
                 } else {
-                    log.debug("${entry.name} has NO fsconfig/prefix match")
+                    log.warn("${entry.name} has NO fsconfig/prefix match")
                 }
             }
             1 -> {
@@ -147,7 +147,7 @@ class AndroidCpio {
                 entry.statMode = itemConfig[0].statMode
             }
             else -> {
-                throw IllegalArgumentException("${entry.name} as multiple exact-match fsConfig")
+                throw IllegalArgumentException("${entry.name} has multiple exact-match fsConfig")
             }
         }
     }
@@ -157,11 +157,12 @@ class AndroidCpio {
         fsConfig.clear()
         propFile?.let {
             if (File(propFile).exists()) {
+                log.info("loading $propFile")
                 File(propFile).readLines().forEach { line ->
                     fsConfig.add(ObjectMapper().readValue(line, AndroidCpioEntry::class.java))
                 }
             } else {
-                log.warn("fsConfig file has been deleted, using fsConfig prefix matcher")
+                log.warn("fsConfig file $propFile has been deleted, using fsConfig prefix matcher")
             }
         }
         FileOutputStream(outFile).use { fos ->

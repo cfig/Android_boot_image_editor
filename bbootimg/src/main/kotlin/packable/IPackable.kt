@@ -40,9 +40,9 @@ interface IPackable {
             ""
         }
         log.info("slot suffix = $slotSuffix")
-        "adb push $fileName /cache/file.to.burn".check_call()
-        "adb shell dd if=/cache/file.to.burn of=/dev/block/by-name/$deviceName$slotSuffix".check_call()
-        "adb shell rm /cache/file.to.burn".check_call()
+        "adb push $fileName /mnt/file.to.burn".check_call()
+        "adb shell dd if=/mnt/file.to.burn of=/dev/block/by-name/$deviceName$slotSuffix".check_call()
+        "adb shell rm /mnt/file.to.burn".check_call()
     }
 
     fun pull(fileName: String = "dtbo.img", deviceName: String = "dtbo") {
@@ -55,9 +55,9 @@ interface IPackable {
             ""
         }
         log.info("slot suffix = $slotSuffix")
-        "adb shell dd if=/dev/block/by-name/$deviceName$slotSuffix of=/cache/file.to.pull".check_call()
-        "adb pull /cache/file.to.pull $fileName".check_call()
-        "adb shell rm /cache/file.to.pull".check_call()
+        "adb shell dd if=/dev/block/by-name/$deviceName$slotSuffix of=/mnt/file.to.pull".check_call()
+        "adb pull /mnt/file.to.pull $fileName".check_call()
+        "adb shell rm /mnt/file.to.pull".check_call()
     }
 
     // invoked solely by reflection

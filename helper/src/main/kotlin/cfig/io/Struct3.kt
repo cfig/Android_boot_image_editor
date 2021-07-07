@@ -167,9 +167,9 @@ class Struct3 {
             if (Char == typeName) {
                 assert(arg is Char) { "[$arg](${arg!!::class.java}) is NOT Char" }
                 if ((arg as Char) !in '\u0000'..'\u00ff') {
-                    throw IllegalArgumentException("arg[${arg.toInt()}] exceeds 8-bit bound")
+                    throw IllegalArgumentException("arg[${arg.code}] exceeds 8-bit bound")
                 }
-                bf.put(arg.toByte())
+                bf.put(arg.code.toByte())
                 continue
             }
 
@@ -377,7 +377,7 @@ class Struct3 {
             fun InputStream.getChar(): Char {
                 val data = ByteArray(Byte.SIZE_BYTES)
                 assert(Byte.SIZE_BYTES == this.read(data))
-                return data[0].toChar()
+                return data[0].toInt().toChar()
             }
 
             fun InputStream.getShort(inByteOrder: ByteOrder): Short {
