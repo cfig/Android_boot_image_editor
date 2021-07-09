@@ -46,7 +46,6 @@ import java.util.regex.Pattern
 import kotlin.random.Random
 
 class Struct3 {
-    private val log = LoggerFactory.getLogger(Struct3::class.java)
     private val formatString: String
     private var byteOrder = ByteOrder.LITTLE_ENDIAN
     private val formats = ArrayList<Array<Any?>>()
@@ -135,10 +134,10 @@ class Struct3 {
         return ret
     }
 
+    @Throws(IllegalArgumentException::class)
     fun pack(vararg args: Any?): ByteArray {
         if (args.size != this.formats.size) {
-            throw IllegalArgumentException("argument size " + args.size +
-                    " doesn't match format size " + this.formats.size)
+            throw IllegalArgumentException("argument size " + args.size + " doesn't match format size " + this.formats.size)
         }
         val bf = ByteBuffer.allocate(this.calcSize())
         bf.order(this.byteOrder)
@@ -157,8 +156,7 @@ class Struct3 {
                     null -> bf.appendPadding(0, multiple)
                     is Byte -> bf.appendPadding(arg, multiple)
                     is Int -> bf.appendPadding(arg.toByte(), multiple)
-                    else -> throw IllegalArgumentException("Index[" + i + "] Unsupported arg ["
-                            + arg + "] with type [" + formats[i][0] + "]")
+                    else -> throw IllegalArgumentException("Index[" + i + "] Unsupported arg [" + arg + "] with type [" + formats[i][0] + "]")
                 }
                 continue
             }
@@ -288,7 +286,7 @@ class Struct3 {
         return bf.array()
     }
 
-    @Throws(IOException::class)
+    @Throws(IOException::class, IllegalArgumentException::class)
     fun unpack(iS: InputStream): List<*> {
         val ret = ArrayList<Any>()
         for (format in this.formats) {
@@ -314,6 +312,7 @@ class Struct3 {
         companion object {
             private val log = LoggerFactory.getLogger(ByteBufferExt::class.java)
 
+            @Throws(IllegalArgumentException::class)
             fun ByteBuffer.appendPadding(b: Byte, bufSize: Int) {
                 when {
                     bufSize == 0 -> {
@@ -334,15 +333,17 @@ class Struct3 {
 
             fun ByteBuffer.appendByteArray(inIntArray: IntArray, bufSize: Int) {
                 val arg2 = mutableListOf<Byte>()
-                inIntArray.toMutableList().mapTo(arg2, {
-                    if (it in Byte.MIN_VALUE..Byte.MAX_VALUE)
+                inIntArray.toMutableList().mapTo(arg2) {
+                    if (it in Byte.MIN_VALUE..Byte.MAX_VALUE) {
                         it.toByte()
-                    else
+                    } else {
                         throw IllegalArgumentException("$it is not valid Byte")
-                })
+                    }
+                }
                 appendByteArray(arg2.toByteArray(), bufSize)
             }
 
+            @Throws(IllegalArgumentException::class)
             fun ByteBuffer.appendByteArray(inByteArray: ByteArray, bufSize: Int) {
                 val paddingSize = bufSize - inByteArray.size
                 if (paddingSize < 0) throw IllegalArgumentException("arg length [${inByteArray.size}] exceeds limit: $bufSize")
@@ -355,18 +356,19 @@ class Struct3 {
 
             fun ByteBuffer.appendUByteArray(inIntArray: IntArray, bufSize: Int) {
                 val arg2 = mutableListOf<UByte>()
-                inIntArray.toMutableList().mapTo(arg2, {
+                inIntArray.toMutableList().mapTo(arg2) {
                     if (it in UByte.MIN_VALUE.toInt()..UByte.MAX_VALUE.toInt())
                         it.toUByte()
-                    else
+                    else {
                         throw IllegalArgumentException("$it is not valid Byte")
-                })
+                    }
+                }
                 appendUByteArray(arg2.toUByteArray(), bufSize)
             }
 
             fun ByteBuffer.appendUByteArray(inUByteArray: UByteArray, bufSize: Int) {
                 val bl = mutableListOf<Byte>()
-                inUByteArray.toMutableList().mapTo(bl, { it.toByte() })
+                inUByteArray.toMutableList().mapTo(bl) { it.toByte() }
                 this.appendByteArray(bl.toByteArray(), bufSize)
             }
         }
@@ -426,7 +428,7 @@ class Struct3 {
                 val data = ByteArray(inSize)
                 assert(inSize == this.read(data))
                 val innerData2 = mutableListOf<UByte>()
-                data.toMutableList().mapTo(innerData2, { it.toUByte() })
+                data.toMutableList().mapTo(innerData2) { it.toUByte() }
                 return innerData2.toUByteArray()
             }
 
@@ -451,92 +453,78 @@ class Struct3 {
             fun ByteArray.toShort(inByteOrder: ByteOrder): Short {
                 val typeSize = Short.SIZE_BYTES / Byte.SIZE_BYTES
                 assert(typeSize == this.size) { "Short must have $typeSize bytes" }
-                var ret: Short
-                ByteBuffer.allocate(typeSize).let {
+                return ByteBuffer.allocate(this.size).let {
                     it.order(inByteOrder)
                     it.put(this)
                     it.flip()
-                    ret = it.getShort()
+                    it.getShort()
                 }
-                return ret
             }
 
             fun ByteArray.toInt(inByteOrder: ByteOrder): Int {
                 val typeSize = Int.SIZE_BYTES / Byte.SIZE_BYTES
                 assert(typeSize == this.size) { "Int must have $typeSize bytes" }
-                var ret: Int
-                ByteBuffer.allocate(typeSize).let {
+                return ByteBuffer.allocate(this.size).let {
                     it.order(inByteOrder)
                     it.put(this)
                     it.flip()
-                    ret = it.getInt()
+                    it.getInt()
                 }
-                return ret
             }
 
             fun ByteArray.toLong(inByteOrder: ByteOrder): Long {
                 val typeSize = Long.SIZE_BYTES / Byte.SIZE_BYTES
                 assert(typeSize == this.size) { "Long must have $typeSize bytes" }
-                var ret: Long
-                ByteBuffer.allocate(typeSize).let {
+                return ByteBuffer.allocate(this.size).let {
                     it.order(inByteOrder)
                     it.put(this)
                     it.flip()
-                    ret = it.getLong()
+                    it.getLong()
                 }
-                return ret
             }
 
             fun ByteArray.toUShort(inByteOrder: ByteOrder): UShort {
                 val typeSize = UShort.SIZE_BYTES / Byte.SIZE_BYTES
                 assert(typeSize == this.size) { "UShort must have $typeSize bytes" }
-                var ret: UShort
-                ByteBuffer.allocate(typeSize).let {
+                return ByteBuffer.allocate(this.size).let {
                     it.order(inByteOrder)
                     it.put(this)
                     it.flip()
-                    ret = it.getShort().toUShort()
+                    it.getShort().toUShort()
                 }
-                return ret
             }
 
             fun ByteArray.toUInt(inByteOrder: ByteOrder): UInt {
                 val typeSize = UInt.SIZE_BYTES / Byte.SIZE_BYTES
                 assert(typeSize == this.size) { "UInt must have $typeSize bytes" }
-                var ret: UInt
-                ByteBuffer.allocate(typeSize).let {
+                return ByteBuffer.allocate(this.size).let {
                     it.order(inByteOrder)
                     it.put(this)
                     it.flip()
-                    ret = it.getInt().toUInt()
+                    it.getInt().toUInt()
                 }
-                return ret
             }
 
             fun ByteArray.toULong(inByteOrder: ByteOrder): ULong {
                 val typeSize = ULong.SIZE_BYTES / Byte.SIZE_BYTES
                 assert(typeSize == this.size) { "ULong must have $typeSize bytes" }
-                var ret: ULong
-                ByteBuffer.allocate(typeSize).let {
+                return ByteBuffer.allocate(this.size).let {
                     it.order(inByteOrder)
                     it.put(this)
                     it.flip()
-                    ret = it.getLong().toULong()
+                    it.getLong().toULong()
                 }
-                return ret
             }
 
             //similar to this.toString(StandardCharsets.UTF_8).replace("${Character.MIN_VALUE}", "")
             // not Deprecated for now, "1.3.41 experimental api: ByteArray.decodeToString()") is a little different
             fun ByteArray.toCString(): String {
-                val str = this.toString(StandardCharsets.UTF_8)
-                val nullPos = str.indexOf(Character.MIN_VALUE)
-                return if (nullPos >= 0) {
-                    str.substring(0, nullPos)
-                } else {
-                    str
+                return this.toString(StandardCharsets.UTF_8).let { str ->
+                    str.indexOf(Character.MIN_VALUE).let { nullPos ->
+                        if (nullPos >= 0) str.substring(0, nullPos) else str
+                    }
                 }
             }
-        }
-    }
+        }//end-of-Companion
+    }//end-of-ByteArrayExt
 }

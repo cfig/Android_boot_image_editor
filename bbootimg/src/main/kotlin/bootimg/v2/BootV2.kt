@@ -14,6 +14,7 @@
 
 package cfig.bootimg.v2
 
+import avb.AVBInfo
 import cfig.Avb
 import cfig.EnvironmentVerifier
 import cfig.bootimg.Common
@@ -38,7 +39,7 @@ data class BootV2(
     var ramdisk: CommArgs = CommArgs(),
     var secondBootloader: CommArgs? = null,
     var recoveryDtbo: CommArgsLong? = null,
-    var dtb: CommArgsLong? = null
+    var dtb: CommArgsLong? = null,
 ) {
     data class MiscInfo(
         var output: String = "",
@@ -54,21 +55,21 @@ data class BootV2(
         var osPatchLevel: String? = null,
         var hash: ByteArray? = byteArrayOf(),
         var verify: String = "",
-        var imageSize: Long = 0
+        var imageSize: Long = 0,
     )
 
     data class CommArgs(
         var file: String? = null,
         var position: Long = 0,
         var size: Int = 0,
-        var loadOffset: Long = 0
+        var loadOffset: Long = 0,
     )
 
     data class CommArgsLong(
         var file: String? = null,
         var position: Long = 0,
         var size: Int = 0,
-        var loadOffset: Long = 0
+        var loadOffset: Long = 0,
     )
 
     companion object {
@@ -223,7 +224,7 @@ data class BootV2(
 
     fun extractVBMeta(): BootV2 {
         if (this.info.verify.startsWith("VB2.0")) {
-            Avb().parseVbMeta(info.output)
+            AVBInfo.parseFrom(info.output).dumpDefault(info.output)
             if (File("vbmeta.img").exists()) {
                 log.warn("Found vbmeta.img, parsing ...")
                 VBMetaParser().unpack("vbmeta.img")

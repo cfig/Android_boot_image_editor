@@ -14,6 +14,7 @@
 
 package cfig.packable
 
+import avb.AVBInfo
 import cfig.Avb
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.check_call
@@ -62,7 +63,7 @@ interface IPackable {
 
     // invoked solely by reflection
     fun `@verify`(fileName: String) {
-        val ai = Avb().parseVbMeta(fileName, true)
+        val ai = AVBInfo.parseFrom(fileName).dumpDefault(fileName)
         Avb().verify(ai, fileName)
     }
 

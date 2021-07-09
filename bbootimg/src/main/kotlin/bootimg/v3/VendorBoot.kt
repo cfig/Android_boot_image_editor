@@ -14,6 +14,7 @@
 
 package cfig.bootimg.v3
 
+import avb.AVBInfo
 import cfig.Avb
 import cfig.EnvironmentVerifier
 import cfig.bootimg.Common.Companion.deleleIfExists
@@ -37,13 +38,13 @@ data class VendorBoot(
     var ramdisk: CommArgs = CommArgs(),
     var dtb: CommArgs = CommArgs(),
     var ramdisk_table: Vrt = Vrt(),
-    var bootconfig: CommArgs = CommArgs()
+    var bootconfig: CommArgs = CommArgs(),
 ) {
     data class CommArgs(
         var file: String = "",
         var position: Long = 0,
         var size: Int = 0,
-        var loadAddr: Long = 0
+        var loadAddr: Long = 0,
     )
 
     data class MiscInfo(
@@ -56,7 +57,7 @@ data class VendorBoot(
         var cmdline: String = "",
         var tagsLoadAddr: Long = 0,
         var kernelLoadAddr: Long = 0,
-        var imageSize: Long = 0
+        var imageSize: Long = 0,
     )
 
     enum class VrtType {
@@ -82,7 +83,7 @@ data class VendorBoot(
         var size: Int = 0,
         var eachEntrySize: Int = 0,
         var position: Long = 0,
-        var ramdidks: MutableList<VrtEntry> = mutableListOf()
+        var ramdidks: MutableList<VrtEntry> = mutableListOf(),
     ) {
         fun update(): Vrt {
             var totalSz = 0
@@ -113,11 +114,10 @@ data class VendorBoot(
         var name: String = "", //32s
         var boardId: ByteArray = byteArrayOf(), //16I (aka. 64 bytes)
         var boardIdStr: String = "",
-        var file: String = ""
+        var file: String = "",
     ) {
         companion object {
-            private val log = LoggerFactory.getLogger(VrtEntry::class.java)
-            const val VENDOR_RAMDISK_NAME_SIZE = 32
+            private const val VENDOR_RAMDISK_NAME_SIZE = 32
             const val VENDOR_RAMDISK_TABLE_ENTRY_BOARD_ID_SIZE = 16
 
             //const val FORMAT_STRING = "3I${VENDOR_RAMDISK_NAME_SIZE}s${VENDOR_RAMDISK_TABLE_ENTRY_BOARD_ID_SIZE}I"
@@ -156,7 +156,6 @@ data class VendorBoot(
     companion object {
         private val log = LoggerFactory.getLogger(VendorBoot::class.java)
         private val workDir = Helper.prop("workDir")
-        private val VENDOR_RAMDISK_TABLE_ENTRY_V4_SIZE = 108
         fun parse(fileName: String): VendorBoot {
             val ret = VendorBoot()
             FileInputStream(fileName).use { fis ->
@@ -342,7 +341,7 @@ data class VendorBoot(
 
     fun extractVBMeta(): VendorBoot {
         try {
-            Avb().parseVbMeta(info.output)
+            AVBInfo.parseFrom(info.output).dumpDefault(info.output)
         } catch (e: Exception) {
             log.error("extraceVBMeta(): $e")
         }

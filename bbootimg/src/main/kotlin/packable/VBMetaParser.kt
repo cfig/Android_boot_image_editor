@@ -14,9 +14,15 @@
 
 package cfig.packable
 
+import avb.AVBInfo
 import cfig.Avb
 import cfig.helper.Helper
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.slf4j.LoggerFactory
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 
 class VBMetaParser: IPackable {
     override val loopNo: Int
@@ -32,11 +38,13 @@ class VBMetaParser: IPackable {
 
     override fun unpack(fileName: String) {
         cleanUp()
-        Avb().parseVbMeta(fileName)
+        AVBInfo.parseFrom(fileName).dumpDefault(fileName)
     }
 
     override fun pack(fileName: String) {
-        Avb().packVbMetaWithPadding(fileName)
+        val blob = ObjectMapper().readValue(File(Avb.getJsonFileName(fileName)), AVBInfo::class.java).encodePadded()
+        log.info("Writing padded vbmeta to file: $fileName.signed")
+        Files.write(Paths.get("$fileName.signed"), blob, StandardOpenOption.CREATE)
     }
 
     override fun flash(fileName: String, deviceName: String) {
@@ -51,4 +59,6 @@ class VBMetaParser: IPackable {
     override fun pull(fileName: String, deviceName: String) {
         super.pull(fileName, deviceName)
     }
+
+    private val log = LoggerFactory.getLogger(VBMetaParser::class.java)
 }

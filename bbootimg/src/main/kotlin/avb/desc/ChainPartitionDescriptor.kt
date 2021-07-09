@@ -14,6 +14,7 @@
 
 package avb.desc
 
+import avb.AVBInfo
 import cfig.Avb
 import cfig.helper.Helper
 import cfig.io.Struct3
@@ -84,7 +85,7 @@ class ChainPartitionDescriptor(
         val ret: Array<Any> = arrayOf(false, "file not found")
         for (item in image_files) {
             if (File(item).exists()) {
-                val subAi = Avb().parseVbMeta(item, false)
+                val subAi = AVBInfo.parseFrom(item)
                 if (pubkey.contentEquals(subAi.auxBlob!!.pubkey!!.pubkey)) {
                     log.info("VERIFY($parent): public key matches, PASS")
                     return Avb().verify(subAi, item, parent)

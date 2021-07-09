@@ -33,7 +33,7 @@ class Signer {
         fun signAVB(output: String, imageSize: Long, avbtool: String) {
             log.info("Adding hash_footer with verified-boot 2.0 style")
             val ai = ObjectMapper().readValue(File(getJsonFileName(output)), AVBInfo::class.java)
-            val alg = Algorithms.get(ai.header!!.algorithm_type.toInt())
+            val alg = Algorithms.get(ai.header!!.algorithm_type)
             val bootDesc = ai.auxBlob!!.hashDescriptors[0]
             val newAvbInfo = ObjectMapper().readValue(File(getJsonFileName(output)), AVBInfo::class.java)
 

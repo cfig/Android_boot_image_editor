@@ -14,6 +14,9 @@
 
 package cfig.bootimg.v3
 
+import avb.AVBInfo
+import avb.alg.Algorithms
+import avb.blob.AuxBlob
 import cfig.Avb
 import cfig.EnvironmentVerifier
 import cfig.bootimg.Common.Companion.deleleIfExists
@@ -37,10 +40,11 @@ data class BootV3(
     var info: MiscInfo = MiscInfo(),
     var kernel: CommArgs = CommArgs(),
     val ramdisk: CommArgs = CommArgs(),
-    var bootSignature: CommArgs = CommArgs()
+    var bootSignature: CommArgs = CommArgs(),
 ) {
     companion object {
         private val log = LoggerFactory.getLogger(BootV3::class.java)
+        private val mapper = ObjectMapper()
         private val workDir = Helper.prop("workDir")
 
         fun parse(fileName: String): BootV3 {
@@ -89,13 +93,13 @@ data class BootV3(
         var osVersion: String = "",
         var osPatchLevel: String = "",
         var imageSize: Long = 0,
-        var signatureSize: Int = 0
+        var signatureSize: Int = 0,
     )
 
     data class CommArgs(
         var file: String = "",
         var position: Int = 0,
-        var size: Int = 0
+        var size: Int = 0,
     )
 
     fun pack(): BootV3 {
@@ -129,9 +133,29 @@ data class BootV3(
         bf.order(ByteOrder.LITTLE_ENDIAN)
         C.writePaddedFile(bf, this.kernel.file, this.info.pageSize)
         C.writePaddedFile(bf, this.ramdisk.file, this.info.pageSize)
-        //write
+        //write V3 data
         FileOutputStream("${this.info.output}.clear", true).use { fos ->
             fos.write(bf.array(), 0, bf.position())
+        }
+
+        //write V4 boot sig
+        if (this.info.headerVersion > 3) {
+            val bootSigJson = File(Avb.getJsonFileName(this.bootSignature.file))
+            var bootSigBytes = ByteArray(this.bootSignature.size)
+            if (bootSigJson.exists()) {
+                log.warn("V4 BootImage has GKI boot signature")
+                val readBackBootSig = mapper.readValue(bootSigJson, AVBInfo::class.java)
+                val alg = Algorithms.get(readBackBootSig.header!!.algorithm_type)!!
+                //replace new pub key
+                readBackBootSig.auxBlob!!.pubkey!!.pubkey = AuxBlob.encodePubKey(alg)
+                //update hash and sig
+                readBackBootSig.auxBlob!!.hashDescriptors.get(0).update(this.info.output + ".clear")
+                bootSigBytes = readBackBootSig.encodePadded()
+            }
+            //write V4 data
+            FileOutputStream("${this.info.output}.clear", true).use { fos ->
+                fos.write(bootSigBytes)
+            }
         }
 
         //google way
@@ -161,14 +185,15 @@ data class BootV3(
             osVersion = info.osVersion,
             osPatchLevel = info.osPatchLevel,
             headerSize = info.headerSize,
-            cmdline = info.cmdline
+            cmdline = info.cmdline,
+            signatureSize = info.signatureSize
         )
     }
 
     fun extractImages(): BootV3 {
         val workDir = Helper.prop("workDir")
         //info
-        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
+        mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         //kernel
         C.dumpKernel(Helper.Slice(info.output, kernel.position, kernel.size, kernel.file))
         //ramdisk
@@ -183,20 +208,20 @@ data class BootV3(
                 this.bootSignature.position.toLong(), this.bootSignature.size
             )
             try {
-                Avb().parseVbMeta(this.bootSignature.file)
+                AVBInfo.parseFrom(this.bootSignature.file).dumpDefault(this.bootSignature.file)
             } catch (e: IllegalArgumentException) {
                 log.warn("boot signature is invalid")
             }
         }
 
         //dump info again
-        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
+        mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         return this
     }
 
     fun extractVBMeta(): BootV3 {
         try {
-            Avb().parseVbMeta(info.output)
+            AVBInfo.parseFrom(info.output).dumpDefault(info.output)
             if (File("vbmeta.img").exists()) {
                 log.warn("Found vbmeta.img, parsing ...")
                 VBMetaParser().unpack("vbmeta.img")
@@ -289,6 +314,12 @@ data class BootV3(
             if (info.osPatchLevel.isNotBlank()) {
                 ret.addArgument(" --os_patch_level")
                 ret.addArgument(info.osPatchLevel)
+            }
+            if (this.bootSignature.size > 0 && File(Avb.getJsonFileName(this.bootSignature.file)).exists()) {
+                val origSig = mapper.readValue(File(Avb.getJsonFileName(this.bootSignature.file)), AVBInfo::class.java)
+                val alg = Algorithms.get(origSig.header!!.algorithm_type)!!
+                ret.addArgument("--gki_signing_algorithm").addArgument(alg.name)
+                ret.addArgument("--gki_signing_key").addArgument(alg.defaultKey)
             }
             ret.addArgument(" --id ")
             ret.addArgument(" --output ")
