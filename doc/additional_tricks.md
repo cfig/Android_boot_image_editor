@@ -88,5 +88,10 @@ Emulate creating GKI image:
 out/host/linux-x86/bin/mkbootimg --kernel out/target/product/vsoc_arm64/kernel  --ramdisk out/target/product/vsoc_arm64/ramdisk.img --gki_signing_key external/avb/test/data/testkey_rsa4096.pem --gki_signing_algorithm SHA256_RSA4096 --os_version 11 --os_patch_level 2021-03-05 --header_version 4 --output out/target/product/vsoc_arm64/boot.img
 out/host/linux-x86/bin/avbtool add_hash_footer --image out/target/product/vsoc_arm64/boot.img --partition_size   67108864 --partition_name boot --algorithm SHA256_RSA2048 --key external/avb/test/data/testkey_rsa2048.pem --prop com.android.build.boot.fingerprint:nicefinger --prop com.android.build.boot.os_version:11 --rollback_index 1614902400
 ```
-As it's only used for GKI verification, I don't want to spend too much time on any special steps in 'gradle pack' flow, as long as DUT can boot up properly.
 
+## bootconfig in VendorBoot V4
+Depends on kernel 5.6+
+https://cateee.net/lkddb/web-lkddb/BOOT_CONFIG.html
+
+VTS requirement:
+if (S-launched, Kernel 5.10+), no "androidboot." should be placed in kernel commandline.

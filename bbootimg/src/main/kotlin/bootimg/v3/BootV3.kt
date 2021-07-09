@@ -320,6 +320,7 @@ data class BootV3(
                 val alg = Algorithms.get(origSig.header!!.algorithm_type)!!
                 ret.addArgument("--gki_signing_algorithm").addArgument(alg.name)
                 ret.addArgument("--gki_signing_key").addArgument(alg.defaultKey)
+                ret.addArgument("--gki_signing_avbtool_path").addArgument(String.format(Helper.prop("avbtool"), "v1.2"))
             }
             ret.addArgument(" --id ")
             ret.addArgument(" --output ")
