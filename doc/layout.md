@@ -12,6 +12,8 @@
 
  - [4.2 AVB Footer](#42-avb-footer-vboot-20)
 
+[5. boot in memory](#5-boot-in-memory)
+
 ## 1. boot.img v0-v2
 ### header
 Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read first to identify header version.
@@ -266,7 +268,7 @@ Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read fi
     | DONOT CARE CHUNK                      |                         |
     |                                       |                         |
     |                                       |                         |
-    +--------------------------------------- -------------------------+
+    +---------------------------------------+-------------------------+
 
     +---------------------------------------+-------------------------+ --> partition_size - block_size
     | Padding                               | block_size - 64         |
@@ -281,3 +283,29 @@ Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read fi
     |   - VBMeta size                       |     8                   |
     |   - Padding                           |     28                  |
     +---------------------------------------+-------------------------+ --> partition_size
+
+## 5. boot in memory
+
+```
+       ┌────────────────────────────────────────┐
+       │           kernel                       │
+       ├──────────────────┬─────────────────────┤
+       │                  │ vendor ramdisk 1    │
+       │                  ├─────────────────────┤
+       │                  │ vendor ramdisk 2    │
+       │  vendor ramdisks ├─────────────────────┤
+       │                  │   ...               │
+       │                  ├─────────────────────┤
+       │                  │ vendor ramdisk n    │
+       ├──────────────────┴─────────────────────┤
+       │  generic ramdisk                       │
+       ├──────────────────┬─────────────────────┤
+       │                  │parameters           │
+       │                  ├─────────────────────┤
+       │                  │param size  (4)      │
+       │   bootconfig     ├─────────────────────┤
+       │                  │param checksum (4)   │
+       │                  ├─────────────────────┤
+       │                  │bootconfig magic(12) │ --> "#BOOTCONFIG\n"
+       └──────────────────┴─────────────────────┘
+```

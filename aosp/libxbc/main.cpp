@@ -76,6 +76,7 @@ int main(int, char**) {
             bootConfigSize += ret;
         }
         dumpBuf((void*)buf, bufSize, "tmp.3");
+        dumpBuf((void*)buf, bootConfigSize, "tmp.final");
     }
 
     free((void*)buf);
