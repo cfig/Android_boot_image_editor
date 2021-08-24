@@ -213,6 +213,14 @@ class ZipHelper {
             this.closeArchiveEntry()
         }
 
+        /*
+        LZMACompressorInputStream() may raise OOM sometimes, like this:
+            Caused by: java.lang.OutOfMemoryError: Java heap space
+            at org.tukaani.xz.ArrayCache.getByteArray(Unknown Source)
+            at org.tukaani.xz.lz.LZDecoder.<init>(Unknown Source)
+            at org.tukaani.xz.LZMAInputStream.initialize(Unknown Source)
+        So we catch it explicitly.
+         */
         fun isLzma(compressedFile: String): Boolean {
             return try {
                 FileInputStream(compressedFile).use { fis ->
@@ -221,6 +229,8 @@ class ZipHelper {
                 }
                 true
             } catch (e: IOException) {
+                false
+            } catch (e: OutOfMemoryError) {
                 false
             }
         }
