@@ -70,6 +70,26 @@ class VendorBootHeader(
         }
     }
 
+    // https://github.com/cfig/Android_boot_image_editor/issues/67
+    // support vendor_boot headerVersion downgrade from 4 to 3 during re-pack
+    fun feature67(): VendorBootHeader {
+        val newHeaderSize = when (this.headerVersion) {
+            3 -> VendorBootHeader.VENDOR_BOOT_IMAGE_HEADER_V3_SIZE
+            else -> VendorBootHeader.VENDOR_BOOT_IMAGE_HEADER_V4_SIZE
+        }
+        if (newHeaderSize != headerSize) {
+            log.warn("wrong headerSize, fixed.($headerSize -> $newHeaderSize)")
+            headerSize = newHeaderSize
+        }
+        if (vrtSize != 0 && headerVersion == 3) {
+            log.warn("trim vrt for headerVersion=3")
+            vrtSize = 0
+            vrtEntryNum = 0
+            vrtEntrySize = 0
+        }
+        return this
+    }
+
     fun encode(): ByteArray {
         return Struct3(FORMAT_STRING).pack(
             magic,

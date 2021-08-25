@@ -187,7 +187,7 @@ data class BootV3(
             headerSize = info.headerSize,
             cmdline = info.cmdline,
             signatureSize = info.signatureSize
-        )
+        ).feature67()
     }
 
     fun extractImages(): BootV3 {

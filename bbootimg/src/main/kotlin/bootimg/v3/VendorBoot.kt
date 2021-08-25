@@ -307,7 +307,7 @@ data class VendorBoot(
             vrtEntryNum = ramdisk_table.ramdidks.size,
             vrtEntrySize = ramdisk_table.eachEntrySize,
             bootconfigSize = File(bootconfig.file).length().toInt()
-        )
+        ).feature67()
     }
 
     fun extractImages(): VendorBoot {

@@ -72,6 +72,22 @@ class BootHeaderV3(
         )
     }
 
+    fun feature67(): BootHeaderV3 {
+        val newHeaderSize = when (headerVersion) {
+            3 -> BOOT_IMAGE_HEADER_V3_SIZE
+            else -> BOOT_IMAGE_HEADER_V4_SIZE
+        }
+        if (newHeaderSize != headerSize) {
+            log.warn("wrong headerSize, fixed.($headerSize -> $newHeaderSize)")
+            headerSize = newHeaderSize
+        }
+        if (signatureSize != 0 && headerVersion == 3) {
+            log.warn("trim bootSignature for headerVersion=3")
+            signatureSize = 0
+        }
+        return this
+    }
+
     override fun toString(): String {
         return "BootImgHeaderV3(kernelSize=$kernelSize, ramdiskSize=$ramdiskSize, osVersion=$osVersion, osPatchLevel=$osPatchLevel, headerSize=$headerSize, headerVersion=$headerVersion, cmdline='$cmdline')"
     }
