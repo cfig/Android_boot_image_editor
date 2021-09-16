@@ -15,7 +15,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.5.20-RC"
+    id("org.jetbrains.kotlin.jvm") version "1.5.30"
     `java-library`
 }
 

@@ -1,29 +1,27 @@
 # /misc partition layout
 
-| - | - | - | Offset | Size |  description |
-| :---- | :------ | :---- | :---- | :---- | ----- |
-| Legacy      | bootloader_message |   | 0 | (2K) |   |
-| | |command |  | 32 |updated by linux/bootloader |
-| | |status |  | 32 |deprecated |
-| | |recovery | |768 |talking channel between normal/recovery modes |
-| |                                              |stage |  | 32 |format "#/#", eg, "1/3" |
-| | |reserved | | 1184| |
-| - | - |- | - | - | - |
-| Vendor Area | vendor bootloader msg | N/A | 2K | 2K | Vendor Area                                                  |
-|             | vendor bootloader msg | N/A | 4K | 12K | pure Vendor area                                             |
-| -           | - | - | - | - | - |
-| Wipe        | wipe_package info                            | | 16K | 16K | offset 16KB, Used by uncrypt and recovery to store wipe_package for A/B devices |
-| -           | -                                            | - | - | - | - |
-| System      | system_space -> 1<br>misc_virtual_ab_message | |  | (64) | |
-| |  | version |  | 1 | |
-| |  | magic |  | 4 | |
-| |  | merge_status |  | 1 | |
-| |  | source_slot |  | 1 | |
-| |  | reserved |  | 57 | |
+| - | - | - | Size |  description | Offset |
+| :---- | :------ | :---- | :---- | ----- | ----- |
+| Legacy      | bootloader_message |   | (2K) |   | --> 0 |
+| | |command | 32 |updated by linux/bootloader | |
+| | |status | 32 |deprecated | |
+| | |recovery |768 |talking channel between normal/recovery modes | |
+| |                                              |stage | 32 |format "#/#", eg, "1/3" | |
+| | |reserved | 1184| | |
+| - | - |- | - | - |  |
+| Vendor Area | vendor bootloader msg | N/A | 2K | Vendor Area                                                  | -->2KB                                           |
+|             | vendor bootloader msg | N/A | 12K | pure Vendor area                                             | -->4KB                                       |
+| -           | - | - | - | - |  |
+| Wipe        | wipe_package info                            | | 16K | offset 16KB, Used by uncrypt and recovery to store wipe_package for A/B devices | -->16KB |
+| -           | -                                            | - | - | - |  |
+| System      | system_space -> 1<br>misc_virtual_ab_message | | (64) | | -->32KB |
+| |  | version | 1 | |  |
+| |  | magic | 4 | | |
+| |  | merge_status | 1 | | |
+| |  | source_slot | 1 | | |
+| |  | reserved | 57 | | |
 | |  |  | | | |
-| |  |  | |  | |
-
-
+| |  |  |  | | |
 
 ### vendor area implementation example from Google: 
 
