@@ -239,7 +239,7 @@ class AndroidCpio {
                     }
                     entry.isRegularFile -> {
                         entryInfo.note = ("REG " + entryInfo.note)
-                        File(outEntryName).writeBytes(buffer)
+                        File(outEntryName).also { it.parentFile.mkdirs() }.writeBytes(buffer)
                         if (EnvironmentVerifier().isWindows) {
                             //Windows: Posix not supported
                         } else {
