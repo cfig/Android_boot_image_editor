@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cfig.sparse_util
+package cfig.utils
 
-import cfig.EnvironmentVerifier
 import cfig.packable.IPackable
 import org.slf4j.LoggerFactory
 import cfig.helper.Helper.Companion.check_call
@@ -22,7 +21,6 @@ import java.io.FileInputStream
 import java.io.File
 import com.fasterxml.jackson.databind.ObjectMapper
 import avb.blob.Footer
-import cfig.Avb
 
 class SparseImgParser : IPackable {
     override val loopNo: Int

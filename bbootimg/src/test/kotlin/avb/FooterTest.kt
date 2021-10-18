@@ -44,6 +44,7 @@ class FooterTest {
                 Footer(it)
                 assertEquals("Should never reach here", true, false)
             } catch (e: IllegalArgumentException) {
+                //expected
             }
         }
     }

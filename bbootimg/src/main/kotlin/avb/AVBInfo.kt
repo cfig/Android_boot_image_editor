@@ -88,121 +88,93 @@ class AVBInfo(
         private val log = LoggerFactory.getLogger(AVBInfo::class.java)
         private val mapper = ObjectMapper()
 
-        fun parseFrom(imageFile: String): AVBInfo {
-            log.info("parseFrom($imageFile) ...")
-            var footer: Footer? = null
-            var vbMetaOffset: Long = 0
+        private data class Glance(
+            var footer: Footer?,
+            var vbMetaOffset: Long
+        )
+
+        private fun imageGlance(imageFile: String): Glance {
+            val ret = Glance(null, 0)
             // footer
             FileInputStream(imageFile).use { fis ->
                 fis.skip(File(imageFile).length() - Footer.SIZE)
                 try {
-                    footer = Footer(fis)
-                    vbMetaOffset = footer!!.vbMetaOffset
-                    log.info("$imageFile: $footer")
+                    ret.footer = Footer(fis)
+                    ret.vbMetaOffset = ret.footer!!.vbMetaOffset
+                    log.info("$imageFile: $ret.footer")
                 } catch (e: IllegalArgumentException) {
                     log.info("image $imageFile has no AVB Footer")
                 }
             }
+            return ret
+        }
+
+        fun parseFrom(imageFile: String): AVBInfo {
+            log.info("parseFrom($imageFile) ...")
+            // glance
+            val (footer, vbMetaOffset) = imageGlance(imageFile)
             // header
-            val rawHeaderBlob = ByteArray(Header.SIZE).apply {
-                FileInputStream(imageFile).use { fis ->
-                    fis.skip(vbMetaOffset)
-                    fis.read(this)
-                }
-            }
-            val vbMetaHeader = Header(ByteArrayInputStream(rawHeaderBlob))
-            log.debug(vbMetaHeader.toString())
+            val vbMetaHeader = Header(ByteArrayInputStream(Helper.readFully(imageFile, vbMetaOffset, Header.SIZE)))
             log.debug(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(vbMetaHeader))
 
-            val authBlockOffset = vbMetaOffset + Header.SIZE
-            val auxBlockOffset = authBlockOffset + vbMetaHeader.authentication_data_block_size
+            val atlas = mutableMapOf<String, Pair<Long, Int>>()
+            atlas["auth"] =
+                Pair(vbMetaOffset + Header.SIZE, vbMetaHeader.authentication_data_block_size.toInt())
+            atlas["auth.hash"] =
+                Pair(atlas["auth"]!!.first + vbMetaHeader.hash_offset, vbMetaHeader.hash_size.toInt())
+            atlas["auth.sig"] =
+                Pair(atlas["auth.hash"]!!.first + atlas["auth.hash"]!!.second, vbMetaHeader.signature_size.toInt())
+            atlas["aux"] =
+                Pair(atlas["auth"]!!.first + atlas["auth"]!!.second, vbMetaHeader.auxiliary_data_block_size.toInt())
 
             val ai = AVBInfo(vbMetaHeader, null, AuxBlob(), footer)
             // Auth blob
             if (vbMetaHeader.authentication_data_block_size > 0) {
-                FileInputStream(imageFile).use { fis ->
-                    fis.skip(vbMetaOffset)
-                    fis.skip(Header.SIZE.toLong())
-                    fis.skip(vbMetaHeader.hash_offset)
-                    val ba = ByteArray(vbMetaHeader.hash_size.toInt())
-                    fis.read(ba)
-                    log.debug("Parsed Auth Hash (Header & Aux Blob): " + Hex.encodeHexString(ba))
-                    val bb = ByteArray(vbMetaHeader.signature_size.toInt())
-                    fis.read(bb)
-                    log.debug("Parsed Auth Signature (of hash): " + Hex.encodeHexString(bb))
-                    ai.authBlob = AuthBlob()
-                    ai.authBlob!!.offset = authBlockOffset
-                    ai.authBlob!!.size = vbMetaHeader.authentication_data_block_size
-                    ai.authBlob!!.hash = Hex.encodeHexString(ba)
-                    ai.authBlob!!.signature = Hex.encodeHexString(bb)
-                }
+                val ba = Helper.readFully(imageFile, atlas["auth.hash"]!!)
+                log.debug("Parsed Auth Hash (Header & Aux Blob): " + Hex.encodeHexString(ba))
+                val bb = Helper.readFully(imageFile, atlas["auth.sig"]!!)
+                log.debug("Parsed Auth Signature (of hash): " + Hex.encodeHexString(bb))
+                ai.authBlob = AuthBlob()
+                ai.authBlob!!.offset = atlas["auth"]!!.first
+                ai.authBlob!!.size = atlas["auth"]!!.second.toLong()
+                ai.authBlob!!.hash = Hex.encodeHexString(ba)
+                ai.authBlob!!.signature = Hex.encodeHexString(bb)
             }
             // aux
-            val rawAuxBlob = ByteArray(vbMetaHeader.auxiliary_data_block_size.toInt()).apply {
-                FileInputStream(imageFile).use { fis ->
-                    fis.skip(auxBlockOffset)
-                    fis.read(this)
-                }
-            }
+            val rawAuxBlob = Helper.readFully(imageFile, atlas["aux"]!!)
             // aux - desc
-            var descriptors: List<Any>
             if (vbMetaHeader.descriptors_size > 0) {
-                ByteArrayInputStream(rawAuxBlob).use { bis ->
-                    bis.skip(vbMetaHeader.descriptors_offset)
-                    descriptors = UnknownDescriptor.parseDescriptors2(bis, vbMetaHeader.descriptors_size)
-                }
-                descriptors.forEach {
-                    log.debug(it.toString())
-                    when (it) {
-                        is PropertyDescriptor -> {
-                            ai.auxBlob!!.propertyDescriptors.add(it)
-                        }
-                        is HashDescriptor -> {
-                            ai.auxBlob!!.hashDescriptors.add(it)
-                        }
-                        is KernelCmdlineDescriptor -> {
-                            ai.auxBlob!!.kernelCmdlineDescriptors.add(it)
-                        }
-                        is HashTreeDescriptor -> {
-                            ai.auxBlob!!.hashTreeDescriptors.add(it)
-                        }
-                        is ChainPartitionDescriptor -> {
-                            ai.auxBlob!!.chainPartitionDescriptors.add(it)
-                        }
-                        is UnknownDescriptor -> {
-                            ai.auxBlob!!.unknownDescriptors.add(it)
-                        }
-                        else -> {
-                            throw IllegalArgumentException("invalid descriptor: $it")
-                        }
-                    }
-                }
+                val descriptors = UnknownDescriptor.parseDescriptors2(
+                    ByteArrayInputStream(
+                        rawAuxBlob.copyOfRange(vbMetaHeader.descriptors_offset.toInt(), rawAuxBlob.size)
+                    ),
+                    vbMetaHeader.descriptors_size
+                )
+                ai.auxBlob!!.populateDescriptors(descriptors)
+            } else {
+                log.warn("no descriptors in AVB aux blob")
             }
             // aux - pubkey
             if (vbMetaHeader.public_key_size > 0) {
                 ai.auxBlob!!.pubkey = AuxBlob.PubKeyInfo()
                 ai.auxBlob!!.pubkey!!.offset = vbMetaHeader.public_key_offset
                 ai.auxBlob!!.pubkey!!.size = vbMetaHeader.public_key_size
-
-                ByteArrayInputStream(rawAuxBlob).use { bis ->
-                    bis.skip(vbMetaHeader.public_key_offset)
-                    ai.auxBlob!!.pubkey!!.pubkey = ByteArray(vbMetaHeader.public_key_size.toInt())
-                    bis.read(ai.auxBlob!!.pubkey!!.pubkey)
-                    log.debug("Parsed Pub Key: " + Hex.encodeHexString(ai.auxBlob!!.pubkey!!.pubkey))
-                }
+                ai.auxBlob!!.pubkey!!.pubkey = rawAuxBlob.copyOfRange(
+                    vbMetaHeader.public_key_offset.toInt(),
+                    (vbMetaHeader.public_key_offset + vbMetaHeader.public_key_size).toInt()
+                )
+                log.debug("Parsed Pub Key: " + Hex.encodeHexString(ai.auxBlob!!.pubkey!!.pubkey))
             }
             // aux - pkmd
             if (vbMetaHeader.public_key_metadata_size > 0) {
                 ai.auxBlob!!.pubkeyMeta = AuxBlob.PubKeyMetadataInfo()
                 ai.auxBlob!!.pubkeyMeta!!.offset = vbMetaHeader.public_key_metadata_offset
                 ai.auxBlob!!.pubkeyMeta!!.size = vbMetaHeader.public_key_metadata_size
-
-                ByteArrayInputStream(rawAuxBlob).use { bis ->
-                    bis.skip(vbMetaHeader.public_key_metadata_offset)
-                    ai.auxBlob!!.pubkeyMeta!!.pkmd = ByteArray(vbMetaHeader.public_key_metadata_size.toInt())
-                    bis.read(ai.auxBlob!!.pubkeyMeta!!.pkmd)
-                    log.debug("Parsed Pub Key Metadata: " + Helper.toHexString(ai.auxBlob!!.pubkeyMeta!!.pkmd))
-                }
+                ai.auxBlob!!.pubkeyMeta!!.pkmd = rawAuxBlob.copyOfRange(
+                    vbMetaHeader.public_key_metadata_offset.toInt(),
+                    (vbMetaHeader.public_key_metadata_offset + vbMetaHeader.public_key_metadata_size).toInt()
+                )
+                log.debug("Parsed Pub Key Metadata: " + Helper.toHexString(ai.auxBlob!!.pubkeyMeta!!.pkmd))
             }
             log.debug("vbmeta info of [$imageFile] has been analyzed")
             return ai

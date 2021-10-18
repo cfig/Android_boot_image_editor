@@ -14,7 +14,7 @@
 
 package cfig.packable
 
-import cfig.sparse_util.SparseImgParser
+import cfig.utils.SparseImgParser
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.regex.Pattern

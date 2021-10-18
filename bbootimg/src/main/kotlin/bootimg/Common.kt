@@ -14,13 +14,13 @@
 
 package cfig.bootimg
 
-import cfig.EnvironmentVerifier
+import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.cpio.AndroidCpio
-import cfig.dtb_util.DTC
+import cfig.utils.DTC
 import cfig.helper.Helper
 import cfig.helper.ZipHelper
 import cfig.io.Struct3.InputStreamExt.Companion.getInt
-import cfig.kernel_util.KernelExtractor
+import cfig.utils.KernelExtractor
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.PumpStreamHandler
@@ -35,6 +35,7 @@ import java.lang.NumberFormatException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.security.MessageDigest
+import java.util.*
 import java.util.regex.Pattern
 
 class Common {
@@ -78,7 +79,7 @@ class Common {
             val a = x shr 14
             val b = x - (a shl 14) shr 7
             val c = x and 0x7f
-            return String.format("%d.%d.%d", a, b, c)
+            return String.format(Locale.getDefault(), "%d.%d.%d", a, b, c)
         }
 
         fun packOsPatchLevel(x: String?): Int {
@@ -234,7 +235,7 @@ class Common {
 
         //using mkbootfs
         fun packRootfs(rootDir: String, ramdiskGz: String, osMajor: Int = 10) {
-            val mkbootfs = String.format(Helper.prop("mkbootfsBin"), osMajor)
+            val mkbootfs = String.format(Locale.getDefault(), Helper.prop("mkbootfsBin"), osMajor)
             log.info("Packing rootfs $rootDir ...")
             val outputStream = ByteArrayOutputStream()
             DefaultExecutor().let { exec ->

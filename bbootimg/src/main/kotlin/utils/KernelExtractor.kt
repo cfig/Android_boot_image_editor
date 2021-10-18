@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cfig.kernel_util
+package cfig.utils
 
-import cfig.EnvironmentVerifier
 import cfig.helper.Helper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor

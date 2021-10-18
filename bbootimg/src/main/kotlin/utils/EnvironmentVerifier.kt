@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cfig
+package cfig.utils
 
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor

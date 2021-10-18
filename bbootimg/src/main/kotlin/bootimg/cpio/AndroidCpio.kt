@@ -15,16 +15,16 @@
 package cfig.bootimg.cpio
 
 import cfig.helper.Helper
-import cfig.EnvironmentVerifier
+import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream
 import org.apache.commons.compress.archivers.cpio.CpioConstants
 import org.slf4j.LoggerFactory
 import java.io.*
-import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.*
 import java.util.regex.Pattern
 
 class AndroidCpio {
@@ -213,7 +213,7 @@ class AndroidCpio {
                     name = entry.name,
                     statMode = entry.mode,
                     ino = entry.inode,
-                    note = String.format("%6s", java.lang.Long.toOctalString(entry.mode))
+                    note = String.format(Locale.getDefault(), "%6s", java.lang.Long.toOctalString(entry.mode))
                 )
                 if (!cis.canReadEntryData(entry)) {
                     throw RuntimeException("can not read entry ??")
@@ -224,7 +224,7 @@ class AndroidCpio {
                 if (((entry.mode and PERM_MASK).shr(7)).toInt() != 0b11) {
                     //@formatter:off
                     log.warn("  root/${entry.name} has improper file mode "
-                            + String.format("%03o, ", entry.mode and PERM_MASK) + "fix it"
+                            + String.format(Locale.getDefault(), "%03o, ", entry.mode and PERM_MASK) + "fix it"
                     )
                     //@formatter:on
                 }

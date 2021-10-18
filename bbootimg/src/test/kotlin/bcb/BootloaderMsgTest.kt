@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package bootloader_message
+package bcb
 
+import cfig.bcb.BootloaderMsg
 import cfig.bootimg.Common.Companion.deleleIfExists
-import cfig.bootloader_message.BootloaderMsg
 import org.junit.After
 import org.junit.Test
 import org.slf4j.LoggerFactory

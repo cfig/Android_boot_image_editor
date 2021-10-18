@@ -19,6 +19,7 @@ import org.junit.Assert
 import org.junit.Test
 import java.io.ByteArrayInputStream
 
+@OptIn(kotlin.ExperimentalUnsignedTypes::class)
 class Struct3Test {
     private fun getConvertedFormats(inStruct: Struct3): ArrayList<Map<String, Int>> {
         val f = inStruct.javaClass.getDeclaredField("formats")

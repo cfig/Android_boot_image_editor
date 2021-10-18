@@ -12,11 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import cfig.EnvironmentVerifier
+import cfig.utils.EnvironmentVerifier
 import org.junit.Test
-
-import org.junit.Assert.*
-import org.junit.Before
 
 class EnvironmentVerifierTest {
     private val envv = EnvironmentVerifier()

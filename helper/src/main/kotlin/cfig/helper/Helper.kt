@@ -369,6 +369,20 @@ class Helper {
             return String.format("%.1f %ciB", value / 1024.0, ci.current())
         }
 
+        fun readFully(fileName: String, offset: Long, byteCount: Int): ByteArray {
+            val data = ByteArray(byteCount).apply {
+                FileInputStream(fileName).use { fis ->
+                    fis.skip(offset)
+                    fis.read(this)
+                }
+            }
+            return data
+        }
+
+        fun readFully(fileName: String, coordinate: Pair<Long, Int>): ByteArray {
+            return readFully(fileName, coordinate.first, coordinate.second)
+        }
+
         private val log = LoggerFactory.getLogger("Helper")
     }
 }

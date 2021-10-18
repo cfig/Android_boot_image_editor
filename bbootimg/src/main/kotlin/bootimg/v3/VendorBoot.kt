@@ -16,7 +16,7 @@ package cfig.bootimg.v3
 
 import avb.AVBInfo
 import cfig.Avb
-import cfig.EnvironmentVerifier
+import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
 import cfig.helper.Helper
@@ -73,7 +73,7 @@ data class VendorBoot(
                     PLATFORM.ordinal -> PLATFORM
                     RECOVERY.ordinal -> RECOVERY
                     DLKM.ordinal -> DLKM
-                    else -> throw IllegalArgumentException()
+                    else -> throw IllegalArgumentException("illegal VrtType $value")
                 }
             }
         }

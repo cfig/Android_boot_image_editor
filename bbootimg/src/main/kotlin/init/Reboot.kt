@@ -14,7 +14,7 @@
 
 package cfig.init
 
-import cfig.bootloader_message.BootloaderMsg
+import cfig.bcb.BootloaderMsg
 import org.slf4j.LoggerFactory
 import java.util.*
 

@@ -16,6 +16,7 @@ package cfig.bootimg.cpio
 
 import cfig.io.Struct3
 import org.apache.commons.compress.archivers.cpio.CpioConstants
+import java.util.*
 
 /*
     cpio "New ASCII Format" with 070701 as magic
@@ -38,26 +39,26 @@ class NewAsciiCpio(
 ) {
     init {
         if (SIZE != Struct3(FORMAT_STRING).calcSize()) {
-            throw RuntimeException()
+            throw RuntimeException("cpio format check failed")
         }
     }
 
     fun encode(): ByteArray {
         return Struct3(FORMAT_STRING).pack(
-            String.format("%s", c_magic),
-            String.format("%08x", c_ino),
-            String.format("%08x", c_mode),
-            String.format("%08x", c_uid),
-            String.format("%08x", c_gid),
-            String.format("%08x", c_nlink),
-            String.format("%08x", c_mtime),
-            String.format("%08x", c_filesize),
-            String.format("%08x", c_devmajor),
-            String.format("%08x", c_devminor),
-            String.format("%08x", c_rdevmajor),
-            String.format("%08x", c_rdevminor),
-            String.format("%08x", c_namesize),
-            String.format("%08x", c_check),
+            String.format(Locale.getDefault(), "%s", c_magic),
+            String.format(Locale.getDefault(), "%08x", c_ino),
+            String.format(Locale.getDefault(), "%08x", c_mode),
+            String.format(Locale.getDefault(),"%08x", c_uid),
+            String.format(Locale.getDefault(),"%08x", c_gid),
+            String.format(Locale.getDefault(),"%08x", c_nlink),
+            String.format(Locale.getDefault(),"%08x", c_mtime),
+            String.format(Locale.getDefault(),"%08x", c_filesize),
+            String.format(Locale.getDefault(),"%08x", c_devmajor),
+            String.format(Locale.getDefault(),"%08x", c_devminor),
+            String.format(Locale.getDefault(),"%08x", c_rdevmajor),
+            String.format(Locale.getDefault(),"%08x", c_rdevminor),
+            String.format(Locale.getDefault(),"%08x", c_namesize),
+            String.format(Locale.getDefault(),"%08x", c_check),
         )
     }
 

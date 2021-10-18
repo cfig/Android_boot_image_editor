@@ -24,7 +24,7 @@ import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.LoggerFactory
 import java.io.File
-import cfig.EnvironmentVerifier
+import cfig.utils.EnvironmentVerifier
 
 class Signer {
     companion object {

@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
 
-class BootImgParser() : IPackable {
+class BootImgParser : IPackable {
     override val loopNo: Int
         get() = 0
     private val workDir = Helper.prop("workDir")

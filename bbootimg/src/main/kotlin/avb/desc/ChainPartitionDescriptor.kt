@@ -58,7 +58,7 @@ class ChainPartitionDescriptor(
 
     constructor(data: InputStream, seq: Int = 0) : this() {
         if (SIZE - RESERVED != Struct3(FORMAT_STRING).calcSize().toLong()) {
-            throw RuntimeException()
+            throw RuntimeException("ChainPartitionDescriptor size check failed")
         }
         this.sequence = seq
         val info = Struct3(FORMAT_STRING + "${RESERVED}s").unpack(data)

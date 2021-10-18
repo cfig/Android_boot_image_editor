@@ -14,11 +14,11 @@
 
 package init
 
+import cfig.bcb.BootloaderMsg
 import org.junit.Test
 import org.junit.After
 import java.io.File
 import java.util.*
-import cfig.bootloader_message.BootloaderMsg
 import cfig.init.Reboot
 import cfig.bootimg.Common.Companion.deleleIfExists
 import org.slf4j.LoggerFactory

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cfig.bootloader_message
+package cfig.bcb
 
 import cfig.io.Struct3
 import org.slf4j.LoggerFactory

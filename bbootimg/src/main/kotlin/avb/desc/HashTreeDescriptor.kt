@@ -245,7 +245,7 @@ class HashTreeDescriptor(
             var hashOffset: Long = 0
         ) {
             override fun toString(): String {
-                return String.format(
+                return String.format(Locale.getDefault(),
                     "MT{data: %10s(%6s blocks), hash: %7s @%-5s}",
                     dataSize,
                     dataBlockCount,

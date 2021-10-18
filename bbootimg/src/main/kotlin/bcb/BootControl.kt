@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cfig.bootloader_message
+package cfig.bcb
 
 class BootControl {
     data class SlotMetadata(//size: 16

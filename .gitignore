@@ -1,5 +1,4 @@
 .idea
 .gradle
 build/
-boot.img*
 local.properties

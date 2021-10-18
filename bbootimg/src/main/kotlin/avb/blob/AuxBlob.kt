@@ -14,6 +14,7 @@
 
 package avb.blob
 
+import avb.AVBInfo
 import avb.alg.Algorithm
 import avb.desc.*
 import cfig.helper.Helper
@@ -99,6 +100,36 @@ class AuxBlob(
                 (encodedDesc.size + encodedKey.size + encodedPkmd.size).toLong(),
                 64)
         return Struct3("${auxSize}b").pack(Helper.join(encodedDesc, encodedKey, encodedPkmd))
+    }
+
+    fun populateDescriptors(descriptors: List<Descriptor>): AuxBlob {
+        descriptors.forEach {
+            log.debug(it.toString())
+            when (it) {
+                is PropertyDescriptor -> {
+                    this.propertyDescriptors.add(it)
+                }
+                is HashDescriptor -> {
+                    this.hashDescriptors.add(it)
+                }
+                is KernelCmdlineDescriptor -> {
+                    this.kernelCmdlineDescriptors.add(it)
+                }
+                is HashTreeDescriptor -> {
+                    this.hashTreeDescriptors.add(it)
+                }
+                is ChainPartitionDescriptor -> {
+                    this.chainPartitionDescriptors.add(it)
+                }
+                is UnknownDescriptor -> {
+                    this.unknownDescriptors.add(it)
+                }
+                else -> {
+                    throw IllegalArgumentException("invalid descriptor: $it")
+                }
+            }
+        }
+        return this
     }
 
     companion object {

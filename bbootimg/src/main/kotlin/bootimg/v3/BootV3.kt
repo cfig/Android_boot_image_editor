@@ -18,7 +18,7 @@ import avb.AVBInfo
 import avb.alg.Algorithms
 import avb.blob.AuxBlob
 import cfig.Avb
-import cfig.EnvironmentVerifier
+import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Common.Companion.getPaddingSize
 import cfig.bootimg.Signer

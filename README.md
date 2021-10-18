@@ -10,7 +10,7 @@ A tool for reverse engineering Android ROM images.
 
 Mac: `brew install lz4 xz dtc`
 
-Linux: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-11-jdk gcc g++ python3`
+Linux: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-11-jdk gcc g++ python3 python-is-python3`
 
 Windows Subsystem for Linux(WSL): `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-11-jdk gcc g++ python`
 

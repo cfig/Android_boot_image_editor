@@ -15,10 +15,9 @@
 package cfig.packable
 
 import avb.blob.Footer
-import cfig.EnvironmentVerifier
-import cfig.dtb_util.DTC
+import cfig.utils.EnvironmentVerifier
+import cfig.utils.DTC
 import cfig.helper.Helper
-import cfig.Avb
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
@@ -46,7 +45,8 @@ class DtboParser(val workDir: File) : IPackable {
         cleanUp()
         val dtbPath = File("$outDir/dtb").path
         val headerPath = File("$outDir/dtbo.header").path
-        val cmd = CommandLine.parse("$dtboMaker dump $fileName").let {
+        val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""
+        val cmd = CommandLine.parse("$cmdPrefix$dtboMaker dump $fileName").let {
             it.addArguments("--dtb $dtbPath")
             it.addArguments("--output $headerPath")
         }

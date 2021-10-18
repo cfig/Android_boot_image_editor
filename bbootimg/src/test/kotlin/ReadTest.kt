@@ -278,16 +278,20 @@ class ReadTest {
 
     fun String.executeCmd(inServices: MutableList<Service>,
                           inTriggers: List<Trigger>, inIndent: String) {
-        val aPre = inIndent + "  "
+        val aPre = "$inIndent  "
         if (this.startsWith("trigger ")) {
-            println(aPre + "|-- " + this)
+            println("$aPre|-- $this")
             queueEventTrigger(inServices, inTriggers, this.substring(8).trim(), aPre + "|  ")
         } else if (this.startsWith("chmod")) {
+            //ignore
         } else if (this.startsWith("chown")) {
+            //ignore
         } else if (this.startsWith("mkdir")) {
+            //ignore
         } else if (this.startsWith("write")) {
+            //ignore
         } else if (Pattern.compile("class_start\\s+\\S+").matcher(this).find()) {
-            println(aPre + "|-- " + this)
+            println("$aPre|-- $this")
             val m = Pattern.compile("class_start\\s+(\\S+)$").matcher(this)
             if (m.find()) {
                 inServices
@@ -304,15 +308,15 @@ class ReadTest {
             println("$aPre|-- $this")
             println("""$aPre|    \-- Starting ${this.substring(5).trim()}...""")
         } else {
-            println(aPre + "|-- " + this)
+            println("$aPre|-- $this")
         }
     }
 
     @Test
     fun parseTest() {
         System.out.println(System.getProperty("user.dir"))
-        var gTriggers: MutableList<Trigger> = mutableListOf()
-        var gServices: MutableList<Service> = mutableListOf()
+        val gTriggers: MutableList<Trigger> = mutableListOf()
+        val gServices: MutableList<Service> = mutableListOf()
 
         parseConfig("__temp/", "/init.rc", gTriggers, gServices)
         parseConfig("__temp/", "/system/etc/init", gTriggers, gServices)

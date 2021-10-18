@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cfig.dtb_util
+package cfig.utils
 
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
@@ -23,7 +23,7 @@ class DTC {
 
     fun decompile(dtbFile: String, outFile: String): Boolean {
         log.info("parsing DTB: $dtbFile")
-        val cmd = CommandLine.parse("dtc -I dtb -O dts").let {
+        val cmd = CommandLine.parse("dtc -q -I dtb -O dts").let {
             it.addArguments("$dtbFile")
             it.addArguments("-o $outFile")
         }
@@ -46,7 +46,7 @@ class DTC {
 
     fun compile(dtsFile: String, outFile: String): Boolean {
         log.info("compiling DTS: $dtsFile")
-        val cmd = CommandLine.parse("dtc -I dts -O dtb").let {
+        val cmd = CommandLine.parse("dtc -q -I dts -O dtb").let {
             it.addArguments("$dtsFile")
             it.addArguments("-o $outFile")
         }

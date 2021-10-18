@@ -16,7 +16,7 @@ package cfig.bootimg.v2
 
 import avb.AVBInfo
 import cfig.Avb
-import cfig.EnvironmentVerifier
+import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
