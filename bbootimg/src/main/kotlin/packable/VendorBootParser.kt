@@ -14,8 +14,6 @@
 
 package cfig.packable
 
-import cfig.Avb
-import cfig.helper.Helper
 import cfig.bootimg.v3.VendorBoot
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
@@ -24,7 +22,6 @@ import java.io.File
 class VendorBootParser : IPackable {
     override val loopNo: Int = 0
     private val log = LoggerFactory.getLogger(VendorBootParser::class.java)
-    private val workDir = Helper.prop("workDir")
     override fun capabilities(): List<String> {
         return listOf("^vendor_boot(-debug)?\\.img$")
     }
@@ -32,20 +29,21 @@ class VendorBootParser : IPackable {
     override fun unpack(fileName: String) {
         cleanUp()
         val vb = VendorBoot
-                .parse(fileName)
-                .extractImages()
-                .extractVBMeta()
-                .printSummary()
+            .parse(fileName)
+            .extractImages()
+            .extractVBMeta()
+            .printUnpackSummary()
         log.debug(vb.toString())
     }
 
     override fun pack(fileName: String) {
-        val cfgFile = "$workDir/${fileName.removeSuffix(".img")}.json"
+        val cfgFile = "$outDir/${fileName.removeSuffix(".img")}.json"
         log.info("Loading config from $cfgFile")
         ObjectMapper().readValue(File(cfgFile), VendorBoot::class.java)
-                .pack()
-                .sign()
-        Avb.updateVbmeta(fileName)
+            .pack()
+            .sign()
+            .updateVbmeta()
+            .printPackSummary()
     }
 
     override fun `@verify`(fileName: String) {

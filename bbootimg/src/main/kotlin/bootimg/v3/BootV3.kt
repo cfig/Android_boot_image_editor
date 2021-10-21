@@ -290,6 +290,16 @@ data class BootV3(
         return this
     }
 
+    fun printPackSummary(): BootV3 {
+        VendorBoot.printPackSummary(info.output)
+        return this
+    }
+
+    fun updateVbmeta(): BootV3 {
+        Avb.updateVbmeta(info.output)
+        return this
+    }
+
     private fun toCommandLine(): CommandLine {
         val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""
         return CommandLine.parse(cmdPrefix + Helper.prop("mkbootimg")).let { ret ->

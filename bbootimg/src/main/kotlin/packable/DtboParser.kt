@@ -14,14 +14,14 @@
 
 package cfig.packable
 
-import avb.blob.Footer
-import cfig.utils.EnvironmentVerifier
-import cfig.utils.DTC
 import cfig.helper.Helper
+import cfig.utils.DTC
+import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.LoggerFactory
+import utils.Dtbo
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
@@ -34,7 +34,6 @@ class DtboParser(val workDir: File) : IPackable {
 
     private val log = LoggerFactory.getLogger(DtboParser::class.java)
     private val envv = EnvironmentVerifier()
-    private val outDir = Helper.prop("workDir")
     private val dtboMaker = Helper.prop("dtboMaker")
 
     override fun capabilities(): List<String> {
@@ -42,6 +41,64 @@ class DtboParser(val workDir: File) : IPackable {
     }
 
     override fun unpack(fileName: String) {
+        cleanUp()
+        Dtbo.parse(fileName)
+            .unpack(outDir)
+            .extractVBMeta()
+            .printSummary()
+    }
+
+    override fun pack(fileName: String) {
+        ObjectMapper().readValue(File(outDir + "dtbo.json"), Dtbo::class.java)
+            .pack()
+            .sign()
+            .updateVbmeta()
+            .printPackSummary()
+    }
+
+    override fun `@verify`(fileName: String) {
+        super.`@verify`(fileName)
+    }
+
+    private fun execInDirectory(cmd: CommandLine, inWorkDir: File) {
+        DefaultExecutor().let {
+            it.workingDirectory = inWorkDir
+            try {
+                log.info(cmd.toString())
+                it.execute(cmd)
+            } catch (e: org.apache.commons.exec.ExecuteException) {
+                log.error("can not exec command")
+                return
+            }
+        }
+    }
+
+    @Deprecated("for debugging purpose only")
+    fun packLegacy(fileName: String) {
+        if (!envv.hasDtc) {
+            log.error("'dtc' is unavailable, task aborted")
+            return
+        }
+
+        val headerPath = File("${outDir}/dtbo.header").path
+        val props = Properties().apply {
+            FileInputStream(File(headerPath)).use { fis ->
+                load(fis)
+            }
+        }
+        val cmd = CommandLine.parse("$dtboMaker create $fileName.clear").let {
+            it.addArguments("--version=1")
+            for (i in 0 until Integer.parseInt(props.getProperty("dt_entry_count"))) {
+                val dtsName = File("$outDir/dtb.$i").path
+                it.addArguments(dtsName)
+            }
+            it
+        }
+        execInDirectory(cmd, this.workDir)
+    }
+
+    @Deprecated("for debugging purpose only")
+    fun unpackLegacy(fileName: String) {
         cleanUp()
         val dtbPath = File("$outDir/dtb").path
         val headerPath = File("$outDir/dtbo.header").path
@@ -65,59 +122,6 @@ class DtboParser(val workDir: File) : IPackable {
             }
         } else {
             log.error("'dtc' is unavailable, task aborted")
-        }
-    }
-
-    override fun pack(fileName: String) {
-        if (!envv.hasDtc) {
-            log.error("'dtc' is unavailable, task aborted")
-            return
-        }
-
-        val headerPath = File("${outDir}/dtbo.header").path
-        val props = Properties().apply {
-            FileInputStream(File(headerPath)).use { fis ->
-                load(fis)
-            }
-        }
-        val cmd = CommandLine.parse("$dtboMaker create $fileName.clear").let {
-            it.addArguments("--version=1")
-            for (i in 0 until Integer.parseInt(props.getProperty("dt_entry_count"))) {
-                val dtsName = File("$outDir/dtb.$i").path
-                it.addArguments(dtsName)
-            }
-            it
-        }
-        execInDirectory(cmd, this.workDir)
-    }
-
-    override fun `@verify`(fileName: String) {
-        super.`@verify`(fileName)
-    }
-
-    // invoked solely by reflection
-    fun `@footer`(fileName: String) {
-        FileInputStream(fileName).use { fis ->
-            fis.skip(File(fileName).length() - Footer.SIZE)
-            try {
-                val footer = Footer(fis)
-                log.info("\n" + ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(footer))
-            } catch (e: IllegalArgumentException) {
-                log.info("image $fileName has no AVB Footer")
-            }
-        }
-    }
-
-    private fun execInDirectory(cmd: CommandLine, inWorkDir: File) {
-        DefaultExecutor().let {
-            it.workingDirectory = inWorkDir
-            try {
-                log.info(cmd.toString())
-                it.execute(cmd)
-            } catch (e: org.apache.commons.exec.ExecuteException) {
-                log.error("can not exec command")
-                return
-            }
         }
     }
 }

@@ -23,21 +23,34 @@ class DTC {
 
     fun decompile(dtbFile: String, outFile: String): Boolean {
         log.info("parsing DTB: $dtbFile")
-        val cmd = CommandLine.parse("dtc -q -I dtb -O dts").let {
-            it.addArguments("$dtbFile")
-            it.addArguments("-o $outFile")
-        }
-
-        CommandLine.parse("fdtdump").let {
-            it.addArguments("$dtbFile")
-        }
-
+        //CommandLine.parse("fdtdump").let {
+        //    it.addArguments("$dtbFile")
+        //}
+        //dtb-> dts
         DefaultExecutor().let {
             try {
+                val cmd = CommandLine.parse("dtc -q -I dtb -O dts").apply {
+                    addArguments(dtbFile)
+                    addArguments("-o $outFile")
+                }
                 it.execute(cmd)
                 log.info(cmd.toString())
             } catch (e: org.apache.commons.exec.ExecuteException) {
                 log.error("can not parse DTB: $dtbFile")
+                return false
+            }
+        }
+        //dts -> yaml
+        DefaultExecutor().let {
+            try {
+                val cmd = CommandLine.parse("dtc -q -I dts -O yaml").apply {
+                    addArguments(outFile)
+                    addArguments("-o $outFile.yaml")
+                }
+                it.execute(cmd)
+                log.info(cmd.toString())
+            } catch (e: org.apache.commons.exec.ExecuteException) {
+                log.error("can not transform DTS: $outFile")
                 return false
             }
         }
@@ -47,7 +60,7 @@ class DTC {
     fun compile(dtsFile: String, outFile: String): Boolean {
         log.info("compiling DTS: $dtsFile")
         val cmd = CommandLine.parse("dtc -q -I dts -O dtb").let {
-            it.addArguments("$dtsFile")
+            it.addArguments(dtsFile)
             it.addArguments("-o $outFile")
         }
 

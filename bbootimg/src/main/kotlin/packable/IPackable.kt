@@ -25,6 +25,9 @@ import java.io.File
 
 interface IPackable {
     val loopNo: Int
+    val outDir: String
+        get() = Helper.prop("workDir")
+
     fun capabilities(): List<String> {
         return listOf("^dtbo\\.img$")
     }

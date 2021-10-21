@@ -48,6 +48,9 @@ dependencies {
 }
 
 tasks.withType<KotlinCompile>().all {
-    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions {
+        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+        freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalUnsignedTypes"
+        jvmTarget = "11"
+    }
 }

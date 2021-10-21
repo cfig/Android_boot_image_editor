@@ -8,14 +8,15 @@ A tool for reverse engineering Android ROM images.
 
 #### install required packages
 
-Mac: `brew install lz4 xz dtc`
-
 Linux: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-11-jdk gcc g++ python3 python-is-python3`
+
+Mac: `brew install lz4 xz dtc`
 
 Windows Subsystem for Linux(WSL): `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-11-jdk gcc g++ python`
 
 Windows: Make sure you have `python3`, `JDK9+` and `openssl` properly installed.
 An easy way is to install [Anaconda](https://www.anaconda.com/products/individual#windows) and [Oracle JDK 11](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html), then run the program under anaconda PowerShell.
+Or install them with chocolate: `choco install openssl dtc-msys2`
 
 #### Parsing and packing
 

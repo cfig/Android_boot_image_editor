@@ -16,12 +16,13 @@ package cfig.bootimg.v2
 
 import avb.AVBInfo
 import cfig.Avb
-import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
+import cfig.bootimg.v3.VendorBoot
 import cfig.helper.Helper
 import cfig.packable.VBMetaParser
+import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
 import org.apache.commons.exec.CommandLine
@@ -514,6 +515,16 @@ data class BootV2(
         } else {
             Signer.signVB1(info.output + ".clear", info.output + ".signed")
         }
+        return this
+    }
+
+    fun printPackSummary(): BootV2 {
+        VendorBoot.printPackSummary(info.output)
+        return this
+    }
+
+    fun updateVbmeta(): BootV2 {
+        Avb.updateVbmeta(info.output)
         return this
     }
 }

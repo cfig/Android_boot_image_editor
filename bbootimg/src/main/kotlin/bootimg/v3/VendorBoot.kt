@@ -208,6 +208,30 @@ data class VendorBoot(
             ret.info.imageSize = File(fileName).length()
             return ret
         }
+
+        fun printPackSummary(imageName: String) {
+            val tableHeader = AsciiTable().apply {
+                addRule()
+                addRow("What", "Where")
+                addRule()
+            }
+            val tab = AsciiTable().let {
+                it.addRule()
+                it.addRow("re-packed $imageName", "$imageName.signed")
+                it.addRule()
+                it
+            }
+            if (File("vbmeta.img").exists()) {
+                if (File("vbmeta.img.signed").exists()) {
+                    tab.addRow("re-packed vbmeta", "vbmeta.img.signed")
+                } else {
+                    tab.addRow("re-packed vbmeta", "-")
+                }
+                tab.addRule()
+            }
+            log.info("\n\t\t\tPack Summary of ${imageName}\n{}\n{}", tableHeader.render(), tab.render())
+        }
+
     }
 
     fun pack(): VendorBoot {
@@ -290,6 +314,11 @@ data class VendorBoot(
         return this
     }
 
+    fun updateVbmeta(): VendorBoot {
+        Avb.updateVbmeta(info.output)
+        return this
+    }
+
     private fun toHeader(): VendorBootHeader {
         return VendorBootHeader(
             headerVersion = info.headerVersion,
@@ -352,7 +381,7 @@ data class VendorBoot(
         return this
     }
 
-    fun printSummary(): VendorBoot {
+    fun printUnpackSummary(): VendorBoot {
         val tableHeader = AsciiTable().apply {
             addRule()
             addRow("What", "Where")
@@ -396,6 +425,11 @@ data class VendorBoot(
             }
         }
         log.info("\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}", tableHeader.render(), tab.render(), tabVBMeta)
+        return this
+    }
+
+    fun printPackSummary(): VendorBoot {
+        printPackSummary(info.output)
         return this
     }
 

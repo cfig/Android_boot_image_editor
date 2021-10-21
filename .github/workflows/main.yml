@@ -87,7 +87,7 @@ jobs:
         run: python -c "import sys; print(sys.version)"
 
       - name: choco
-        run: choco install openssl
+        run: choco install openssl dtc-msys2
 
       - name: Unit Test
         run: ./gradlew.bat check && ./gradlew.bat clean

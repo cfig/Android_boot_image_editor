@@ -58,6 +58,7 @@ application {
 tasks.withType<KotlinCompile>().all {
     kotlinOptions {
         freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+        freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalUnsignedTypes"
         jvmTarget = "11"
     }
 }

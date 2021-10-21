@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import shutil, os.path, json, subprocess, hashlib, glob
-import unittest, logging, sys, lzma, time
+import unittest, logging, sys, lzma, time, platform
 
 successLogo = """
       +----------------------------------+
@@ -145,7 +145,14 @@ def main():
     #########################################
     #   resource_2
     #########################################
+    cleanUp()
     verifySingleJson("%s/issue_59/recovery.json" % resDir2, func = lambda: shutil.rmtree("build/unzip_boot/root", ignore_errors = False))
+    # Issue 71: dtbo
+    if platform.system() != "Darwin":
+        verifySingleDir(resDir2, "issue_71")
+        verifySingleDir(resDir2, "issue_71/redfin")
+    else:
+        log.info("dtbo not fully supported on MacOS, skip testing")
 
     log.info(successLogo)
 
