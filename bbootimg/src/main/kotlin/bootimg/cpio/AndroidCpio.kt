@@ -147,11 +147,10 @@ class AndroidCpio {
                 entry.statMode = itemConfig[0].statMode
             }
             else -> {
-                //Issue #73: https://github.com/cfig/Android_boot_image_editor/issues/73
-                //Reason: cpio may have multiple entries with the same name, that's ugly!
-                //throw IllegalArgumentException("${entry.name} has multiple exact-match fsConfig")
-                log.warn("${entry.name} has multiple exact-match fsConfig")
-                entry.statMode = itemConfig[0].statMode
+                //Issue #75: https://github.com/cfig/Android_boot_image_editor/issues/75
+                //Reason: cpio may have multiple entries with the same name, that's caused by man-made errors
+                throw IllegalArgumentException("${entry.name} has multiple exact-match fsConfig, " +
+                        "check https://github.com/cfig/Android_boot_image_editor/issues/75")
             }
         }
     }
