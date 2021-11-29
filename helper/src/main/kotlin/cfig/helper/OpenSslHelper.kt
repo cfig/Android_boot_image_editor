@@ -39,9 +39,11 @@ class OpenSslHelper {
         }
     }
 
-    class PK1Key(val format: KeyFormat = KeyFormat.PEM,
-                 override val data: ByteArray = byteArrayOf(),
-                 override val name: String = "RSA Private") : IKey {
+    class PK1Key(
+        val format: KeyFormat = KeyFormat.PEM,
+        override val data: ByteArray = byteArrayOf(),
+        override val name: String = "RSA Private"
+    ) : IKey {
         /*
             PEM private key -> PEM/DER public key
          */
@@ -49,8 +51,10 @@ class OpenSslHelper {
             if (format != KeyFormat.PEM) {
                 throw IllegalArgumentException("can not handle $format private key")
             }
-            val ret = Helper.powerRun("openssl rsa -in $stdin -pubout -outform ${pubKeyFormat.name}",
-                    ByteArrayInputStream(data))
+            val ret = Helper.powerRun(
+                "openssl rsa -in $stdin -pubout -outform ${pubKeyFormat.name}",
+                ByteArrayInputStream(data)
+            )
             log.info("privateToPublic:stderr: ${String(ret[1])}")
             return PK1PubKey(format = pubKeyFormat, data = ret[0])
         }
@@ -65,8 +69,10 @@ class OpenSslHelper {
             if (this.format != KeyFormat.PEM) {
                 throw java.lang.IllegalArgumentException("Only PEM key is supported")
             }
-            val ret = Helper.powerRun2("openssl rsa -in $stdin -pubout",
-                    ByteArrayInputStream(data))
+            val ret = Helper.powerRun2(
+                "openssl rsa -in $stdin -pubout",
+                ByteArrayInputStream(data)
+            )
             if (ret[0] as Boolean) {
                 log.info("getPk8PublicKey:error: ${String(ret[2] as ByteArray)}")
                 return Pk8PubKey(KeyFormat.PEM, ret[1] as ByteArray)
@@ -84,16 +90,18 @@ class OpenSslHelper {
                 openssl pkcs8 -nocrypt -in - -topk8 -outform DER
          */
         fun toPk8(pk8Format: KeyFormat): PK8RsaKey {
-            val ret = Helper.powerRun("openssl pkcs8 -nocrypt -in $stdin -topk8 -outform ${pk8Format.name}",
-                    ByteArrayInputStream(data))
+            val ret = Helper.powerRun(
+                "openssl pkcs8 -nocrypt -in $stdin -topk8 -outform ${pk8Format.name}",
+                ByteArrayInputStream(data)
+            )
             log.info("toPk8Private:stderr: ${String(ret[1])}")
             return PK8RsaKey(format = pk8Format, data = ret[0])
         }
 
-        fun toCsr(): Csr {
-            val info = "/C=CN/ST=Shanghai/L=Shanghai/O=XXX/OU=infra/CN=gerrit/emailAddress=webmaster@XX.com"
+        fun toCsr(info: String? = null): Csr {
+            val defaultInfo = "/C=CN/ST=Shanghai/L=Shanghai/O=XXX/OU=infra/CN=gerrit/emailAddress=webmaster@XX.com"
             val cmdLine = CommandLine.parse("openssl req -new -key $stdin -subj").apply {
-                this.addArgument("$info", true)
+                this.addArgument(info ?: defaultInfo, true)
             }
             val ret = Helper.powerRun3(cmdLine, ByteArrayInputStream(data))
             if (ret[0] as Boolean) {
@@ -117,8 +125,10 @@ class OpenSslHelper {
             val tmpFile = File.createTempFile("pk1.", ".csr")
             tmpFile.writeBytes(csr.data)
             tmpFile.deleteOnExit()
-            val ret = Helper.powerRun2("openssl x509 -req -in ${tmpFile.path} -signkey $stdin -days 180",
-                    ByteArrayInputStream(data))
+            val ret = Helper.powerRun2(
+                "openssl x509 -req -in ${tmpFile.path} -signkey $stdin -days 180",
+                ByteArrayInputStream(data)
+            )
             if (ret[0] as Boolean) {
                 log.info("toCrt:error: ${String(ret[2] as ByteArray)}")
                 return Crt(ret[1] as ByteArray)
@@ -141,9 +151,11 @@ class OpenSslHelper {
         }
     }
 
-    class PK8RsaKey(val format: KeyFormat = KeyFormat.PEM,
-                    override val data: ByteArray = byteArrayOf(),
-                    override val name: String = "PK8 Private") : IKey {
+    class PK8RsaKey(
+        val format: KeyFormat = KeyFormat.PEM,
+        override val data: ByteArray = byteArrayOf(),
+        override val name: String = "PK8 Private"
+    ) : IKey {
 
         /*
         file based:
@@ -157,8 +169,10 @@ class OpenSslHelper {
             if (this.format != KeyFormat.PEM) {
                 throw IllegalArgumentException("Only pk8+pem can be converted to RSA")
             }
-            val ret = Helper.powerRun2("openssl rsa -in $stdin",
-                    ByteArrayInputStream(data))
+            val ret = Helper.powerRun2(
+                "openssl rsa -in $stdin",
+                ByteArrayInputStream(data)
+            )
             if (ret[0] as Boolean) {
                 log.info("toRsaPrivate:error: ${String(ret[2] as ByteArray)}")
                 return PK1Key(KeyFormat.PEM, ret[1] as ByteArray)
@@ -173,8 +187,10 @@ class OpenSslHelper {
             openssl pkcs8 -nocrypt -in - -inform DER
          */
         fun transform(inFormat: KeyFormat, outFormat: KeyFormat): PK8RsaKey {
-            val ret = Helper.powerRun2("openssl pkcs8 -nocrypt -in $stdin -inform ${inFormat.name} -outform ${outFormat.name}",
-                    ByteArrayInputStream(data))
+            val ret = Helper.powerRun2(
+                "openssl pkcs8 -nocrypt -in $stdin -inform ${inFormat.name} -outform ${outFormat.name}",
+                ByteArrayInputStream(data)
+            )
             if (ret[0] as Boolean) {
                 log.info("transform:error: ${String(ret[2] as ByteArray)}")
                 return PK8RsaKey(data = ret[1] as ByteArray)
@@ -195,8 +211,10 @@ class OpenSslHelper {
             if (this.format != KeyFormat.PEM) {
                 throw java.lang.IllegalArgumentException("Only PEM key is supported")
             }
-            val ret = Helper.powerRun2("openssl rsa -in $stdin -pubout",
-                    ByteArrayInputStream(data))
+            val ret = Helper.powerRun2(
+                "openssl rsa -in $stdin -pubout",
+                ByteArrayInputStream(data)
+            )
             if (ret[0] as Boolean) {
                 log.info("getPublicKey:error: ${String(ret[2] as ByteArray)}")
                 return Pk8PubKey(KeyFormat.PEM, ret[1] as ByteArray)
@@ -209,15 +227,15 @@ class OpenSslHelper {
     }
 
     class PK1PubKey(
-            val format: KeyFormat = KeyFormat.PEM,
-            override val data: ByteArray = byteArrayOf(),
-            override val name: String = "RSA Public"
+        val format: KeyFormat = KeyFormat.PEM,
+        override val data: ByteArray = byteArrayOf(),
+        override val name: String = "RSA Public"
     ) : IKey
 
     class Pk8PubKey(
-            val format: KeyFormat = KeyFormat.PEM,
-            override val data: ByteArray = byteArrayOf(),
-            override val name: String = "Pk8 Public"
+        val format: KeyFormat = KeyFormat.PEM,
+        override val data: ByteArray = byteArrayOf(),
+        override val name: String = "Pk8 Public"
     ) : IKey
 
     class Csr(override val name: String = "CSR", override val data: ByteArray = byteArrayOf()) : IKey
@@ -226,8 +244,10 @@ class OpenSslHelper {
         fun check(passWord: String = "somepassword") {
             val tmpFile = File.createTempFile("tmp.", ".jks").apply { this.deleteOnExit() }
             tmpFile.writeBytes(this.data)
-            val ret = Helper.powerRun2("keytool -list -v -deststorepass $passWord -keystore $tmpFile",
-                    null)
+            val ret = Helper.powerRun2(
+                "keytool -list -v -deststorepass $passWord -keystore $tmpFile",
+                null
+            )
             if (ret[0] as Boolean) {
                 log.info("Jks.check:stdout: ${String(ret[1] as ByteArray)}")
                 log.info("Jks.check:error: ${String(ret[2] as ByteArray)}")
@@ -239,17 +259,19 @@ class OpenSslHelper {
         }
     }
 
-    class Crt(val data: ByteArray = byteArrayOf()) {
+    class Crt(override val data: ByteArray = byteArrayOf(), override val name: String = "crt") : IKey {
         //Result: trustedCertEntry
         //keytool -importcert -file 2017key.crt -deststorepass somepassword -srcstorepass somepassword -keystore 2017key.2.jks
         fun toJks(paramSrcPass: String = "somepassword", paramDstPass: String = "somepassword"): Jks {
             val crtFile = File.createTempFile("tmp.", ".crt").apply { this.deleteOnExit() }
             crtFile.writeBytes(this.data)
             val outFile = File.createTempFile("tmp.", ".jks").apply { this.delete() }
-            val ret = Helper.powerRun2("keytool -importcert -file ${crtFile.path}" +
-                    " -deststorepass $paramDstPass -srcstorepass $paramSrcPass " +
-                    " -keystore ${outFile.path}",
-                    ByteArrayInputStream("yes\n".toByteArray()))
+            val ret = Helper.powerRun2(
+                "keytool -importcert -file ${crtFile.path}" +
+                        " -deststorepass $paramDstPass -srcstorepass $paramSrcPass " +
+                        " -keystore ${outFile.path}",
+                ByteArrayInputStream("yes\n".toByteArray())
+            )
             if (ret[0] as Boolean) {
                 log.info("toJks:error: ${String(ret[2] as ByteArray)}")
                 log.info("toJks:stdout: ${String(ret[1] as ByteArray)}")
@@ -268,9 +290,11 @@ class OpenSslHelper {
         }
     }
 
-    class Pfx(override val name: String = "androiddebugkey",
-              var thePassword: String = "somepassword",
-              override var data: ByteArray = byteArrayOf()) : IKey {
+    class Pfx(
+        override val name: String = "androiddebugkey",
+        var thePassword: String = "somepassword",
+        override var data: ByteArray = byteArrayOf()
+    ) : IKey {
         fun generate(pk1: PK1Key, crt: Crt) {
             val pk1File = File.createTempFile("tmp.", ".file").apply { this.deleteOnExit() }
             pk1File.writeBytes(pk1.data)
@@ -295,7 +319,7 @@ class OpenSslHelper {
             }
         }
 
-        //Zkeytool -importkeystore -deststorepass $(thePassword) -destkeystore $(jks_file) -srckeystore $(pfx_cert) -srcstoretype PKCS12 -srcstorepass $(thePassword)
+        //keytool -importkeystore -deststorepass $(thePassword) -destkeystore $(jks_file) -srckeystore $(pfx_cert) -srcstoretype PKCS12 -srcstorepass $(thePassword)
         fun toJks(): Jks {
             val jksFile = File.createTempFile("tmp.", ".file").apply { this.delete() }
             val thisFile = File.createTempFile("tmp.", ".file").apply { this.deleteOnExit() }
@@ -324,16 +348,6 @@ class OpenSslHelper {
         private val log = LoggerFactory.getLogger(OpenSslHelper::class.java)
         val stdin = if (System.getProperty("os.name").contains("Mac")) "/dev/stdin" else "-"
 
-        fun decodePem(keyText: String): ByteArray {
-            val publicKeyPEM = keyText
-                    .replace("-----BEGIN .*-----".toRegex(), "")
-                    .replace(System.lineSeparator().toRegex(), "")
-                    .replace("\n", "")
-                    .replace("\r", "")
-                    .replace("-----END .*-----".toRegex(), "")
-            return Base64.getDecoder().decode(publicKeyPEM)
-        }
-
         fun toPfx(password: String = "somepassword", keyName: String = "androiddebugkey", pk1: PK1Key, crt: Crt) {
             val pk1File = File.createTempFile("tmp.", ".file").apply { this.deleteOnExit() }
             pk1File.writeBytes(pk1.data)
@@ -342,7 +356,8 @@ class OpenSslHelper {
             crtFile.writeBytes(crt.data)
 
             //openssl pkcs12 -export -out $(pfx_cert) -inkey $(rsa_key) -in $(crt_file) -password pass:$(thePassword) -name $(thePfxName)
-            val cmd = "openssl pkcs12 -export -inkey ${pk1File.path} -in ${crtFile.path} -password pass:$password -name $keyName"
+            val cmd =
+                "openssl pkcs12 -export -inkey ${pk1File.path} -in ${crtFile.path} -password pass:$password -name $keyName"
             val ret = Helper.powerRun2(cmd, null)
             if (ret[0] as Boolean) {
                 log.info("toPfx:error: ${String(ret[2] as ByteArray)}")

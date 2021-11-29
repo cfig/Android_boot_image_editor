@@ -15,10 +15,11 @@
 package cfig.packable
 
 import avb.blob.Footer
-import cfig.Avb
 import cfig.bootimg.Common.Companion.probeHeaderVersion
 import cfig.bootimg.v2.BootV2
+import cfig.bootimg.v2.BootV2Dialects
 import cfig.bootimg.v3.BootV3
+import cfig.helper.Helper.Companion.deleteIfExists
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
 import org.slf4j.LoggerFactory
@@ -37,20 +38,31 @@ class BootImgParser : IPackable {
         cleanUp()
         val hv = probeHeaderVersion(fileName)
         log.info("header version $hv")
-        if (hv in 0..2) {
-            val b2 = BootV2
-                .parse(fileName)
-                .extractImages()
-                .extractVBMeta()
-                .printSummary()
-            log.debug(b2.toString())
-        } else {
-            val b3 = BootV3
-                .parse(fileName)
-                .extractImages()
-                .extractVBMeta()
-                .printSummary()
-            log.debug(b3.toString())
+        when (hv) {
+            in 0..2 -> {
+                val b2 = BootV2
+                    .parse(fileName)
+                    .extractImages()
+                    .extractVBMeta()
+                    .printSummary()
+                log.debug(b2.toString())
+            }
+            in 3..4 -> {
+                val b3 = BootV3
+                    .parse(fileName)
+                    .extractImages()
+                    .extractVBMeta()
+                    .printSummary()
+                log.debug(b3.toString())
+            }
+            else -> {
+                val b2 = BootV2Dialects
+                    .parse(fileName)
+                    .extractImages()
+                    .extractVBMeta()
+                    .printSummary()
+                log.debug(b2.toString())
+            }
         }
     }
 
@@ -112,6 +124,14 @@ class BootImgParser : IPackable {
 
     override fun pull(fileName: String, deviceName: String) {
         super.pull(fileName, deviceName)
+    }
+
+    fun clean(fileName: String) {
+        super.cleanUp()
+        listOf("", ".clear", ".google", ".clear", ".signed", ".signed2").forEach {
+            "$fileName$it".deleteIfExists()
+        }
+        VBMetaParser().clean("vbmeta.img")
     }
 
     companion object {

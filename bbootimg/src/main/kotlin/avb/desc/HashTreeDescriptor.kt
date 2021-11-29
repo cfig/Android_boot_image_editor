@@ -15,8 +15,8 @@
 package avb.desc
 
 import avb.blob.Header
+import cfig.helper.CryptoHelper
 import cfig.helper.Helper
-import cfig.helper.KeyHelper2
 import cfig.io.Struct3
 import org.slf4j.LoggerFactory
 import java.io.*
@@ -117,8 +117,8 @@ class HashTreeDescriptor(
                     fis.skip(this.tree_offset)
                     fis.read(readTree)
                 }
-                val ourHtHash = KeyHelper2.sha256(File("hash.tree").readBytes())
-                val diskHtHash = KeyHelper2.sha256(readTree)
+                val ourHtHash = CryptoHelper.Hasher.sha256(File("hash.tree").readBytes())
+                val diskHtHash = CryptoHelper.Hasher.sha256(readTree)
                 if (!ourHtHash.contentEquals(diskHtHash)) {
                     return arrayOf(false, "MerkleTree corrupted")
                 } else {
@@ -136,7 +136,7 @@ class HashTreeDescriptor(
     }
 
     private fun calcSingleHashSize(padded: Boolean = false): Int {
-        val digSize = MessageDigest.getInstance(KeyHelper2.pyAlg2java(this.hash_algorithm)).digest().size
+        val digSize = MessageDigest.getInstance(CryptoHelper.Hasher.pyAlg2java(this.hash_algorithm)).digest().size
         val padSize = Helper.round_to_pow2(digSize.toLong()) - digSize
         return (digSize + (if (padded) padSize else 0)).toInt()
     }
@@ -159,7 +159,7 @@ class HashTreeDescriptor(
             var totalRead = 0L
             while (true) {
                 val data = ByteArray(blockSz)
-                MessageDigest.getInstance(KeyHelper2.pyAlg2java(this.hash_algorithm)).let {
+                MessageDigest.getInstance(CryptoHelper.Hasher.pyAlg2java(this.hash_algorithm)).let {
                     val bytesRead = inputStream.read(data)
                     if (bytesRead <= 0) {
                         return@hashing

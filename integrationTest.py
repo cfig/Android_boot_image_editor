@@ -71,6 +71,10 @@ def verifySingleJson(jsonFile, func = None):
     for k, v in verifyItems["hash"].items():
         log.info("%s : %s" % (k, v))
         unittest.TestCase().assertEqual(v, hashFile(k))
+    try:
+        subprocess.check_call(gradleWrapper + " clean", shell = True)
+    except Exception as e:
+        pass
 
 def verifySingleDir(inResourceDir, inImageDir):
     resDir = inResourceDir

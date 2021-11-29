@@ -14,11 +14,10 @@
 
 package avb.blob
 
-import avb.AVBInfo
 import avb.alg.Algorithm
 import avb.desc.*
+import cfig.helper.CryptoHelper
 import cfig.helper.Helper
-import cfig.helper.KeyHelper
 import cfig.io.Struct3
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey
@@ -140,8 +139,8 @@ class AuxBlob(
                 if (key == null) {
                     algKey = Files.readAllBytes((Paths.get(alg.defaultKey)))
                 }
-                val rsa = KeyHelper.parse(algKey!!) as RSAPrivateKey //BC RSA
-                encodedKey = KeyHelper.encodeRSAkey(rsa)
+                val rsa = CryptoHelper.KeyBox.parse(algKey!!) as RSAPrivateKey //BC RSA
+                encodedKey = CryptoHelper.KeyBox.encodeRSAkey(rsa)
                 assert(alg.public_key_num_bytes == encodedKey.size)
             } else {
                 log.info("encodePubKey(): No key to encode for algorithm " + alg.name)

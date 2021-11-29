@@ -15,6 +15,7 @@
 package cfig.packable
 
 import cfig.bootimg.v3.VendorBoot
+import cfig.helper.Helper.Companion.deleteIfExists
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -52,6 +53,14 @@ class VendorBootParser : IPackable {
 
     override fun pull(fileName: String, deviceName: String) {
         super.pull(fileName, deviceName)
+    }
+
+    fun clean(fileName: String) {
+        super.cleanUp()
+        listOf("", ".clear", ".google", ".clear", ".signed", ".signed2").forEach {
+            "$fileName$it".deleteIfExists()
+        }
+        VBMetaParser().clean("vbmeta.img")
     }
 
     override fun flash(fileName: String, deviceName: String) {

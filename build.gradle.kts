@@ -73,6 +73,16 @@ tasks {
     }
     pullTask.dependsOn("bbootimg:jar")
 
+    val cleanTask by register("clean", JavaExec::class) {
+        group = GROUP_ANDROID
+        main = "cfig.packable.PackableLauncherKt"
+        classpath = files("bbootimg/build/libs/bbootimg.jar")
+        this.maxHeapSize = "512m"
+        enableAssertions = true
+        args("clean")
+    }
+    cleanTask.dependsOn("bbootimg:jar")
+
     //sparse image dependencies
     if (bHackingMode) {
         logger.info("Hacking mode!")

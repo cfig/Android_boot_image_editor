@@ -15,7 +15,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.31"
+    kotlin("jvm") version "1.6.0"
     application
 }
 
@@ -33,16 +33,16 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
-    implementation("org.slf4j:slf4j-simple:1.7.31")
-    implementation("org.slf4j:slf4j-api:1.7.31")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.12.3")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
+    implementation("org.slf4j:slf4j-simple:1.7.32")
+    implementation("org.slf4j:slf4j-api:1.7.32")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.0")
     implementation("com.google.guava:guava:18.0")
     implementation("org.apache.commons:commons-exec:1.3")
-    implementation("org.apache.commons:commons-compress:1.20")
+    implementation("org.apache.commons:commons-compress:1.21")
     implementation("org.tukaani:xz:1.9")
     implementation("commons-codec:commons-codec:1.15")
-    implementation("junit:junit:4.12")
+    implementation("junit:junit:4.13.2")
     implementation("org.bouncycastle:bcprov-jdk15on:1.69")
     implementation("de.vandermeer:asciitable:0.3.2")
     implementation(project(":helper"))

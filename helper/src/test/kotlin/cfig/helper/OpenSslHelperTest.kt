@@ -14,7 +14,6 @@
 
 package cfig.helper
 
-import cfig.helper.OpenSslHelper.Companion.decodePem
 import org.junit.Test
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -36,7 +35,7 @@ class OpenSslHelperTest {
             writeTo("2_rsa_pub.pem.key")
         }
         //Action-3: RSA public key(PEM) -->  RSA public key(DER)
-        val decodeFromPem = decodePem(String(rsaPubPEM.data))
+        val decodeFromPem = CryptoHelper.KeyBox.decodePem(String(rsaPubPEM.data))
 
         //Action-2: private RSA key -> RSA public key(DER)
         val rsaPubDer = rsa.getPublicKey(OpenSslHelper.KeyFormat.DER).apply {
@@ -66,18 +65,18 @@ class OpenSslHelperTest {
 
         run { //check equality: 8 == 4,5
             val pk8Pub = rsa.getPk8PublicKey()
-            val action8_11 = decodePem(String(pk8Pub.data))
+            val action8_11 = CryptoHelper.KeyBox.decodePem(String(pk8Pub.data))
 //            val pk8Pub2 = rsa.toPk8(OpenSslHelper.KeyFormat.PEM).getPublicKey()
 //            assert(pk8Pub.data.contentEquals(pk8Pub2.data))
         }
 
-        //check equality: 4,9 == original RSA
+        //check equality: 4,4' == original RSA
         rsa.toPk8(OpenSslHelper.KeyFormat.PEM).let { pk8Pem ->
             val shortConversion = pk8Pem.toPk1()
             assert(shortConversion.data.contentEquals(rsa.data))
         }
 
-        //check equality: 7,10,9 == original RSA
+        //check equality: 7,10,4' == original RSA
         rsa.toPk8(OpenSslHelper.KeyFormat.DER).let { pk8der ->
             val longConversion = pk8der
                     .transform(OpenSslHelper.KeyFormat.DER, OpenSslHelper.KeyFormat.PEM) //pk8 PEM

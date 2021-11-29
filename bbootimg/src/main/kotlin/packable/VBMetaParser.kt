@@ -16,6 +16,7 @@ package cfig.packable
 
 import avb.AVBInfo
 import cfig.Avb
+import cfig.helper.Helper.Companion.deleteIfExists
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -57,6 +58,13 @@ class VBMetaParser: IPackable {
 
     override fun pull(fileName: String, deviceName: String) {
         super.pull(fileName, deviceName)
+    }
+
+    fun clean(fileName: String) {
+        super.cleanUp()
+        listOf("", ".signed").forEach {
+            "$fileName$it".deleteIfExists()
+        }
     }
 
     private val log = LoggerFactory.getLogger(VBMetaParser::class.java)

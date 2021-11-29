@@ -16,13 +16,12 @@ package avb
 
 import avb.alg.Algorithms
 import avb.blob.AuxBlob
+import cfig.helper.CryptoHelper
 import cfig.helper.Helper
-import cfig.helper.KeyHelper
 import org.apache.commons.codec.binary.Hex
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.io.ByteArrayInputStream
 
 class BlobTest {
     @Test
@@ -34,9 +33,9 @@ class BlobTest {
             "00000800c9d87d7bc65551dd3224a2e00ebc7efdbda2538058697ef54a4087959054593d55caff36341afae1e0902a1a32685bf3dfad0bf9b1d0f7eaab471f76be1b984b67a362fadfe6b5f8ee73165fb8b182de4989d53dd7a842998175c8d8847bbd54a8226444bc3406103c89c2d1f32c036591b1a0d1c82156159948202774ef017a76a50b6bfde3faed0df90f7a41fa76053749fe344f4b0149e498f7898ecd36aa391da97d5d6b5a52d17569a8df7cde1c1bf9d9195bb7474cb9702eade5d6887ced926e460810b576033e09ac4db62ccd1200bdd4a703d31b910823365b11feaf5969b33c8824372d61bac599511897f92342969f872ecdb24d5fa924f245dae26526264d1efa3b53abc5d379532f66b82194669a936f3526438c8f96b9ffaccdf4006ebeb673548450854653d5dd43feb26a784079569f86f3d3813b3d409035329a517ff8c34bc7d6a1ca30fb1bfd270ab8644134c117dea1769aebcf0c50d913f50d0b2c9924cbb5b4f8c60ad026b15bfd4d44669db076aa799dc05c3b9436c18ffec9d25a6aa046e1a28b2f516151a3369183b4fbcda9403446988a1a91dfd92c3abf573a464620f2f0bc315e29fe5890325c6697999a8e1523eba947d363c618bb8ed2209f78af71b32e0889a1f17db130a0e61bbd6ec8f633e1dab0bd1641fe076f6e978b6a33d2d780036a4de70582281fef6aa9757ee14ee2955b4fe6dc03b981"
         assertEquals(expectedKeyEnc, Helper.toHexString(encodedKey))
         run {//decode pub key and check
-            val decodedKey = KeyHelper.decodeRSAkey(encodedKey)
+            val decodedKey = CryptoHelper.KeyBox.decodeRSAkey(encodedKey)
             //val rsa = KeyHelper.parsePemPrivateKeyBC(ByteArrayInputStream(Helper.fromHexString(keyStr))) //BC RSA
-            val rsa = KeyHelper.parse(Helper.fromHexString(keyStr)) as RSAPrivateKey //BC RSA
+            val rsa = CryptoHelper.KeyBox.parse(Helper.fromHexString(keyStr)) as RSAPrivateKey //BC RSA
             assert(rsa.modulus.equals(decodedKey.modulus))
             assert(rsa.publicExponent.equals(decodedKey.publicExponent))
         }

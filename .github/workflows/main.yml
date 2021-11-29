@@ -35,7 +35,7 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Unit Test
-        run: ./gradlew check && ./gradlew clean
+        run: ./gradlew check && ./gradlew clean || true
 
       # Runs a set of commands using the runners shell
       - name: Integration Test
@@ -59,7 +59,7 @@ jobs:
         run: brew install dtc
 
       - name: Unit Test
-        run: ./gradlew check && ./gradlew clean
+        run: ./gradlew check && ./gradlew clean || true
 
       # Runs a set of commands using the runners shell
       - name: Integration Test
@@ -90,7 +90,7 @@ jobs:
         run: choco install openssl dtc-msys2
 
       - name: Unit Test
-        run: ./gradlew.bat check && ./gradlew.bat clean
+        run: ./gradlew.bat check && ./gradlew.bat clean || true
 
       # Runs a set of commands using the runners shell
       - name: Integration Test

@@ -14,7 +14,7 @@
 
 package avb.desc
 
-import cfig.helper.KeyHelper2
+import cfig.helper.CryptoHelper
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
 import org.junit.Assert.assertEquals
@@ -46,7 +46,7 @@ class HashTreeDescriptorTest {
     @Test
     fun x1() {
         HashTreeDescriptor.calcMerkleTree(120721408, 4096, 32)
-        println(MessageDigest.getInstance(KeyHelper2.pyAlg2java("sha1")).digest().size)
-        println(MessageDigest.getInstance(KeyHelper2.pyAlg2java("sha256")).digest().size)
+        println(MessageDigest.getInstance(CryptoHelper.Hasher.pyAlg2java("sha1")).digest().size)
+        println(MessageDigest.getInstance(CryptoHelper.Hasher.pyAlg2java("sha256")).digest().size)
     }
 }

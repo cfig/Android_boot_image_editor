@@ -15,6 +15,7 @@
 package cfig.packable
 
 import cfig.helper.Helper
+import cfig.helper.Helper.Companion.deleteIfExists
 import cfig.utils.DTC
 import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -58,6 +59,14 @@ class DtboParser(val workDir: File) : IPackable {
 
     override fun `@verify`(fileName: String) {
         super.`@verify`(fileName)
+    }
+
+    fun clean(fileName: String) {
+        super.cleanUp()
+        listOf("", ".clear", ".google", ".clear", ".signed", ".signed2").forEach {
+            "$fileName$it".deleteIfExists()
+        }
+        VBMetaParser().clean("vbmeta.img")
     }
 
     private fun execInDirectory(cmd: CommandLine, inWorkDir: File) {

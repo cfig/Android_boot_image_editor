@@ -1,0 +1,38 @@
+@startuml
+'Android system libs
+
+class libbase {
+2
+}
+class liblog {
+1
+}
+class libprocinfo {
+3
+}
+class libcutils {
+5
+* libcutils_sockets (4)
+}
+class libfstab {
+6
+}
+class libutils {
+L.1
+}
+class libdm {
+7
+}
+class libavb {
+* avb_crypto_ops_impl_sha
+}
+libbase --|> liblog
+libprocinfo --|> libbase
+libcutils --|> libbase
+libcutils --|> liblog
+libfstab --|> liblog
+libfstab --|> libbase
+libutils --|> libcutils
+libutils --|> liblog
+libdm --|> libbase
+@enduml

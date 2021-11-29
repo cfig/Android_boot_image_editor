@@ -15,8 +15,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.5.31"
+    id("org.jetbrains.kotlin.jvm") version "1.6.0"
     `java-library`
+    application
 }
 
 repositories {
@@ -33,18 +34,19 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     implementation("com.google.guava:guava:18.0")
-    implementation("org.slf4j:slf4j-api:1.7.31")
-    implementation("org.slf4j:slf4j-simple:1.7.31")
+    implementation("org.slf4j:slf4j-api:1.7.32")
+    implementation("org.slf4j:slf4j-simple:1.7.32")
     implementation("org.apache.commons:commons-exec:1.3")
     implementation("org.bouncycastle:bcprov-jdk15on:1.69")
-    implementation("org.apache.commons:commons-compress:1.20")
+    implementation("org.bouncycastle:bcpkix-jdk15on:1.69") //org.bouncycastle.pkcs
+    implementation("org.apache.commons:commons-compress:1.21")
     implementation("org.tukaani:xz:1.9")
     implementation("com.github.freva:ascii-table:1.2.0")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
-    testImplementation("com.fasterxml.jackson.core:jackson-annotations:2.12.3")
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
+    testImplementation("com.fasterxml.jackson.core:jackson-annotations:2.13.0")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.13.0")
 }
 
 tasks.withType<KotlinCompile>().all {
@@ -52,5 +54,26 @@ tasks.withType<KotlinCompile>().all {
         freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
         freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalUnsignedTypes"
         jvmTarget = "11"
+    }
+}
+
+application {
+    mainClass.set("cfig.helper.LauncherKt")
+}
+tasks {
+    jar {
+        manifest {
+            attributes["Implementation-Title"] = "Helper"
+            attributes["Main-Class"] = "cfig.helper.LauncherKt"
+        }
+        from(configurations.runtimeClasspath.get().map({ if (it.isDirectory) it else zipTree(it) }))
+        excludes.addAll(mutableSetOf("META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.DSA"))
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+    test {
+        testLogging {
+            showExceptions = true
+            showStackTraces = true
+        }
     }
 }

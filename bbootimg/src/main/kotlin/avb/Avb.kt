@@ -21,10 +21,9 @@ import avb.blob.AuxBlob
 import avb.blob.Footer
 import avb.blob.Header
 import avb.desc.*
+import cfig.helper.CryptoHelper
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.paddingWith
-import cfig.helper.KeyHelper
-import cfig.helper.KeyHelper2
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
 import org.apache.commons.exec.CommandLine
@@ -195,8 +194,8 @@ class Avb {
             val readHash = Helper.join(declaredAlg.padding, Helper.fromHexString(ai.authBlob!!.hash!!))
             if (calcHash.contentEquals(readHash)) {
                 log.info("VERIFY($localParent->AuthBlob): verify hash... PASS")
-                val readPubKey = KeyHelper.decodeRSAkey(ai.auxBlob!!.pubkey!!.pubkey)
-                val hashFromSig = KeyHelper2.rawRsa(readPubKey, Helper.fromHexString(ai.authBlob!!.signature!!))
+                val readPubKey = CryptoHelper.KeyBox.decodeRSAkey(ai.auxBlob!!.pubkey!!.pubkey)
+                val hashFromSig = CryptoHelper.Signer.rawRsa(readPubKey, Helper.fromHexString(ai.authBlob!!.signature!!))
                 if (hashFromSig.contentEquals(readHash)) {
                     log.info("VERIFY($localParent->AuthBlob): verify signature... PASS")
                 } else {

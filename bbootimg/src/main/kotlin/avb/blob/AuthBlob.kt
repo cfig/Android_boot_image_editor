@@ -15,9 +15,8 @@
 package avb.blob
 
 import avb.alg.Algorithms
+import cfig.helper.CryptoHelper
 import cfig.helper.Helper
-import cfig.helper.KeyHelper
-import cfig.helper.KeyHelper2
 import cfig.io.Struct3
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
@@ -56,8 +55,8 @@ data class AuthBlob(
             return if (alg.name == "NONE") {
                 byteArrayOf()
             } else {
-                val k = KeyHelper.parse(Files.readAllBytes(Paths.get(alg.defaultKey.replace(".pem", ".pk8")))) as PrivateKey
-                KeyHelper2.rawRsa(k, Helper.join(alg.padding, hash))
+                val k = CryptoHelper.KeyBox.parse(Files.readAllBytes(Paths.get(alg.defaultKey.replace(".pem", ".pk8")))) as PrivateKey
+                CryptoHelper.Signer.rawRsa(k, Helper.join(alg.padding, hash))
             }
         }
 
