@@ -50,13 +50,14 @@ data class AuthBlob(
             }
         }
 
-        fun calcSignature(hash: ByteArray, algorithm_name: String): ByteArray {
+        private fun calcSignature(hash: ByteArray, algorithm_name: String): ByteArray {
             val alg = Algorithms.get(algorithm_name)!!
             return if (alg.name == "NONE") {
                 byteArrayOf()
             } else {
-                val k = CryptoHelper.KeyBox.parse(Files.readAllBytes(Paths.get(alg.defaultKey.replace(".pem", ".pk8")))) as PrivateKey
-                CryptoHelper.Signer.rawRsa(k, Helper.join(alg.padding, hash))
+                val k = CryptoHelper.KeyBox.parse2(Files.readAllBytes(Paths.get(alg.defaultKey.replace(".pem", ".pk8")))) as Array<*>
+                assert(k[0] as Boolean)
+                CryptoHelper.Signer.rawRsa(k[2] as PrivateKey, Helper.join(alg.padding, hash))
             }
         }
 

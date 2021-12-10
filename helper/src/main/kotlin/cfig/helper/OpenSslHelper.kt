@@ -114,14 +114,14 @@ class OpenSslHelper {
             }
         }
 
-        fun toV1Cert(): Crt {
+        fun toV1Cert(info: String? = null): Crt {
             //full command:
             //  openssl x509 -req -in 2017key.csr -signkey 2017key.rsa.pem -out theCert.crt -days 180
             //send RSA key as input stream:
             //  openssl x509 -req -in 2017key.csr -signkey - -out theCert.crt -days 180
             //send RSA key as input stream, crt as output stream:
             //  openssl x509 -req -in 2017key.csr -signkey - -days 180
-            val csr = this.toCsr()
+            val csr = this.toCsr(info)
             val tmpFile = File.createTempFile("pk1.", ".csr")
             tmpFile.writeBytes(csr.data)
             tmpFile.deleteOnExit()
@@ -148,6 +148,12 @@ class OpenSslHelper {
                 log.info("generateRSA:stderr: ${String(ret[1])}")
                 return PK1Key(format = KeyFormat.PEM, data = ret[0])
             }
+
+            fun generate(keyLength: Int, password: String): PK1Key {
+                val ret = Helper.powerRun("openssl genrsa -aes256 -passout pass:$password $keyLength", null)
+                log.info("generateRSA:stderr: ${String(ret[1])}")
+                return PK1Key(format = KeyFormat.PEM, data = ret[0])
+            }
         }
     }
 
@@ -166,12 +172,16 @@ class OpenSslHelper {
             openssl rsa -in - -out -
          */
         fun toPk1(): PK1Key {
-            if (this.format != KeyFormat.PEM) {
-                throw IllegalArgumentException("Only pk8+pem can be converted to RSA")
-            }
+            val transformed =
+                if (this.format != KeyFormat.PEM) {
+                    log.warn("Only pk8+pem can be converted to RSA, transforming ...")
+                    this.transform(KeyFormat.DER, KeyFormat.PEM)
+                } else {
+                    this
+                }
             val ret = Helper.powerRun2(
                 "openssl rsa -in $stdin",
-                ByteArrayInputStream(data)
+                ByteArrayInputStream(transformed.data)
             )
             if (ret[0] as Boolean) {
                 log.info("toRsaPrivate:error: ${String(ret[2] as ByteArray)}")
@@ -241,7 +251,7 @@ class OpenSslHelper {
     class Csr(override val name: String = "CSR", override val data: ByteArray = byteArrayOf()) : IKey
     class Jks(override val name: String = "Java Keystore", override val data: ByteArray = byteArrayOf()) : IKey {
         //keytool -list -v -deststorepass $(thePassword) -keystore $(jks_file)
-        fun check(passWord: String = "somepassword") {
+        fun check(passWord: String = "secretpassword") {
             val tmpFile = File.createTempFile("tmp.", ".jks").apply { this.deleteOnExit() }
             tmpFile.writeBytes(this.data)
             val ret = Helper.powerRun2(
@@ -257,18 +267,47 @@ class OpenSslHelper {
                 throw RuntimeException()
             }
         }
+
+        companion object {
+            fun generate(keyPass: String, storePass: String, alias: String, dname: String?, outFile: String) {
+                //val cmd = "keytool -genkey -noprompt -alias $alias -dname \"$defaultInfo\" -keystore $outFile -storepass $storePass -keypass $keyPass"
+                val defaultInfo =
+                    dname ?: "CN=Unknown, OU=Unknown, O=Unknown Software Company, L=Unknown, ST=Unknown, C=Unknown"
+                val cmd = CommandLine.parse("keytool -genkey -noprompt -keyalg RSA").apply {
+                    addArgument("-alias").addArgument(alias)
+                    addArgument("-dname").addArgument(defaultInfo, false)
+                    addArgument("-keystore").addArgument(outFile)
+                    addArgument("-storepass").addArgument(storePass)
+                    addArgument("-keypass").addArgument(keyPass)
+                }
+                val ret = Helper.powerRun3(cmd, null)
+                if (ret[0] as Boolean) {
+                    log.info("Jks.gen:stdout: ${String(ret[1] as ByteArray)}")
+                    log.info("Jks.gen:error: ${String(ret[2] as ByteArray)}")
+                } else {
+                    log.error("Jks.gen:stdout: " + String(ret[1] as ByteArray))
+                    log.error("Jks.gen:stderr: " + String(ret[2] as ByteArray))
+                    throw RuntimeException()
+                }
+            }
+        }
     }
 
     class Crt(override val data: ByteArray = byteArrayOf(), override val name: String = "crt") : IKey {
         //Result: trustedCertEntry
-        //keytool -importcert -file 2017key.crt -deststorepass somepassword -srcstorepass somepassword -keystore 2017key.2.jks
-        fun toJks(paramSrcPass: String = "somepassword", paramDstPass: String = "somepassword"): Jks {
+        //keytool -importcert -file 2017key.crt -deststorepass secretpassword -srcstorepass secretpassword -keystore 2017key.2.jks
+        fun toJks(
+            paramSrcPass: String = "secretpassword",
+            paramDstPass: String = "secretpassword",
+            alias: String = "awesomeKey"
+        ): Jks {
             val crtFile = File.createTempFile("tmp.", ".crt").apply { this.deleteOnExit() }
             crtFile.writeBytes(this.data)
             val outFile = File.createTempFile("tmp.", ".jks").apply { this.delete() }
             val ret = Helper.powerRun2(
                 "keytool -importcert -file ${crtFile.path}" +
                         " -deststorepass $paramDstPass -srcstorepass $paramSrcPass " +
+                        " -alias $alias " +
                         " -keystore ${outFile.path}",
                 ByteArrayInputStream("yes\n".toByteArray())
             )
@@ -292,10 +331,10 @@ class OpenSslHelper {
 
     class Pfx(
         override val name: String = "androiddebugkey",
-        var thePassword: String = "somepassword",
+        var thePassword: String = "secretpassword",
         override var data: ByteArray = byteArrayOf()
     ) : IKey {
-        fun generate(pk1: PK1Key, crt: Crt) {
+        fun generate(pk1: PK1Key, crt: Crt): Pfx {
             val pk1File = File.createTempFile("tmp.", ".file").apply { this.deleteOnExit() }
             pk1File.writeBytes(pk1.data)
 
@@ -317,6 +356,7 @@ class OpenSslHelper {
                 log.error("stderr: " + String(ret[2] as ByteArray))
                 throw RuntimeException()
             }
+            return this
         }
 
         //keytool -importkeystore -deststorepass $(thePassword) -destkeystore $(jks_file) -srckeystore $(pfx_cert) -srcstoretype PKCS12 -srcstorepass $(thePassword)
@@ -348,7 +388,7 @@ class OpenSslHelper {
         private val log = LoggerFactory.getLogger(OpenSslHelper::class.java)
         val stdin = if (System.getProperty("os.name").contains("Mac")) "/dev/stdin" else "-"
 
-        fun toPfx(password: String = "somepassword", keyName: String = "androiddebugkey", pk1: PK1Key, crt: Crt) {
+        fun toPfx(password: String = "secretpassword", keyName: String = "androiddebugkey", pk1: PK1Key, crt: Crt) {
             val pk1File = File.createTempFile("tmp.", ".file").apply { this.deleteOnExit() }
             pk1File.writeBytes(pk1.data)
 

@@ -9,10 +9,7 @@ import org.apache.commons.exec.PumpStreamHandler
 import org.bouncycastle.pkcs.PKCS10CertificationRequest
 import org.bouncycastle.util.io.pem.PemReader
 import org.slf4j.LoggerFactory
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.IOException
-import java.io.InputStreamReader
+import java.io.*
 import java.math.BigInteger
 import java.math.RoundingMode
 import java.security.KeyFactory
@@ -30,11 +27,40 @@ import javax.crypto.Cipher
 class CryptoHelper {
     class KeyBox {
         companion object {
-            fun parse(data: ByteArray): Any {
+            fun parseToPk8(kFile: String): OpenSslHelper.PK8RsaKey {
+                val inBytes = File(kFile).readBytes()
+                val k = parse2(inBytes) as Array<*>
+                val kType = if ((k[1] as String) == "PEM") OpenSslHelper.KeyFormat.PEM else OpenSslHelper.KeyFormat.DER
+                return when (k[2]) {
+                    is org.bouncycastle.asn1.pkcs.RSAPrivateKey -> {
+                        OpenSslHelper.PK1Key(kType, inBytes).toPk8(OpenSslHelper.KeyFormat.PEM)
+                    }
+                    is java.security.interfaces.RSAPrivateKey -> {
+                        OpenSslHelper.PK8RsaKey(kType, inBytes).let {
+                            if (it.format == OpenSslHelper.KeyFormat.DER) {
+                                it.transform(OpenSslHelper.KeyFormat.DER, OpenSslHelper.KeyFormat.PEM)
+                            } else {
+                                it
+                            }
+                        }
+                    }
+                    else -> {
+                        throw IllegalArgumentException("unknown PK1/PK8 private key")
+                    }
+                }
+            }
+
+            fun parse2(data: ByteArray): Any {
+                var bSuccess = false
+                var retType = "NA"
+                var ret: Any = false
+
                 val p = PemReader(InputStreamReader(ByteArrayInputStream(data))).readPemObject()
-                return if (p != null) {
+                if (p != null) {
                     log.debug("parse PEM: " + p.type)
-                    when (p.type) {
+                    bSuccess = true
+                    retType = "PEM"
+                    ret = when (p.type) {
                         "RSA PUBLIC KEY" -> {
                             org.bouncycastle.asn1.pkcs.RSAPublicKey.getInstance(p.content) as org.bouncycastle.asn1.pkcs.RSAPublicKey
                         }
@@ -59,47 +85,58 @@ class CryptoHelper {
                         }
                         else -> throw IllegalArgumentException("unsupported type: ${p.type}")
                     }
+                    return arrayOf(bSuccess, retType, ret)
                 } else {
-                    var bSuccess = false
-                    var ret: Any = false
                     //try 1
                     try {
                         val spec = PKCS8EncodedKeySpec(data)
                         val privateKey = KeyFactory.getInstance("RSA").generatePrivate(spec)
                         log.debug("Parse PKCS8:Private")
                         ret = privateKey
+                        retType = "RAW"
                         bSuccess = true
                     } catch (e: java.security.spec.InvalidKeySpecException) {
                         log.debug("not PKCS8:Private")
                     }
-                    if (bSuccess) return ret
-
+                    if (bSuccess) return arrayOf(bSuccess, retType, ret)
                     //try 2
                     try {
                         log.debug("Parse X509:Public")
                         val spec = X509EncodedKeySpec(data)
+                        retType = "RAW"
                         ret = KeyFactory.getInstance("RSA").generatePublic(spec)
                         bSuccess = true
                     } catch (e: java.security.spec.InvalidKeySpecException) {
                         log.debug(e.toString())
                         log.debug("not X509:Public")
                     }
-                    if (bSuccess) return ret
+                    if (bSuccess) return arrayOf(bSuccess, retType, ret)
 
                     //try 3: jks
                     try {
-                        val pwdArray = "androiddebugkey".toCharArray()
+                        val envPassword = System.getProperty("password") ?: "secretpassword"
+                        log.warn("trying with password=$envPassword")
                         val ks = KeyStore.getInstance("JKS")
-                        ks.load(ByteArrayInputStream(data), pwdArray)
+                        ks.load(ByteArrayInputStream(data), envPassword.toCharArray())
+                        ret = ks
+                        retType = "JKS"
+                        bSuccess = true
                     } catch (e: IOException) {
                         if (e.toString().contains("Keystore was tampered with, or password was incorrect")) {
-                            log.info("JKS password wrong")
+                            log.info("JKS password wrong #1")
                             bSuccess = false
-                            ret = true
+                            retType = "JKS"
+                            ret = KeyStore.getInstance("JKS")
+                        }
+                        if (e.toString().contains("keystore password was incorrect")) {
+                            log.info("JKS password wrong #2")
+                            bSuccess = false
+                            retType = "JKS"
+                            ret = KeyStore.getInstance("JKS")
                         }
                     }
                     //at last
-                    return ret
+                    return arrayOf(bSuccess, retType, ret)
                 }
             }
 

@@ -139,7 +139,7 @@ class AuxBlob(
                 if (key == null) {
                     algKey = Files.readAllBytes((Paths.get(alg.defaultKey)))
                 }
-                val rsa = CryptoHelper.KeyBox.parse(algKey!!) as RSAPrivateKey //BC RSA
+                val rsa = (CryptoHelper.KeyBox.parse2(algKey!!) as Array<*>)[2] as RSAPrivateKey //BC RSA
                 encodedKey = CryptoHelper.KeyBox.encodeRSAkey(rsa)
                 assert(alg.public_key_num_bytes == encodedKey.size)
             } else {

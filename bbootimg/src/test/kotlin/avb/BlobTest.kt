@@ -35,7 +35,7 @@ class BlobTest {
         run {//decode pub key and check
             val decodedKey = CryptoHelper.KeyBox.decodeRSAkey(encodedKey)
             //val rsa = KeyHelper.parsePemPrivateKeyBC(ByteArrayInputStream(Helper.fromHexString(keyStr))) //BC RSA
-            val rsa = CryptoHelper.KeyBox.parse(Helper.fromHexString(keyStr)) as RSAPrivateKey //BC RSA
+            val rsa = (CryptoHelper.KeyBox.parse2(Helper.fromHexString(keyStr)) as Array<*>)[2] as RSAPrivateKey //BC RSA
             assert(rsa.modulus.equals(decodedKey.modulus))
             assert(rsa.publicExponent.equals(decodedKey.publicExponent))
         }

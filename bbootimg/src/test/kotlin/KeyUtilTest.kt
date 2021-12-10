@@ -35,14 +35,14 @@ class KeyUtilTest {
     fun parseKeys() {
         val keyFile = "../" + Algorithms.get("SHA256_RSA2048")!!.defaultKey
         println("Key: $keyFile")
-        val k = CryptoHelper.KeyBox.parse(File(keyFile.replace("pem", "pk8")).readBytes()) as RSAPrivateKey
+        val k = (CryptoHelper.KeyBox.parse2(File(keyFile.replace("pem", "pk8")).readBytes()) as Array<*>)[2] as RSAPrivateKey
         println(k.privateExponent)
         println(k.modulus)
-        val k2 = CryptoHelper.KeyBox.parse(File(keyFile).readBytes()) as org.bouncycastle.asn1.pkcs.RSAPrivateKey
+        val k2 = (CryptoHelper.KeyBox.parse2(File(keyFile).readBytes()) as Array<*>)[2] as org.bouncycastle.asn1.pkcs.RSAPrivateKey
         println(k2.privateExponent)
         println(k2.modulus)
         //KeyHelper2.parseRsaPk8(FileInputStream(keyFile).readAllBytes())
-        CryptoHelper.KeyBox.parse(File(keyFile.replace("pem", "pk8")).readBytes())
+        CryptoHelper.KeyBox.parse2(File(keyFile.replace("pem", "pk8")).readBytes())
     }
 
     @Test
@@ -87,7 +87,7 @@ class KeyUtilTest {
         val expectedSig =
             "28e17bc57406650ed78785fd558e7c1861cc4014c900d72b61c03cdbab1039e713b5bb19b556d04d276b46aae9b8a3999ccbac533a1cce00f83cfb83e2beb35ed7329f71ffec04fc2839a9b44e50abd66ea6c3d3bea6705e93e9139ecd0331170db18eba36a85a78bc49a5447260a30ed19d956cb2f8a71f6b19e57fdca43e052d1bb7840bf4c3efb47111f4d77764236d2e013fbf3b2577e4a3e01c9d166a5e890ef96210882e6e88ceca2fe3a2201f4961210d4ec6167f5dfd0e038e4a146f960caecab7d15ba65f6edcf5dbd25f5af543cfb8da4338bdbc872eec3f8e72aa8db679099e70952d3f7176c0b9111bf20ad1390eab1d09a859105816fdf92fbb"
         val privkFile = "../" + Algorithms.get("SHA256_RSA2048")!!.defaultKey.replace("pem", "pk8")
-        val k = CryptoHelper.KeyBox.parse(Files.readAllBytes(Paths.get(privkFile))) as PrivateKey
+        val k = (CryptoHelper.KeyBox.parse2(Files.readAllBytes(Paths.get(privkFile))) as Array<*>)[2] as PrivateKey
         val encData = CryptoHelper.Signer.rawRsa(k, data)
         assertEquals(expectedSig, Helper.toHexString(encData))
     }
@@ -108,7 +108,7 @@ class KeyUtilTest {
             Helper.fromHexString("0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d0609608648016503040201050004206317a4c8d86accc8258c1ac23ef0ebd18bc3301033")
         val signature = Signature.getInstance("NONEwithRSA")
         val keyFile = "../" + Algorithms.get("SHA256_RSA2048")!!.defaultKey.replace("pem", "pk8")
-        val k = CryptoHelper.KeyBox.parse(Files.readAllBytes(Paths.get(keyFile))) as PrivateKey
+        val k = (CryptoHelper.KeyBox.parse2(Files.readAllBytes(Paths.get(keyFile))) as Array<*>)[2] as PrivateKey
         signature.initSign(k)
         signature.update(data)
         println("data size " + data.size)
@@ -194,9 +194,11 @@ class KeyUtilTest {
     fun signData() {
         val data = KeyUtilTest::class.java.classLoader.getResourceAsStream("data").readAllBytes()
         println(Helper.toHexString(data))
-        val privKey = CryptoHelper.KeyBox.parse(
-            KeyUtilTest::class.java.classLoader.getResourceAsStream("testkey.pk8").readAllBytes()
+        //@formatter:off
+        val privKey = (
+                (CryptoHelper.KeyBox.parse2(KeyUtilTest::class.java.classLoader.getResourceAsStream("testkey.pk8").readAllBytes()) as Array<*>)[2]
         ) as PrivateKey
+        //@formatter:on
         println("sha256=" + Helper.toHexString(CryptoHelper.Hasher.sha256(data)))
         val signedHash = CryptoHelper.Signer.sha256rsa(data, privKey)
         println("Signed Hash: " + Helper.toHexString(signedHash))
