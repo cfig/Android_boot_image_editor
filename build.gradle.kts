@@ -5,7 +5,7 @@ import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.PumpStreamHandler
 
 val GROUP_ANDROID = "android"
-val bHackingMode = true
+val bHackingMode = false
 if (parseGradleVersion(gradle.gradleVersion) < 6) {
     logger.error("ERROR: Gradle Version MUST >= 6.0, current is {}", gradle.gradleVersion)
     throw RuntimeException("ERROR: Gradle Version")
