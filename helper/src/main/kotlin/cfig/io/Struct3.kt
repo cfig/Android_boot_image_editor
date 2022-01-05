@@ -1,40 +1,6 @@
-// Copyright 2021 yuyezhong@gmail.com
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package cfig.io
 
-import cfig.io.Struct3.ByteArrayExt.Companion.toCString
-import cfig.io.Struct3.ByteArrayExt.Companion.toInt
-import cfig.io.Struct3.ByteArrayExt.Companion.toLong
-import cfig.io.Struct3.ByteArrayExt.Companion.toShort
-import cfig.io.Struct3.ByteArrayExt.Companion.toUInt
-import cfig.io.Struct3.ByteArrayExt.Companion.toULong
-import cfig.io.Struct3.ByteArrayExt.Companion.toUShort
-import cfig.io.Struct3.ByteBufferExt.Companion.appendByteArray
-import cfig.io.Struct3.ByteBufferExt.Companion.appendPadding
-import cfig.io.Struct3.ByteBufferExt.Companion.appendUByteArray
-import cfig.io.Struct3.InputStreamExt.Companion.getByteArray
-import cfig.io.Struct3.InputStreamExt.Companion.getCString
-import cfig.io.Struct3.InputStreamExt.Companion.getChar
-import cfig.io.Struct3.InputStreamExt.Companion.getInt
-import cfig.io.Struct3.InputStreamExt.Companion.getLong
-import cfig.io.Struct3.InputStreamExt.Companion.getPadding
-import cfig.io.Struct3.InputStreamExt.Companion.getShort
-import cfig.io.Struct3.InputStreamExt.Companion.getUByteArray
-import cfig.io.Struct3.InputStreamExt.Companion.getUInt
-import cfig.io.Struct3.InputStreamExt.Companion.getULong
-import cfig.io.Struct3.InputStreamExt.Companion.getUShort
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.InputStream
@@ -43,488 +9,533 @@ import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.regex.Pattern
-import kotlin.random.Random
 
-class Struct3 {
-    private val formatString: String
+class Struct3(inFormatString: String) {
+    private val formatString: String = inFormatString
     private var byteOrder = ByteOrder.LITTLE_ENDIAN
-    private val formats = ArrayList<Array<Any?>>()
+    private val warships = ArrayList<IWarShip<*>>()
 
-    constructor(inFormatString: String) {
-        assert(inFormatString.isNotEmpty()) { "FORMAT_STRING must not be empty" }
-        formatString = inFormatString
+    init {
+        require(inFormatString.isNotEmpty()) { "FORMAT_STRING must not be empty" }
         val m = Pattern.compile("(\\d*)([a-zA-Z])").matcher(formatString)
-        when (formatString[0]) {
-            '>', '!' -> this.byteOrder = ByteOrder.BIG_ENDIAN
-            '@', '=' -> this.byteOrder = ByteOrder.nativeOrder()
-            else -> this.byteOrder = ByteOrder.LITTLE_ENDIAN
+        this.byteOrder = when (formatString[0]) {
+            '>', '!' -> ByteOrder.BIG_ENDIAN
+            '@', '=' -> ByteOrder.nativeOrder()
+            else -> ByteOrder.LITTLE_ENDIAN
         }
         while (m.find()) {
             //item[0]: Type, item[1]: multiple
             // if need to expand format items, explode it
             // eg: "4L" will be exploded to "1L 1L 1L 1L", so it's treated as primitive
             // eg: "10x" won't be exploded, it's still "10x", so it's treated as non-primitive
-            val typeName: Any = when (m.group(2)) {
-                //primitive types
-                "x" -> Random //byte 1 (exploded)
-                "b" -> Byte //byte 1 (exploded)
-                "B" -> UByte //UByte 1 (exploded)
-                "s" -> String //string (exploded)
-                //zippable types, which need to be exploded with multiple=1
-                "c" -> Char
-                "h" -> Short //2
-                "H" -> UShort //2
-                "i", "l" -> Int //4
-                "I", "L" -> UInt //4
-                "q" -> Long //8
-                "Q" -> ULong //8
-                else -> throw IllegalArgumentException("type [" + m.group(2) + "] not supported")
-            }
-            val bPrimitive = m.group(2) in listOf("x", "b", "B", "s")
-            val multiple = if (m.group(1).isEmpty()) 1 else Integer.decode(m.group(1))
-            if (bPrimitive) {
-                formats.add(arrayOf<Any?>(typeName, multiple))
-            } else {
-                for (i in 0 until multiple) {
-                    formats.add(arrayOf<Any?>(typeName, 1))
-                }
-            }
+            require(m.group(2).length == 1)
+            val marker = m.group(2)[0]
+            val count = if (m.group(1).isEmpty()) 1 else Integer.decode(m.group(1))
+            warships.addAll(makeWarship(marker, count))
         }
     }
 
-    private fun getFormatInfo(inCursor: Int): String {
-        return ("type=" + formats.get(inCursor)[0] + ", value=" + formats.get(inCursor)[1])
-    }
-
-    override fun toString(): String {
-        val formatStr = mutableListOf<String>()
-        formats.forEach {
-            val fs = StringBuilder()
-            when (it[0]) {
-                Random -> fs.append("x")
-                Byte -> fs.append("b")
-                UByte -> fs.append("B")
-                String -> fs.append("s")
-                Char -> fs.append("c")
-                Short -> fs.append("h")
-                UShort -> fs.append("H")
-                Int -> fs.append("i")
-                UInt -> fs.append("I")
-                Long -> fs.append("q")
-                ULong -> fs.append("Q")
-                else -> throw IllegalArgumentException("type [" + it[0] + "] not supported")
-            }
-            fs.append(":" + it[1])
-            formatStr.add(fs.toString())
+    private fun makeWarship(marker: Char, count: Int): List<IWarShip<*>> {
+        return when (marker) {
+            //primitive types
+            's' -> listOf(StringFleet(count)) //string (exploded)
+            'x' -> listOf(PaddingFleet(count)) //byte 1 (exploded)
+            'b' -> listOf(ByteFleet(count)) //byte 1 (exploded)
+            'B' -> listOf(UByteFleet(count)) //UByte 1 (exploded)
+            //zippable types, which need to be exploded with multiple=1
+            'c' -> List(count) { CharShip() } //1
+            'h' -> List(count) { ShortShip() } //2
+            'H' -> List(count) { UShortShip() } //2
+            'i', 'l' -> List(count) { IntShip() } //4
+            'I', 'L' -> List(count) { UIntShip() } //4
+            'q' -> List(count) { LongShip() } //8
+            'Q' -> List(count) { ULongShip() } //8
+            else -> throw IllegalArgumentException("type [$marker] not supported")
         }
-        return "Struct3(formatString='$formatString', byteOrder=$byteOrder, formats=$formatStr)"
     }
 
     fun calcSize(): Int {
-        var ret = 0
-        for (format in formats) {
-            ret += when (val formatType = format[0]) {
-                Random, Byte, UByte, Char, String -> format[1] as Int
-                Short, UShort -> 2 * format[1] as Int
-                Int, UInt -> 4 * format[1] as Int
-                Long, ULong -> 8 * format[1] as Int
-                else -> throw IllegalArgumentException("Class [$formatType] not supported")
-            }
-        }
-        return ret
+        return warships.sumOf { it.multiple * it.sz }
+    }
+
+    override fun toString(): String {
+        val sb = StringBuilder("Struct[$byteOrder]")
+        warships.map { it.toString() }.reduce { acc, s -> "$acc$s" }
+        return sb.toString()
     }
 
     @Throws(IllegalArgumentException::class)
     fun pack(vararg args: Any?): ByteArray {
-        if (args.size != this.formats.size) {
-            throw IllegalArgumentException("argument size " + args.size + " doesn't match format size " + this.formats.size)
+        if (args.size != this.warships.size) {
+            throw IllegalArgumentException("argument size " + args.size + " doesn't match format size " + this.warships.size)
         }
-        val bf = ByteBuffer.allocate(this.calcSize())
-        bf.order(this.byteOrder)
-        for (i in args.indices) {
-            val arg = args[i]
-            val typeName = formats[i][0]
-            val multiple = formats[i][1] as Int
-
-            if (typeName !in arrayOf(Random, Byte, String, UByte)) {
-                assert(1 == multiple)
+        return ByteBuffer.allocate(this.calcSize()).let { bf ->
+            bf.order(this.byteOrder)
+            args.forEachIndexed { index, arg ->
+                warships.get(index).put(bf, arg)
             }
-
-            //x: padding:
-            if (Random == typeName) {
-                when (arg) {
-                    null -> bf.appendPadding(0, multiple)
-                    is Byte -> bf.appendPadding(arg, multiple)
-                    is Int -> bf.appendPadding(arg.toByte(), multiple)
-                    else -> throw IllegalArgumentException("Index[" + i + "] Unsupported arg [" + arg + "] with type [" + formats[i][0] + "]")
-                }
-                continue
-            }
-
-            //c: character
-            if (Char == typeName) {
-                assert(arg is Char) { "[$arg](${arg!!::class.java}) is NOT Char" }
-                if ((arg as Char) !in '\u0000'..'\u00ff') {
-                    throw IllegalArgumentException("arg[${arg.code}] exceeds 8-bit bound")
-                }
-                bf.put(arg.code.toByte())
-                continue
-            }
-
-            //b: byte array
-            if (Byte == typeName) {
-                when (arg) {
-                    is IntArray -> bf.appendByteArray(arg, multiple)
-                    is ByteArray -> bf.appendByteArray(arg, multiple)
-                    else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT ByteArray/IntArray")
-                }
-                continue
-            }
-
-            //B: UByte array
-            if (UByte == typeName) {
-                when (arg) {
-                    is ByteArray -> bf.appendByteArray(arg, multiple)
-                    is UByteArray -> bf.appendUByteArray(arg, multiple)
-                    is IntArray -> bf.appendUByteArray(arg, multiple)
-                    else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT ByteArray/IntArray")
-                }
-                continue
-            }
-
-            //s: String
-            if (String == typeName) {
-                assert(arg != null) { "arg can not be NULL for String, formatString=$formatString, ${getFormatInfo(i)}" }
-                assert(arg is String) { "[$arg](${arg!!::class.java}) is NOT String, ${getFormatInfo(i)}" }
-                bf.appendByteArray((arg as String).toByteArray(), multiple)
-                continue
-            }
-
-            //h: Short
-            if (Short == typeName) {
-                when (arg) {
-                    is Int -> {
-                        assert(arg in Short.MIN_VALUE..Short.MAX_VALUE) { "[$arg] is truncated as type Short.class" }
-                        bf.putShort(arg.toShort())
-                    }
-                    is Short -> bf.putShort(arg) //instance Short
-                    else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT Short/Int")
-                }
-                continue
-            }
-
-            //H: UShort
-            if (UShort == typeName) {
-                assert(arg is UShort || arg is UInt || arg is Int) { "[$arg](${arg!!::class.java}) is NOT UShort/UInt/Int" }
-                when (arg) {
-                    is Int -> {
-                        assert(arg >= UShort.MIN_VALUE.toInt() && arg <= UShort.MAX_VALUE.toInt()) { "[$arg] is truncated as type UShort" }
-                        bf.putShort(arg.toShort())
-                    }
-                    is UInt -> {
-                        assert(arg >= UShort.MIN_VALUE && arg <= UShort.MAX_VALUE) { "[$arg] is truncated as type UShort" }
-                        bf.putShort(arg.toShort())
-                    }
-                    is UShort -> bf.putShort(arg.toShort())
-                }
-                continue
-            }
-
-            //i, l: Int
-            if (Int == typeName) {
-                assert(arg is Int) { "[$arg](${arg!!::class.java}) is NOT Int" }
-                bf.putInt(arg as Int)
-                continue
-            }
-
-            //I, L: UInt
-            if (UInt == typeName) {
-                when (arg) {
-                    is Int -> {
-                        assert(arg >= 0) { "[$arg] is invalid as type UInt" }
-                        bf.putInt(arg)
-                    }
-                    is UInt -> bf.putInt(arg.toInt())
-                    is Long -> {
-                        assert(arg >= 0) { "[$arg] is invalid as type UInt" }
-                        bf.putInt(arg.toInt())
-                    }
-                    else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT UInt/Int/Long")
-                }
-                continue
-            }
-
-            //q: Long
-            if (Long == typeName) {
-                when (arg) {
-                    is Long -> bf.putLong(arg)
-                    is Int -> bf.putLong(arg.toLong())
-                    else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT Long/Int")
-                }
-                continue
-            }
-
-            //Q: ULong
-            if (ULong == typeName) {
-                when (arg) {
-                    is Int -> {
-                        assert(arg >= 0) { "[$arg] is invalid as type ULong" }
-                        bf.putLong(arg.toLong())
-                    }
-                    is Long -> {
-                        assert(arg >= 0) { "[$arg] is invalid as type ULong" }
-                        bf.putLong(arg)
-                    }
-                    is ULong -> bf.putLong(arg.toLong())
-                    else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT Int/Long/ULong")
-                }
-                continue
-            }
-
-            throw IllegalArgumentException("unrecognized format $typeName")
+            bf.array()
         }
-        return bf.array()
     }
 
     @Throws(IOException::class, IllegalArgumentException::class)
     fun unpack(iS: InputStream): List<*> {
-        val ret = ArrayList<Any>()
-        for (format in this.formats) {
-            when (format[0]) {
-                Random -> ret.add(iS.getPadding(format[1] as Int)) //return padding byte
-                Byte -> ret.add(iS.getByteArray(format[1] as Int)) //b: byte array
-                UByte -> ret.add(iS.getUByteArray(format[1] as Int)) //B: ubyte array
-                Char -> ret.add(iS.getChar()) //char: 1
-                String -> ret.add(iS.getCString(format[1] as Int)) //c string
-                Short -> ret.add(iS.getShort(this.byteOrder)) //h: short
-                UShort -> ret.add(iS.getUShort(this.byteOrder)) //H: UShort
-                Int -> ret.add(iS.getInt(this.byteOrder)) //i, l: Int
-                UInt -> ret.add(iS.getUInt(this.byteOrder)) //I, L: UInt
-                Long -> ret.add(iS.getLong(this.byteOrder)) //q: Long
-                ULong -> ret.add(iS.getULong(this.byteOrder)) //Q: ULong
-                else -> throw IllegalArgumentException("Class [" + format[0] + "] not supported")
-            }//end-of-when
-        }//end-of-for
-        return ret
+        return warships.map { it.get(iS, byteOrder) }
     }
 
-    class ByteBufferExt {
-        companion object {
-            private val log = LoggerFactory.getLogger(ByteBufferExt::class.java)
+    private interface IWarShip<T> {
+        val sz: Int
+        var multiple: Int
+        val log: Logger
+        fun get(stream: InputStream, byteOrder: ByteOrder): T
+        fun get(ba: ByteArray, byteOrder: ByteOrder): T
+        fun put(bf: ByteBuffer, arg: Any?)
+    }
 
-            @Throws(IllegalArgumentException::class)
-            fun ByteBuffer.appendPadding(b: Byte, bufSize: Int) {
-                when {
-                    bufSize == 0 -> {
-                        log.debug("paddingSize is zero, perfect match")
-                        return
-                    }
-                    bufSize < 0 -> {
-                        throw IllegalArgumentException("illegal padding size: $bufSize")
-                    }
-                    else -> {
-                        log.debug("paddingSize $bufSize")
-                    }
+    private interface IBaseShip<T> : IWarShip<T> {
+        override var multiple: Int
+            get() = 1
+            set(@Suppress("UNUSED_PARAMETER") value) {}
+    }
+
+    private class ShortShip : IBaseShip<Short> {
+        override fun get(stream: InputStream, byteOrder: ByteOrder): Short {
+            val data = ByteArray(Short.SIZE_BYTES)
+            check(Short.SIZE_BYTES == stream.read(data))
+            return get(data, byteOrder)
+        }
+
+        override fun get(ba: ByteArray, byteOrder: ByteOrder): Short {
+            val typeSize = Short.SIZE_BYTES / Byte.SIZE_BYTES
+            check(typeSize == ba.size) { "Short must have $typeSize bytes" }
+            return ByteBuffer.allocate(ba.size).let {
+                it.order(byteOrder)
+                it.put(ba)
+                it.flip()
+                it.getShort()
+            }
+        }
+
+        override fun put(bf: ByteBuffer, arg: Any?) {
+            //h: Short
+            when (arg) {
+                is Int -> {
+                    require(arg in Short.MIN_VALUE..Short.MAX_VALUE) { "[$arg] is truncated as type Short.class" }
+                    bf.putShort(arg.toShort())
                 }
-                val padding = ByteArray(bufSize)
-                Arrays.fill(padding, b)
-                this.put(padding)
+                is Short -> bf.putShort(arg) //instance Short
+                else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT Short/Int")
             }
+        }
 
-            fun ByteBuffer.appendByteArray(inIntArray: IntArray, bufSize: Int) {
-                val arg2 = mutableListOf<Byte>()
-                inIntArray.toMutableList().mapTo(arg2) {
-                    if (it in Byte.MIN_VALUE..Byte.MAX_VALUE) {
-                        it.toByte()
-                    } else {
-                        throw IllegalArgumentException("$it is not valid Byte")
-                    }
+        override fun toString(): String {
+            return "h"
+        }
+
+        override val sz: Int = Short.SIZE_BYTES
+        override val log: Logger = LoggerFactory.getLogger(ShortShip::class.java)
+    }
+
+    private class UShortShip : IBaseShip<UShort> {
+        override fun get(stream: InputStream, byteOrder: ByteOrder): UShort {
+            val data = ByteArray(UShort.SIZE_BYTES)
+            check(UShort.SIZE_BYTES == stream.read(data))
+            return get(data, byteOrder)
+        }
+
+        override fun get(ba: ByteArray, byteOrder: ByteOrder): UShort {
+            val typeSize = UShort.SIZE_BYTES / Byte.SIZE_BYTES
+            assert(typeSize == ba.size) { "UShort must have $typeSize bytes" }
+            return ByteBuffer.allocate(ba.size).let {
+                it.order(byteOrder)
+                it.put(ba)
+                it.flip()
+                it.getShort().toUShort()
+            }
+        }
+
+        override fun put(bf: ByteBuffer, arg: Any?) {
+            require(arg is UShort || arg is UInt || arg is Int) { "[$arg](${arg!!::class.java}) is NOT UShort/UInt/Int" }
+            when (arg) {
+                is Int -> {
+                    require(arg >= UShort.MIN_VALUE.toInt() && arg <= UShort.MAX_VALUE.toInt()) { "[$arg] is truncated as type UShort" }
+                    bf.putShort(arg.toShort())
                 }
-                appendByteArray(arg2.toByteArray(), bufSize)
-            }
-
-            @Throws(IllegalArgumentException::class)
-            fun ByteBuffer.appendByteArray(inByteArray: ByteArray, bufSize: Int) {
-                val paddingSize = bufSize - inByteArray.size
-                if (paddingSize < 0) throw IllegalArgumentException("arg length [${inByteArray.size}] exceeds limit: $bufSize")
-                //data
-                this.put(inByteArray)
-                //padding
-                this.appendPadding(0.toByte(), paddingSize)
-                log.debug("paddingSize $paddingSize")
-            }
-
-            fun ByteBuffer.appendUByteArray(inIntArray: IntArray, bufSize: Int) {
-                val arg2 = mutableListOf<UByte>()
-                inIntArray.toMutableList().mapTo(arg2) {
-                    if (it in UByte.MIN_VALUE.toInt()..UByte.MAX_VALUE.toInt())
-                        it.toUByte()
-                    else {
-                        throw IllegalArgumentException("$it is not valid Byte")
-                    }
+                is UInt -> {
+                    require(arg >= UShort.MIN_VALUE && arg <= UShort.MAX_VALUE) { "[$arg] is truncated as type UShort" }
+                    bf.putShort(arg.toShort())
                 }
-                appendUByteArray(arg2.toUByteArray(), bufSize)
+                is UShort -> bf.putShort(arg.toShort())
+                else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT valid for UShort")
             }
+        }
 
-            fun ByteBuffer.appendUByteArray(inUByteArray: UByteArray, bufSize: Int) {
-                val bl = mutableListOf<Byte>()
-                inUByteArray.toMutableList().mapTo(bl) { it.toByte() }
-                this.appendByteArray(bl.toByteArray(), bufSize)
+        override fun toString(): String {
+            return "H"
+        }
+
+        override val sz: Int = UShort.SIZE_BYTES
+        override val log: Logger = LoggerFactory.getLogger(UShortShip::class.java)
+    }
+
+    //i, l: Int
+    class IntShip : IBaseShip<Int> {
+        override fun get(stream: InputStream, byteOrder: ByteOrder): Int {
+            val data = ByteArray(Int.SIZE_BYTES)
+            check(Int.SIZE_BYTES == stream.read(data))
+            return get(data, byteOrder)
+        }
+
+        override fun get(ba: ByteArray, byteOrder: ByteOrder): Int {
+            val typeSize = Int.SIZE_BYTES / Byte.SIZE_BYTES
+            assert(typeSize == ba.size) { "Int must have $typeSize bytes" }
+            return ByteBuffer.allocate(ba.size).let {
+                it.order(byteOrder)
+                it.put(ba)
+                it.flip()
+                it.getInt()
             }
+        }
+
+        override fun put(bf: ByteBuffer, arg: Any?) {
+            require(arg is Int) { "[$arg](${arg!!::class.java}) is NOT Int" }
+            bf.putInt(arg)
+        }
+
+        override fun toString(): String {
+            return "i"
+        }
+
+        override val sz: Int = Int.SIZE_BYTES
+        override val log: Logger = LoggerFactory.getLogger(IntShip::class.java)
+    }
+
+    //I, L: UInt
+    class UIntShip : IBaseShip<UInt> {
+        override fun get(stream: InputStream, byteOrder: ByteOrder): UInt {
+            val data = ByteArray(UInt.SIZE_BYTES)
+            check(UInt.SIZE_BYTES == stream.read(data))
+            return get(data, byteOrder)
+        }
+
+        override fun get(ba: ByteArray, byteOrder: ByteOrder): UInt {
+            val typeSize = UInt.SIZE_BYTES / Byte.SIZE_BYTES
+            assert(typeSize == ba.size) { "UInt must have $typeSize bytes" }
+            return ByteBuffer.allocate(ba.size).let {
+                it.order(byteOrder)
+                it.put(ba)
+                it.flip()
+                it.getInt().toUInt()
+            }
+        }
+
+        override fun put(bf: ByteBuffer, arg: Any?) {
+            when (arg) {
+                is Int -> {
+                    require(arg >= 0) { "[$arg] is invalid as type UInt" }
+                    bf.putInt(arg)
+                }
+                is UInt -> bf.putInt(arg.toInt())
+                is Long -> {
+                    require(arg >= 0) { "[$arg] is invalid as type UInt" }
+                    bf.putInt(arg.toInt())
+                }
+                else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT valid UInt")
+            }
+        }
+
+        override fun toString(): String {
+            return "I"
+        }
+
+        override val sz: Int = UInt.SIZE_BYTES
+        override val log: Logger = LoggerFactory.getLogger(UIntShip::class.java)
+    }
+
+    //q: Long
+    private class LongShip : IBaseShip<Long> {
+        override fun get(stream: InputStream, byteOrder: ByteOrder): Long {
+            val data = ByteArray(Long.SIZE_BYTES)
+            check(Long.SIZE_BYTES == stream.read(data))
+            return get(data, byteOrder)
+        }
+
+        override fun get(ba: ByteArray, byteOrder: ByteOrder): Long {
+            val typeSize = Long.SIZE_BYTES / Byte.SIZE_BYTES
+            check(typeSize == ba.size) { "Long must have $typeSize bytes" }
+            return ByteBuffer.allocate(ba.size).let {
+                it.order(byteOrder)
+                it.put(ba)
+                it.flip()
+                it.getLong()
+            }
+        }
+
+        override fun put(bf: ByteBuffer, arg: Any?) {
+            when (arg) {
+                is Long -> bf.putLong(arg)
+                is Int -> bf.putLong(arg.toLong())
+                else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT valid Long")
+            }
+        }
+
+        override fun toString(): String {
+            return "q"
+        }
+
+        override val sz: Int = Long.SIZE_BYTES
+        override val log: Logger = LoggerFactory.getLogger(LongShip::class.java)
+    }
+
+    //Q: ULong
+    private class ULongShip : IBaseShip<ULong> {
+        override fun get(stream: InputStream, byteOrder: ByteOrder): ULong {
+            val data = ByteArray(ULong.SIZE_BYTES)
+            check(ULong.SIZE_BYTES == stream.read(data))
+            return get(data, byteOrder)
+        }
+
+        override fun get(ba: ByteArray, byteOrder: ByteOrder): ULong {
+            val typeSize = ULong.SIZE_BYTES / Byte.SIZE_BYTES
+            assert(typeSize == ba.size) { "ULong must have $typeSize bytes" }
+            return ByteBuffer.allocate(ba.size).let {
+                it.order(byteOrder)
+                it.put(ba)
+                it.flip()
+                it.getLong().toULong()
+            }
+        }
+
+        override fun put(bf: ByteBuffer, arg: Any?) {
+            when (arg) {
+                is Int -> {
+                    require(arg >= 0) { "[$arg] is invalid as type ULong" }
+                    bf.putLong(arg.toLong())
+                }
+                is Long -> {
+                    require(arg >= 0) { "[$arg] is invalid as type ULong" }
+                    bf.putLong(arg)
+                }
+                is ULong -> bf.putLong(arg.toLong())
+                else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT valid ULong")
+            }
+        }
+
+        override fun toString(): String {
+            return "Q"
+        }
+
+        override val sz: Int = ULong.SIZE_BYTES
+        override val log: Logger = LoggerFactory.getLogger(ULongShip::class.java)
+    }
+
+    //c: character
+    private class CharShip : IBaseShip<Char> {
+        override fun get(stream: InputStream, byteOrder: ByteOrder): Char {
+            val data = ByteArray(Byte.SIZE_BYTES)
+            check(Byte.SIZE_BYTES == stream.read(data))
+            return data[0].toInt().toChar()
+        }
+
+        override fun get(ba: ByteArray, byteOrder: ByteOrder): Char {
+            return ba.get(0).toInt().toChar()
+        }
+
+        override fun put(bf: ByteBuffer, arg: Any?) {
+            require(arg is Char) { "[$arg](${arg!!::class.java}) is NOT Char" }
+            if (arg !in '\u0000'..'\u00ff') {
+                throw IllegalArgumentException("arg[${arg.code}] exceeds 8-bit bound")
+            }
+            bf.put(arg.code.toByte())
+        }
+
+        override fun toString(): String {
+            return "c"
+        }
+
+        override val sz: Int = 1
+        override val log: Logger = LoggerFactory.getLogger(CharShip::class.java)
+    }
+
+    private interface IBaseFleet<T> : IWarShip<T> {
+        fun appendPadding(bf: ByteBuffer, b: Byte, bufSize: Int) {
+            when {
+                bufSize == 0 -> {
+                    log.debug("paddingSize is zero, perfect match")
+                    return
+                }
+                bufSize < 0 -> {
+                    throw IllegalArgumentException("illegal padding size: $bufSize")
+                }
+                else -> {
+                    log.debug("paddingSize $bufSize")
+                }
+            }
+            val padding = ByteArray(bufSize)
+            Arrays.fill(padding, b)
+            bf.put(padding)
+        }
+
+        @Throws(IllegalArgumentException::class)
+        fun appendByteArray(bf: ByteBuffer, inByteArray: ByteArray, bufSize: Int) {
+            val paddingSize = bufSize - inByteArray.size
+            if (paddingSize < 0) throw IllegalArgumentException("arg length [${inByteArray.size}] exceeds limit: $bufSize")
+            //data
+            bf.put(inByteArray)
+            //padding
+            appendPadding(bf, 0.toByte(), paddingSize)
+            log.debug("paddingSize $paddingSize")
+        }
+
+        fun appendByteArray(bf: ByteBuffer, inIntArray: IntArray, bufSize: Int) {
+            val arg2 = mutableListOf<Byte>()
+            inIntArray.toMutableList().mapTo(arg2) {
+                if (it in Byte.MIN_VALUE..Byte.MAX_VALUE) {
+                    it.toByte()
+                } else {
+                    throw IllegalArgumentException("$it is not valid Byte")
+                }
+            }
+            appendByteArray(bf, arg2.toByteArray(), bufSize)
+        }
+
+        fun appendUByteArray(bf: ByteBuffer, inIntArray: IntArray, bufSize: Int) {
+            val arg2 = mutableListOf<UByte>()
+            inIntArray.toMutableList().mapTo(arg2) {
+                if (it in UByte.MIN_VALUE.toInt()..UByte.MAX_VALUE.toInt())
+                    it.toUByte()
+                else {
+                    throw IllegalArgumentException("$it is not valid Byte")
+                }
+            }
+            appendUByteArray(bf, arg2.toUByteArray(), bufSize)
+        }
+
+        fun appendUByteArray(bf: ByteBuffer, inUByteArray: UByteArray, bufSize: Int) {
+            val bl = mutableListOf<Byte>()
+            inUByteArray.toMutableList().mapTo(bl) { it.toByte() }
+            appendByteArray(bf, bl.toByteArray(), bufSize)
         }
     }
 
-    class InputStreamExt {
-        companion object {
-            fun InputStream.getChar(): Char {
-                val data = ByteArray(Byte.SIZE_BYTES)
-                assert(Byte.SIZE_BYTES == this.read(data))
-                return data[0].toInt().toChar()
-            }
+    //x: padding:
+    private class PaddingFleet(override var multiple: Int, override val sz: Int = 1) : IBaseFleet<Byte> {
+        override fun get(stream: InputStream, byteOrder: ByteOrder): Byte {
+            val data = ByteArray(Byte.SIZE_BYTES)
+            check(Byte.SIZE_BYTES == stream.read(data)) //sample the 1st byte
+            val skipped = stream.skip(multiple.toLong() - Byte.SIZE_BYTES)//skip remaining to save memory
+            check(multiple.toLong() - Byte.SIZE_BYTES == skipped)
+            return data[0]
+        }
 
-            fun InputStream.getShort(inByteOrder: ByteOrder): Short {
-                val data = ByteArray(Short.SIZE_BYTES)
-                assert(Short.SIZE_BYTES == this.read(data))
-                return data.toShort(inByteOrder)
-            }
+        override fun get(ba: ByteArray, byteOrder: ByteOrder): Byte {
+            TODO("Not yet implemented")
+        }
 
-            fun InputStream.getInt(inByteOrder: ByteOrder): Int {
-                val data = ByteArray(Int.SIZE_BYTES)
-                assert(Int.SIZE_BYTES == this.read(data))
-                return data.toInt(inByteOrder)
-            }
-
-            fun InputStream.getLong(inByteOrder: ByteOrder): Long {
-                val data = ByteArray(Long.SIZE_BYTES)
-                assert(Long.SIZE_BYTES == this.read(data))
-                return data.toLong(inByteOrder)
-            }
-
-            fun InputStream.getUShort(inByteOrder: ByteOrder): UShort {
-                val data = ByteArray(UShort.SIZE_BYTES)
-                assert(UShort.SIZE_BYTES == this.read(data))
-                return data.toUShort(inByteOrder)
-            }
-
-            fun InputStream.getUInt(inByteOrder: ByteOrder): UInt {
-                val data = ByteArray(UInt.SIZE_BYTES)
-                assert(UInt.SIZE_BYTES == this.read(data))
-                return data.toUInt(inByteOrder)
-            }
-
-            fun InputStream.getULong(inByteOrder: ByteOrder): ULong {
-                val data = ByteArray(ULong.SIZE_BYTES)
-                assert(ULong.SIZE_BYTES == this.read(data))
-                return data.toULong(inByteOrder)
-            }
-
-            fun InputStream.getByteArray(inSize: Int): ByteArray {
-                val data = ByteArray(inSize)
-                assert(inSize == this.read(data))
-                return data
-            }
-
-            fun InputStream.getUByteArray(inSize: Int): UByteArray {
-                val data = ByteArray(inSize)
-                assert(inSize == this.read(data))
-                val innerData2 = mutableListOf<UByte>()
-                data.toMutableList().mapTo(innerData2) { it.toUByte() }
-                return innerData2.toUByteArray()
-            }
-
-            fun InputStream.getCString(inSize: Int): String {
-                val data = ByteArray(inSize)
-                assert(inSize == this.read(data))
-                return data.toCString()
-            }
-
-            fun InputStream.getPadding(inSize: Int): Byte {
-                val data = ByteArray(Byte.SIZE_BYTES)
-                assert(Byte.SIZE_BYTES == this.read(data)) //sample the 1st byte
-                val skipped = this.skip(inSize.toLong() - Byte.SIZE_BYTES)//skip remaining to save memory
-                assert(inSize.toLong() - Byte.SIZE_BYTES == skipped)
-                return data[0]
+        override fun put(bf: ByteBuffer, arg: Any?) {
+            when (arg) {
+                null -> appendPadding(bf, 0, multiple)
+                is Byte -> appendPadding(bf, arg, multiple)
+                is Int -> appendPadding(bf, arg.toByte(), multiple)
+                else -> throw IllegalArgumentException("Unsupported arg [$arg]")
             }
         }
+
+        override fun toString(): String {
+            return "${multiple}x"
+        }
+
+        override val log: Logger = LoggerFactory.getLogger(PaddingFleet::class.java)
     }
 
-    class ByteArrayExt {
-        companion object {
-            fun ByteArray.toShort(inByteOrder: ByteOrder): Short {
-                val typeSize = Short.SIZE_BYTES / Byte.SIZE_BYTES
-                assert(typeSize == this.size) { "Short must have $typeSize bytes" }
-                return ByteBuffer.allocate(this.size).let {
-                    it.order(inByteOrder)
-                    it.put(this)
-                    it.flip()
-                    it.getShort()
-                }
-            }
+    //b: byte array
+    private class ByteFleet(override var multiple: Int = 0) : IBaseFleet<ByteArray> {
+        override fun get(stream: InputStream, byteOrder: ByteOrder): ByteArray {
+            val data = ByteArray(multiple)
+            check(multiple == stream.read(data))
+            return data
+        }
 
-            fun ByteArray.toInt(inByteOrder: ByteOrder): Int {
-                val typeSize = Int.SIZE_BYTES / Byte.SIZE_BYTES
-                assert(typeSize == this.size) { "Int must have $typeSize bytes" }
-                return ByteBuffer.allocate(this.size).let {
-                    it.order(inByteOrder)
-                    it.put(this)
-                    it.flip()
-                    it.getInt()
-                }
-            }
+        override fun get(ba: ByteArray, byteOrder: ByteOrder): ByteArray {
+            TODO("Not yet implemented")
+        }
 
-            fun ByteArray.toLong(inByteOrder: ByteOrder): Long {
-                val typeSize = Long.SIZE_BYTES / Byte.SIZE_BYTES
-                assert(typeSize == this.size) { "Long must have $typeSize bytes" }
-                return ByteBuffer.allocate(this.size).let {
-                    it.order(inByteOrder)
-                    it.put(this)
-                    it.flip()
-                    it.getLong()
-                }
+        override fun put(bf: ByteBuffer, arg: Any?) {
+            when (arg) {
+                is IntArray -> appendByteArray(bf, arg, multiple)
+                is ByteArray -> appendByteArray(bf, arg, multiple)
+                else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT ByteArray/IntArray")
             }
+        }
 
-            fun ByteArray.toUShort(inByteOrder: ByteOrder): UShort {
-                val typeSize = UShort.SIZE_BYTES / Byte.SIZE_BYTES
-                assert(typeSize == this.size) { "UShort must have $typeSize bytes" }
-                return ByteBuffer.allocate(this.size).let {
-                    it.order(inByteOrder)
-                    it.put(this)
-                    it.flip()
-                    it.getShort().toUShort()
-                }
-            }
+        override fun toString(): String {
+            return "${multiple}b"
+        }
 
-            fun ByteArray.toUInt(inByteOrder: ByteOrder): UInt {
-                val typeSize = UInt.SIZE_BYTES / Byte.SIZE_BYTES
-                assert(typeSize == this.size) { "UInt must have $typeSize bytes" }
-                return ByteBuffer.allocate(this.size).let {
-                    it.order(inByteOrder)
-                    it.put(this)
-                    it.flip()
-                    it.getInt().toUInt()
-                }
-            }
+        override val sz: Int = Byte.SIZE_BYTES
+        override val log: Logger = LoggerFactory.getLogger(ByteFleet::class.java)
+    }
 
-            fun ByteArray.toULong(inByteOrder: ByteOrder): ULong {
-                val typeSize = ULong.SIZE_BYTES / Byte.SIZE_BYTES
-                assert(typeSize == this.size) { "ULong must have $typeSize bytes" }
-                return ByteBuffer.allocate(this.size).let {
-                    it.order(inByteOrder)
-                    it.put(this)
-                    it.flip()
-                    it.getLong().toULong()
-                }
-            }
+    //B: UByte array
+    private class UByteFleet(override var multiple: Int = 0) : IBaseFleet<UByteArray> {
+        override fun get(stream: InputStream, byteOrder: ByteOrder): UByteArray {
+            val data = ByteArray(multiple)
+            check(multiple == stream.read(data))
+            val innerData2 = mutableListOf<UByte>()
+            data.toMutableList().mapTo(innerData2) { it.toUByte() }
+            return innerData2.toUByteArray()
+        }
 
-            //similar to this.toString(StandardCharsets.UTF_8).replace("${Character.MIN_VALUE}", "")
-            // not Deprecated for now, "1.3.41 experimental api: ByteArray.decodeToString()") is a little different
-            fun ByteArray.toCString(): String {
-                return this.toString(StandardCharsets.UTF_8).let { str ->
-                    str.indexOf(Character.MIN_VALUE).let { nullPos ->
-                        if (nullPos >= 0) str.substring(0, nullPos) else str
-                    }
+        override fun put(bf: ByteBuffer, arg: Any?) {
+            when (arg) {
+                is ByteArray -> appendByteArray(bf, arg, multiple)
+                is UByteArray -> appendUByteArray(bf, arg, multiple)
+                is IntArray -> appendUByteArray(bf, arg, multiple)
+                else -> throw IllegalArgumentException("[$arg](${arg!!::class.java}) is NOT ByteArray/IntArray")
+            }
+        }
+
+        override fun toString(): String {
+            return "${multiple}B"
+        }
+
+        override val sz: Int
+            get() = UByte.SIZE_BYTES
+
+        override fun get(ba: ByteArray, byteOrder: ByteOrder): UByteArray {
+            TODO("Not yet implemented")
+        }
+
+        override val log: Logger = LoggerFactory.getLogger(UByteFleet::class.java)
+    }
+
+    //s: String
+    class StringFleet(override var multiple: Int = 0) : IBaseFleet<String> {
+        override fun get(stream: InputStream, byteOrder: ByteOrder): String {
+            val data = ByteArray(multiple)
+            check(multiple == stream.read(data))
+            return get(data, byteOrder)
+        }
+
+        override fun get(ba: ByteArray, byteOrder: ByteOrder): String {
+            return ba.toString(StandardCharsets.UTF_8).let { str ->
+                str.indexOf(Character.MIN_VALUE).let { nullPos ->
+                    if (nullPos >= 0) str.substring(0, nullPos) else str
                 }
             }
-        }//end-of-Companion
-    }//end-of-ByteArrayExt
+        }
+
+        override fun put(bf: ByteBuffer, arg: Any?) {
+            requireNotNull(arg) { "arg can not be NULL for String" }
+            require(arg is String) { "[$arg](${arg::class.java}) is NOT String" }
+            appendByteArray(bf, arg.toByteArray(), multiple)
+        }
+
+        override fun toString(): String {
+            return "${multiple}s"
+        }
+
+        override val sz: Int = 1
+        override val log: Logger = LoggerFactory.getLogger(StringFleet::class.java)
+    }
 }

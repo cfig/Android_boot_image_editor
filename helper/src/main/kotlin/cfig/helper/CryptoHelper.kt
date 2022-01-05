@@ -178,9 +178,9 @@ class CryptoHelper {
                 from avbtool::encode_rsa_key()
              */
             fun encodeRSAkey(rsa: org.bouncycastle.asn1.pkcs.RSAPrivateKey): ByteArray {
-                assert(65537.toBigInteger() == rsa.publicExponent)
+                require(65537.toBigInteger() == rsa.publicExponent)
                 val numBits: Int = BigIntegerMath.log2(rsa.modulus, RoundingMode.CEILING)
-                assert(rsa.modulus.bitLength() == numBits)
+                require(rsa.modulus.bitLength() == numBits)
                 val b = BigInteger.valueOf(2).pow(32)
                 val n0inv = b.minus(rsa.modulus.modInverse(b)).toLong()
                 val rrModn = BigInteger.valueOf(4).pow(numBits).rem(rsa.modulus)

@@ -1,68 +1,51 @@
-// Copyright 2021 yuyezhong@gmail.com
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+package cfig.io
 
 import cfig.helper.Helper
-import cfig.io.Struct3
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.Assert
 import org.junit.Test
 import java.io.ByteArrayInputStream
 
-@OptIn(kotlin.ExperimentalUnsignedTypes::class)
 class Struct3Test {
-    private fun getConvertedFormats(inStruct: Struct3): ArrayList<Map<String, Int>> {
-        val f = inStruct.javaClass.getDeclaredField("formats")
-        f.isAccessible = true
-        val formatDumps = arrayListOf<Map<String, Int>>()
-        (f.get(inStruct) as ArrayList<*>).apply {
-            this.forEach {
-                @Suppress("UNCHECKED_CAST")
-                val format = it as Array<Any>
-                val k = if (format[0].toString().indexOf(" ") > 0) {
-                    format[0].toString().split(" ")[1]
-                } else {
-                    format[0].toString()
-                }
-                formatDumps.add(mapOf(k to (format[1] as Int)))
-            }
-        }
-        return formatDumps
-    }
-
     private fun constructorTestFun1(inFormatString: String) {
-        println(ObjectMapper().writeValueAsString(getConvertedFormats(Struct3(inFormatString))))
+        println(Struct3(inFormatString))
     }
 
     @Test
     fun constructorTest() {
         constructorTestFun1("3s")
-        constructorTestFun1("5b")
         constructorTestFun1("5x")
+        constructorTestFun1("5b")
+        constructorTestFun1("5B")
+
         constructorTestFun1("2c")
+        constructorTestFun1("1h")
+        constructorTestFun1("1H")
+        constructorTestFun1("1i")
+        constructorTestFun1("3I")
+        constructorTestFun1("3q")
+        constructorTestFun1("3Q")
+        constructorTestFun1(">2b202x1b19B")
+        constructorTestFun1("<2b2x1b3i2q")
     }
 
     @Test
     fun calcSizeTest() {
         Assert.assertEquals(3, Struct3("3s").calcSize())
-        Assert.assertEquals(5, Struct3("5b").calcSize())
         Assert.assertEquals(5, Struct3("5x").calcSize())
+        Assert.assertEquals(5, Struct3("5b").calcSize())
+        Assert.assertEquals(5, Struct3("5B").calcSize())
+
         Assert.assertEquals(9, Struct3("9c").calcSize())
+        Assert.assertEquals(8, Struct3("2i").calcSize())
+        Assert.assertEquals(8, Struct3("2I").calcSize())
+        Assert.assertEquals(24, Struct3("3q").calcSize())
+        Assert.assertEquals(24, Struct3("3Q").calcSize())
     }
 
     @Test
     fun toStringTest() {
         println(Struct3("!4s2L2QL11QL4x47sx80x"))
+        println(Struct3("@4s2L2QL11QL4x47sx80x"))
     }
 
     //x
@@ -116,12 +99,18 @@ class Struct3Test {
         }
 
         //pack legal
-        Assert.assertEquals("61",
-                Helper.toHexString(Struct3("!c").pack('a')))
-        Assert.assertEquals("61",
-                Helper.toHexString(Struct3("c").pack('a')))
-        Assert.assertEquals("616263",
-                Helper.toHexString(Struct3("3c").pack('a', 'b', 'c')))
+        Assert.assertEquals(
+            "61",
+            Helper.toHexString(Struct3("!c").pack('a'))
+        )
+        Assert.assertEquals(
+            "61",
+            Helper.toHexString(Struct3("c").pack('a'))
+        )
+        Assert.assertEquals(
+            "616263",
+            Helper.toHexString(Struct3("3c").pack('a', 'b', 'c'))
+        )
 
         //unpack
         Struct3("3c").unpack(ByteArrayInputStream(Helper.fromHexString("616263"))).let {
@@ -142,12 +131,21 @@ class Struct3Test {
         Assert.assertEquals(3, Struct3("3b").calcSize())
 
         //pack
-        Assert.assertEquals("123456", Helper.toHexString(
-                Struct3("3b").pack(byteArrayOf(0x12, 0x34, 0x56))))
-        Assert.assertEquals("123456", Helper.toHexString(
-                Struct3("!3b").pack(byteArrayOf(0x12, 0x34, 0x56))))
-        Assert.assertEquals("123400", Helper.toHexString(
-                Struct3("3b").pack(byteArrayOf(0x12, 0x34))))
+        Assert.assertEquals(
+            "123456", Helper.toHexString(
+                Struct3("3b").pack(byteArrayOf(0x12, 0x34, 0x56))
+            )
+        )
+        Assert.assertEquals(
+            "123456", Helper.toHexString(
+                Struct3("!3b").pack(byteArrayOf(0x12, 0x34, 0x56))
+            )
+        )
+        Assert.assertEquals(
+            "123400", Helper.toHexString(
+                Struct3("3b").pack(byteArrayOf(0x12, 0x34))
+            )
+        )
 
         //unpack
         Struct3("3b").unpack(ByteArrayInputStream(Helper.fromHexString("123400"))).let {
@@ -172,12 +170,21 @@ class Struct3Test {
         Assert.assertEquals(3, Struct3("3B").calcSize())
 
         //pack
-        Assert.assertEquals("123456", Helper.toHexString(
-                Struct3("3B").pack(byteArrayOf(0x12, 0x34, 0x56))))
-        Assert.assertEquals("123456", Helper.toHexString(
-                Struct3("!3B").pack(byteArrayOf(0x12, 0x34, 0x56))))
-        Assert.assertEquals("123400", Helper.toHexString(
-                Struct3("3B").pack(byteArrayOf(0x12, 0x34))))
+        Assert.assertEquals(
+            "123456", Helper.toHexString(
+                Struct3("3B").pack(byteArrayOf(0x12, 0x34, 0x56))
+            )
+        )
+        Assert.assertEquals(
+            "123456", Helper.toHexString(
+                Struct3("!3B").pack(byteArrayOf(0x12, 0x34, 0x56))
+            )
+        )
+        Assert.assertEquals(
+            "123400", Helper.toHexString(
+                Struct3("3B").pack(byteArrayOf(0x12, 0x34))
+            )
+        )
 
         //unpack
         Struct3("3B").unpack(ByteArrayInputStream(Helper.fromHexString("123400"))).let {
@@ -308,10 +315,16 @@ class Struct3Test {
         Assert.assertEquals(12, Struct3("3L").calcSize())
 
         //pack
-        Assert.assertEquals("01000000", Helper.toHexString(
-                Struct3("I").pack(1U)))
-        Assert.assertEquals("80000000", Helper.toHexString(
-                Struct3(">I").pack(Int.MAX_VALUE.toUInt() + 1U)))
+        Assert.assertEquals(
+            "01000000", Helper.toHexString(
+                Struct3("I").pack(1U)
+            )
+        )
+        Assert.assertEquals(
+            "80000000", Helper.toHexString(
+                Struct3(">I").pack(Int.MAX_VALUE.toUInt() + 1U)
+            )
+        )
         //unpack
         Struct3("I").unpack(ByteArrayInputStream(Helper.fromHexString("01000000"))).let {
             Assert.assertEquals(1, it.size)
@@ -333,12 +346,21 @@ class Struct3Test {
         Assert.assertEquals(24, Struct3("3q").calcSize())
 
         //pack
-        Assert.assertEquals("8000000000000000", Helper.toHexString(
-                Struct3(">q").pack(Long.MIN_VALUE)))
-        Assert.assertEquals("7fffffffffffffff", Helper.toHexString(
-                Struct3(">q").pack(Long.MAX_VALUE)))
-        Assert.assertEquals("ffffffffffffffff", Helper.toHexString(
-                Struct3(">q").pack(-1L)))
+        Assert.assertEquals(
+            "8000000000000000", Helper.toHexString(
+                Struct3(">q").pack(Long.MIN_VALUE)
+            )
+        )
+        Assert.assertEquals(
+            "7fffffffffffffff", Helper.toHexString(
+                Struct3(">q").pack(Long.MAX_VALUE)
+            )
+        )
+        Assert.assertEquals(
+            "ffffffffffffffff", Helper.toHexString(
+                Struct3(">q").pack(-1L)
+            )
+        )
         //unpack
         Struct3(">q").unpack(ByteArrayInputStream(Helper.fromHexString("8000000000000000"))).let {
             Assert.assertEquals(1, it.size)
@@ -364,12 +386,21 @@ class Struct3Test {
         Assert.assertEquals(24, Struct3("3Q").calcSize())
 
         //pack
-        Assert.assertEquals("7fffffffffffffff", Helper.toHexString(
-                Struct3(">Q").pack(Long.MAX_VALUE)))
-        Assert.assertEquals("0000000000000000", Helper.toHexString(
-                Struct3(">Q").pack(ULong.MIN_VALUE)))
-        Assert.assertEquals("ffffffffffffffff", Helper.toHexString(
-                Struct3(">Q").pack(ULong.MAX_VALUE)))
+        Assert.assertEquals(
+            "7fffffffffffffff", Helper.toHexString(
+                Struct3(">Q").pack(Long.MAX_VALUE)
+            )
+        )
+        Assert.assertEquals(
+            "0000000000000000", Helper.toHexString(
+                Struct3(">Q").pack(ULong.MIN_VALUE)
+            )
+        )
+        Assert.assertEquals(
+            "ffffffffffffffff", Helper.toHexString(
+                Struct3(">Q").pack(ULong.MAX_VALUE)
+            )
+        )
         try {
             Struct3(">Q").pack(-1L)
         } catch (e: Throwable) {
@@ -392,15 +423,23 @@ class Struct3Test {
 
     @Test
     fun legacyTest() {
-        Assert.assertTrue(Struct3("<2i4b4b").pack(
-                1, 7321, byteArrayOf(1, 2, 3, 4), byteArrayOf(200.toByte(), 201.toByte(), 202.toByte(), 203.toByte()))
-                .contentEquals(Helper.fromHexString("01000000991c000001020304c8c9cacb")))
-        Assert.assertTrue(Struct3("<2i4b4B").pack(
-                1, 7321, byteArrayOf(1, 2, 3, 4), intArrayOf(200, 201, 202, 203))
-                .contentEquals(Helper.fromHexString("01000000991c000001020304c8c9cacb")))
+        Assert.assertTrue(
+            Struct3("<2i4b4b").pack(
+                1, 7321, byteArrayOf(1, 2, 3, 4), byteArrayOf(200.toByte(), 201.toByte(), 202.toByte(), 203.toByte())
+            )
+                .contentEquals(Helper.fromHexString("01000000991c000001020304c8c9cacb"))
+        )
+        Assert.assertTrue(
+            Struct3("<2i4b4B").pack(
+                1, 7321, byteArrayOf(1, 2, 3, 4), intArrayOf(200, 201, 202, 203)
+            )
+                .contentEquals(Helper.fromHexString("01000000991c000001020304c8c9cacb"))
+        )
 
         Assert.assertTrue(Struct3("b2x").pack(byteArrayOf(0x13), null).contentEquals(Helper.fromHexString("130000")))
-        Assert.assertTrue(Struct3("b2xi").pack(byteArrayOf(0x13), null, 55).contentEquals(Helper.fromHexString("13000037000000")))
+        Assert.assertTrue(
+            Struct3("b2xi").pack(byteArrayOf(0x13), null, 55).contentEquals(Helper.fromHexString("13000037000000"))
+        )
 
         Struct3("5s").pack("Good").contentEquals(Helper.fromHexString("476f6f6400"))
         Struct3("5s1b").pack("Good", byteArrayOf(13)).contentEquals(Helper.fromHexString("476f6f64000d"))

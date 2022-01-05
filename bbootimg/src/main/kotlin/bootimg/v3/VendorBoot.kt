@@ -21,7 +21,6 @@ import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
 import cfig.helper.Helper
 import cfig.io.Struct3
-import cfig.io.Struct3.ByteArrayExt.Companion.toCString
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -140,7 +139,7 @@ data class VendorBoot(
             this.type = VrtType.fromInt((info[2] as UInt).toInt())
             this.name = info[3] as String
             this.boardId = info[4] as ByteArray
-            this.boardIdStr = boardId.toCString()
+            this.boardIdStr = Struct3.StringFleet().get(boardId, ByteOrder.LITTLE_ENDIAN)
             this.file = dumpFile
         }
 

@@ -138,7 +138,7 @@ class Launcher {
                 val outFile = File(kFile).name + ".csr"
                 val inBytes = File(kFile).readBytes()
                 val k = (CryptoHelper.KeyBox.parse2(inBytes) as Array<*>)[2]
-                assert(k is org.bouncycastle.asn1.pkcs.RSAPrivateKey) {
+                require(k is org.bouncycastle.asn1.pkcs.RSAPrivateKey) {
                     "${k!!::class} is not org.bouncycastle.asn1.pkcs.RSAPrivateKey"
                 }
                 OpenSslHelper.PK1Key(KeyFormat.PEM, inBytes).toCsr(info2.getProperty("csr.info")).writeTo(outFile)
@@ -163,7 +163,7 @@ class Launcher {
                 val k = CryptoHelper.KeyBox.parse2(inBytes) as Array<*>
                 val kType = if ((k[1] as String) == "PEM") KeyFormat.PEM else KeyFormat.DER
                 val outFile = File(info2.getProperty("file")).name + ".pk1"
-                assert(k[2] is java.security.interfaces.RSAPrivateKey) {
+                require(k[2] is java.security.interfaces.RSAPrivateKey) {
                     "${k[2]!!::class} is NOT java.security.interfaces.RSAPrivateKey"
                 }
                 val hint = "RSA private: PK8($kType) => PK1(PEM)"
@@ -180,7 +180,7 @@ class Launcher {
                 val k = CryptoHelper.KeyBox.parse2(inBytes) as Array<*>
                 val kType = if ((k[1] as String) == "PEM") KeyFormat.PEM else KeyFormat.DER
                 val outFileStem = File(info2.getProperty("file")).name
-                assert(k[2] is org.bouncycastle.asn1.pkcs.RSAPrivateKey)
+                require(k[2] is org.bouncycastle.asn1.pkcs.RSAPrivateKey)
                 val hint = "RSA private: PK1 => PK8(PEM,DER)"
                 log.info("Running: $hint")
                 OpenSslHelper.PK1Key(data = File(kFile).readBytes()).let { rsa ->
@@ -251,7 +251,7 @@ class Launcher {
                 val hint = "RSA private(PK8): => Public Key(PK8, PEM)"
                 val kFile = args[1]
                 val outFile = args[2]
-                assert((CryptoHelper.KeyBox.parse2(File(kFile).readBytes()) as Array<*>)[2] is org.bouncycastle.asn1.pkcs.RSAPrivateKey)
+                require((CryptoHelper.KeyBox.parse2(File(kFile).readBytes()) as Array<*>)[2] is org.bouncycastle.asn1.pkcs.RSAPrivateKey)
                 val pk8rsa = OpenSslHelper.PK8RsaKey(KeyFormat.PEM, File(kFile).readBytes())
                 pk8rsa.getPublicKey().writeTo(outFile)
                 log.info("$hint: $kFile => $outFile")
@@ -262,7 +262,7 @@ class Launcher {
                 val kFile = args[1]
                 val outFile = args[2]
                 val inBytes = File(kFile).readBytes()
-                assert((CryptoHelper.KeyBox.parse2(inBytes) as Array<*>)[2] is java.security.interfaces.RSAPrivateKey)
+                require((CryptoHelper.KeyBox.parse2(inBytes) as Array<*>)[2] is java.security.interfaces.RSAPrivateKey)
                 val p = PemReader(InputStreamReader(ByteArrayInputStream(File(kFile).readBytes()))).readPemObject()
                 if (p != null) {//pem
                     hint = "PK8 RSA: PEM => DER"
@@ -290,7 +290,7 @@ class Launcher {
                 val kFile = args[1]
                 val crtFile = args[2]
                 val outFile = args[3]
-                assert((CryptoHelper.KeyBox.parse2(File(crtFile).readBytes()) as Array<*>)[2] is Certificate)
+                require((CryptoHelper.KeyBox.parse2(File(crtFile).readBytes()) as Array<*>)[2] is Certificate)
                 val envPassword = System.getProperty("password") ?: "secretpassword"
                 val envAlias = System.getProperty("alias") ?: "someUnknownAlias"
                 val crt = OpenSslHelper.Crt(File(crtFile).readBytes())

@@ -117,7 +117,7 @@ class Helper {
                 RandomAccessFile(outImgName, "rw").use { outRaf ->
                     inRaf.seek(offset)
                     val data = ByteArray(length)
-                    assert(length == inRaf.read(data))
+                    check(length == inRaf.read(data))
                     outRaf.write(data)
                 }
             }

@@ -19,7 +19,7 @@ import cfig.bootimg.cpio.AndroidCpio
 import cfig.utils.DTC
 import cfig.helper.Helper
 import cfig.helper.ZipHelper
-import cfig.io.Struct3.InputStreamExt.Companion.getInt
+import cfig.io.Struct3
 import cfig.utils.KernelExtractor
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
@@ -363,7 +363,7 @@ class Common {
         fun probeHeaderVersion(fileName: String): Int {
             return FileInputStream(fileName).let { fis ->
                 fis.skip(40)
-                fis.getInt(ByteOrder.LITTLE_ENDIAN)
+                Struct3.IntShip().get(fis, ByteOrder.LITTLE_ENDIAN)
             }
         }
 
