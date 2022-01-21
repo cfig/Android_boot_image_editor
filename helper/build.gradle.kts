@@ -15,7 +15,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.6.0"
+    id("org.jetbrains.kotlin.jvm") version "1.6.10"
     `java-library`
     application
 }
@@ -33,7 +33,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
-    implementation("com.google.guava:guava:18.0")
+    implementation("com.google.guava:guava:31.0.1-jre")
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("org.slf4j:slf4j-simple:1.7.32")
     implementation("org.apache.commons:commons-exec:1.3")
@@ -45,8 +45,8 @@ dependencies {
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
-    testImplementation("com.fasterxml.jackson.core:jackson-annotations:2.13.0")
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.13.0")
+    testImplementation("com.fasterxml.jackson.core:jackson-annotations:2.13.1")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
 }
 
 tasks.withType<KotlinCompile>().all {
