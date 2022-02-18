@@ -14,9 +14,9 @@
 
 package cfig.helper
 
+import cc.cfig.io.Struct3
 import cfig.helper.Helper.Companion.check_call
 import cfig.helper.Helper.Companion.check_output
-import cfig.io.Struct3
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream

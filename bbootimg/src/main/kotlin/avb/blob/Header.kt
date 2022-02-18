@@ -15,7 +15,7 @@
 package avb.blob
 
 import cfig.Avb
-import cfig.io.Struct3
+import cc.cfig.io.Struct3
 import java.io.InputStream
 
 //avbtool::AvbVBMetaHeader

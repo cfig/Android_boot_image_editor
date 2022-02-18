@@ -18,7 +18,7 @@ import avb.alg.Algorithm
 import avb.desc.*
 import cfig.helper.CryptoHelper
 import cfig.helper.Helper
-import cfig.io.Struct3
+import cc.cfig.io.Struct3
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey
 import org.slf4j.LoggerFactory

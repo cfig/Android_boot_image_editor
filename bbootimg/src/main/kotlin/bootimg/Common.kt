@@ -14,12 +14,12 @@
 
 package cfig.bootimg
 
+import cc.cfig.io.Struct3
 import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.cpio.AndroidCpio
 import cfig.utils.DTC
 import cfig.helper.Helper
 import cfig.helper.ZipHelper
-import cfig.io.Struct3
 import cfig.utils.KernelExtractor
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
@@ -66,9 +66,9 @@ class Common {
                 if (m.groupCount() == 3) {
                     c = Integer.decode(m.group(3))
                 }
-                assert(a < 128)
-                assert(b < 128)
-                assert(c < 128)
+                check(a < 128)
+                check(b < 128)
+                check(c < 128)
                 return (a shl 14) or (b shl 7) or c
             } else {
                 throw IllegalArgumentException("invalid os_version")
@@ -91,8 +91,8 @@ class Common {
                 val y = Integer.parseInt(matcher.group(1), 10) - 2000
                 val m = Integer.parseInt(matcher.group(2), 10)
                 // 7 bits allocated for the year, 4 bits for the month
-                assert(y in 0..127)
-                assert(m in 1..12)
+                check(y in 0..127)
+                check(m in 1..12)
                 ret = (y shl 4) or m
             } else {
                 throw IllegalArgumentException("invalid os_patch_level")
@@ -307,7 +307,7 @@ class Common {
 
         fun writePaddedFile(inBF: ByteBuffer, srcFile: String, padding: UInt) {
             log.info("adding $srcFile into buffer ...")
-            assert(padding < Int.MAX_VALUE.toUInt())
+            check(padding < Int.MAX_VALUE.toUInt())
             writePaddedFile(inBF, srcFile, padding.toInt())
         }
 

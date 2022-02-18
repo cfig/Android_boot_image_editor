@@ -1,4 +1,4 @@
-package cfig.io
+package cc.cfig.io
 
 import cfig.helper.Helper
 import org.junit.Assert

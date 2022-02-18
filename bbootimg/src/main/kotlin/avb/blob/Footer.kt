@@ -14,7 +14,7 @@
 
 package avb.blob
 
-import cfig.io.Struct3
+import cc.cfig.io.Struct3
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream

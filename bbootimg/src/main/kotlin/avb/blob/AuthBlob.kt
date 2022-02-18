@@ -17,7 +17,7 @@ package avb.blob
 import avb.alg.Algorithms
 import cfig.helper.CryptoHelper
 import cfig.helper.Helper
-import cfig.io.Struct3
+import cc.cfig.io.Struct3
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Paths

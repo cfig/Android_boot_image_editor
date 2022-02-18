@@ -14,9 +14,9 @@
 
 package cfig.bootimg.v2
 
+import cc.cfig.io.Struct3
 import cfig.helper.Helper
 import cfig.bootimg.Common
-import cfig.io.Struct3
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 import kotlin.math.pow

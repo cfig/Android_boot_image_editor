@@ -14,7 +14,7 @@
 
 package cfig.helper
 
-import cfig.io.Struct3
+import cc.cfig.io.Struct3
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.ExecuteException

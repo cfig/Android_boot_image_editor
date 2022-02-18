@@ -1,7 +1,19 @@
-package cfig.io
+// Copyright 2022 yuyezhong@gmail.com
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+package cc.cfig.io
+
 import java.io.IOException
 import java.io.InputStream
 import java.nio.ByteBuffer
@@ -72,7 +84,7 @@ class Struct3(inFormatString: String) {
         return ByteBuffer.allocate(this.calcSize()).let { bf ->
             bf.order(this.byteOrder)
             args.forEachIndexed { index, arg ->
-                warships.get(index).put(bf, arg)
+                warships[index].put(bf, arg)
             }
             bf.array()
         }
@@ -86,7 +98,6 @@ class Struct3(inFormatString: String) {
     private interface IWarShip<T> {
         val sz: Int
         var multiple: Int
-        val log: Logger
         fun get(stream: InputStream, byteOrder: ByteOrder): T
         fun get(ba: ByteArray, byteOrder: ByteOrder): T
         fun put(bf: ByteBuffer, arg: Any?)
@@ -112,7 +123,7 @@ class Struct3(inFormatString: String) {
                 it.order(byteOrder)
                 it.put(ba)
                 it.flip()
-                it.getShort()
+                it.short
             }
         }
 
@@ -133,7 +144,6 @@ class Struct3(inFormatString: String) {
         }
 
         override val sz: Int = Short.SIZE_BYTES
-        override val log: Logger = LoggerFactory.getLogger(ShortShip::class.java)
     }
 
     private class UShortShip : IBaseShip<UShort> {
@@ -150,7 +160,7 @@ class Struct3(inFormatString: String) {
                 it.order(byteOrder)
                 it.put(ba)
                 it.flip()
-                it.getShort().toUShort()
+                it.short.toUShort()
             }
         }
 
@@ -175,7 +185,6 @@ class Struct3(inFormatString: String) {
         }
 
         override val sz: Int = UShort.SIZE_BYTES
-        override val log: Logger = LoggerFactory.getLogger(UShortShip::class.java)
     }
 
     //i, l: Int
@@ -193,7 +202,7 @@ class Struct3(inFormatString: String) {
                 it.order(byteOrder)
                 it.put(ba)
                 it.flip()
-                it.getInt()
+                it.int
             }
         }
 
@@ -207,7 +216,6 @@ class Struct3(inFormatString: String) {
         }
 
         override val sz: Int = Int.SIZE_BYTES
-        override val log: Logger = LoggerFactory.getLogger(IntShip::class.java)
     }
 
     //I, L: UInt
@@ -225,7 +233,7 @@ class Struct3(inFormatString: String) {
                 it.order(byteOrder)
                 it.put(ba)
                 it.flip()
-                it.getInt().toUInt()
+                it.int.toUInt()
             }
         }
 
@@ -249,7 +257,6 @@ class Struct3(inFormatString: String) {
         }
 
         override val sz: Int = UInt.SIZE_BYTES
-        override val log: Logger = LoggerFactory.getLogger(UIntShip::class.java)
     }
 
     //q: Long
@@ -267,7 +274,7 @@ class Struct3(inFormatString: String) {
                 it.order(byteOrder)
                 it.put(ba)
                 it.flip()
-                it.getLong()
+                it.long
             }
         }
 
@@ -284,7 +291,6 @@ class Struct3(inFormatString: String) {
         }
 
         override val sz: Int = Long.SIZE_BYTES
-        override val log: Logger = LoggerFactory.getLogger(LongShip::class.java)
     }
 
     //Q: ULong
@@ -302,7 +308,7 @@ class Struct3(inFormatString: String) {
                 it.order(byteOrder)
                 it.put(ba)
                 it.flip()
-                it.getLong().toULong()
+                it.long.toULong()
             }
         }
 
@@ -326,7 +332,6 @@ class Struct3(inFormatString: String) {
         }
 
         override val sz: Int = ULong.SIZE_BYTES
-        override val log: Logger = LoggerFactory.getLogger(ULongShip::class.java)
     }
 
     //c: character
@@ -338,7 +343,7 @@ class Struct3(inFormatString: String) {
         }
 
         override fun get(ba: ByteArray, byteOrder: ByteOrder): Char {
-            return ba.get(0).toInt().toChar()
+            return ba[0].toInt().toChar()
         }
 
         override fun put(bf: ByteBuffer, arg: Any?) {
@@ -354,21 +359,20 @@ class Struct3(inFormatString: String) {
         }
 
         override val sz: Int = 1
-        override val log: Logger = LoggerFactory.getLogger(CharShip::class.java)
     }
 
     private interface IBaseFleet<T> : IWarShip<T> {
         fun appendPadding(bf: ByteBuffer, b: Byte, bufSize: Int) {
             when {
                 bufSize == 0 -> {
-                    log.debug("paddingSize is zero, perfect match")
+                    //"paddingSize is zero, perfect match"
                     return
                 }
                 bufSize < 0 -> {
                     throw IllegalArgumentException("illegal padding size: $bufSize")
                 }
                 else -> {
-                    log.debug("paddingSize $bufSize")
+                    //"paddingSize $bufSize"
                 }
             }
             val padding = ByteArray(bufSize)
@@ -382,9 +386,8 @@ class Struct3(inFormatString: String) {
             if (paddingSize < 0) throw IllegalArgumentException("arg length [${inByteArray.size}] exceeds limit: $bufSize")
             //data
             bf.put(inByteArray)
-            //padding
+            //padding: "paddingSize $paddingSize"
             appendPadding(bf, 0.toByte(), paddingSize)
-            log.debug("paddingSize $paddingSize")
         }
 
         fun appendByteArray(bf: ByteBuffer, inIntArray: IntArray, bufSize: Int) {
@@ -429,7 +432,7 @@ class Struct3(inFormatString: String) {
         }
 
         override fun get(ba: ByteArray, byteOrder: ByteOrder): Byte {
-            TODO("Not yet implemented")
+            return ba[0]
         }
 
         override fun put(bf: ByteBuffer, arg: Any?) {
@@ -444,8 +447,6 @@ class Struct3(inFormatString: String) {
         override fun toString(): String {
             return "${multiple}x"
         }
-
-        override val log: Logger = LoggerFactory.getLogger(PaddingFleet::class.java)
     }
 
     //b: byte array
@@ -457,7 +458,8 @@ class Struct3(inFormatString: String) {
         }
 
         override fun get(ba: ByteArray, byteOrder: ByteOrder): ByteArray {
-            TODO("Not yet implemented")
+            check(multiple == ba.size)
+            return ba
         }
 
         override fun put(bf: ByteBuffer, arg: Any?) {
@@ -473,7 +475,6 @@ class Struct3(inFormatString: String) {
         }
 
         override val sz: Int = Byte.SIZE_BYTES
-        override val log: Logger = LoggerFactory.getLogger(ByteFleet::class.java)
     }
 
     //B: UByte array
@@ -484,6 +485,10 @@ class Struct3(inFormatString: String) {
             val innerData2 = mutableListOf<UByte>()
             data.toMutableList().mapTo(innerData2) { it.toUByte() }
             return innerData2.toUByteArray()
+        }
+
+        override fun get(ba: ByteArray, byteOrder: ByteOrder): UByteArray {
+            return ba.toUByteArray()
         }
 
         override fun put(bf: ByteBuffer, arg: Any?) {
@@ -501,12 +506,6 @@ class Struct3(inFormatString: String) {
 
         override val sz: Int
             get() = UByte.SIZE_BYTES
-
-        override fun get(ba: ByteArray, byteOrder: ByteOrder): UByteArray {
-            TODO("Not yet implemented")
-        }
-
-        override val log: Logger = LoggerFactory.getLogger(UByteFleet::class.java)
     }
 
     //s: String
@@ -536,6 +535,5 @@ class Struct3(inFormatString: String) {
         }
 
         override val sz: Int = 1
-        override val log: Logger = LoggerFactory.getLogger(StringFleet::class.java)
     }
 }

@@ -14,7 +14,7 @@
 
 package cfig.bootimg.cpio
 
-import cfig.io.Struct3
+import cc.cfig.io.Struct3
 import org.apache.commons.compress.archivers.cpio.CpioConstants
 import java.util.*
 

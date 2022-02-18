@@ -1,6 +1,7 @@
+@file:Suppress("JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE")
 package cfig.helper
 
-import cfig.io.Struct3
+import cc.cfig.io.Struct3
 import com.google.common.math.BigIntegerMath
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor

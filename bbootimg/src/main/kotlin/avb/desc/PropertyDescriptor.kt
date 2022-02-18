@@ -15,7 +15,7 @@
 package avb.desc
 
 import cfig.helper.Helper
-import cfig.io.Struct3
+import cc.cfig.io.Struct3
 import java.io.InputStream
 
 class PropertyDescriptor(

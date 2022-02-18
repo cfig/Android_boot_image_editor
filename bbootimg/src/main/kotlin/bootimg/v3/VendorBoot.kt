@@ -15,12 +15,12 @@
 package cfig.bootimg.v3
 
 import avb.AVBInfo
+import cc.cfig.io.Struct3
 import cfig.Avb
 import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
 import cfig.helper.Helper
-import cfig.io.Struct3
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -287,7 +287,9 @@ data class VendorBoot(
                     //2. vrt
                     it.put(this.ramdisk_table.update().encode(this.info.pageSize))
                     //3. bootconfig
-                    C.writePaddedFile(it, this.bootconfig.file, this.info.pageSize)
+                    if (this.bootconfig.file.isNotBlank()) {
+                        C.writePaddedFile(it, this.bootconfig.file, this.info.pageSize)
+                    }
                     it
                 }
             }
@@ -451,7 +453,9 @@ data class VendorBoot(
                         addArgument("--ramdisk_name").addArgument(it.name, true)
                         addArgument("--vendor_ramdisk_fragment").addArgument(it.file)
                     }
-                    addArgument("--vendor_bootconfig").addArgument(bootconfig.file)
+                    if (bootconfig.file.isNotBlank()) {
+                        addArgument("--vendor_bootconfig").addArgument(bootconfig.file)
+                    }
                 }
             }
             addArgument("--dtb").addArgument(dtb.file)

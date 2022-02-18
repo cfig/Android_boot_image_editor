@@ -14,8 +14,8 @@
 
 package avb.desc
 
+import cc.cfig.io.Struct3
 import cfig.helper.Helper
-import cfig.io.Struct3
 import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream

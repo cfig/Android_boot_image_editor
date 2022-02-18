@@ -14,7 +14,7 @@
 
 package cfig.bcb
 
-import cfig.io.Struct3
+import cc.cfig.io.Struct3
 import org.slf4j.LoggerFactory
 import java.io.FileInputStream
 

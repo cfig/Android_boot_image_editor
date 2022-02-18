@@ -17,7 +17,7 @@ package avb.desc
 import avb.AVBInfo
 import cfig.Avb
 import cfig.helper.Helper
-import cfig.io.Struct3
+import cc.cfig.io.Struct3
 import java.io.File
 import java.io.InputStream
 import java.security.MessageDigest

@@ -14,7 +14,7 @@
 
 package avb.alg
 
-import cfig.io.Struct3
+import cc.cfig.io.Struct3
 
 class Algorithms {
     companion object {
