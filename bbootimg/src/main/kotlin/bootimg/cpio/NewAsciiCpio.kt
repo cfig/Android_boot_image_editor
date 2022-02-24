@@ -14,7 +14,7 @@
 
 package cfig.bootimg.cpio
 
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import org.apache.commons.compress.archivers.cpio.CpioConstants
 import java.util.*
 
@@ -38,13 +38,13 @@ class NewAsciiCpio(
     var c_check: Int = 0
 ) {
     init {
-        if (SIZE != Struct3(FORMAT_STRING).calcSize()) {
+        if (SIZE != Struct(FORMAT_STRING).calcSize()) {
             throw RuntimeException("cpio format check failed")
         }
     }
 
     fun encode(): ByteArray {
-        return Struct3(FORMAT_STRING).pack(
+        return Struct(FORMAT_STRING).pack(
             String.format(Locale.getDefault(), "%s", c_magic),
             String.format(Locale.getDefault(), "%08x", c_ino),
             String.format(Locale.getDefault(), "%08x", c_mode),

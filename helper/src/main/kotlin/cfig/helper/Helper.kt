@@ -14,7 +14,7 @@
 
 package cfig.helper
 
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.ExecuteException
@@ -61,9 +61,9 @@ class Helper {
             val paddingNeeded = round_to_multiple(this.size.toUInt(), pageSize) - this.size.toUInt()
             return if (paddingNeeded > 0u) {
                 if (paddingHead) {
-                    join(Struct3("${paddingNeeded}x").pack(null), this)
+                    join(Struct("${paddingNeeded}x").pack(null), this)
                 } else {
-                    join(this, Struct3("${paddingNeeded}x").pack(null))
+                    join(this, Struct("${paddingNeeded}x").pack(null))
                 }
             } else {
                 this

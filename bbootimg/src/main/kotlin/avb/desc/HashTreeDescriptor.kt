@@ -17,7 +17,7 @@ package avb.desc
 import avb.blob.Header
 import cfig.helper.CryptoHelper
 import cfig.helper.Helper
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import org.slf4j.LoggerFactory
 import java.io.*
 import java.security.MessageDigest
@@ -52,7 +52,7 @@ class HashTreeDescriptor(
 
     constructor(data: InputStream, seq: Int = 0) : this() {
         this.sequence = seq
-        val info = Struct3(FORMAT_STRING).unpack(data)
+        val info = Struct(FORMAT_STRING).unpack(data)
         this.tag = (info[0] as ULong).toLong()
         this.num_bytes_following = (info[1] as ULong).toLong()
         this.dm_verity_version = (info[2] as UInt).toInt()
@@ -75,7 +75,7 @@ class HashTreeDescriptor(
             throw IllegalArgumentException("Given data does not look like a hashtree descriptor")
         }
 
-        val info2 = Struct3("${partition_name_len}s${salt_len}b${root_digest_len}b").unpack(data)
+        val info2 = Struct("${partition_name_len}s${salt_len}b${root_digest_len}b").unpack(data)
         this.partition_name = info2[0] as String
         this.salt = info2[1] as ByteArray
         this.root_digest = info2[2] as ByteArray
@@ -85,7 +85,7 @@ class HashTreeDescriptor(
         this.num_bytes_following = SIZE + this.partition_name.length + this.salt.size + this.root_digest.size - 16
         val nbf_with_padding = Helper.round_to_multiple(this.num_bytes_following.toLong(), 8)
         val padding_size = nbf_with_padding - this.num_bytes_following.toLong()
-        val desc = Struct3(FORMAT_STRING).pack(
+        val desc = Struct(FORMAT_STRING).pack(
             TAG,
             nbf_with_padding.toULong(),
             this.dm_verity_version,
@@ -104,7 +104,7 @@ class HashTreeDescriptor(
             this.flags,
             null
         )
-        val padding = Struct3("${padding_size}x").pack(null)
+        val padding = Struct("${padding_size}x").pack(null)
         return Helper.join(desc, this.partition_name.toByteArray(), this.salt, this.root_digest, padding)
     }
 
@@ -155,7 +155,7 @@ class HashTreeDescriptor(
         val bos = ByteArrayOutputStream(hashSize.toInt())
         run hashing@{
             val padSz = calcSingleHashSize(true) - calcSingleHashSize(false)
-            val padding = Struct3("${padSz}x").pack(0)
+            val padding = Struct("${padSz}x").pack(0)
             var totalRead = 0L
             while (true) {
                 val data = ByteArray(blockSz)
@@ -179,7 +179,7 @@ class HashTreeDescriptor(
         }//hashing
 
         if (hashSize > bos.size()) {
-            bos.write(Struct3("${hashSize - bos.size()}x").pack(0))
+            bos.write(Struct("${hashSize - bos.size()}x").pack(0))
         }
         return bos.toByteArray()
     }

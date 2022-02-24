@@ -14,7 +14,7 @@
 
 package avb.desc
 
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import cfig.helper.Helper
 import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
@@ -25,7 +25,7 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 
     @Throws(IllegalArgumentException::class)
     constructor(stream: InputStream, seq: Int = 0) : this() {
         this.sequence = seq
-        val info = Struct3(FORMAT).unpack(stream)
+        val info = Struct(FORMAT).unpack(stream)
         this.tag = (info[0] as ULong).toLong()
         this.num_bytes_following = (info[1] as ULong).toLong()
         log.debug("UnknownDescriptor: tag = $tag, len = ${this.num_bytes_following}")
@@ -36,7 +36,7 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 
     }
 
     override fun encode(): ByteArray {
-        return Helper.join(Struct3(FORMAT).pack(this.tag, this.data.size.toLong()), data)
+        return Helper.join(Struct(FORMAT).pack(this.tag, this.data.size.toLong()), data)
     }
 
     override fun toString(): String {
@@ -120,7 +120,7 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 
         }
 
         init {
-            assert(SIZE == Struct3(FORMAT).calcSize())
+            assert(SIZE == Struct(FORMAT).calcSize())
         }
     }
 }

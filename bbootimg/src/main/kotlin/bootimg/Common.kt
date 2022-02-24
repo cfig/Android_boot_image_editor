@@ -14,7 +14,7 @@
 
 package cfig.bootimg
 
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.cpio.AndroidCpio
 import cfig.utils.DTC
@@ -363,7 +363,7 @@ class Common {
         fun probeHeaderVersion(fileName: String): Int {
             return FileInputStream(fileName).let { fis ->
                 fis.skip(40)
-                Struct3.IntShip().get(fis, ByteOrder.LITTLE_ENDIAN)
+                Struct.IntShip().get(fis, ByteOrder.LITTLE_ENDIAN)
             }
         }
 

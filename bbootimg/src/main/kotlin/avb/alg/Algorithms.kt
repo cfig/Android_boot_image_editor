@@ -14,7 +14,7 @@
 
 package avb.alg
 
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 
 class Algorithms {
     companion object {
@@ -42,7 +42,7 @@ class Algorithms {
                     hash_num_bytes = 32,
                     signature_num_bytes = 256,
                     public_key_num_bytes = 8 + 2 * 2048 / 8,
-                    padding = Struct3("2b202x1b19B").pack(
+                    padding = Struct("2b202x1b19B").pack(
                             byteArrayOf(0x00, 0x01),
                             0xff,
                             byteArrayOf(0x00),
@@ -58,7 +58,7 @@ class Algorithms {
                     hash_num_bytes = 32,
                     signature_num_bytes = 512,
                     public_key_num_bytes = 8 + 2 * 4096 / 8,
-                    padding = Struct3("2b458x1x19B").pack(
+                    padding = Struct("2b458x1x19B").pack(
                             byteArrayOf(0x00, 0x01),
                             0xff,
                             0x00,
@@ -76,7 +76,7 @@ class Algorithms {
                     hash_num_bytes = 32,
                     signature_num_bytes = 1024,
                     public_key_num_bytes = 8 + 2 * 8192 / 8,
-                    padding = Struct3("2b970x1x19B").pack(
+                    padding = Struct("2b970x1x19B").pack(
                             intArrayOf(0x00, 0x01),
                             0xff,
                             0x00,
@@ -92,7 +92,7 @@ class Algorithms {
                     hash_num_bytes = 64,
                     signature_num_bytes = 256,
                     public_key_num_bytes = 8 + 2 * 2048 / 8,
-                    padding = Struct3("2b170x1x19B").pack(
+                    padding = Struct("2b170x1x19B").pack(
                             intArrayOf(0x00, 0x01),
                             0xff,
                             0x00,
@@ -108,7 +108,7 @@ class Algorithms {
                     hash_num_bytes = 64,
                     signature_num_bytes = 512,
                     public_key_num_bytes = 8 + 2 * 4096 / 8,
-                    padding = Struct3("2b426x1x19B").pack(
+                    padding = Struct("2b426x1x19B").pack(
                             intArrayOf(0x00, 0x01),
                             0xff,
                             0x00,
@@ -125,7 +125,7 @@ class Algorithms {
                     signature_num_bytes = 1024,
                     public_key_num_bytes = 8 + 2 * 8192 / 8,
 
-                    padding = Struct3("2b938x1x19B").pack(
+                    padding = Struct("2b938x1x19B").pack(
                             intArrayOf(0x00, 0x01),
                             0xff,
                             0x00,

@@ -16,7 +16,7 @@ package avb.desc
 
 import avb.blob.Header
 import cfig.helper.Helper
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -44,7 +44,7 @@ class HashDescriptor(var flags: Int = 0,
         }
 
     constructor(data: InputStream, seq: Int = 0) : this() {
-        val info = Struct3(FORMAT_STRING).unpack(data)
+        val info = Struct(FORMAT_STRING).unpack(data)
         this.tag = (info[0] as ULong).toLong()
         this.num_bytes_following = (info[1] as ULong).toLong()
         this.image_size = (info[2] as ULong).toLong()
@@ -59,7 +59,7 @@ class HashDescriptor(var flags: Int = 0,
         if (this.tag != TAG || expectedSize != this.num_bytes_following) {
             throw IllegalArgumentException("Given data does not look like a |hash| descriptor")
         }
-        val payload = Struct3("${this.partition_name_len}s${this.salt_len}b${this.digest_len}b").unpack(data)
+        val payload = Struct("${this.partition_name_len}s${this.salt_len}b${this.digest_len}b").unpack(data)
         assert(3 == payload.size)
         this.partition_name = payload[0] as String
         this.salt = payload[1] as ByteArray
@@ -70,7 +70,7 @@ class HashDescriptor(var flags: Int = 0,
         val payload_bytes_following = SIZE + this.partition_name.length + this.salt.size + this.digest.size - 16L
         this.num_bytes_following = Helper.round_to_multiple(payload_bytes_following, 8)
         val padding_size = num_bytes_following - payload_bytes_following
-        val desc = Struct3(FORMAT_STRING).pack(
+        val desc = Struct(FORMAT_STRING).pack(
                 TAG,
                 this.num_bytes_following,
                 this.image_size,
@@ -80,7 +80,7 @@ class HashDescriptor(var flags: Int = 0,
                 this.digest.size,
                 this.flags,
                 null)
-        val padding = Struct3("${padding_size}x").pack(null)
+        val padding = Struct("${padding_size}x").pack(null)
         return Helper.join(desc, partition_name.toByteArray(), this.salt, this.digest, padding)
     }
 

@@ -14,7 +14,7 @@
 
 package cfig.bootimg.v3
 
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 
@@ -41,7 +41,7 @@ class VendorBootHeader(
             return
         }
         log.warn("VendorBootHeader constructor")
-        val info = Struct3(FORMAT_STRING).unpack(iS)
+        val info = Struct(FORMAT_STRING).unpack(iS)
         assert(16 == info.size)
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like Android Vendor Boot Image")
@@ -91,7 +91,7 @@ class VendorBootHeader(
     }
 
     fun encode(): ByteArray {
-        return Struct3(FORMAT_STRING).pack(
+        return Struct(FORMAT_STRING).pack(
             magic,
             headerVersion,
             pageSize,
@@ -134,7 +134,7 @@ class VendorBootHeader(
                 "I"   //[v4] bootconfig size
 
         init {
-            assert(Struct3(FORMAT_STRING).calcSize() == VENDOR_BOOT_IMAGE_HEADER_V4_SIZE)
+            assert(Struct(FORMAT_STRING).calcSize() == VENDOR_BOOT_IMAGE_HEADER_V4_SIZE)
         }
     }
 

@@ -1,7 +1,7 @@
 package utils
 
 import avb.AVBInfo
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import cfig.Avb
 import cfig.bootimg.Common
 import cfig.bootimg.Signer
@@ -44,7 +44,7 @@ class Dtbo(
             internal const val SIZE = 32
 
             init {
-                assert(Struct3(FORMAT_STRING).calcSize() == SIZE)
+                assert(Struct(FORMAT_STRING).calcSize() == SIZE)
             }
         }
 
@@ -52,7 +52,7 @@ class Dtbo(
             if (iS == null) {
                 return
             }
-            val info = Struct3(FORMAT_STRING).unpack(iS)
+            val info = Struct(FORMAT_STRING).unpack(iS)
             assert(8 == info.size)
             if ((info[0] as UInt).toLong() != magic) {
                 throw IllegalArgumentException("stream doesn't look like DTBO header")
@@ -73,7 +73,7 @@ class Dtbo(
         }
 
         fun encode(): ByteArray {
-            return Struct3(FORMAT_STRING).pack(
+            return Struct(FORMAT_STRING).pack(
                 magic,
                 totalSize,
                 headerSize,
@@ -103,12 +103,12 @@ class Dtbo(
             internal const val SIZE = 32
 
             init {
-                assert(Struct3(FORMAT_STRING).calcSize() == SIZE)
+                assert(Struct(FORMAT_STRING).calcSize() == SIZE)
             }
         }
 
         constructor(iS: InputStream) : this() {
-            val info = Struct3(FORMAT_STRING).unpack(iS)
+            val info = Struct(FORMAT_STRING).unpack(iS)
             assert(8 == info.size)
             entrySize = info[0] as Int
             entryOffset = info[1] as Int
@@ -121,7 +121,7 @@ class Dtbo(
         }
 
         fun encode(): ByteArray {
-            return Struct3(FORMAT_STRING).pack(
+            return Struct(FORMAT_STRING).pack(
                 entrySize,
                 entryOffset,
                 id,

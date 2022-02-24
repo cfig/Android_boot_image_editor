@@ -17,7 +17,7 @@ package avb.desc
 import avb.AVBInfo
 import cfig.Avb
 import cfig.helper.Helper
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import java.io.File
 import java.io.InputStream
 import java.security.MessageDigest
@@ -37,14 +37,14 @@ class ChainPartitionDescriptor(
         this.num_bytes_following = SIZE + this.partition_name_len + this.public_key_len - 16
         val nbf_with_padding = Helper.round_to_multiple(this.num_bytes_following, 8).toULong()
         val padding_size = nbf_with_padding - this.num_bytes_following.toUInt()
-        val desc = Struct3(FORMAT_STRING + "${RESERVED}x").pack(
+        val desc = Struct(FORMAT_STRING + "${RESERVED}x").pack(
                 TAG,
                 nbf_with_padding,
                 this.rollback_index_location,
                 this.partition_name.length.toUInt(),
                 this.public_key_len,
                 null)
-        val padding = Struct3("${padding_size}x").pack(null)
+        val padding = Struct("${padding_size}x").pack(null)
         return Helper.join(desc, this.partition_name.toByteArray(), this.pubkey, padding)
     }
 
@@ -57,11 +57,11 @@ class ChainPartitionDescriptor(
     }
 
     constructor(data: InputStream, seq: Int = 0) : this() {
-        if (SIZE - RESERVED != Struct3(FORMAT_STRING).calcSize().toLong()) {
+        if (SIZE - RESERVED != Struct(FORMAT_STRING).calcSize().toLong()) {
             throw RuntimeException("ChainPartitionDescriptor size check failed")
         }
         this.sequence = seq
-        val info = Struct3(FORMAT_STRING + "${RESERVED}s").unpack(data)
+        val info = Struct(FORMAT_STRING + "${RESERVED}s").unpack(data)
         this.tag = (info[0] as ULong).toLong()
         this.num_bytes_following = (info[1] as ULong).toLong()
         this.rollback_index_location = (info[2] as UInt).toInt()
@@ -71,7 +71,7 @@ class ChainPartitionDescriptor(
         if (this.tag != TAG || this.num_bytes_following != expectedSize) {
             throw IllegalArgumentException("Given data does not look like a chain/delegation descriptor")
         }
-        val info2 = Struct3("${this.partition_name_len}s${this.public_key_len}b").unpack(data)
+        val info2 = Struct("${this.partition_name_len}s${this.public_key_len}b").unpack(data)
         this.partition_name = info2[0] as String
         this.pubkey = info2[1] as ByteArray
         val md = MessageDigest.getInstance("SHA1").let {

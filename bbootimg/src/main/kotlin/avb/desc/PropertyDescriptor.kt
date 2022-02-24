@@ -15,21 +15,21 @@
 package avb.desc
 
 import cfig.helper.Helper
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import java.io.InputStream
 
 class PropertyDescriptor(
         var key: String = "",
         var value: String = "") : Descriptor(TAG, 0, 0) {
     override fun encode(): ByteArray {
-        if (SIZE != Struct3(FORMAT_STRING).calcSize().toUInt()) {
+        if (SIZE != Struct(FORMAT_STRING).calcSize().toUInt()) {
             throw RuntimeException("PropertyDesc size check failed")
         }
         this.num_bytes_following = (SIZE + this.key.length.toUInt() + this.value.length.toUInt() + 2U - 16U).toLong()
         val nbfWithPadding = Helper.round_to_multiple(this.num_bytes_following.toLong(), 8).toULong()
         val paddingSize = nbfWithPadding - num_bytes_following.toUInt()
-        val padding = Struct3("${paddingSize}x").pack(0)
-        val desc = Struct3(FORMAT_STRING).pack(
+        val padding = Struct("${paddingSize}x").pack(0)
+        val desc = Struct(FORMAT_STRING).pack(
                 TAG,
                 nbfWithPadding,
                 this.key.length,
@@ -41,7 +41,7 @@ class PropertyDescriptor(
     }
 
     constructor(data: InputStream, seq: Int = 0) : this() {
-        val info = Struct3(FORMAT_STRING).unpack(data)
+        val info = Struct(FORMAT_STRING).unpack(data)
         this.tag = (info[0] as ULong).toLong()
         this.num_bytes_following = (info[1] as ULong).toLong()
         val keySize = (info[2] as ULong).toUInt()
@@ -52,7 +52,7 @@ class PropertyDescriptor(
         }
         this.sequence = seq
 
-        val info2 = Struct3("${keySize}sx${valueSize}s").unpack(data)
+        val info2 = Struct("${keySize}sx${valueSize}s").unpack(data)
         this.key = info2[0] as String
         this.value = info2[2] as String
     }

@@ -14,7 +14,7 @@
 
 package cfig.bcb
 
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import cfig.helper.Helper
 import org.slf4j.LoggerFactory
 import java.io.FileInputStream
@@ -33,12 +33,12 @@ data class VirtualABMsg(
         private const val MAGIC = "b00a7456"
 
         init {
-            assert(SIZE == Struct3(FORMAT_STRING).calcSize())
+            assert(SIZE == Struct(FORMAT_STRING).calcSize())
         }
     }
 
     constructor(fis: FileInputStream) : this() {
-        val info = Struct3(FORMAT_STRING).unpack(fis)
+        val info = Struct(FORMAT_STRING).unpack(fis)
         this.version = (info[0] as ByteArray)[0].toInt()
         this.magic = info[1] as ByteArray
         this.mergeStatus = (info[2] as ByteArray)[0].toInt()
@@ -50,7 +50,7 @@ data class VirtualABMsg(
     }
 
     fun encode(): ByteArray {
-        return Struct3(FORMAT_STRING).pack(
+        return Struct(FORMAT_STRING).pack(
             this.version,
             this.magic,
             this.mergeStatus,

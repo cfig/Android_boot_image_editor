@@ -14,7 +14,7 @@
 
 package cfig.bootimg.v3
 
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import cfig.bootimg.Common
 import org.slf4j.LoggerFactory
 import java.io.InputStream
@@ -35,7 +35,7 @@ class BootHeaderV3(
             return
         }
         log.warn("BootImgHeaderV3/V4 constructor")
-        val info = Struct3(FORMAT_STRING).unpack(iS)
+        val info = Struct(FORMAT_STRING).unpack(iS)
         assert(12 == info.size)
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like Android Boot Image V3 Header")
@@ -56,7 +56,7 @@ class BootHeaderV3(
     }
 
     fun encode(): ByteArray {
-        return Struct3(FORMAT_STRING).pack(
+        return Struct(FORMAT_STRING).pack(
             magic,
             kernelSize,
             ramdiskSize,
@@ -106,7 +106,7 @@ class BootHeaderV3(
         const val pageSize: Int = 4096
 
         init {
-            assert(BOOT_IMAGE_HEADER_V4_SIZE == Struct3(FORMAT_STRING).calcSize()) {
+            assert(BOOT_IMAGE_HEADER_V4_SIZE == Struct(FORMAT_STRING).calcSize()) {
                 "internal error: expected size $BOOT_IMAGE_HEADER_V4_SIZE "
             }
         }

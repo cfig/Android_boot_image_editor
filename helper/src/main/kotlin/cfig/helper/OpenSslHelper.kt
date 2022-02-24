@@ -1,411 +1,80 @@
-// Copyright 2021 yuyezhong@gmail.com
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package cfig.helper
 
 import org.apache.commons.exec.CommandLine
-import org.bouncycastle.util.encoders.Hex
+import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.LoggerFactory
-import java.io.ByteArrayInputStream
 import java.io.File
-import java.io.FileOutputStream
-import java.lang.RuntimeException
-import java.util.*
 
+//https://www.digicert.com/kb/ssl-support/openssl-quick-reference-guide.htm
 class OpenSslHelper {
-    enum class KeyFormat {
-        PEM,  //header + metadata + base64 der
-        DER // der format
-    }
+    companion object {
+        private val log = LoggerFactory.getLogger(OpenSslHelper::class.java)
 
-    interface IKey {
-        val name: String
-        val data: ByteArray
-        fun writeTo(fileName: String) {
-            FileOutputStream(fileName, false).use {
-                it.write(data)
-            }
-        }
-    }
-
-    class PK1Key(
-        val format: KeyFormat = KeyFormat.PEM,
-        override val data: ByteArray = byteArrayOf(),
-        override val name: String = "RSA Private"
-    ) : IKey {
-        /*
-            PEM private key -> PEM/DER public key
-         */
-        fun getPublicKey(pubKeyFormat: KeyFormat): PK1PubKey {
-            if (format != KeyFormat.PEM) {
-                throw IllegalArgumentException("can not handle $format private key")
-            }
-            val ret = Helper.powerRun(
-                "openssl rsa -in $stdin -pubout -outform ${pubKeyFormat.name}",
-                ByteArrayInputStream(data)
-            )
-            log.info("privateToPublic:stderr: ${String(ret[1])}")
-            return PK1PubKey(format = pubKeyFormat, data = ret[0])
+        //openssl req -new -newkey rsa:2048 -nodes -keyout server.key -out server.csr -subj "/C=US/ST=Utah/L=Lehi/O=Your Company, Inc./OU=IT/CN=yourdomain.com"\n
+        //openssl req -text -in server.csr -noout -verify
+        //\"/C=US/ST=Utah/L=Lehi/O=Your Company, Inc./OU=IT/CN=yourdomain.com\"
+        fun createCsr(outKey: String, outCsr: String, subj: String, keyLen: Int = 2048) {
+            DefaultExecutor().execute(
+                CommandLine.parse("openssl req -new -newkey rsa:$keyLen -nodes").apply {
+                    addArguments("-keyout $outKey")
+                    addArguments("-out $outCsr")
+                    addArgument("-subj").addArgument("$subj", false)
+                })
+            DefaultExecutor().execute(CommandLine.parse("openssl req -text -in $outCsr -noout -verify"))
         }
 
-        /*
-        file based:
-            openssl rsa -in private.pem -pubout -out public.pem
-        stream based:
-            openssl rsa -in - -pubout
-         */
-        fun getPk8PublicKey(): Pk8PubKey {
-            if (this.format != KeyFormat.PEM) {
-                throw java.lang.IllegalArgumentException("Only PEM key is supported")
+        fun toJks(
+            pk8: String, x509Pem: String,
+            outFile: String,
+            paramSrcPass: String = "somepassword",
+            paramDstPass: String = "somepassword",
+            alias: String = "androiddebugkey"
+        ) {
+            File(outFile).let {
+                if (it.exists()) it.delete()
             }
-            val ret = Helper.powerRun2(
-                "openssl rsa -in $stdin -pubout",
-                ByteArrayInputStream(data)
-            )
-            if (ret[0] as Boolean) {
-                log.info("getPk8PublicKey:error: ${String(ret[2] as ByteArray)}")
-                return Pk8PubKey(KeyFormat.PEM, ret[1] as ByteArray)
-            } else {
-                log.error("stdout: " + String(ret[1] as ByteArray))
-                log.error("stderr: " + String(ret[2] as ByteArray))
-                throw RuntimeException()
-            }
-        }
-
-        /*
-            file based:
-                openssl pkcs8 -nocrypt -in $(rsa_key) -topk8 -outform DER -out $(pk8_key)
-            stream based:
-                openssl pkcs8 -nocrypt -in - -topk8 -outform DER
-         */
-        fun toPk8(pk8Format: KeyFormat): PK8RsaKey {
-            val ret = Helper.powerRun(
-                "openssl pkcs8 -nocrypt -in $stdin -topk8 -outform ${pk8Format.name}",
-                ByteArrayInputStream(data)
-            )
-            log.info("toPk8Private:stderr: ${String(ret[1])}")
-            return PK8RsaKey(format = pk8Format, data = ret[0])
-        }
-
-        fun toCsr(info: String? = null): Csr {
-            val defaultInfo = "/C=CN/ST=Shanghai/L=Shanghai/O=XXX/OU=infra/CN=gerrit/emailAddress=webmaster@XX.com"
-            val cmdLine = CommandLine.parse("openssl req -new -key $stdin -subj").apply {
-                this.addArgument(info ?: defaultInfo, true)
-            }
-            val ret = Helper.powerRun3(cmdLine, ByteArrayInputStream(data))
-            if (ret[0] as Boolean) {
-                log.info("toCsr:error: ${String(ret[2] as ByteArray)}")
-                return Csr(data = ret[1] as ByteArray)
-            } else {
-                log.error("stdout: " + String(ret[1] as ByteArray))
-                log.error("stderr: " + String(ret[2] as ByteArray))
-                throw RuntimeException()
-            }
-        }
-
-        fun toV1Cert(info: String? = null): Crt {
-            //full command:
-            //  openssl x509 -req -in 2017key.csr -signkey 2017key.rsa.pem -out theCert.crt -days 180
-            //send RSA key as input stream:
-            //  openssl x509 -req -in 2017key.csr -signkey - -out theCert.crt -days 180
-            //send RSA key as input stream, crt as output stream:
-            //  openssl x509 -req -in 2017key.csr -signkey - -days 180
-            val csr = this.toCsr(info)
-            val tmpFile = File.createTempFile("pk1.", ".csr")
-            tmpFile.writeBytes(csr.data)
-            tmpFile.deleteOnExit()
-            val ret = Helper.powerRun2(
-                "openssl x509 -req -in ${tmpFile.path} -signkey $stdin -days 180",
-                ByteArrayInputStream(data)
-            )
-            if (ret[0] as Boolean) {
-                log.info("toCrt:error: ${String(ret[2] as ByteArray)}")
-                return Crt(ret[1] as ByteArray)
-            } else {
-                log.error("stdout: " + String(ret[1] as ByteArray))
-                log.error("stderr: " + String(ret[2] as ByteArray))
-                throw RuntimeException()
-            }
-        }
-
-        companion object {
-            /*
-                -> PEM RSA private key
-             */
-            fun generate(keyLength: Int): PK1Key {
-                val ret = Helper.powerRun("openssl genrsa $keyLength", null)
-                log.info("generateRSA:stderr: ${String(ret[1])}")
-                return PK1Key(format = KeyFormat.PEM, data = ret[0])
-            }
-
-            fun generate(keyLength: Int, password: String): PK1Key {
-                val ret = Helper.powerRun("openssl genrsa -aes256 -passout pass:$password $keyLength", null)
-                log.info("generateRSA:stderr: ${String(ret[1])}")
-                return PK1Key(format = KeyFormat.PEM, data = ret[0])
-            }
-        }
-    }
-
-    class PK8RsaKey(
-        val format: KeyFormat = KeyFormat.PEM,
-        override val data: ByteArray = byteArrayOf(),
-        override val name: String = "PK8 Private"
-    ) : IKey {
-
-        /*
-        file based:
-            openssl pkcs8 -nocrypt -in $(pk8_key) -inform DER -out $(rsa_key).converted.tmp
-            openssl rsa -in $(rsa_key).converted.tmp -out $(rsa_key).converted
-        stream based:
-            openssl pkcs8 -nocrypt -in - -inform DER
-            openssl rsa -in - -out -
-         */
-        fun toPk1(): PK1Key {
-            val transformed =
-                if (this.format != KeyFormat.PEM) {
-                    log.warn("Only pk8+pem can be converted to RSA, transforming ...")
-                    this.transform(KeyFormat.DER, KeyFormat.PEM)
+            val privKey = File.createTempFile("key.", ".tmp").let {
+                it.deleteOnExit()
+                val ret = Helper.powerRun2("openssl pkcs8 -in $pk8 -inform DER -outform PEM -nocrypt", null)
+                if (ret[0] as Boolean) {
+                    it.writeBytes(ret[1] as ByteArray)
                 } else {
-                    this
+                    log.error("stdout: " + String(ret[1] as ByteArray))
+                    log.error("stderr: " + String(ret[2] as ByteArray))
+                    throw java.lang.RuntimeException()
                 }
-            val ret = Helper.powerRun2(
-                "openssl rsa -in $stdin",
-                ByteArrayInputStream(transformed.data)
-            )
-            if (ret[0] as Boolean) {
-                log.info("toRsaPrivate:error: ${String(ret[2] as ByteArray)}")
-                return PK1Key(KeyFormat.PEM, ret[1] as ByteArray)
-            } else {
-                log.error("stdout: " + String(ret[1] as ByteArray))
-                log.error("stderr: " + String(ret[2] as ByteArray))
-                throw RuntimeException()
+                it
             }
-        }
 
-        /*
-            openssl pkcs8 -nocrypt -in - -inform DER
-         */
-        fun transform(inFormat: KeyFormat, outFormat: KeyFormat): PK8RsaKey {
-            val ret = Helper.powerRun2(
-                "openssl pkcs8 -nocrypt -in $stdin -inform ${inFormat.name} -outform ${outFormat.name}",
-                ByteArrayInputStream(data)
-            )
-            if (ret[0] as Boolean) {
-                log.info("transform:error: ${String(ret[2] as ByteArray)}")
-                return PK8RsaKey(data = ret[1] as ByteArray)
-            } else {
-                log.error("stdout: " + String(ret[1] as ByteArray))
-                log.error("stderr: " + String(ret[2] as ByteArray))
-                throw IllegalArgumentException()
+            val pk12 = File.createTempFile("key.", ".tmp").let {
+                it.deleteOnExit()
+                val ret = Helper.powerRun2(
+                    "openssl pkcs12 -export -in $x509Pem -password pass:$paramSrcPass -inkey ${privKey.path} -name androiddebugkey",
+                    null
+                )
+                if (ret[0] as Boolean) {
+                    it.writeBytes(ret[1] as ByteArray)
+                } else {
+                    log.error("stdout: " + String(ret[1] as ByteArray))
+                    log.error("stderr: " + String(ret[2] as ByteArray))
+                    throw java.lang.RuntimeException()
+                }
+                it
             }
-        }
 
-        /*
-        file based:
-            openssl rsa -in pkcs8.pem -pubout -out public_pkcs8.pem
-        stream based:
-            openssl rsa -in - -pubout
-         */
-        fun getPublicKey(): Pk8PubKey {
-            if (this.format != KeyFormat.PEM) {
-                throw java.lang.IllegalArgumentException("Only PEM key is supported")
-            }
             val ret = Helper.powerRun2(
-                "openssl rsa -in $stdin -pubout",
-                ByteArrayInputStream(data)
-            )
-            if (ret[0] as Boolean) {
-                log.info("getPublicKey:error: ${String(ret[2] as ByteArray)}")
-                return Pk8PubKey(KeyFormat.PEM, ret[1] as ByteArray)
-            } else {
-                log.error("stdout: " + String(ret[1] as ByteArray))
-                log.error("stderr: " + String(ret[2] as ByteArray))
-                throw RuntimeException()
-            }
-        }
-    }
-
-    class PK1PubKey(
-        val format: KeyFormat = KeyFormat.PEM,
-        override val data: ByteArray = byteArrayOf(),
-        override val name: String = "RSA Public"
-    ) : IKey
-
-    class Pk8PubKey(
-        val format: KeyFormat = KeyFormat.PEM,
-        override val data: ByteArray = byteArrayOf(),
-        override val name: String = "Pk8 Public"
-    ) : IKey
-
-    class Csr(override val name: String = "CSR", override val data: ByteArray = byteArrayOf()) : IKey
-    class Jks(override val name: String = "Java Keystore", override val data: ByteArray = byteArrayOf()) : IKey {
-        //keytool -list -v -deststorepass $(thePassword) -keystore $(jks_file)
-        fun check(passWord: String = "secretpassword") {
-            val tmpFile = File.createTempFile("tmp.", ".jks").apply { this.deleteOnExit() }
-            tmpFile.writeBytes(this.data)
-            val ret = Helper.powerRun2(
-                "keytool -list -v -deststorepass $passWord -keystore $tmpFile",
+                "keytool -importkeystore " +
+                        " -deststorepass $paramDstPass -destkeystore $outFile" +
+                        " -srckeystore ${pk12.path} -srcstoretype PKCS12 -srcstorepass $paramSrcPass" +
+                        " -alias $alias",
                 null
             )
             if (ret[0] as Boolean) {
-                log.info("Jks.check:stdout: ${String(ret[1] as ByteArray)}")
-                log.info("Jks.check:error: ${String(ret[2] as ByteArray)}")
+                log.info("$outFile is ready")
             } else {
                 log.error("stdout: " + String(ret[1] as ByteArray))
                 log.error("stderr: " + String(ret[2] as ByteArray))
-                throw RuntimeException()
-            }
-        }
-
-        companion object {
-            fun generate(keyPass: String, storePass: String, alias: String, dname: String?, outFile: String) {
-                //val cmd = "keytool -genkey -noprompt -alias $alias -dname \"$defaultInfo\" -keystore $outFile -storepass $storePass -keypass $keyPass"
-                val defaultInfo =
-                    dname ?: "CN=Unknown, OU=Unknown, O=Unknown Software Company, L=Unknown, ST=Unknown, C=Unknown"
-                val cmd = CommandLine.parse("keytool -genkey -noprompt -keyalg RSA").apply {
-                    addArgument("-alias").addArgument(alias)
-                    addArgument("-dname").addArgument(defaultInfo, false)
-                    addArgument("-keystore").addArgument(outFile)
-                    addArgument("-storepass").addArgument(storePass)
-                    addArgument("-keypass").addArgument(keyPass)
-                }
-                val ret = Helper.powerRun3(cmd, null)
-                if (ret[0] as Boolean) {
-                    log.info("Jks.gen:stdout: ${String(ret[1] as ByteArray)}")
-                    log.info("Jks.gen:error: ${String(ret[2] as ByteArray)}")
-                } else {
-                    log.error("Jks.gen:stdout: " + String(ret[1] as ByteArray))
-                    log.error("Jks.gen:stderr: " + String(ret[2] as ByteArray))
-                    throw RuntimeException()
-                }
-            }
-        }
-    }
-
-    class Crt(override val data: ByteArray = byteArrayOf(), override val name: String = "crt") : IKey {
-        //Result: trustedCertEntry
-        //keytool -importcert -file 2017key.crt -deststorepass secretpassword -srcstorepass secretpassword -keystore 2017key.2.jks
-        fun toJks(
-            paramSrcPass: String = "secretpassword",
-            paramDstPass: String = "secretpassword",
-            alias: String = "awesomeKey"
-        ): Jks {
-            val crtFile = File.createTempFile("tmp.", ".crt").apply { this.deleteOnExit() }
-            crtFile.writeBytes(this.data)
-            val outFile = File.createTempFile("tmp.", ".jks").apply { this.delete() }
-            val ret = Helper.powerRun2(
-                "keytool -importcert -file ${crtFile.path}" +
-                        " -deststorepass $paramDstPass -srcstorepass $paramSrcPass " +
-                        " -alias $alias " +
-                        " -keystore ${outFile.path}",
-                ByteArrayInputStream("yes\n".toByteArray())
-            )
-            if (ret[0] as Boolean) {
-                log.info("toJks:error: ${String(ret[2] as ByteArray)}")
-                log.info("toJks:stdout: ${String(ret[1] as ByteArray)}")
-            } else {
-                log.error("stdout: " + String(ret[1] as ByteArray))
-                log.error("stderr: " + String(ret[2] as ByteArray))
-                throw RuntimeException()
-            }
-
-            if (!outFile.exists()) {
-                throw RuntimeException()
-            }
-            val outData = outFile.readBytes()
-            outFile.delete()
-            return Jks(data = outData)
-        }
-    }
-
-    class Pfx(
-        override val name: String = "androiddebugkey",
-        var thePassword: String = "secretpassword",
-        override var data: ByteArray = byteArrayOf()
-    ) : IKey {
-        fun generate(pk1: PK1Key, crt: Crt): Pfx {
-            val pk1File = File.createTempFile("tmp.", ".file").apply { this.deleteOnExit() }
-            pk1File.writeBytes(pk1.data)
-
-            val crtFile = File.createTempFile("tmp.", ".file").apply { this.deleteOnExit() }
-            crtFile.writeBytes(crt.data)
-
-            //openssl pkcs12 -export -out $(pfx_cert) -inkey $(rsa_key) -in $(crt_file) -password pass:$(thePassword) -name $(thePfxName)
-            val cmd = "openssl pkcs12 -export " +
-                    " -inkey ${pk1File.path} " +
-                    " -in ${crtFile.path} " +
-                    " -password pass:${this.thePassword} -name ${this.name}"
-            val ret = Helper.powerRun2(cmd, null)
-            if (ret[0] as Boolean) {
-                log.info("toPfx:error: ${String(ret[2] as ByteArray)}")
-                log.info("toPfx:stdout: ${Hex.toHexString(ret[1] as ByteArray)}")
-                this.data = ret[1] as ByteArray
-            } else {
-                log.error("stdout: " + String(ret[1] as ByteArray))
-                log.error("stderr: " + String(ret[2] as ByteArray))
-                throw RuntimeException()
-            }
-            return this
-        }
-
-        //keytool -importkeystore -deststorepass $(thePassword) -destkeystore $(jks_file) -srckeystore $(pfx_cert) -srcstoretype PKCS12 -srcstorepass $(thePassword)
-        fun toJks(): Jks {
-            val jksFile = File.createTempFile("tmp.", ".file").apply { this.delete() }
-            val thisFile = File.createTempFile("tmp.", ".file").apply { this.deleteOnExit() }
-            thisFile.writeBytes(this.data)
-            val cmd = "keytool -importkeystore " +
-                    " -srcstorepass $thePassword -deststorepass $thePassword " +
-                    " -destkeystore ${jksFile.path} " +
-                    " -srckeystore $thisFile -srcstoretype PKCS12"
-            val ret = Helper.powerRun2(cmd, null)
-            if (ret[0] as Boolean) {
-                log.info("toJks:error: " + String(ret[2] as ByteArray))
-                log.info("toJks:stdout: " + String(ret[1] as ByteArray))
-                this.data = ret[1] as ByteArray
-            } else {
-                log.error("stdout: " + String(ret[1] as ByteArray))
-                log.error("stderr: " + String(ret[2] as ByteArray))
-                throw RuntimeException()
-            }
-            val outDate = jksFile.readBytes()
-            jksFile.delete()
-            return Jks(this.name, outDate)
-        }
-    }
-
-    companion object {
-        private val log = LoggerFactory.getLogger(OpenSslHelper::class.java)
-        val stdin = if (System.getProperty("os.name").contains("Mac")) "/dev/stdin" else "-"
-
-        fun toPfx(password: String = "secretpassword", keyName: String = "androiddebugkey", pk1: PK1Key, crt: Crt) {
-            val pk1File = File.createTempFile("tmp.", ".file").apply { this.deleteOnExit() }
-            pk1File.writeBytes(pk1.data)
-
-            val crtFile = File.createTempFile("tmp.", ".file").apply { this.deleteOnExit() }
-            crtFile.writeBytes(crt.data)
-
-            //openssl pkcs12 -export -out $(pfx_cert) -inkey $(rsa_key) -in $(crt_file) -password pass:$(thePassword) -name $(thePfxName)
-            val cmd =
-                "openssl pkcs12 -export -inkey ${pk1File.path} -in ${crtFile.path} -password pass:$password -name $keyName"
-            val ret = Helper.powerRun2(cmd, null)
-            if (ret[0] as Boolean) {
-                log.info("toPfx:error: ${String(ret[2] as ByteArray)}")
-                log.info("toPfx:stdout: ${Hex.toHexString(ret[1] as ByteArray)}")
-            } else {
-                log.error("stdout: " + String(ret[1] as ByteArray))
-                log.error("stderr: " + String(ret[2] as ByteArray))
-                throw RuntimeException()
+                throw java.lang.RuntimeException()
             }
         }
     }

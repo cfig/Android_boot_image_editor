@@ -33,6 +33,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
+    implementation("cc.cfig:io:0.2")
     implementation("org.slf4j:slf4j-simple:1.7.32")
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.1")

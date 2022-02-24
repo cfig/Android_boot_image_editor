@@ -14,7 +14,7 @@
 
 package cfig.helper
 
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import cfig.helper.Helper.Companion.check_call
 import cfig.helper.Helper.Companion.check_output
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
@@ -159,7 +159,7 @@ class ZipHelper {
             sizeFileHeader = struct.calcsize(structFileHeader)
         */
         fun ZipArchiveEntry.getEntryOffset(): Long {
-            val zipFileHeaderSize = Struct3("<4s2B4HL2L2H").calcSize()
+            val zipFileHeaderSize = Struct("<4s2B4HL2L2H").calcSize()
             val funGetLocalHeaderOffset = ZipArchiveEntry::class.declaredFunctions.filter { funcItem ->
                 funcItem.name == "getLocalHeaderOffset"
             }[0]

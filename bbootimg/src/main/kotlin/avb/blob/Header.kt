@@ -15,7 +15,7 @@
 package avb.blob
 
 import cfig.Avb
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import java.io.InputStream
 
 //avbtool::AvbVBMetaHeader
@@ -40,7 +40,7 @@ data class Header(
         var release_string: String = "avbtool ${Avb.AVB_VERSION_MAJOR}.${Avb.AVB_VERSION_MINOR}.${Avb.AVB_VERSION_SUB}") {
     @Throws(IllegalArgumentException::class)
     constructor(iS: InputStream) : this() {
-        val info = Struct3(FORMAT_STRING).unpack(iS)
+        val info = Struct(FORMAT_STRING).unpack(iS)
         assert(22 == info.size)
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like valid VBMeta Header")
@@ -67,7 +67,7 @@ data class Header(
     }
 
     fun encode(): ByteArray {
-        return Struct3(FORMAT_STRING).pack(
+        return Struct(FORMAT_STRING).pack(
                 magic,                                                                  //4s
                 this.required_libavb_version_major, this.required_libavb_version_minor, //2L
                 this.authentication_data_block_size, this.auxiliary_data_block_size,    //2Q
@@ -121,7 +121,7 @@ data class Header(
         private const val FORMAT_STRING = ("!4s2L2QL11QL${REVERSED0}x47sx" + "${REVERSED}x")
 
         init {
-            assert(SIZE == Struct3(FORMAT_STRING).calcSize())
+            assert(SIZE == Struct(FORMAT_STRING).calcSize())
         }
     }
 }

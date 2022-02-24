@@ -14,7 +14,7 @@
 
 package cfig.bcb
 
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -35,12 +35,12 @@ data class BootloaderMsg(//offset 0, size 2k
         private val log = LoggerFactory.getLogger("BootloaderMsg")
 
         init {
-            assert(SIZE == Struct3(FORMAT_STRING).calcSize())
+            assert(SIZE == Struct(FORMAT_STRING).calcSize())
         }
     }
 
     constructor(fis: FileInputStream) : this() {
-        val info = Struct3(FORMAT_STRING).unpack(fis)
+        val info = Struct(FORMAT_STRING).unpack(fis)
         this.command = info[0] as String
         this.status = info[1] as String
         this.recovery = info[2] as String
@@ -49,7 +49,7 @@ data class BootloaderMsg(//offset 0, size 2k
     }
 
     fun encode(): ByteArray {
-        return Struct3(FORMAT_STRING).pack(
+        return Struct(FORMAT_STRING).pack(
                 this.command,
                 this.stage,
                 this.recovery,
@@ -71,7 +71,7 @@ data class BootloaderMsg(//offset 0, size 2k
         if (File(miscFile).exists()) {
             log.info("readBootloaderMsg() from $miscFile")
             val fis = FileInputStream(miscFile)
-            val info = Struct3(FORMAT_STRING).unpack(fis)
+            val info = Struct(FORMAT_STRING).unpack(fis)
             this.command = info[0] as String
             this.status = info[1] as String
             this.recovery = info[2] as String

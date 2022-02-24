@@ -14,7 +14,7 @@
 
 package cfig.bcb
 
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import org.slf4j.LoggerFactory
 import java.io.FileInputStream
 
@@ -29,19 +29,19 @@ class BootloaderMsgAB( //offset 2k, size 2k
         private val log = LoggerFactory.getLogger(BootloaderMsgAB::class.java.simpleName)
 
         init {
-            assert(SIZE == Struct3(FORMAT_STRING).calcSize())
+            assert(SIZE == Struct(FORMAT_STRING).calcSize())
         }
     }
 
     constructor(fis: FileInputStream) : this() {
-        val info = Struct3(FORMAT_STRING).unpack(fis)
+        val info = Struct(FORMAT_STRING).unpack(fis)
         this.slotSuffix = info[0] as String
         this.updateChannel = info[1] as String
         this.reserved = info[2] as ByteArray
     }
 
     fun encode(): ByteArray {
-        return Struct3(FORMAT_STRING).pack(
+        return Struct(FORMAT_STRING).pack(
                 this.slotSuffix,
                 this.updateChannel,
                 byteArrayOf())

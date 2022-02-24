@@ -17,7 +17,7 @@ package avb.blob
 import avb.alg.Algorithms
 import cfig.helper.CryptoHelper
 import cfig.helper.Helper
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -55,9 +55,8 @@ data class AuthBlob(
             return if (alg.name == "NONE") {
                 byteArrayOf()
             } else {
-                val k = CryptoHelper.KeyBox.parse2(Files.readAllBytes(Paths.get(alg.defaultKey.replace(".pem", ".pk8")))) as Array<*>
-                assert(k[0] as Boolean)
-                CryptoHelper.Signer.rawRsa(k[2] as PrivateKey, Helper.join(alg.padding, hash))
+                val k = CryptoHelper.KeyBox.parse4(Files.readAllBytes(Paths.get(alg.defaultKey.replace(".pem", ".pk8"))))
+                CryptoHelper.Signer.rawRsa(k.key as PrivateKey, Helper.join(alg.padding, hash))
             }
         }
 
@@ -77,7 +76,7 @@ data class AuthBlob(
             val binaryHash = calcHash(header_data_blob, aux_data_blob, algorithm_name)
             val binarySignature = calcSignature(binaryHash, algorithm_name)
             val authData = Helper.join(binaryHash, binarySignature)
-            return Helper.join(authData, Struct3("${authBlockSize - authData.size}x").pack(0))
+            return Helper.join(authData, Struct("${authBlockSize - authData.size}x").pack(0))
         }
 
         private val log = LoggerFactory.getLogger(AuthBlob::class.java)

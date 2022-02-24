@@ -18,7 +18,7 @@ import avb.alg.Algorithm
 import avb.desc.*
 import cfig.helper.CryptoHelper
 import cfig.helper.Helper
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey
 import org.slf4j.LoggerFactory
@@ -98,7 +98,7 @@ class AuxBlob(
         val auxSize = Helper.round_to_multiple(
                 (encodedDesc.size + encodedKey.size + encodedPkmd.size).toLong(),
                 64)
-        return Struct3("${auxSize}b").pack(Helper.join(encodedDesc, encodedKey, encodedPkmd))
+        return Struct("${auxSize}b").pack(Helper.join(encodedDesc, encodedKey, encodedPkmd))
     }
 
     fun populateDescriptors(descriptors: List<Descriptor>): AuxBlob {
@@ -139,7 +139,7 @@ class AuxBlob(
                 if (key == null) {
                     algKey = Files.readAllBytes((Paths.get(alg.defaultKey)))
                 }
-                val rsa = (CryptoHelper.KeyBox.parse2(algKey!!) as Array<*>)[2] as RSAPrivateKey //BC RSA
+                val rsa = CryptoHelper.KeyBox.parse4(algKey!!).key as RSAPrivateKey //BC RSA
                 encodedKey = CryptoHelper.KeyBox.encodeRSAkey(rsa)
                 assert(alg.public_key_num_bytes == encodedKey.size)
             } else {

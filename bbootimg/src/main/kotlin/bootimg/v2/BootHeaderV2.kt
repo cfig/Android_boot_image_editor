@@ -14,7 +14,7 @@
 
 package cfig.bootimg.v2
 
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import cfig.helper.Helper
 import cfig.bootimg.Common
 import org.slf4j.LoggerFactory
@@ -58,7 +58,7 @@ open class BootHeaderV2(
             return
         }
         log.warn("BootImgHeader constructor")
-        val info = Struct3(FORMAT_STRING).unpack(iS)
+        val info = Struct(FORMAT_STRING).unpack(iS)
         assert(20 == info.size)
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like Android Boot Image Header")
@@ -110,7 +110,7 @@ open class BootHeaderV2(
             (11..14).forEach { add(2.0.pow(it).toLong()) }
         }
         assert(pageSizeChoices.contains(pageSize.toLong())) { "invalid parameter [pageSize=$pageSize], (choose from $pageSizeChoices)" }
-        return Struct3(FORMAT_STRING).pack(
+        return Struct(FORMAT_STRING).pack(
                 magic,
                 //10I
                 kernelLength,
@@ -168,7 +168,7 @@ open class BootHeaderV2(
         const val BOOT_IMAGE_HEADER_V0_SIZE = 0
 
         init {
-            assert(BOOT_IMAGE_HEADER_V2_SIZE == Struct3(FORMAT_STRING).calcSize())
+            assert(BOOT_IMAGE_HEADER_V2_SIZE == Struct(FORMAT_STRING).calcSize())
         }
 
     }

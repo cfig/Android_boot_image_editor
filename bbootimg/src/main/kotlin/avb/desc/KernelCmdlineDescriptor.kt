@@ -15,7 +15,7 @@
 package avb.desc
 
 import cfig.helper.Helper
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import java.io.InputStream
 
 class KernelCmdlineDescriptor(
@@ -36,7 +36,7 @@ class KernelCmdlineDescriptor(
 
     @Throws(IllegalArgumentException::class)
     constructor(data: InputStream, seq: Int = 0) : this() {
-        val info = Struct3(FORMAT_STRING).unpack(data)
+        val info = Struct(FORMAT_STRING).unpack(data)
         this.tag = (info[0] as ULong).toLong()
         this.num_bytes_following = (info[1] as ULong).toLong()
         this.flags = (info[2] as UInt).toInt()
@@ -46,19 +46,19 @@ class KernelCmdlineDescriptor(
         if ((this.tag != TAG) || (this.num_bytes_following != expectedSize.toLong())) {
             throw IllegalArgumentException("Given data does not look like a kernel cmdline descriptor")
         }
-        this.cmdline = Struct3("${this.cmdlineLength}s").unpack(data)[0] as String
+        this.cmdline = Struct("${this.cmdlineLength}s").unpack(data)[0] as String
     }
 
     override fun encode(): ByteArray {
         val num_bytes_following = SIZE - 16 + cmdline.toByteArray().size
         val nbf_with_padding = Helper.round_to_multiple(num_bytes_following.toLong(), 8)
         val padding_size = nbf_with_padding - num_bytes_following
-        val desc = Struct3(FORMAT_STRING).pack(
+        val desc = Struct(FORMAT_STRING).pack(
                 TAG,
                 nbf_with_padding,
                 this.flags,
                 cmdline.length)
-        val padding = Struct3("${padding_size}x").pack(null)
+        val padding = Struct("${padding_size}x").pack(null)
         return Helper.join(desc, cmdline.toByteArray(), padding)
     }
 
@@ -72,7 +72,7 @@ class KernelCmdlineDescriptor(
         const val flagHashTreeDisabled = 2
 
         init {
-            assert(SIZE == Struct3(FORMAT_STRING).calcSize())
+            assert(SIZE == Struct(FORMAT_STRING).calcSize())
         }
     }
 }

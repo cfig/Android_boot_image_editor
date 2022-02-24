@@ -15,7 +15,7 @@
 package cfig.bootimg.v3
 
 import avb.AVBInfo
-import cc.cfig.io.Struct3
+import cc.cfig.io.Struct
 import cfig.Avb
 import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.Common.Companion.deleleIfExists
@@ -124,7 +124,7 @@ data class VendorBoot(
             const val SIZE = 108
 
             init {
-                assert(Struct3(FORMAT_STRING).calcSize() == SIZE)
+                assert(Struct(FORMAT_STRING).calcSize() == SIZE)
             }
         }
 
@@ -132,19 +132,19 @@ data class VendorBoot(
             if (iS == null) {
                 return
             }
-            val info = Struct3(FORMAT_STRING).unpack(iS)
+            val info = Struct(FORMAT_STRING).unpack(iS)
             assert((3 + 1 + 1) == info.size)
             this.size = (info[0] as UInt).toInt()
             this.offset = (info[1] as UInt).toInt()
             this.type = VrtType.fromInt((info[2] as UInt).toInt())
             this.name = info[3] as String
             this.boardId = info[4] as ByteArray
-            this.boardIdStr = Struct3.StringFleet().get(boardId, ByteOrder.LITTLE_ENDIAN)
+            this.boardIdStr = Struct.StringFleet().get(boardId, ByteOrder.LITTLE_ENDIAN)
             this.file = dumpFile
         }
 
         fun encode(): ByteArray {
-            return Struct3(FORMAT_STRING).pack(this.size, this.offset, this.type.ordinal, this.name, this.boardId)
+            return Struct(FORMAT_STRING).pack(this.size, this.offset, this.type.ordinal, this.name, this.boardId)
         }
 
         override fun toString(): String {
@@ -445,7 +445,7 @@ data class VendorBoot(
                     ramdisk_table.ramdidks.forEachIndexed { index, it ->
                         log.info("dumping vendor ramdisk ${index + 1}/${ramdisk_table.ramdidks.size} ...")
                         addArgument("--ramdisk_type").addArgument(it.type.toString())
-                        Struct3("${VrtEntry.VENDOR_RAMDISK_TABLE_ENTRY_BOARD_ID_SIZE}i").unpack(ByteArrayInputStream(it.boardId))
+                        Struct("${VrtEntry.VENDOR_RAMDISK_TABLE_ENTRY_BOARD_ID_SIZE}i").unpack(ByteArrayInputStream(it.boardId))
                             .forEachIndexed { boardIdIndex, boardIdValue ->
                                 addArgument("--board_id$boardIdIndex")
                                 addArgument("0x" + Integer.toHexString((boardIdValue as Int)))
