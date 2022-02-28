@@ -10,7 +10,7 @@ A tool for reverse engineering Android ROM images.
 
 Linux: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-11-jdk gcc g++ python3 python-is-python3`
 
-Mac: `brew install lz4 xz dtc` 
+Mac: `brew install lz4 xz dtc`
 
 Mac: Make sure you have `JDK9+` properly installed.
 
@@ -161,6 +161,17 @@ Please note that to use 'gradle flash', your host machine must be connectted to 
 
 </details>
 
+<details>
+  <summary>working with system.img</summary>
+
+First enable **hacking mode** by setting `bHackingMode = true` in file `build.gradle.kts`, then
+```bash
+cp <your_system_image> system.img
+./gradlew unpack
+```
+You get `system.img.unsparse`, that's a plain ext4 filesystem data.
+
+</details>
 
 <details>
   <summary>How to disable AVB verification</summary>
