@@ -22,6 +22,8 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.apache.commons.compress.archivers.zip.ZipFile
 import org.apache.commons.compress.archivers.zip.ZipMethod
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipParameters
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream
@@ -428,5 +430,31 @@ class ZipHelper {
             }
             log.info("compress(gz) done: $compressedFile")
         }
-    }
+
+        fun isBzip2(compressedFile: String): Boolean {
+            return try {
+                FileInputStream(compressedFile).use { fis ->
+                    BZip2CompressorInputStream(fis).use { }
+                }
+                true
+            } catch (e: IOException) {
+                false
+            }
+        }
+
+        fun bzip2(compressedFile: String, fis: InputStream) {
+            log.info("Compress(bzip2) ... ")
+            FileOutputStream(compressedFile).use { fos ->
+                BZip2CompressorOutputStream(fos).use { zos ->
+                    val buffer = ByteArray(1024)
+                    while (true) {
+                        val bytesRead = fis.read(buffer)
+                        if (bytesRead <= 0) break
+                        zos.write(buffer, 0, bytesRead)
+                    }
+                }
+            }
+            log.info("compress(bzip2) done: $compressedFile")
+        }
+    } // end-of-companion
 }

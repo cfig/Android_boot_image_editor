@@ -28,7 +28,7 @@ class PackableLauncher
 fun main(args: Array<String>) {
     val log = LoggerFactory.getLogger(PackableLauncher::class.java)
     val packablePool = mutableMapOf<List<String>, KClass<IPackable>>()
-    listOf(DtboParser(), VBMetaParser(), BootImgParser(), SparseImgParser(), VendorBootParser()).forEach {
+    listOf(DtboParser(), VBMetaParser(), BootImgParser(), SparseImgParser(), VendorBootParser(), PayloadBinParser()).forEach {
         @Suppress("UNCHECKED_CAST")
         packablePool.put(it.capabilities(), it::class as KClass<IPackable>)
     }

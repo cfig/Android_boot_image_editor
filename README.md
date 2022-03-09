@@ -65,8 +65,9 @@ Well done you did it! The last step is to star this repo :smile
 | boot images     | boot.img, vendor_boot.img           |  all          | |
 | recovery images | recovery.img, recovery-two-step.img |  all          | |
 | vbmeta images   | vbmeta.img, vbmeta_system.img etc.  |  all          | |
-| dtbo images     | dtbo.img                            | linux & mac | |
+| dtbo images     | dtbo.img                            | linux & mac   | |
 | sparse images   | system.img, vendor.img, product.img etc. | linux & mac | need **hacking mode**\* |
+| OTA payload     | payload.bin                         | linux & mac   | |
 
 Please note that the boot.img MUST follows AOSP verified boot flow, either [Boot image signature](https://source.android.com/security/verifiedboot/verified-boot#signature_format) in VBoot 1.0 or [AVB HASH footer](https://android.googlesource.com/platform/external/avb/+/master/README.md#The-VBMeta-struct) (a.k.a. AVB) in VBoot 2.0.
 

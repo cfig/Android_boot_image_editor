@@ -99,7 +99,7 @@ open class BootHeaderV2(
     }
 
     private fun get_recovery_dtbo_offset(): Long {
-        return Helper.round_to_multiple(this.headerSize.toLong(), pageSize) +
+        return Helper.round_to_multiple(this.headerSize.toLong(), pageSize.toLong()) +
                 Helper.round_to_multiple(this.kernelLength, pageSize) +
                 Helper.round_to_multiple(this.ramdiskLength, pageSize) +
                 Helper.round_to_multiple(this.secondBootloaderLength, pageSize)

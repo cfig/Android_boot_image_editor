@@ -73,7 +73,7 @@ class Avb {
         }
 
         // image + padding
-        val imgPaddingNeeded = Helper.round_to_multiple(newImageSize, BLOCK_SIZE) - newImageSize
+        val imgPaddingNeeded = Helper.round_to_multiple(newImageSize.toInt(), BLOCK_SIZE) - newImageSize
 
         // + vbmeta + padding
         val vbmetaBlob = newAvbInfo.encode()

@@ -17,6 +17,7 @@ package avb.desc
 import avb.blob.Header
 import cfig.helper.Helper
 import cc.cfig.io.Struct
+import cfig.helper.CryptoHelper.Hasher
 import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -88,7 +89,7 @@ class HashDescriptor(var flags: Int = 0,
         val ret: Array<Any> = arrayOf(false, "file not found")
         for (item in image_files) {
             if (File(item).exists()) {
-                val hasher = MessageDigest.getInstance(Helper.pyAlg2java(hash_algorithm))
+                val hasher = MessageDigest.getInstance(Hasher.pyAlg2java(hash_algorithm))
                 hasher.update(this.salt)
                 FileInputStream(item).use { fis ->
                     val data = ByteArray(this.image_size.toInt())
@@ -112,7 +113,7 @@ class HashDescriptor(var flags: Int = 0,
         //salt
         if (this.salt.isEmpty()) {
             //If salt is not explicitly specified, choose a hash that's the same size as the hash size
-            val expectedDigestSize = MessageDigest.getInstance(Helper.pyAlg2java(hash_algorithm)).digest().size
+            val expectedDigestSize = MessageDigest.getInstance(Hasher.pyAlg2java(hash_algorithm)).digest().size
             FileInputStream(File("/dev/urandom")).use {
                 val randomSalt = ByteArray(expectedDigestSize)
                 it.read(randomSalt)
@@ -136,7 +137,7 @@ class HashDescriptor(var flags: Int = 0,
 
         if (!use_persistent_digest) {
             //hash digest
-            val newDigest = MessageDigest.getInstance(Helper.pyAlg2java(hash_algorithm)).apply {
+            val newDigest = MessageDigest.getInstance(Hasher.pyAlg2java(hash_algorithm)).apply {
                 update(salt)
                 update(File(image_file).readBytes())
             }.digest()

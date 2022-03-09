@@ -34,8 +34,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     implementation("cc.cfig:io:0.2")
-    implementation("org.slf4j:slf4j-simple:1.7.32")
-    implementation("org.slf4j:slf4j-api:1.7.32")
+    implementation("org.slf4j:slf4j-simple:1.7.36")
+    implementation("org.slf4j:slf4j-api:1.7.36")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.1")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
     implementation("com.google.guava:guava:31.0.1-jre")
@@ -46,6 +46,7 @@ dependencies {
     implementation("junit:junit:4.13.2")
     implementation("org.bouncycastle:bcprov-jdk15on:1.69")
     implementation("de.vandermeer:asciitable:0.3.2")
+    implementation("com.google.protobuf:protobuf-java:3.19.4")
     implementation(project(":helper"))
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")

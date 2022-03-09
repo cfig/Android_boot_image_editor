@@ -41,7 +41,7 @@ data class AuthBlob(
                 log.debug("calc hash: NONE")
                 byteArrayOf()
             } else {
-                MessageDigest.getInstance(Helper.pyAlg2java(alg.hash_name)).apply {
+                MessageDigest.getInstance(CryptoHelper.Hasher.pyAlg2java(alg.hash_name)).apply {
                     update(header_data_blob)
                     update(aux_data_blob)
                 }.digest().apply {

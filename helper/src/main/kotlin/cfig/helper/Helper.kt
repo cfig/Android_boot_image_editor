@@ -132,7 +132,7 @@ class Helper {
             }
         }
 
-        fun round_to_multiple(size: Long, page: Int): Long {
+        fun round_to_multiple(size: Long, page: Long): Long {
             val remainder = size % page
             return if (remainder == 0L) {
                 size
@@ -152,17 +152,6 @@ class Helper {
 
         fun round_to_pow2(num: Long): Long {
             return 2.0.pow((num - 1).toBigInteger().bitLength().toDouble()).toLong()
-        }
-
-        fun pyAlg2java(alg: String): String {
-            return when (alg) {
-                "sha1" -> "sha-1"
-                "sha224" -> "sha-224"
-                "sha256" -> "sha-256"
-                "sha384" -> "sha-384"
-                "sha512" -> "sha-512"
-                else -> throw IllegalArgumentException("unknown algorithm: [$alg]")
-            }
         }
 
         fun dumpToFile(dumpFile: String, data: ByteArray) {

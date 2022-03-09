@@ -11,10 +11,7 @@ import org.apache.commons.exec.PumpStreamHandler
 import org.bouncycastle.pkcs.PKCS10CertificationRequest
 import org.bouncycastle.util.io.pem.PemReader
 import org.slf4j.LoggerFactory
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.IOException
-import java.io.InputStreamReader
+import java.io.*
 import java.math.BigInteger
 import java.math.RoundingMode
 import java.security.KeyFactory
@@ -36,6 +33,7 @@ class CryptoHelper {
         PEM,  //header + metadata + base64 der
         DER, // der format
     }
+
     class KeyBox(val fmt: KeyFormat, val clazz: KClass<*>, val key: Any) {
         companion object {
             fun parse4(data: ByteArray): KeyBox {
@@ -230,6 +228,53 @@ class CryptoHelper {
             */
             fun sha256(inData: ByteArray): ByteArray {
                 return MessageDigest.getInstance("SHA-256").digest(inData)
+            }
+
+            //fun hash(file: String, algorithm: String): ByteArray {
+            //    val md = MessageDigest.getInstance(algorithm)
+            //    FileInputStream(file).use { fis ->
+            //        val buffer = ByteArray(1024 * 1024)
+            //        while (true) {
+            //            val bytesRead = fis.read(buffer)
+            //            if (bytesRead <= 0) break
+            //            md.update(buffer, 0, bytesRead)
+            //        }
+            //    }
+            //    return md.digest()
+            //}
+            fun hash(file: String, algorithm: String): ByteArray {
+                return hash(file, listOf(Pair(0, File(file).length())), algorithm)
+            }
+
+            fun hash(file: String, coordinates: List<Pair<Long, Long>>, algorithm: String): ByteArray {
+                require(coordinates.isNotEmpty())
+                coordinates.forEach {
+                    require(it.first >= 0 && it.second > 0)
+                }
+                return MessageDigest.getInstance(algorithm).let { md ->
+                    coordinates.forEach { coordinate ->
+                        FileInputStream(file).use { fis ->
+                            fis.skip(coordinate.first)
+                            val ibs = 1024 * 1024
+                            val buffer = ByteArray(ibs)
+                            var bytesRemaining = coordinate.second
+                            while (bytesRemaining > 0) {
+                                log.debug("Remain $bytesRemaining, reading ...")
+                                val bytesRead = fis.read(buffer)
+                                if (bytesRemaining > ibs) {
+                                    check(bytesRead == ibs)
+                                    md.update(buffer, 0, bytesRead)
+                                } else {
+                                    check(bytesRead >= bytesRemaining)
+                                    md.update(buffer, 0, bytesRemaining.toInt())
+                                }
+                                bytesRemaining -= bytesRead
+                                log.debug("Read $bytesRead, remain $bytesRemaining")
+                            }
+                        }
+                    }
+                    md
+                }.digest()
             }
         }
     }

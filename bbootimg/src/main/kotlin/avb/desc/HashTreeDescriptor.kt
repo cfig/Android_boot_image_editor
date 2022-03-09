@@ -143,7 +143,7 @@ class HashTreeDescriptor(
 
     private fun calcStreamHashSize(inStreamSize: Long, inBlockSize: Int): Long {
         val blockCount = (inStreamSize + inBlockSize - 1) / inBlockSize
-        return Helper.round_to_multiple(blockCount * calcSingleHashSize(true), inBlockSize)
+        return Helper.round_to_multiple(blockCount * calcSingleHashSize(true), inBlockSize.toLong())
     }
 
     fun hashStream(
@@ -266,7 +266,7 @@ class HashTreeDescriptor(
                     break
                 }
                 //digest size in page of blockSize
-                val hashSize = Helper.round_to_multiple(blockCount * digestSize, blockSize)
+                val hashSize = Helper.round_to_multiple(blockCount * digestSize, blockSize.toLong())
                 tree.add(0, MerkleTree(levelDataSize, blockCount, hashSize))
                 levelDataSize = hashSize
                 levelNo++

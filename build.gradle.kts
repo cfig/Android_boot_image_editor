@@ -36,7 +36,7 @@ tasks {
         group = GROUP_ANDROID
         main = "cfig.packable.PackableLauncherKt"
         classpath = files("bbootimg/build/libs/bbootimg.jar")
-        this.maxHeapSize = "512m"
+        this.maxHeapSize = "128m"
         enableAssertions = true
         args("unpack")
     }

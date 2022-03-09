@@ -173,8 +173,8 @@ data class VendorBoot(
                 ret.ramdisk.size = header.vndRamdiskTotalSize
                 ret.ramdisk.loadAddr = header.ramdiskLoadAddr
                 ret.ramdisk.position = Helper.round_to_multiple(
-                    VendorBootHeader.VENDOR_BOOT_IMAGE_HEADER_V3_SIZE.toLong(), header.pageSize
-                )
+                    VendorBootHeader.VENDOR_BOOT_IMAGE_HEADER_V3_SIZE, header.pageSize
+                ).toLong()
                 //dtb
                 ret.dtb.file = workDir + "dtb"
                 ret.dtb.size = header.dtbSize
