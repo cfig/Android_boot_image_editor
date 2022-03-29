@@ -73,4 +73,22 @@ class BootloaderMsgTest {
         val msg = BootloaderMsg()
         msg.writeBootloaderMessage(arrayOf("--update_package=/cache/update.zip", "--security"))
     }
+
+    @Test
+    fun rebootWipeAb() {
+        val msg = BootloaderMsg()
+        msg.writeBootloaderMessage(arrayOf(
+            "--wipe_ab",
+            "--wipe_package_size=1024",
+            "--locale=en_US"))
+    }
+
+    @Test
+    fun rebootWipeData() {
+        val msg = BootloaderMsg()
+        msg.writeBootloaderMessage(arrayOf(
+            "--wipe_data",
+            "--reason=convert_fbe",
+            "--locale=en_US"))
+    }
 }

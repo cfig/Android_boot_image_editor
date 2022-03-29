@@ -131,7 +131,9 @@ data class BootV3(
         //BootV3 should have correct image size
         val bf = ByteBuffer.allocate(maxOf(info.imageSize.toInt(), 64 * 1024 * 1024))
         bf.order(ByteOrder.LITTLE_ENDIAN)
-        C.writePaddedFile(bf, this.kernel.file, this.info.pageSize)
+        if (kernel.size > 0) {
+            C.writePaddedFile(bf, this.kernel.file, this.info.pageSize)
+        }
         C.writePaddedFile(bf, this.ramdisk.file, this.info.pageSize)
         //write V3 data
         FileOutputStream("${this.info.output}.clear", true).use { fos ->
@@ -195,7 +197,11 @@ data class BootV3(
         //info
         mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         //kernel
-        C.dumpKernel(Helper.Slice(info.output, kernel.position, kernel.size, kernel.file))
+        if (kernel.size > 0) {
+            C.dumpKernel(Helper.Slice(info.output, kernel.position, kernel.size, kernel.file))
+        } else {
+            log.warn("${this.info.output} has no kernel")
+        }
         //ramdisk
         val fmt = C.dumpRamdisk(
             Helper.Slice(info.output, ramdisk.position, ramdisk.size, ramdisk.file), "${workDir}root"
@@ -244,18 +250,20 @@ data class BootV3(
             it.addRule()
             it.addRow("image info", workDir + info.output.removeSuffix(".img") + ".json")
             it.addRule()
-            it.addRow("kernel", this.kernel.file)
-            File(Helper.prop("kernelVersionFile")).let { kernelVersionFile ->
-                if (kernelVersionFile.exists()) {
-                    it.addRow("\\-- version " + kernelVersionFile.readLines().toString(), kernelVersionFile.path)
+            if (this.kernel.size > 0) {
+                it.addRow("kernel", this.kernel.file)
+                File(Helper.prop("kernelVersionFile")).let { kernelVersionFile ->
+                    if (kernelVersionFile.exists()) {
+                        it.addRow("\\-- version " + kernelVersionFile.readLines().toString(), kernelVersionFile.path)
+                    }
                 }
-            }
-            File(Helper.prop("kernelConfigFile")).let { kernelConfigFile ->
-                if (kernelConfigFile.exists()) {
-                    it.addRow("\\-- config", kernelConfigFile.path)
+                File(Helper.prop("kernelConfigFile")).let { kernelConfigFile ->
+                    if (kernelConfigFile.exists()) {
+                        it.addRow("\\-- config", kernelConfigFile.path)
+                    }
                 }
+                it.addRule()
             }
-            it.addRule()
             it.addRow("ramdisk", this.ramdisk.file)
             it.addRow("\\-- extracted ramdisk rootfs", "${workDir}root")
             it.addRule()

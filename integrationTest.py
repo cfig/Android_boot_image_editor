@@ -42,6 +42,8 @@ def cleanUp():
         "boot.img", "boot.img.clear", "boot.img.google", "boot.img.signed", "boot.img.signed2",
         "recovery.img", "recovery.img.clear", "recovery.img.google", "recovery.img.signed", "recovery.img.signed2",
         "vbmeta.img", "vbmeta.img.signed",
+        "payload.bin",
+        "init_boot.img", "init_boot.img.signed",
         "vendor_boot.img", "vendor_boot.img.clear", "vendor_boot.img.google", "vendor_boot.img.signed", "vendor_boot.img.signed2",
         "boot-debug.img", "boot-debug.img.clear", "boot-debug.img.google",
         "vendor_boot-debug.img", "vendor_boot-debug.img.clear", "vendor_boot-debug.img.google" ]]
@@ -157,6 +159,8 @@ def main():
         verifySingleDir(resDir2, "issue_71/redfin")
     else:
         log.info("dtbo not fully supported on MacOS, skip testing")
+    # Issue 83: init_boot
+    verifySingleDir(resDir2, "issue_83")
 
     log.info(successLogo)
 

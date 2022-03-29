@@ -26,8 +26,9 @@ import array
 import collections
 import os
 import re
-import subprocess
 import tempfile
+
+from gki.generate_gki_certificate import generate_gki_certificate
 
 # Constant and structure definition is in
 # system/tools/mkbootimg/include/bootimg/bootimg.h
@@ -104,6 +105,12 @@ def get_recovery_dtbo_offset(args):
     return dtbo_offset
 
 
+def should_add_legacy_gki_boot_signature(args):
+    if args.gki_signing_key and args.gki_signing_algorithm:
+        return True
+    return False
+
+
 def write_header_v3_and_above(args):
     if args.header_version > 3:
         boot_header_size = BOOT_IMAGE_HEADER_V4_SIZE
@@ -126,14 +133,14 @@ def write_header_v3_and_above(args):
                            args.cmdline))
     if args.header_version >= 4:
         # The signature used to verify boot image v4.
-        args.output.write(pack('I', BOOT_IMAGE_V4_SIGNATURE_SIZE))
+        boot_signature_size = 0
+        if should_add_legacy_gki_boot_signature(args):
+            boot_signature_size = BOOT_IMAGE_V4_SIGNATURE_SIZE
+        args.output.write(pack('I', boot_signature_size))
     pad_file(args.output, BOOT_IMAGE_HEADER_V3_PAGESIZE)
 
 
 def write_vendor_boot_header(args):
-    if filesize(args.dtb) == 0:
-        raise ValueError('DTB image must not be empty.')
-
     if args.header_version > 3:
         vendor_ramdisk_size = args.vendor_ramdisk_total_size
         vendor_boot_header_size = VENDOR_BOOT_IMAGE_HEADER_V4_SIZE
@@ -535,20 +542,25 @@ def parse_cmdline():
                         help='boot image header version')
     parser.add_argument('-o', '--output', type=FileType('wb'),
                         help='output file name')
-    parser.add_argument('--gki_signing_algorithm',
-                        help='GKI signing algorithm to use')
-    parser.add_argument('--gki_signing_key',
-                        help='path to RSA private key file')
-    parser.add_argument('--gki_signing_signature_args',
-                        help='other hash arguments passed to avbtool')
-    parser.add_argument('--gki_signing_avbtool_path',
-                        help='path to avbtool for boot signature generation')
     parser.add_argument('--vendor_boot', type=FileType('wb'),
                         help='vendor boot output file name')
     parser.add_argument('--vendor_ramdisk', type=FileType('rb'),
                         help='path to the vendor ramdisk')
     parser.add_argument('--vendor_bootconfig', type=FileType('rb'),
                         help='path to the vendor bootconfig file')
+
+    gki_2_0_signing_args = parser.add_argument_group(
+        '[DEPRECATED] GKI 2.0 signing arguments')
+    gki_2_0_signing_args.add_argument(
+        '--gki_signing_algorithm', help='GKI signing algorithm to use')
+    gki_2_0_signing_args.add_argument(
+        '--gki_signing_key', help='path to RSA private key file')
+    gki_2_0_signing_args.add_argument(
+        '--gki_signing_signature_args', default='',
+        help='other hash arguments passed to avbtool')
+    gki_2_0_signing_args.add_argument(
+        '--gki_signing_avbtool_path', default='avbtool',
+        help='path to avbtool for boot signature generation')
 
     args, extra_args = parser.parse_known_args()
     if args.vendor_boot is not None and args.header_version > 3:
@@ -575,50 +587,30 @@ def add_boot_image_signature(args, pagesize):
     vbmeta partition) via the Android Verified Boot process, when the
     device boots.
     """
-    args.output.flush()  # Flush the buffer for signature calculation.
-
-    # Appends zeros if the signing key is not specified.
-    if not args.gki_signing_key or not args.gki_signing_algorithm:
-        zeros = b'\x00' * BOOT_IMAGE_V4_SIGNATURE_SIZE
-        args.output.write(zeros)
-        pad_file(args.output, pagesize)
-        return
-
-    avbtool = 'avbtool'  # Used from otatools.zip or Android build env.
-
-    # We need to specify the path of avbtool in build/core/Makefile.
-    # Because avbtool is not guaranteed to be in $PATH there.
-    if args.gki_signing_avbtool_path:
-        avbtool = args.gki_signing_avbtool_path
-
-    # Need to specify a value of --partition_size for avbtool to work.
-    # We use 64 MB below, but avbtool will not resize the boot image to
-    # this size because --do_not_append_vbmeta_image is also specified.
-    avbtool_cmd = [
-        avbtool, 'add_hash_footer',
-        '--partition_name', 'boot',
-        '--partition_size', str(64 * 1024 * 1024),
-        '--image', args.output.name,
-        '--algorithm', args.gki_signing_algorithm,
-        '--key', args.gki_signing_key,
-        '--salt', 'd00df00d']  # TODO: use a hash of kernel/ramdisk as the salt.
-
-    # Additional arguments passed to avbtool.
-    if args.gki_signing_signature_args:
-        avbtool_cmd += args.gki_signing_signature_args.split()
+    # Flush the buffer for signature calculation.
+    args.output.flush()
 
     # Outputs the signed vbmeta to a separate file, then append to boot.img
     # as the boot signature.
     with tempfile.TemporaryDirectory() as temp_out_dir:
         boot_signature_output = os.path.join(temp_out_dir, 'boot_signature')
-        avbtool_cmd += ['--do_not_append_vbmeta_image',
-                        '--output_vbmeta_image', boot_signature_output]
-        subprocess.check_call(avbtool_cmd)
+        generate_gki_certificate(
+            image=args.output.name, avbtool=args.gki_signing_avbtool_path,
+            name='boot', algorithm=args.gki_signing_algorithm,
+            key=args.gki_signing_key, salt='d00df00d',
+            additional_avb_args=args.gki_signing_signature_args.split(),
+            output=boot_signature_output,
+        )
         with open(boot_signature_output, 'rb') as boot_signature:
-            if filesize(boot_signature) > BOOT_IMAGE_V4_SIGNATURE_SIZE:
+            boot_signature_bytes = boot_signature.read()
+            if len(boot_signature_bytes) > BOOT_IMAGE_V4_SIGNATURE_SIZE:
                 raise ValueError(
                     f'boot sigature size is > {BOOT_IMAGE_V4_SIGNATURE_SIZE}')
-            write_padded_file(args.output, boot_signature, pagesize)
+            boot_signature_bytes += b'\x00' * (
+                BOOT_IMAGE_V4_SIGNATURE_SIZE - len(boot_signature_bytes))
+            assert len(boot_signature_bytes) == BOOT_IMAGE_V4_SIGNATURE_SIZE
+            args.output.write(boot_signature_bytes)
+            pad_file(args.output, pagesize)
 
 
 def write_data(args, pagesize):
@@ -630,7 +622,7 @@ def write_data(args, pagesize):
         write_padded_file(args.output, args.recovery_dtbo, pagesize)
     if args.header_version == 2:
         write_padded_file(args.output, args.dtb, pagesize)
-    if args.header_version >= 4:
+    if args.header_version >= 4 and should_add_legacy_gki_boot_signature(args):
         add_boot_image_signature(args, pagesize)
 
 
