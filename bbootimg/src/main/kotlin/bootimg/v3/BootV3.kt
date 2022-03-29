@@ -103,19 +103,23 @@ data class BootV3(
     )
 
     fun pack(): BootV3 {
-        if (File(this.ramdisk.file).exists() && !File(workDir + "root").exists()) {
-            //do nothing if we have ramdisk.img.gz but no /root
-            log.warn("Use prebuilt ramdisk file: ${this.ramdisk.file}")
-        } else {
-            File(this.ramdisk.file).deleleIfExists()
-            File(this.ramdisk.file.replaceFirst("[.][^.]+$", "")).deleleIfExists()
-            //TODO: remove cpio in C/C++
-            //C.packRootfs("$workDir/root", this.ramdisk.file, C.parseOsMajor(info.osVersion))
-            // enable advance JAVA cpio
-            C.packRootfs("$workDir/root", this.ramdisk.file)
+        if (this.kernel.size > 0) {
+            this.kernel.size = File(this.kernel.file).length().toInt()
         }
-        this.kernel.size = File(this.kernel.file).length().toInt()
-        this.ramdisk.size = File(this.ramdisk.file).length().toInt()
+        if (this.ramdisk.size > 0) {
+            if (File(this.ramdisk.file).exists() && !File(workDir + "root").exists()) {
+                //do nothing if we have ramdisk.img.gz but no /root
+                log.warn("Use prebuilt ramdisk file: ${this.ramdisk.file}")
+            } else {
+                File(this.ramdisk.file).deleleIfExists()
+                File(this.ramdisk.file.replaceFirst("[.][^.]+$", "")).deleleIfExists()
+                //TODO: remove cpio in C/C++
+                //C.packRootfs("$workDir/root", this.ramdisk.file, C.parseOsMajor(info.osVersion))
+                // enable advance JAVA cpio
+                C.packRootfs("$workDir/root", this.ramdisk.file)
+            }
+            this.ramdisk.size = File(this.ramdisk.file).length().toInt()
+        }
 
         //header
         FileOutputStream(this.info.output + ".clear", false).use { fos ->
@@ -134,7 +138,9 @@ data class BootV3(
         if (kernel.size > 0) {
             C.writePaddedFile(bf, this.kernel.file, this.info.pageSize)
         }
-        C.writePaddedFile(bf, this.ramdisk.file, this.info.pageSize)
+        if (ramdisk.size > 0) {
+            C.writePaddedFile(bf, this.ramdisk.file, this.info.pageSize)
+        }
         //write V3 data
         FileOutputStream("${this.info.output}.clear", true).use { fos ->
             fos.write(bf.array(), 0, bf.position())
@@ -203,10 +209,12 @@ data class BootV3(
             log.warn("${this.info.output} has no kernel")
         }
         //ramdisk
-        val fmt = C.dumpRamdisk(
-            Helper.Slice(info.output, ramdisk.position, ramdisk.size, ramdisk.file), "${workDir}root"
-        )
-        this.ramdisk.file = this.ramdisk.file + ".$fmt"
+        if (ramdisk.size > 0) {
+            val fmt = C.dumpRamdisk(
+                Helper.Slice(info.output, ramdisk.position, ramdisk.size, ramdisk.file), "${workDir}root"
+            )
+            this.ramdisk.file = this.ramdisk.file + ".$fmt"
+        }
         //bootsig
         if (info.signatureSize > 0) {
             Helper.extractFile(
@@ -264,10 +272,11 @@ data class BootV3(
                 }
                 it.addRule()
             }
-            it.addRow("ramdisk", this.ramdisk.file)
-            it.addRow("\\-- extracted ramdisk rootfs", "${workDir}root")
-            it.addRule()
-
+            if (this.ramdisk.size > 0) {
+                it.addRow("ramdisk", this.ramdisk.file)
+                it.addRow("\\-- extracted ramdisk rootfs", "${workDir}root")
+                it.addRule()
+            }
             if (this.info.signatureSize > 0) {
                 it.addRow("boot signature", this.bootSignature.file)
                 Avb.getJsonFileName(this.bootSignature.file).let { jsFile ->
