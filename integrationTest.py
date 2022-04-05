@@ -42,6 +42,8 @@ def cleanUp():
         "boot.img", "boot.img.clear", "boot.img.google", "boot.img.signed", "boot.img.signed2",
         "recovery.img", "recovery.img.clear", "recovery.img.google", "recovery.img.signed", "recovery.img.signed2",
         "vbmeta.img", "vbmeta.img.signed",
+        "dtbo.img", "dtbo.img.clear", "dtbo.img.signed", "dtbo.img.signed2",
+        "misc.img", "misc.img.new",
         "payload.bin",
         "init_boot.img", "init_boot.img.signed",
         "vendor_boot.img", "vendor_boot.img.clear", "vendor_boot.img.google", "vendor_boot.img.signed", "vendor_boot.img.signed2",

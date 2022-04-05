@@ -14,13 +14,11 @@
 
 package init
 
-import cfig.bcb.BootloaderMsg
+import miscimg.MiscImage
 import org.junit.Test
 import org.junit.After
-import java.io.File
 import java.util.*
 import cfig.init.Reboot
-import cfig.bootimg.Common.Companion.deleleIfExists
 import org.slf4j.LoggerFactory
 
 class RebootTest {
@@ -28,7 +26,6 @@ class RebootTest {
 
     @After
     fun tearDown() {
-        File(BootloaderMsg.miscFile).deleleIfExists()
     }
 
     @Test
@@ -86,10 +83,8 @@ class RebootTest {
                 put(Reboot.dynamicPartitionKey, "true")
             })
         log.info("fastbootd test 2")
-        BootloaderMsg().let {
-            it.updateBootloaderMessage("boot-fastboot", "recovery", null)
-            it.writeBootloaderMessage()
-        }
+        val bcb = MiscImage.BootloaderMessage(command = "boot-fastboot", recovery = "recovery")
+        log.info(bcb.toString())
         log.info("fastbootd test 3: not supported, change to bootloader")
         Reboot.handlePowerctlMessage("reboot,fastboot", Properties())
     }
@@ -103,10 +98,8 @@ class RebootTest {
     @Test
     fun recovery_rescue() {
         log.info("recovery test 1: rescue")
-        BootloaderMsg().let {
-            it.updateBootloaderMessage("boot-rescue", "recovery", null)
-            it.writeBootloaderMessage()
-        }
+        val bcb = MiscImage.BootloaderMessage(command = "boot-rescue", recovery = "recovery")
+        log.info(bcb.toString())
         log.info("recovery test 2: rescue")
         Reboot.handlePowerctlMessage("reboot,rescue")
     }

@@ -14,7 +14,7 @@
 
 package cfig.init
 
-import cfig.bcb.BootloaderMsg
+import miscimg.MiscImage
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -87,23 +87,28 @@ class Reboot {
                         }
                         when (rebootTarget) {
                             "fastboot" -> {
+                                val bcb: MiscImage.BootloaderMessage
                                 if (bDynamicPartition == null || bDynamicPartition == false) {
                                     log.warn("$dynamicPartitionKey=false, using 'bootloader fastboot' instead of 'fastbootd'")
                                     rebootTarget = "bootloader"
-                                    BootloaderMsg().writeRebootBootloader()
+                                    bcb = MiscImage.BootloaderMessage.rebootBootloader()
+                                    log.info(bcb.toString())
                                 } else {
                                     log.info("$dynamicPartitionKey=true, using fastbootd")
-                                    BootloaderMsg().writeBootloaderMessage(arrayOf("--fastboot"))
+                                    bcb = MiscImage.BootloaderMessage.rebootFastboot2()
                                     rebootTarget = "recovery"
                                 }
+                                log.info(bcb.toString())
                             }
                             "bootloader" -> {
-                                BootloaderMsg().writeRebootBootloader()
+                                val bcb = MiscImage.BootloaderMessage.rebootBootloader()
+                                log.info(bcb.toString())
                             }
                             "sideload", "sideload-auto-reboot" -> {
-                                BootloaderMsg().writeBootloaderMessage(
-                                    arrayOf("--" + rebootTarget.replace("-", "_"))
-                                )
+                                val bcb = MiscImage.BootloaderMessage().apply {
+                                    updateBootloaderMessageInStruct(arrayOf("--" + rebootTarget.replace("-", "_")))
+                                }
+                                log.info(bcb.toString())
                                 rebootTarget = "recovery"
                             }
                             else -> {

@@ -28,7 +28,10 @@ class PackableLauncher
 fun main(args: Array<String>) {
     val log = LoggerFactory.getLogger(PackableLauncher::class.java)
     val packablePool = mutableMapOf<List<String>, KClass<IPackable>>()
-    listOf(DtboParser(), VBMetaParser(), BootImgParser(), SparseImgParser(), VendorBootParser(), PayloadBinParser()).forEach {
+    listOf(
+        DtboParser(), VBMetaParser(), BootImgParser(), SparseImgParser(), VendorBootParser(), PayloadBinParser(),
+        MiscImgParser()
+    ).forEach {
         @Suppress("UNCHECKED_CAST")
         packablePool.put(it.capabilities(), it::class as KClass<IPackable>)
     }
@@ -41,17 +44,17 @@ fun main(args: Array<String>) {
         for (currentLoopNo in 0..1) { //currently we have only 2 loops
             File(".").listFiles()!!.forEach { file ->
                 packablePool
-                        .filter { it.value.createInstance().loopNo == currentLoopNo }
-                        .forEach { p ->
-                            for (item in p.key) {
-                                if (Pattern.compile(item).matcher(file.name).matches()) {
-                                    log.debug("Found: " + file.name + ", " + item)
-                                    targetFile = file.name
-                                    targetHandler = p.value
-                                    return@found
-                                }
+                    .filter { it.value.createInstance().loopNo == currentLoopNo }
+                    .forEach { p ->
+                        for (item in p.key) {
+                            if (Pattern.compile(item).matcher(file.name).matches()) {
+                                log.debug("Found: " + file.name + ", " + item)
+                                targetFile = file.name
+                                targetHandler = p.value
+                                return@found
                             }
                         }
+                    }
             }//end-of-file-traversing
         }//end-of-range-loop
     }//end-of-found@
@@ -105,7 +108,7 @@ fun main(args: Array<String>) {
                 functions[0].call(it.createInstance(), targetFile!!)
             }
             3 -> {
-                if (args.size != 2 ) {
+                if (args.size != 2) {
                     log.info("invoke: ${it.qualifiedName}, $targetFile, " + targetFile!!.removeSuffix(".img"))
                     functions[0].call(it.createInstance(), targetFile!!, targetFile!!.removeSuffix(".img"))
                 } else {
