@@ -122,7 +122,7 @@ class Common {
             parseKernelInfo(s.dumpFile)
         }
 
-        fun dumpRamdisk(s: Helper.Slice, root: String): String {
+        fun dumpRamdisk(s: Helper.Slice, root: String, unpackCpio: Boolean = true): String {
             var ret = "gz"
             Helper.extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
             when {
@@ -164,7 +164,9 @@ class Common {
                     throw IllegalArgumentException("ramdisk is in unknown format")
                 }
             }
-            unpackRamdisk(s.dumpFile, root)
+            if (unpackCpio) {
+                unpackRamdisk(s.dumpFile, root)
+            }
             return ret
         }
 

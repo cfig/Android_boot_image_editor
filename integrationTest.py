@@ -163,6 +163,8 @@ def main():
         log.info("dtbo not fully supported on MacOS, skip testing")
     # Issue 83: init_boot
     verifySingleDir(resDir2, "issue_83")
+    # Issue 86: vendor_boot with vrt and board name
+    verifySingleDir(resDir2, "issue_86")
 
     log.info(successLogo)
 

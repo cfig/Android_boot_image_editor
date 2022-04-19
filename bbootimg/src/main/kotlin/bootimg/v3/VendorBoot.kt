@@ -346,7 +346,8 @@ data class VendorBoot(
         //ramdisk
         //@formatter:off
         val fmt = C.dumpRamdisk(
-            Helper.Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file), "${workDir}root")
+            Helper.Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file), "${workDir}root",
+            this.ramdisk_table.ramdidks.isEmpty())
         //@formatter:on
         this.ramdisk.file = this.ramdisk.file + ".$fmt"
         //dtb
@@ -457,6 +458,9 @@ data class VendorBoot(
                         addArgument("--vendor_bootconfig").addArgument(bootconfig.file)
                     }
                 }
+            }
+            if (info.product.isNotBlank()) {
+                addArgument("--board").addArgument(info.product)
             }
             addArgument("--dtb").addArgument(dtb.file)
             addArgument("--vendor_cmdline").addArgument(info.cmdline, false)
