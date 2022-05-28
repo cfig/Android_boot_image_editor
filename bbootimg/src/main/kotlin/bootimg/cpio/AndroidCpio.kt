@@ -149,8 +149,15 @@ class AndroidCpio {
             else -> {
                 //Issue #75: https://github.com/cfig/Android_boot_image_editor/issues/75
                 //Reason: cpio may have multiple entries with the same name, that's caused by man-made errors
-                throw IllegalArgumentException("${entry.name} has multiple exact-match fsConfig, " +
-                        "check https://github.com/cfig/Android_boot_image_editor/issues/75")
+                val msg = "(${entry.name} has multiple exact-match fsConfig, " +
+                        "check https://github.com/cfig/Android_boot_image_editor/issues/75"
+                errLog.warn("IllegalArgumentException$msg")
+                if (Helper.prop("config.allow_cpio_duplicate") == "true") {
+                    log.warn("IllegalArgumentException$msg")
+                    entry.statMode = itemConfig[0].statMode
+                } else {
+                    throw IllegalArgumentException(msg)
+                }
             }
         }
     }
@@ -198,6 +205,7 @@ class AndroidCpio {
 
     companion object {
         private val log = LoggerFactory.getLogger(AndroidCpio::class.java)
+        private val errLog = LoggerFactory.getLogger("uiderrors")
         private val PERM_MASK = java.lang.Long.valueOf("777", 8)
         fun decompressCPIO(cpioFile: String, outDir: String, fileList: String? = null) {
             run { //clean up

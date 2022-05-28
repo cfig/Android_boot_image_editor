@@ -68,18 +68,27 @@ def generate_test_boot_image(boot_img, kernel_size=4096, seed='kernel',
         subprocess.check_call(avbtool_cmd)
 
 
-def generate_test_boot_image_archive(output_zip, boot_img_info):
-    """Generates a zip archive of test boot images.
+def generate_test_boot_image_archive(archive_file_name, archive_format,
+                                     boot_img_info, gki_info=None):
+    """Generates an archive of test boot images.
 
     It also adds a file gki-info.txt, which contains additional settings for
     for `certify_bootimg --extra_args`.
 
     Args:
-        output_zip: the output zip archive, e.g., /path/to/boot-img.zip.
+        archive_file_name: the name of the archive file to create, including the
+          path, minus any format-specific extension.
+        archive_format: the |format| parameter for shutil.make_archive().
+          e.g., 'zip', 'tar', or 'gztar', etc.
         boot_img_info: a list of (boot_image_name, kernel_size,
           partition_size) tuples. e.g.,
           [('boot-1.0.img', 4096, 4 * 1024),
            ('boot-2.0.img', 8192, 8 * 1024)].
+        gki_info: the file content to be written into 'gki-info.txt' in the
+          created archive.
+
+    Returns:
+        The full path of the created archive. e.g., /path/to/boot-img.tar.gz.
     """
     with tempfile.TemporaryDirectory() as temp_out_dir:
         for name, kernel_size, partition_size in boot_img_info:
@@ -89,17 +98,14 @@ def generate_test_boot_image_archive(output_zip, boot_img_info):
                                      seed=name,
                                      avb_partition_size=partition_size)
 
-        gki_info = os.path.join(temp_out_dir, 'gki-info.txt')
-        with open(gki_info, 'w', encoding='utf-8') as f:
-            f.write('certify_bootimg_extra_args='
-                    '--prop KERNEL_RELEASE:5.10.42'
-                    '-android13-0-00544-ged21d463f856 '
-                    '--prop BRANCH:android13-5.10-2022-05 '
-                    '--prop BUILD_NUMBER:ab8295296 '
-                    '--prop SPACE:"nice to meet you"\n')
+        if gki_info:
+            gki_info_path = os.path.join(temp_out_dir, 'gki-info.txt')
+            with open(gki_info_path, 'w', encoding='utf-8') as f:
+                f.write(gki_info)
 
-        archive_base_name = os.path.splitext(output_zip)[0]
-        shutil.make_archive(archive_base_name, 'zip', temp_out_dir)
+        return shutil.make_archive(archive_file_name,
+                                   archive_format,
+                                   temp_out_dir)
 
 
 def has_avb_footer(image):
@@ -177,10 +183,10 @@ def extract_boot_signatures(boot_img, output_dir):
         boot_signature_bytes = boot_signature_bytes[next_signature_size:]
 
 
-def extract_boot_archive_with_signatures(boot_img_zip, output_dir):
+def extract_boot_archive_with_signatures(boot_img_archive, output_dir):
     """Extracts boot images and signatures of a boot images archive.
 
-    Suppose there are two boot images in |boot_img_zip|: boot-1.0.img
+    Suppose there are two boot images in |boot_img_archive|: boot-1.0.img
     and boot-2.0.img. This function then extracts each boot-*.img and
     their signatures as:
       - |output_dir|/boot-1.0.img
@@ -190,7 +196,7 @@ def extract_boot_archive_with_signatures(boot_img_zip, output_dir):
       - |output_dir|/boot-2.0/boot_signature1
       - |output_dir|/boot-2.0/boot_signature2
     """
-    shutil.unpack_archive(boot_img_zip, output_dir)
+    shutil.unpack_archive(boot_img_archive, output_dir)
     for boot_img in glob.glob(os.path.join(output_dir, 'boot-*.img')):
         img_name = os.path.splitext(os.path.basename(boot_img))[0]
         signature_output_dir = os.path.join(output_dir, img_name)
@@ -212,6 +218,197 @@ class CertifyBootimgTest(unittest.TestCase):
         # Set self.maxDiff to None to see full diff in assertion.
         # C0103: invalid-name for maxDiff.
         self.maxDiff = None  # pylint: disable=C0103
+
+        # For AVB footers, we don't sign it so the Authentication block
+        # is zero bytes and the Algorithm is NONE. The footer will be
+        # replaced by device-specific settings when being incorporated into
+        # a device codebase. The footer here is just to pass some GKI
+        # pre-release test.
+        self._EXPECTED_AVB_FOOTER_BOOT_CERTIFIED = (    # pylint: disable=C0103
+            'Footer version:           1.0\n'
+            'Image size:               131072 bytes\n'
+            'Original image size:      24576 bytes\n'
+            'VBMeta offset:            24576\n'
+            'VBMeta size:              576 bytes\n'
+            '--\n'
+            'Minimum libavb version:   1.0\n'
+            'Header Block:             256 bytes\n'
+            'Authentication Block:     0 bytes\n'
+            'Auxiliary Block:          320 bytes\n'
+            'Algorithm:                NONE\n'
+            'Rollback Index:           0\n'
+            'Flags:                    0\n'
+            'Rollback Index Location:  0\n'
+            "Release String:           'avbtool 1.2.0'\n"
+            'Descriptors:\n'
+            '    Hash descriptor:\n'
+            '      Image Size:            24576 bytes\n'
+            '      Hash Algorithm:        sha256\n'
+            '      Partition Name:        boot\n'
+            '      Salt:                  a11ba11b\n'
+            '      Digest:                '
+            'c9b4ad78fae6f72f7eff939dee6078ed'
+            '8a75132e53f6c11ba1ec0f4b57f9eab0\n'
+            '      Flags:                 0\n'
+            "    Prop: avb -> 'nice'\n"
+            "    Prop: avb_space -> 'nice to meet you'\n"
+        )
+
+        self._EXPECTED_AVB_FOOTER_BOOT_CERTIFIED_2 = (  # pylint: disable=C0103
+            'Footer version:           1.0\n'
+            'Image size:               131072 bytes\n'
+            'Original image size:      24576 bytes\n'
+            'VBMeta offset:            24576\n'
+            'VBMeta size:              576 bytes\n'
+            '--\n'
+            'Minimum libavb version:   1.0\n'
+            'Header Block:             256 bytes\n'
+            'Authentication Block:     0 bytes\n'
+            'Auxiliary Block:          320 bytes\n'
+            'Algorithm:                NONE\n'
+            'Rollback Index:           0\n'
+            'Flags:                    0\n'
+            'Rollback Index Location:  0\n'
+            "Release String:           'avbtool 1.2.0'\n"
+            'Descriptors:\n'
+            '    Hash descriptor:\n'
+            '      Image Size:            24576 bytes\n'
+            '      Hash Algorithm:        sha256\n'
+            '      Partition Name:        boot\n'
+            '      Salt:                  a11ba11b\n'
+            '      Digest:                '
+            'ae2538e78b2a30b1112cede30d858a5f'
+            '6f8dc2a1b109dd4a7bb28124b77d2ab0\n'
+            '      Flags:                 0\n'
+            "    Prop: avb -> 'nice'\n"
+            "    Prop: avb_space -> 'nice to meet you'\n"
+        )
+
+        self._EXPECTED_AVB_FOOTER_WITH_GKI_INFO = (     # pylint: disable=C0103
+            'Footer version:           1.0\n'
+            'Image size:               131072 bytes\n'
+            'Original image size:      24576 bytes\n'
+            'VBMeta offset:            24576\n'
+            'VBMeta size:              704 bytes\n'
+            '--\n'
+            'Minimum libavb version:   1.0\n'
+            'Header Block:             256 bytes\n'
+            'Authentication Block:     0 bytes\n'
+            'Auxiliary Block:          448 bytes\n'
+            'Algorithm:                NONE\n'
+            'Rollback Index:           0\n'
+            'Flags:                    0\n'
+            'Rollback Index Location:  0\n'
+            "Release String:           'avbtool 1.2.0'\n"
+            'Descriptors:\n'
+            '    Hash descriptor:\n'
+            '      Image Size:            24576 bytes\n'
+            '      Hash Algorithm:        sha256\n'
+            '      Partition Name:        boot\n'
+            '      Salt:                  a11ba11b\n'
+            '      Digest:                '
+            '363d4f246a4a5e1bba8ba8b86f5eb0cf'
+            '9817e4e51663ba26edccf71c3861090a\n'
+            '      Flags:                 0\n'
+            "    Prop: avb -> 'nice'\n"
+            "    Prop: avb_space -> 'nice to meet you'\n"
+            "    Prop: com.android.build.boot.os_version -> '13'\n"
+            "    Prop: com.android.build.boot.security_patch -> '2022-05-05'\n"
+        )
+
+        self._EXPECTED_AVB_FOOTER_BOOT_1_0 = (          # pylint: disable=C0103
+            'Footer version:           1.0\n'
+            'Image size:               131072 bytes\n'
+            'Original image size:      28672 bytes\n'
+            'VBMeta offset:            28672\n'
+            'VBMeta size:              704 bytes\n'
+            '--\n'
+            'Minimum libavb version:   1.0\n'
+            'Header Block:             256 bytes\n'
+            'Authentication Block:     0 bytes\n'
+            'Auxiliary Block:          448 bytes\n'
+            'Algorithm:                NONE\n'
+            'Rollback Index:           0\n'
+            'Flags:                    0\n'
+            'Rollback Index Location:  0\n'
+            "Release String:           'avbtool 1.2.0'\n"
+            'Descriptors:\n'
+            '    Hash descriptor:\n'
+            '      Image Size:            28672 bytes\n'
+            '      Hash Algorithm:        sha256\n'
+            '      Partition Name:        boot\n'
+            '      Salt:                  a11ba11b\n'
+            '      Digest:                '
+            '634e60e08f5b83842c70fa0efa05de87'
+            '643cd75357f06eff9acc3d1f93e26795\n'
+            '      Flags:                 0\n'
+            "    Prop: avb -> 'nice'\n"
+            "    Prop: avb_space -> 'nice to meet you'\n"
+            "    Prop: com.android.build.boot.os_version -> '13'\n"
+            "    Prop: com.android.build.boot.security_patch -> '2022-05-05'\n"
+        )
+
+        self._EXPECTED_AVB_FOOTER_BOOT_2_0 = (          # pylint: disable=C0103
+            'Footer version:           1.0\n'
+            'Image size:               262144 bytes\n'
+            'Original image size:      36864 bytes\n'
+            'VBMeta offset:            36864\n'
+            'VBMeta size:              704 bytes\n'
+            '--\n'
+            'Minimum libavb version:   1.0\n'
+            'Header Block:             256 bytes\n'
+            'Authentication Block:     0 bytes\n'
+            'Auxiliary Block:          448 bytes\n'
+            'Algorithm:                NONE\n'
+            'Rollback Index:           0\n'
+            'Flags:                    0\n'
+            'Rollback Index Location:  0\n'
+            "Release String:           'avbtool 1.2.0'\n"
+            'Descriptors:\n'
+            '    Hash descriptor:\n'
+            '      Image Size:            36864 bytes\n'
+            '      Hash Algorithm:        sha256\n'
+            '      Partition Name:        boot\n'
+            '      Salt:                  a11ba11b\n'
+            '      Digest:                '
+            'f9bb362d8d0e6559f9f8f42eeaf4da9f'
+            '0fca6093de74ac406f76719fd0b20102\n'
+            '      Flags:                 0\n'
+            "    Prop: avb -> 'nice'\n"
+            "    Prop: avb_space -> 'nice to meet you'\n"
+            "    Prop: com.android.build.boot.os_version -> '13'\n"
+            "    Prop: com.android.build.boot.security_patch -> '2022-05-05'\n"
+        )
+
+        self._EXPECTED_AVB_FOOTER_BOOT_3_0 = (          # pylint: disable=C0103
+            'Footer version:           1.0\n'
+            'Image size:               131072 bytes\n'
+            'Original image size:      28672 bytes\n'
+            'VBMeta offset:            28672\n'
+            'VBMeta size:              576 bytes\n'
+            '--\n'
+            'Minimum libavb version:   1.0\n'
+            'Header Block:             256 bytes\n'
+            'Authentication Block:     0 bytes\n'
+            'Auxiliary Block:          320 bytes\n'
+            'Algorithm:                NONE\n'
+            'Rollback Index:           0\n'
+            'Flags:                    0\n'
+            'Rollback Index Location:  0\n'
+            "Release String:           'avbtool 1.2.0'\n"
+            'Descriptors:\n'
+            '    Hash descriptor:\n'
+            '      Image Size:            28672 bytes\n'
+            '      Hash Algorithm:        sha256\n'
+            '      Partition Name:        boot\n'
+            '      Salt:                  a11ba11b\n'
+            '      Digest:                '
+            'fb0326a78b3794c79fad414d10f8d69a'
+            '86a0da49e5320bd5b4fc09272cb2cad9\n'
+            '      Flags:                 0\n'
+            "    Prop: avb -> 'nice'\n"
+            "    Prop: avb_space -> 'nice to meet you'\n"
+        )
 
         self._EXPECTED_BOOT_SIGNATURE_RSA2048 = (       # pylint: disable=C0103
             'Minimum libavb version:   1.0\n'
@@ -315,6 +512,68 @@ class CertifyBootimgTest(unittest.TestCase):
             '      Flags:                 0\n'
             "    Prop: gki -> 'nice'\n"
             "    Prop: space -> 'nice to meet you'\n"
+        )
+
+        self._EXPECTED_BOOT_SIGNATURE_WITH_GKI_INFO = (  # pylint: disable=C0103
+            'Minimum libavb version:   1.0\n'
+            'Header Block:             256 bytes\n'
+            'Authentication Block:     576 bytes\n'
+            'Auxiliary Block:          1600 bytes\n'
+            'Public key (sha1):        '
+            '2597c218aae470a130f61162feaae70afd97f011\n'
+            'Algorithm:                SHA256_RSA4096\n' # RSA4096
+            'Rollback Index:           0\n'
+            'Flags:                    0\n'
+            'Rollback Index Location:  0\n'
+            "Release String:           'avbtool 1.2.0'\n"
+            'Descriptors:\n'
+            '    Hash descriptor:\n'
+            '      Image Size:            8192 bytes\n'
+            '      Hash Algorithm:        sha256\n'
+            '      Partition Name:        boot\n'        # boot
+            '      Salt:                  d00df00d\n'
+            '      Digest:                '
+            'faf1da72a4fba97ddab0b8f7a410db86'
+            '8fb72392a66d1440ff8bff490c73c771\n'
+            '      Flags:                 0\n'
+            "    Prop: gki -> 'nice'\n"
+            "    Prop: space -> 'nice to meet you'\n"
+            "    Prop: KERNEL_RELEASE -> '5.10.42-android13-0-00544-"
+            "ged21d463f856'\n"
+            "    Prop: BRANCH -> 'android13-5.10-2022-05'\n"
+            "    Prop: BUILD_NUMBER -> 'ab8295296'\n"
+            "    Prop: GKI_INFO -> 'added here'\n"
+        )
+
+        self._EXPECTED_KERNEL_SIGNATURE_WITH_GKI_INFO = (# pylint: disable=C0103
+            'Minimum libavb version:   1.0\n'
+            'Header Block:             256 bytes\n'
+            'Authentication Block:     576 bytes\n'
+            'Auxiliary Block:          1600 bytes\n'
+            'Public key (sha1):        '
+            '2597c218aae470a130f61162feaae70afd97f011\n'
+            'Algorithm:                SHA256_RSA4096\n' # RSA4096
+            'Rollback Index:           0\n'
+            'Flags:                    0\n'
+            'Rollback Index Location:  0\n'
+            "Release String:           'avbtool 1.2.0'\n"
+            'Descriptors:\n'
+            '    Hash descriptor:\n'
+            '      Image Size:            4096 bytes\n'
+            '      Hash Algorithm:        sha256\n'
+            '      Partition Name:        generic_kernel\n' # generic_kernel
+            '      Salt:                  d00df00d\n'
+            '      Digest:                '
+            '762c877f3af0d50a4a4fbc1385d5c7ce'
+            '52a1288db74b33b72217d93db6f2909f\n'
+            '      Flags:                 0\n'
+            "    Prop: gki -> 'nice'\n"
+            "    Prop: space -> 'nice to meet you'\n"
+            "    Prop: KERNEL_RELEASE -> '5.10.42-android13-0-00544-"
+            "ged21d463f856'\n"
+            "    Prop: BRANCH -> 'android13-5.10-2022-05'\n"
+            "    Prop: BUILD_NUMBER -> 'ab8295296'\n"
+            "    Prop: GKI_INFO -> 'added here'\n"
         )
 
         self._EXPECTED_BOOT_1_0_SIGNATURE1_RSA4096 = (   # pylint: disable=C0103
@@ -441,6 +700,58 @@ class CertifyBootimgTest(unittest.TestCase):
             "    Prop: SPACE -> 'nice to meet you'\n"
         )
 
+        self._EXPECTED_BOOT_3_0_SIGNATURE1_RSA4096 = (   # pylint: disable=C0103
+            'Minimum libavb version:   1.0\n'
+            'Header Block:             256 bytes\n'
+            'Authentication Block:     576 bytes\n'
+            'Auxiliary Block:          1344 bytes\n'
+            'Public key (sha1):        '
+            '2597c218aae470a130f61162feaae70afd97f011\n'
+            'Algorithm:                SHA256_RSA4096\n'    # RSA4096
+            'Rollback Index:           0\n'
+            'Flags:                    0\n'
+            'Rollback Index Location:  0\n'
+            "Release String:           'avbtool 1.2.0'\n"
+            'Descriptors:\n'
+            '    Hash descriptor:\n'
+            '      Image Size:            12288 bytes\n'
+            '      Hash Algorithm:        sha256\n'
+            '      Partition Name:        boot\n'           # boot
+            '      Salt:                  d00df00d\n'
+            '      Digest:                '
+            '9b9cd845a367d7fc9b61d6ac02b0e7c9'
+            'dc3d3b219abf60dd6e19359f0353c917\n'
+            '      Flags:                 0\n'
+            "    Prop: gki -> 'nice'\n"
+            "    Prop: space -> 'nice to meet you'\n"
+        )
+
+        self._EXPECTED_BOOT_3_0_SIGNATURE2_RSA4096 = (   # pylint: disable=C0103
+            'Minimum libavb version:   1.0\n'
+            'Header Block:             256 bytes\n'
+            'Authentication Block:     576 bytes\n'
+            'Auxiliary Block:          1344 bytes\n'
+            'Public key (sha1):        '
+            '2597c218aae470a130f61162feaae70afd97f011\n'
+            'Algorithm:                SHA256_RSA4096\n'    # RSA4096
+            'Rollback Index:           0\n'
+            'Flags:                    0\n'
+            'Rollback Index Location:  0\n'
+            "Release String:           'avbtool 1.2.0'\n"
+            'Descriptors:\n'
+            '    Hash descriptor:\n'
+            '      Image Size:            8192 bytes\n'
+            '      Hash Algorithm:        sha256\n'
+            '      Partition Name:        generic_kernel\n' # generic_kernel
+            '      Salt:                  d00df00d\n'
+            '      Digest:                '
+            '0cd7d331ed9b32dcd92f00e2cac75595'
+            '52199170afe788a8fcf1954f9ea072d0\n'
+            '      Flags:                 0\n'
+            "    Prop: gki -> 'nice'\n"
+            "    Prop: space -> 'nice to meet you'\n"
+        )
+
     def _test_boot_signatures(self, signatures_dir, expected_signatures_info):
         """Tests the info of each boot signature under the signature directory.
 
@@ -527,6 +838,8 @@ class CertifyBootimgTest(unittest.TestCase):
                 '--key', './testdata/testkey_rsa2048.pem',
                 '--extra_args', '--prop gki:nice '
                 '--prop space:"nice to meet you"',
+                '--extra_footer_args', '--salt a11ba11b --prop avb:nice '
+                '--prop avb_space:"nice to meet you"',
                 '--output', boot_certified_img,
             ]
             subprocess.run(certify_bootimg_cmds, check=True, cwd=self._exec_dir)
@@ -535,7 +848,13 @@ class CertifyBootimgTest(unittest.TestCase):
             self.assertTrue(has_avb_footer(boot_certified_img))
             self.assertEqual(os.path.getsize(boot_img),
                              os.path.getsize(boot_certified_img))
+            # Checks the content in the AVB footer.
+            self._test_boot_signatures(
+                temp_out_dir,
+                {'boot-certified.img':
+                    self._EXPECTED_AVB_FOOTER_BOOT_CERTIFIED})
 
+            # Checks the content in the GKI certificate.
             extract_boot_signatures(boot_certified_img, temp_out_dir)
             self._test_boot_signatures(
                 temp_out_dir,
@@ -552,6 +871,8 @@ class CertifyBootimgTest(unittest.TestCase):
                 '--key', './testdata/testkey_rsa4096.pem',
                 '--extra_args', '--prop gki:nice '
                 '--prop space:"nice to meet you"',
+                '--extra_footer_args', '--salt a11ba11b --prop avb:nice '
+                '--prop avb_space:"nice to meet you"',
                 '--output', boot_certified2_img,
             ]
             subprocess.run(certify_bootimg_cmds, check=True, cwd=self._exec_dir)
@@ -560,12 +881,76 @@ class CertifyBootimgTest(unittest.TestCase):
             self.assertTrue(has_avb_footer(boot_certified2_img))
             self.assertEqual(os.path.getsize(boot_certified_img),
                              os.path.getsize(boot_certified2_img))
+            # Checks the content in the AVB footer.
+            self._test_boot_signatures(
+                temp_out_dir,
+                {'boot-certified2.img':
+                    self._EXPECTED_AVB_FOOTER_BOOT_CERTIFIED_2})
 
+            # Checks the content in the GKI certificate.
             extract_boot_signatures(boot_certified2_img, temp_out_dir)
             self._test_boot_signatures(
                 temp_out_dir,
                 {'boot_signature1': self._EXPECTED_BOOT_SIGNATURE_RSA4096,
                  'boot_signature2': self._EXPECTED_KERNEL_SIGNATURE_RSA4096})
+
+    def test_certify_bootimg_with_gki_info(self):
+        """Tests certify_bootimg with --gki_info."""
+        with tempfile.TemporaryDirectory() as temp_out_dir:
+            boot_img = os.path.join(temp_out_dir, 'boot.img')
+            generate_test_boot_image(boot_img=boot_img,
+                                     avb_partition_size=128 * 1024)
+            self.assertTrue(has_avb_footer(boot_img))
+
+            gki_info = ('certify_bootimg_extra_args='
+                        '--prop KERNEL_RELEASE:5.10.42'
+                        '-android13-0-00544-ged21d463f856 '
+                        '--prop BRANCH:android13-5.10-2022-05 '
+                        '--prop BUILD_NUMBER:ab8295296 '
+                        '--prop GKI_INFO:"added here"\n'
+                        'certify_bootimg_extra_footer_args='
+                        '--prop com.android.build.boot.os_version:13 '
+                        '--prop com.android.build.boot.security_patch:'
+                        '2022-05-05\n')
+            gki_info_path = os.path.join(temp_out_dir, 'gki-info.txt')
+            with open(gki_info_path, 'w', encoding='utf-8') as f:
+                f.write(gki_info)
+
+            # Certifies the boot image with --gki_info.
+            boot_certified_img = os.path.join(temp_out_dir,
+                                              'boot-certified.img')
+            certify_bootimg_cmds = [
+                'certify_bootimg',
+                '--boot_img', boot_img,
+                '--algorithm', 'SHA256_RSA4096',
+                '--key', './testdata/testkey_rsa4096.pem',
+                '--extra_args', '--prop gki:nice '
+                '--prop space:"nice to meet you"',
+                '--extra_footer_args', '--salt a11ba11b --prop avb:nice '
+                '--prop avb_space:"nice to meet you"',
+                '--gki_info', gki_info_path,
+                '--output', boot_certified_img,
+            ]
+            subprocess.run(certify_bootimg_cmds, check=True, cwd=self._exec_dir)
+
+            # Checks an AVB footer exists and the image size remains.
+            self.assertTrue(has_avb_footer(boot_certified_img))
+            self.assertEqual(os.path.getsize(boot_img),
+                             os.path.getsize(boot_certified_img))
+
+            # Checks the content in the AVB footer.
+            self._test_boot_signatures(
+                temp_out_dir,
+                {'boot-certified.img': self._EXPECTED_AVB_FOOTER_WITH_GKI_INFO})
+
+            # Checks the content in the GKI certificate.
+            extract_boot_signatures(boot_certified_img, temp_out_dir)
+            self._test_boot_signatures(
+                temp_out_dir,
+                {'boot_signature1':
+                    self._EXPECTED_BOOT_SIGNATURE_WITH_GKI_INFO,
+                 'boot_signature2':
+                    self._EXPECTED_KERNEL_SIGNATURE_WITH_GKI_INFO})
 
     def test_certify_bootimg_exceed_size(self):
         """Tests the boot signature size exceeded max size of the signature."""
@@ -597,30 +982,44 @@ class CertifyBootimgTest(unittest.TestCase):
                               err.stderr)
 
     def test_certify_bootimg_archive(self):
-        """Tests certify_bootimg for a boot-img.zip."""
+        """Tests certify_bootimg for a boot images archive.."""
         with tempfile.TemporaryDirectory() as temp_out_dir:
-            boot_img_zip = os.path.join(temp_out_dir, 'boot-img.zip')
-            generate_test_boot_image_archive(
-                boot_img_zip,
+            boot_img_archive_name = os.path.join(temp_out_dir, 'boot-img')
+            gki_info = ('certify_bootimg_extra_args='
+                        '--prop KERNEL_RELEASE:5.10.42'
+                        '-android13-0-00544-ged21d463f856 '
+                        '--prop BRANCH:android13-5.10-2022-05 '
+                        '--prop BUILD_NUMBER:ab8295296 '
+                        '--prop SPACE:"nice to meet you"\n'
+                        'certify_bootimg_extra_footer_args='
+                        '--prop com.android.build.boot.os_version:13 '
+                        '--prop com.android.build.boot.security_patch:'
+                        '2022-05-05\n')
+            boot_img_archive_path = generate_test_boot_image_archive(
+                boot_img_archive_name,
+                'gztar',
                 # A list of (boot_img_name, kernel_size, partition_size).
                 [('boot-1.0.img', 8 * 1024, 128 * 1024),
-                 ('boot-2.0.img', 16 * 1024, 256 * 1024)])
+                 ('boot-2.0.img', 16 * 1024, 256 * 1024)],
+                gki_info)
 
             # Certify the boot image archive, with a RSA4096 key.
-            boot_certified_img_zip = os.path.join(temp_out_dir,
-                                                  'boot-certified-img.zip')
+            boot_certified_img_archive = os.path.join(
+                temp_out_dir, 'boot-certified-img.tar.gz')
             certify_bootimg_cmds = [
                 'certify_bootimg',
-                '--boot_img_zip', boot_img_zip,
+                '--boot_img_archive', boot_img_archive_path,
                 '--algorithm', 'SHA256_RSA4096',
                 '--key', './testdata/testkey_rsa4096.pem',
                 '--extra_args', '--prop gki:nice '
                 '--prop space:"nice to meet you"',
-                '--output', boot_certified_img_zip,
+                '--extra_footer_args', '--salt a11ba11b --prop avb:nice '
+                '--prop avb_space:"nice to meet you"',
+                '--output', boot_certified_img_archive,
             ]
             subprocess.run(certify_bootimg_cmds, check=True, cwd=self._exec_dir)
 
-            extract_boot_archive_with_signatures(boot_certified_img_zip,
+            extract_boot_archive_with_signatures(boot_certified_img_archive,
                                                  temp_out_dir)
 
             # Checks an AVB footer exists and the image size remains.
@@ -632,6 +1031,13 @@ class CertifyBootimgTest(unittest.TestCase):
             self.assertTrue(has_avb_footer(boot_2_img))
             self.assertEqual(os.path.getsize(boot_2_img), 256 * 1024)
 
+            # Checks the content in the AVB footer.
+            self._test_boot_signatures(
+                temp_out_dir,
+                {'boot-1.0.img': self._EXPECTED_AVB_FOOTER_BOOT_1_0,
+                 'boot-2.0.img': self._EXPECTED_AVB_FOOTER_BOOT_2_0})
+
+            # Checks the content in the GKI certificate.
             self._test_boot_signatures(
                 temp_out_dir,
                 {'boot-1.0/boot_signature1':
@@ -642,6 +1048,81 @@ class CertifyBootimgTest(unittest.TestCase):
                     self._EXPECTED_BOOT_2_0_SIGNATURE1_RSA4096,
                  'boot-2.0/boot_signature2':
                     self._EXPECTED_BOOT_2_0_SIGNATURE2_RSA4096})
+
+    def test_certify_bootimg_archive_without_gki_info(self):
+        """Tests certify_bootimg for a boot images archive."""
+        with tempfile.TemporaryDirectory() as temp_out_dir:
+            boot_img_archive_name = os.path.join(temp_out_dir, 'boot-img')
+
+            # Checks ceritfy_bootimg works for a boot images archive without a
+            # gki-info.txt. Using *.zip -> *.tar.
+            boot_img_archive_path = generate_test_boot_image_archive(
+                boot_img_archive_name,
+                'zip',
+                # A list of (boot_img_name, kernel_size, partition_size).
+                [('boot-3.0.img', 8 * 1024, 128 * 1024)],
+                gki_info=None)
+            # Certify the boot image archive, with a RSA4096 key.
+            boot_certified_img_archive = os.path.join(
+                temp_out_dir, 'boot-certified-img.tar')
+            certify_bootimg_cmds = [
+                'certify_bootimg',
+                '--boot_img_archive', boot_img_archive_path,
+                '--algorithm', 'SHA256_RSA4096',
+                '--key', './testdata/testkey_rsa4096.pem',
+                '--extra_args', '--prop gki:nice '
+                '--prop space:"nice to meet you"',
+                '--extra_footer_args', '--salt a11ba11b --prop avb:nice '
+                '--prop avb_space:"nice to meet you"',
+                '--output', boot_certified_img_archive,
+            ]
+            subprocess.run(certify_bootimg_cmds, check=True, cwd=self._exec_dir)
+
+            # Checks ceritfy_bootimg works for a boot images archive with a
+            # special gki-info.txt. Using *.tar -> *.tgz.
+            boot_img_archive_path = generate_test_boot_image_archive(
+                boot_img_archive_name,
+                'tar',
+                # A list of (boot_img_name, kernel_size, partition_size).
+                [('boot-3.0.img', 8 * 1024, 128 * 1024)],
+                gki_info='a=b\n'
+                         'c=d\n')
+            # Certify the boot image archive, with a RSA4096 key.
+            boot_certified_img_archive2 = os.path.join(
+                temp_out_dir, 'boot-certified-img.tgz')
+            certify_bootimg_cmds = [
+                'certify_bootimg',
+                '--boot_img_archive', boot_img_archive_path,
+                '--algorithm', 'SHA256_RSA4096',
+                '--key', './testdata/testkey_rsa4096.pem',
+                '--extra_args', '--prop gki:nice '
+                '--prop space:"nice to meet you"',
+                '--extra_footer_args', '--salt a11ba11b --prop avb:nice '
+                '--prop avb_space:"nice to meet you"',
+                '--output', boot_certified_img_archive2,
+            ]
+            subprocess.run(certify_bootimg_cmds, check=True, cwd=self._exec_dir)
+
+            extract_boot_archive_with_signatures(boot_certified_img_archive2,
+                                                 temp_out_dir)
+
+            # Checks an AVB footer exists and the image size remains.
+            boot_3_img = os.path.join(temp_out_dir, 'boot-3.0.img')
+            self.assertTrue(has_avb_footer(boot_3_img))
+            self.assertEqual(os.path.getsize(boot_3_img), 128 * 1024)
+
+            # Checks the content in the AVB footer.
+            self._test_boot_signatures(
+                temp_out_dir,
+                {'boot-3.0.img': self._EXPECTED_AVB_FOOTER_BOOT_3_0})
+
+            # Checks the content in the GKI certificate.
+            self._test_boot_signatures(
+                temp_out_dir,
+                {'boot-3.0/boot_signature1':
+                    self._EXPECTED_BOOT_3_0_SIGNATURE1_RSA4096,
+                 'boot-3.0/boot_signature2':
+                    self._EXPECTED_BOOT_3_0_SIGNATURE2_RSA4096})
 
 
 # I don't know how, but we need both the logger configuration and verbosity

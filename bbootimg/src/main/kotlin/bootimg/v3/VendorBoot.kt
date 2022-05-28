@@ -305,7 +305,7 @@ data class VendorBoot(
             DefaultExecutor().execute(it)
         }
 
-        C.assertFileEquals(this.info.output + ".clear", this.info.output + ".google")
+        Helper.assertFileEquals(this.info.output + ".clear", this.info.output + ".google")
         return this
     }
 

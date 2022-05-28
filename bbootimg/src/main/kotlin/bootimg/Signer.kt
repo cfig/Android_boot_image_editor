@@ -69,7 +69,7 @@ class Signer {
                 File("$output.clear").copyTo(File("$output.signed2"), overwrite = true)
                 DefaultExecutor().execute(this)
             }
-            Common.assertFileEquals("$output.signed", "$output.signed2")
+            Helper.assertFileEquals("$output.signed", "$output.signed2")
             //TODO: decide what to verify
             //Parser.verifyAVBIntegrity(cfg.info.output + ".signed", avbtool)
             //Parser.verifyAVBIntegrity(cfg.info.output + ".signed2", avbtool)

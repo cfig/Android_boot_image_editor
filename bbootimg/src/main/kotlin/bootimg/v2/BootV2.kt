@@ -437,7 +437,7 @@ data class BootV2(
             DefaultExecutor().execute(this)
         }
 
-        Common.assertFileEquals("${info.output}.clear", "${info.output}.google")
+        Helper.assertFileEquals("${info.output}.clear", "${info.output}.google")
 
         return this
     }

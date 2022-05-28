@@ -223,18 +223,6 @@ class Common {
             return md.digest()
         }
 
-        fun assertFileEquals(file1: String, file2: String) {
-            val hash1 = hashFileAndSize(file1)
-            val hash2 = hashFileAndSize(file2)
-            log.info("$file1 hash ${Helper.toHexString(hash1)}, $file2 hash ${Helper.toHexString(hash2)}")
-            if (hash1.contentEquals(hash2)) {
-                log.info("Hash verification passed: ${Helper.toHexString(hash1)}")
-            } else {
-                log.error("Hash verification failed")
-                throw UnknownError("Do not know why hash verification fails, maybe a bug")
-            }
-        }
-
         //using mkbootfs
         fun packRootfs(rootDir: String, ramdiskGz: String, osMajor: Int = 10) {
             val mkbootfs = String.format(Locale.getDefault(), Helper.prop("mkbootfsBin"), osMajor)

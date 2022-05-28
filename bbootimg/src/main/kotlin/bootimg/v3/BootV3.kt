@@ -44,6 +44,7 @@ data class BootV3(
 ) {
     companion object {
         private val log = LoggerFactory.getLogger(BootV3::class.java)
+        private val errLog = LoggerFactory.getLogger("uiderrors")
         private val mapper = ObjectMapper()
         private val workDir = Helper.prop("workDir")
 
@@ -123,6 +124,16 @@ data class BootV3(
 
         //header
         FileOutputStream(this.info.output + ".clear", false).use { fos ->
+            //trim bootSig if it's not parsable
+            //https://github.com/cfig/Android_boot_image_editor/issues/88
+            File(Avb.getJsonFileName(this.bootSignature.file)).let { bootSigJson ->
+                if (!bootSigJson.exists()) {
+                    errLog.info(
+                        "erase unparsable boot signature in header. Refer to https://github.com/cfig/Android_boot_image_editor/issues/88"
+                    )
+                    this.info.signatureSize = 0
+                }
+            }
             val encodedHeader = this.toHeader().encode()
             fos.write(encodedHeader)
             fos.write(
@@ -160,9 +171,13 @@ data class BootV3(
                 readBackBootSig.auxBlob!!.hashDescriptors.get(0).update(this.info.output + ".clear")
                 bootSigBytes = readBackBootSig.encodePadded()
             }
-            //write V4 data
-            FileOutputStream("${this.info.output}.clear", true).use { fos ->
-                fos.write(bootSigBytes)
+            if (this.info.signatureSize > 0) {
+                //write V4 data
+                FileOutputStream("${this.info.output}.clear", true).use { fos ->
+                    fos.write(bootSigBytes)
+                }
+            } else {
+                errLog.info("ignore bootsig for v4 boot.img")
             }
         }
 
@@ -172,7 +187,7 @@ data class BootV3(
             DefaultExecutor().execute(it)
         }
 
-        C.assertFileEquals(this.info.output + ".clear", this.info.output + ".google")
+        Helper.assertFileEquals(this.info.output + ".clear", this.info.output + ".google")
         return this
     }
 

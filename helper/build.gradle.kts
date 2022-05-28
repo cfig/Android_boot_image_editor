@@ -35,8 +35,7 @@ dependencies {
 
     implementation("cc.cfig:io:0.2")
     implementation("com.google.guava:guava:31.0.1-jre")
-    implementation("org.slf4j:slf4j-api:1.7.32")
-    implementation("org.slf4j:slf4j-simple:1.7.32")
+    implementation("ch.qos.logback:logback-classic:1.2.11")
     implementation("org.apache.commons:commons-exec:1.3")
     implementation("org.bouncycastle:bcprov-jdk15on:1.69")
     implementation("org.bouncycastle:bcpkix-jdk15on:1.69") //org.bouncycastle.pkcs

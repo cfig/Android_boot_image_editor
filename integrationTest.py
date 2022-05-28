@@ -37,7 +37,7 @@ def deleteIfExists(inFile):
 
 def cleanUp():
     log.info("clean up ...")
-    shutil.rmtree("build", ignore_errors = True)
+    shutil.rmtree("build/unzip_boot", ignore_errors = True)
     [deleteIfExists(item) for item in [
         "boot.img", "boot.img.clear", "boot.img.google", "boot.img.signed", "boot.img.signed2",
         "recovery.img", "recovery.img.clear", "recovery.img.google", "recovery.img.signed", "recovery.img.signed2",
@@ -165,6 +165,9 @@ def main():
     verifySingleDir(resDir2, "issue_83")
     # Issue 86: vendor_boot with vrt and board name
     verifySingleDir(resDir2, "issue_86")
+    # Issue 88: boot image V4 without boot signature,
+    #  and Issue 75: allow duplicated entry in cpio
+    verifySingleDir(resDir2, "issue_88")
 
     log.info(successLogo)
 
