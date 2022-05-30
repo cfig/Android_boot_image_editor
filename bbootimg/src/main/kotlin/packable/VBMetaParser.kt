@@ -16,6 +16,7 @@ package cfig.packable
 
 import avb.AVBInfo
 import cfig.Avb
+import cfig.helper.Helper
 import cfig.helper.Helper.Companion.deleteIfExists
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
@@ -24,7 +25,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 
-class VBMetaParser: IPackable {
+class VBMetaParser : IPackable {
     override val loopNo: Int
         get() = 1
 
@@ -32,12 +33,12 @@ class VBMetaParser: IPackable {
         return listOf("^vbmeta\\.img$", "^vbmeta\\_[a-z]+.img$")
     }
 
-    override fun cleanUp() {
-        File(outDir).mkdirs()
-    }
-
     override fun unpack(fileName: String) {
-        cleanUp()
+        File(Helper.prop("workDir")).let {
+            if (!it.exists()) {
+                it.mkdirs()
+            }
+        }
         AVBInfo.parseFrom(fileName).dumpDefault(fileName)
     }
 
@@ -60,8 +61,8 @@ class VBMetaParser: IPackable {
         super.pull(fileName, deviceName)
     }
 
-    fun clean(fileName: String) {
-        super.cleanUp()
+    fun clear(fileName: String) {
+        super.clear()
         listOf("", ".signed").forEach {
             "$fileName$it".deleteIfExists()
         }

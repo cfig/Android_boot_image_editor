@@ -19,6 +19,7 @@ import cfig.Avb
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.check_call
 import cfig.helper.Helper.Companion.check_output
+import cfig.helper.Helper.Companion.deleteIfExists
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -70,10 +71,14 @@ interface IPackable {
         Avb().verify(ai, fileName)
     }
 
-    fun cleanUp() {
+    fun clear() {
         val workDir = Helper.prop("workDir")
-        if (File(workDir).exists()) File(workDir).deleteRecursively()
+        if (File(workDir).exists()) {
+            log.info("deleting $workDir ...")
+            File(workDir).deleteRecursively()
+        }
         File(workDir).mkdirs()
+        "uiderrors".deleteIfExists()
     }
 
     companion object {

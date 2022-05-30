@@ -14,13 +14,12 @@
 
 package cfig.packable
 
-import cc.cfig.io.Struct
+import cfig.helper.Helper
 import miscimg.MiscImage
 import cfig.helper.Helper.Companion.deleteIfExists
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.io.FileOutputStream
 import java.io.RandomAccessFile
 
 class MiscImgParser : IPackable {
@@ -31,23 +30,22 @@ class MiscImgParser : IPackable {
         return listOf("^misc\\.img$")
     }
 
+    private fun getOutputFile(fileName: String): File {
+        return File(workDir + "/" + File(fileName).name.removeSuffix(".img") + ".json")
+    }
+
     override fun unpack(fileName: String) {
-        cleanUp()
+        clear()
         val misc = MiscImage.parse(fileName)
         log.info(misc.toString())
+        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(getOutputFile(fileName), misc)
         ObjectMapper().writerWithDefaultPrettyPrinter()
-            .writeValue(File(File(fileName).name.removeSuffix(".img") + ".json"), misc)
-        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(
-            File("sample.json"),
-            MiscImage.BootloaderMessage.generateSamples()
-        )
+            .writeValue(getOutputFile("sample.img"), MiscImage.BootloaderMessage.generateSamples())
+        log.info(getOutputFile(fileName).path + " is ready")
     }
 
     override fun pack(fileName: String) {
-        val misc = ObjectMapper().readValue(
-            File(File(fileName).name.removeSuffix(".img") + ".json"),
-            MiscImage::class.java
-        )
+        val misc = ObjectMapper().readValue(getOutputFile(fileName), MiscImage::class.java)
         val out = File("$fileName.new")
         File(fileName).copyTo(out, true)
         RandomAccessFile(out.name, "rw").use { raf ->
@@ -73,15 +71,15 @@ class MiscImgParser : IPackable {
         super.pull(fileName, deviceName)
     }
 
-    fun clean(fileName: String) {
-        super.cleanUp()
-        listOf("", ".clear", ".google", ".clear", ".signed", ".signed2").forEach {
+    fun clear(fileName: String) {
+        super.clear()
+        listOf("", ".new").forEach {
             "$fileName$it".deleteIfExists()
         }
-        VBMetaParser().clean("vbmeta.img")
     }
 
     companion object {
         private val log = LoggerFactory.getLogger(MiscImgParser::class.java)
+        private val workDir = Helper.prop("workDir")
     }
 }

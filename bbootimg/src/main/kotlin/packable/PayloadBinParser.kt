@@ -25,7 +25,7 @@ class PayloadBinParser : IPackable {
     }
 
     override fun unpack(fileName: String) {
-        cleanUp()
+        clear()
         Payload.parse(fileName).let { pl ->
             pl.setUp()
             pl.printInfo()
@@ -44,7 +44,7 @@ class PayloadBinParser : IPackable {
         super.pull(fileName, deviceName)
     }
 
-    fun clean(fileName: String) {
+    fun clear(fileName: String) {
     }
 
     override fun flash(fileName: String, deviceName: String) {

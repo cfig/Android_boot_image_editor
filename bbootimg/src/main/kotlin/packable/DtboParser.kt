@@ -42,7 +42,7 @@ class DtboParser(val workDir: File) : IPackable {
     }
 
     override fun unpack(fileName: String) {
-        cleanUp()
+        clear()
         Dtbo.parse(fileName)
             .unpack(outDir)
             .extractVBMeta()
@@ -61,12 +61,12 @@ class DtboParser(val workDir: File) : IPackable {
         super.`@verify`(fileName)
     }
 
-    fun clean(fileName: String) {
-        super.cleanUp()
+    fun clear(fileName: String) {
+        super.clear()
         listOf("", ".clear", ".google", ".clear", ".signed", ".signed2").forEach {
             "$fileName$it".deleteIfExists()
         }
-        VBMetaParser().clean("vbmeta.img")
+        VBMetaParser().clear("vbmeta.img")
     }
 
     private fun execInDirectory(cmd: CommandLine, inWorkDir: File) {
@@ -108,7 +108,7 @@ class DtboParser(val workDir: File) : IPackable {
 
     @Deprecated("for debugging purpose only")
     fun unpackLegacy(fileName: String) {
-        cleanUp()
+        clear()
         val dtbPath = File("$outDir/dtb").path
         val headerPath = File("$outDir/dtbo.header").path
         val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""

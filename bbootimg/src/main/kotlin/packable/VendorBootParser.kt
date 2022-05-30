@@ -28,7 +28,7 @@ class VendorBootParser : IPackable {
     }
 
     override fun unpack(fileName: String) {
-        cleanUp()
+        clear()
         val vb = VendorBoot
             .parse(fileName)
             .extractImages()
@@ -55,12 +55,12 @@ class VendorBootParser : IPackable {
         super.pull(fileName, deviceName)
     }
 
-    fun clean(fileName: String) {
-        super.cleanUp()
+    fun clear(fileName: String) {
+        super.clear()
         listOf("", ".clear", ".google", ".clear", ".signed", ".signed2").forEach {
             "$fileName$it".deleteIfExists()
         }
-        VBMetaParser().clean("vbmeta.img")
+        VBMetaParser().clear("vbmeta.img")
     }
 
     override fun flash(fileName: String, deviceName: String) {

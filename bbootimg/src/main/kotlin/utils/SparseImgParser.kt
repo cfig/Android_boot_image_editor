@@ -40,7 +40,7 @@ class SparseImgParser : IPackable {
     }
 
     override fun unpack(fileName: String) {
-        cleanUp()
+        clear()
         simg2img(fileName, "$fileName.unsparse")
     }
 

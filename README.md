@@ -130,6 +130,16 @@ cp <your_vbmeta_image> vbmeta.img
 </details>
 
 <details>
+  <summary>clean workspace</summary>
+When you finished current work and need to clean the workspace for next image, it's a good idea to call the `clear` command:
+
+```bash
+./gradlew clear
+```
+
+</details>
+
+<details>
   <summary>working with boot.img and vbmeta.img</summary>
 
 If your vbmeta.img contains hash of boot.img, you MUST update vbmeta image together.

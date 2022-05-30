@@ -25,15 +25,19 @@ def hashFile(fileName):
     return hasher.hexdigest()
 
 def deleteIfExists(inFile):
-    for i in range(3):
-        try:
-            if os.path.isfile(inFile):
-                log.info("rm %s" % inFile)
-                os.remove(inFile)
-            return
-        except Exception as e:
-            log.warning("Exception in cleaning up %s" % inFile)
-            time.sleep(3)
+    if os.path.isfile(inFile):
+        log.info("rm %s" % inFile)
+        raise
+    ## do not delete
+    #for i in range(3):
+    #    try:
+    #        if os.path.isfile(inFile):
+    #            log.info("rm %s" % inFile)
+    #            os.remove(inFile)
+    #        return
+    #    except Exception as e:
+    #        log.warning("Exception in cleaning up %s" % inFile)
+    #        time.sleep(3)
 
 def cleanUp():
     log.info("clean up ...")
@@ -51,7 +55,7 @@ def cleanUp():
         "vendor_boot-debug.img", "vendor_boot-debug.img.clear", "vendor_boot-debug.img.google" ]]
 
 def verifySingleJson(jsonFile, func = None):
-    log.info(jsonFile)
+    log.info("executing %s ..." % jsonFile)
     imgDir = os.path.dirname(jsonFile)
     verifyItems = json.load(open(jsonFile))
     for k, v in verifyItems["copy"].items():
@@ -76,7 +80,7 @@ def verifySingleJson(jsonFile, func = None):
         log.info("%s : %s" % (k, v))
         unittest.TestCase().assertEqual(v, hashFile(k))
     try:
-        subprocess.check_call(gradleWrapper + " clean", shell = True)
+        subprocess.check_call(gradleWrapper + " clear", shell = True)
     except Exception as e:
         pass
 
