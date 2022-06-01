@@ -38,6 +38,75 @@ class Helper {
         var dumpFile: String
     )
 
+    class DataSrc<in T>(private val incoming: T) {
+        fun getName(): String {
+            return if (incoming is String) "FILE:$incoming" else "data"
+        }
+
+        fun getLength(): Long {
+            return when (incoming) {
+                is String -> {
+                    File(incoming).length()
+                }
+                is ByteArray -> {
+                    incoming.size.toLong()
+                }
+                else -> {
+                    throw IllegalArgumentException("type ${incoming!!::class} is not supported")
+                }
+            }
+        }
+
+        @Throws(IllegalArgumentException::class)
+        fun readFully(range: LongRange): ByteArray {
+            when (incoming) {
+                is String -> {
+                    return ByteArray(range.count()).apply {
+                        FileInputStream(incoming).use { fis ->
+                            fis.skip(range.first)
+                            fis.read(this)
+                        }
+                    }
+                }
+                is ByteArray -> {
+                    return incoming.sliceArray(range.first.toInt()..range.last.toInt())
+                }
+                else -> {
+                    throw IllegalArgumentException("type ${incoming!!::class} is not supported")
+                }
+            }
+        }
+
+        @Throws(IllegalArgumentException::class)
+        fun readFully(loc: Pair<Long, Int>): ByteArray {
+            when (incoming) {
+                is String -> {
+                    return ByteArray(loc.second).apply {
+                        FileInputStream(incoming).use { fis ->
+                            if (loc.first < 0) {
+                                fis.skip(getLength() + loc.first)
+                            } else {
+                                fis.skip(loc.first)
+                            }
+                            fis.read(this)
+                        }
+                    }
+                }
+                is ByteArray -> {
+                    val subRangeStart = if (loc.first < 0) {
+                        (getLength() + loc.first).toInt()
+                    } else {
+                        loc.first.toInt()
+                    }
+                    return incoming.sliceArray(subRangeStart until (subRangeStart + loc.second).toInt())
+                }
+                else -> {
+                    throw IllegalArgumentException("type ${incoming!!::class} is not supported")
+                }
+            }
+        }
+    }
+
     companion object {
         private val gcfg: Properties = Properties().apply {
             load(Helper::class.java.classLoader.getResourceAsStream("general.cfg"))
@@ -368,8 +437,16 @@ class Helper {
             return data
         }
 
+        fun readFully(data: ByteArray, offset: Long, byteCount: Int): ByteArray {
+            return data.sliceArray(offset.toInt()..(offset + byteCount).toInt())
+        }
+
         fun readFully(fileName: String, coordinate: Pair<Long, Int>): ByteArray {
             return readFully(fileName, coordinate.first, coordinate.second)
+        }
+
+        fun readFully(data: ByteArray, coordinate: Pair<Long, Int>): ByteArray {
+            return readFully(data, coordinate.first, coordinate.second)
         }
 
         private val log = LoggerFactory.getLogger("Helper")

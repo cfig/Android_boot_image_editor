@@ -20,10 +20,11 @@ import avb.blob.AuthBlob
 import avb.blob.AuxBlob
 import avb.blob.Footer
 import avb.blob.Header
-import avb.desc.*
+import avb.desc.HashDescriptor
 import cfig.helper.CryptoHelper
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.paddingWith
+import cfig.helper.Helper.DataSrc
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
 import org.apache.commons.exec.CommandLine
@@ -106,7 +107,7 @@ class Avb {
             log.info("4/4 Appending AVB footer (${footerBlobWithPadding.size} bytes)...")
             fos.write(footerBlobWithPadding)
         }
-        assert(partition_size == File(image_file).length()) { "generated file size mismatch" }
+        check(partition_size == File(image_file).length()) { "generated file size mismatch" }
         log.info("addHashFooter($image_file) done.")
     }
 
@@ -162,99 +163,6 @@ class Avb {
         }
     }
 
-    fun verify(ai: AVBInfo, image_file: String, parent: String = ""): Array<Any> {
-        val ret: Array<Any> = arrayOf(true, "")
-        val localParent = if (parent.isEmpty()) image_file else parent
-        //header
-        val rawHeaderBlob = ByteArray(Header.SIZE).apply {
-            FileInputStream(image_file).use { fis ->
-                ai.footer?.let {
-                    fis.skip(it.vbMetaOffset)
-                }
-                fis.read(this)
-            }
-        }
-        // aux
-        val rawAuxBlob = ByteArray(ai.header!!.auxiliary_data_block_size.toInt()).apply {
-            FileInputStream(image_file).use { fis ->
-                val vbOffset = if (ai.footer == null) 0 else ai.footer!!.vbMetaOffset
-                fis.skip(vbOffset + Header.SIZE + ai.header!!.authentication_data_block_size)
-                fis.read(this)
-            }
-        }
-        //integrity check
-        val declaredAlg = Algorithms.get(ai.header!!.algorithm_type)
-        if (declaredAlg!!.public_key_num_bytes > 0) {
-            if (AuxBlob.encodePubKey(declaredAlg).contentEquals(ai.auxBlob!!.pubkey!!.pubkey)) {
-                log.info("VERIFY($localParent): signed with dev key: " + declaredAlg.defaultKey)
-            } else {
-                log.info("VERIFY($localParent): signed with release key")
-            }
-            val calcHash = Helper.join(declaredAlg.padding, AuthBlob.calcHash(rawHeaderBlob, rawAuxBlob, declaredAlg.name))
-            val readHash = Helper.join(declaredAlg.padding, Helper.fromHexString(ai.authBlob!!.hash!!))
-            if (calcHash.contentEquals(readHash)) {
-                log.info("VERIFY($localParent->AuthBlob): verify hash... PASS")
-                val readPubKey = CryptoHelper.KeyBox.decodeRSAkey(ai.auxBlob!!.pubkey!!.pubkey)
-                val hashFromSig = CryptoHelper.Signer.rawRsa(readPubKey, Helper.fromHexString(ai.authBlob!!.signature!!))
-                if (hashFromSig.contentEquals(readHash)) {
-                    log.info("VERIFY($localParent->AuthBlob): verify signature... PASS")
-                } else {
-                    ret[0] = false
-                    ret[1] = ret[1] as String + " verify signature fail;"
-                    log.warn("read=" + Helper.toHexString(readHash) + ", calc=" + Helper.toHexString(calcHash))
-                    log.warn("VERIFY($localParent->AuthBlob): verify signature... FAIL")
-                }
-            } else {
-                ret[0] = false
-                ret[1] = ret[1] as String + " verify hash fail"
-                log.warn("read=" + ai.authBlob!!.hash!! + ", calc=" + Helper.toHexString(calcHash))
-                log.warn("VERIFY($localParent->AuthBlob): verify hash... FAIL")
-            }
-        } else {
-            log.warn("VERIFY($localParent->AuthBlob): algorithm=[${declaredAlg.name}], no signature, skip")
-        }
-
-        val morePath = System.getenv("more")
-        val morePrefix = if (!morePath.isNullOrBlank()) "$morePath/" else ""
-        ai.auxBlob!!.chainPartitionDescriptors.forEach {
-            val vRet = it.verify(listOf(morePrefix + it.partition_name + ".img", it.partition_name + ".img"),
-                          image_file + "->Chain[${it.partition_name}]")
-            if (vRet[0] as Boolean) {
-                log.info("VERIFY($localParent->Chain[${it.partition_name}]): " + "PASS")
-            } else {
-                ret[0] = false
-                ret[1] = ret[1] as String + "; " +  vRet[1] as String
-                log.info("VERIFY($localParent->Chain[${it.partition_name}]): " + vRet[1] as String + "... FAIL")
-            }
-        }
-
-        ai.auxBlob!!.hashDescriptors.forEach {
-            val vRet = it.verify(listOf(morePrefix + it.partition_name + ".img", it.partition_name + ".img"),
-                          image_file + "->HashDescriptor[${it.partition_name}]")
-            if (vRet[0] as Boolean) {
-                log.info("VERIFY($localParent->HashDescriptor[${it.partition_name}]): ${it.hash_algorithm} " + "PASS")
-            } else {
-                ret[0] = false
-                ret[1] = ret[1] as String + "; " +  vRet[1] as String
-                log.info("VERIFY($localParent->HashDescriptor[${it.partition_name}]): ${it.hash_algorithm} " + vRet[1] as String + "... FAIL")
-            }
-        }
-
-        ai.auxBlob!!.hashTreeDescriptors.forEach {
-            val vRet = it.verify(listOf(morePrefix + it.partition_name + ".img", it.partition_name + ".img"),
-                image_file + "->HashTreeDescriptor[${it.partition_name}]")
-            if (vRet[0] as Boolean) {
-                log.info("VERIFY($localParent->HashTreeDescriptor[${it.partition_name}]): ${it.hash_algorithm} " + "PASS")
-            } else {
-                ret[0] = false
-                ret[1] = ret[1] as String + "; " +  vRet[1] as String
-                log.info("VERIFY($localParent->HashTreeDescriptor[${it.partition_name}]): ${it.hash_algorithm} " + vRet[1] as String + "... FAIL")
-            }
-        }
-
-        return ret
-    }
-
     companion object {
         private val log = LoggerFactory.getLogger(Avb::class.java)
         const val BLOCK_SIZE = 4096
@@ -297,8 +205,8 @@ class Avb {
                         it.auxBlob!!.hashDescriptors.get(0).partition_name
                     }
                 //read hashDescriptor from image
-                val newHashDesc = AVBInfo.parseFrom("$fileName.signed")
-                assert(newHashDesc.auxBlob!!.hashDescriptors.size == 1)
+                val newHashDesc = AVBInfo.parseFrom(DataSrc("$fileName.signed"))
+                check(newHashDesc.auxBlob!!.hashDescriptors.size == 1)
                 var seq = -1 //means not found
                 //main vbmeta
                 ObjectMapper().readValue(File(getJsonFileName("vbmeta.img")), AVBInfo::class.java).apply {
@@ -326,6 +234,105 @@ class Avb {
             } else {
                 log.debug("no companion vbmeta.img")
             }
+        }
+
+        fun verify(ai: AVBInfo, image_file: String, parent: String = ""): Array<Any> {
+            val ret: Array<Any> = arrayOf(true, "")
+            val localParent = parent.ifEmpty { image_file }
+            //header
+            val rawHeaderBlob = DataSrc(image_file).readFully(Pair(ai.footer?.vbMetaOffset ?: 0, Header.SIZE))
+            // aux
+            val vbOffset = ai.footer?.vbMetaOffset ?: 0
+            //@formatter:off
+            val rawAuxBlob = DataSrc(image_file).readFully(
+                    Pair(vbOffset + Header.SIZE + ai.header!!.authentication_data_block_size,
+                        ai.header!!.auxiliary_data_block_size.toInt()))
+            //@formatter:on
+            //integrity check
+            val declaredAlg = Algorithms.get(ai.header!!.algorithm_type)
+            if (declaredAlg!!.public_key_num_bytes > 0) {
+                val gkiPubKey = if (declaredAlg.algorithm_type == 1) AuxBlob.encodePubKey(
+                    declaredAlg,
+                    File("aosp/make/target/product/gsi/testkey_rsa2048.pem").readBytes()
+                ) else null
+                if (AuxBlob.encodePubKey(declaredAlg).contentEquals(ai.auxBlob!!.pubkey!!.pubkey)) {
+                    log.info("VERIFY($localParent): signed with dev key: " + declaredAlg.defaultKey)
+                } else if (gkiPubKey.contentEquals(ai.auxBlob!!.pubkey!!.pubkey)) {
+                    log.info("VERIFY($localParent): signed with dev GKI key: " + declaredAlg.defaultKey)
+                } else {
+                    log.info("VERIFY($localParent): signed with release key")
+                }
+                val calcHash =
+                    Helper.join(declaredAlg.padding, AuthBlob.calcHash(rawHeaderBlob, rawAuxBlob, declaredAlg.name))
+                val readHash = Helper.join(declaredAlg.padding, Helper.fromHexString(ai.authBlob!!.hash!!))
+                if (calcHash.contentEquals(readHash)) {
+                    log.info("VERIFY($localParent->AuthBlob): verify hash... PASS")
+                    val readPubKey = CryptoHelper.KeyBox.decodeRSAkey(ai.auxBlob!!.pubkey!!.pubkey)
+                    val hashFromSig =
+                        CryptoHelper.Signer.rawRsa(readPubKey, Helper.fromHexString(ai.authBlob!!.signature!!))
+                    if (hashFromSig.contentEquals(readHash)) {
+                        log.info("VERIFY($localParent->AuthBlob): verify signature... PASS")
+                    } else {
+                        ret[0] = false
+                        ret[1] = ret[1] as String + " verify signature fail;"
+                        log.warn("read=" + Helper.toHexString(readHash) + ", calc=" + Helper.toHexString(calcHash))
+                        log.warn("VERIFY($localParent->AuthBlob): verify signature... FAIL")
+                    }
+                } else {
+                    ret[0] = false
+                    ret[1] = ret[1] as String + " verify hash fail"
+                    log.warn("read=" + ai.authBlob!!.hash!! + ", calc=" + Helper.toHexString(calcHash))
+                    log.warn("VERIFY($localParent->AuthBlob): verify hash... FAIL")
+                }
+            } else {
+                log.warn("VERIFY($localParent->AuthBlob): algorithm=[${declaredAlg.name}], no signature, skip")
+            }
+
+            val prefixes = setOf(System.getenv("more"), System.getProperty("more")).filterNotNull()
+                .map { Paths.get(it).toString() + "/" }.toMutableList().apply { add("") }
+            ai.auxBlob!!.chainPartitionDescriptors.forEach {
+                val vRet = it.verify(
+                    prefixes.map { prefix -> "$prefix${it.partition_name}.img" },
+                    image_file + "->Chain[${it.partition_name}]"
+                )
+                if (vRet[0] as Boolean) {
+                    log.info("VERIFY($localParent->Chain[${it.partition_name}]): " + "PASS")
+                } else {
+                    ret[0] = false
+                    ret[1] = ret[1] as String + "; " + vRet[1] as String
+                    log.info("VERIFY($localParent->Chain[${it.partition_name}]): " + vRet[1] as String + "... FAIL")
+                }
+            }
+
+            ai.auxBlob!!.hashDescriptors.forEach {
+                val vRet = it.verify(
+                    prefixes.map { prefix -> "$prefix${it.partition_name}.img" },
+                    image_file + "->HashDescriptor[${it.partition_name}]"
+                )
+                if (vRet[0] as Boolean) {
+                    log.info("VERIFY($localParent->HashDescriptor[${it.partition_name}]): ${it.hash_algorithm} " + "PASS")
+                } else {
+                    ret[0] = false
+                    ret[1] = ret[1] as String + "; " + vRet[1] as String
+                    log.info("VERIFY($localParent->HashDescriptor[${it.partition_name}]): ${it.hash_algorithm} " + vRet[1] as String + "... FAIL")
+                }
+            }
+
+            ai.auxBlob!!.hashTreeDescriptors.forEach {
+                val vRet = it.verify(
+                    prefixes.map { prefix -> "$prefix${it.partition_name}.img" },
+                    image_file + "->HashTreeDescriptor[${it.partition_name}]"
+                )
+                if (vRet[0] as Boolean) {
+                    log.info("VERIFY($localParent->HashTreeDescriptor[${it.partition_name}]): ${it.hash_algorithm} " + "PASS")
+                } else {
+                    ret[0] = false
+                    ret[1] = ret[1] as String + "; " + vRet[1] as String
+                    log.info("VERIFY($localParent->HashTreeDescriptor[${it.partition_name}]): ${it.hash_algorithm} " + vRet[1] as String + "... FAIL")
+                }
+            }
+
+            return ret
         }
     }
 }

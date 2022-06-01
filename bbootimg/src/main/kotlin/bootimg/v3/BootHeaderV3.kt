@@ -36,7 +36,7 @@ class BootHeaderV3(
         }
         log.warn("BootImgHeaderV3/V4 constructor")
         val info = Struct(FORMAT_STRING).unpack(iS)
-        assert(12 == info.size)
+        check(12 == info.size)
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like Android Boot Image V3 Header")
         }
@@ -52,7 +52,7 @@ class BootHeaderV3(
         this.headerVersion = (info[9] as UInt).toInt()
         this.cmdline = info[10] as String
         this.signatureSize = (info[11] as UInt).toInt()
-        assert(this.headerSize in intArrayOf(BOOT_IMAGE_HEADER_V3_SIZE, BOOT_IMAGE_HEADER_V4_SIZE))
+        check(this.headerSize in intArrayOf(BOOT_IMAGE_HEADER_V3_SIZE, BOOT_IMAGE_HEADER_V4_SIZE))
     }
 
     fun encode(): ByteArray {
@@ -106,7 +106,7 @@ class BootHeaderV3(
         const val pageSize: Int = 4096
 
         init {
-            assert(BOOT_IMAGE_HEADER_V4_SIZE == Struct(FORMAT_STRING).calcSize()) {
+            check(BOOT_IMAGE_HEADER_V4_SIZE == Struct(FORMAT_STRING).calcSize()) {
                 "internal error: expected size $BOOT_IMAGE_HEADER_V4_SIZE "
             }
         }

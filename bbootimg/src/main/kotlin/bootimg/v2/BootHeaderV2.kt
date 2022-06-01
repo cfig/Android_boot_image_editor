@@ -59,7 +59,7 @@ open class BootHeaderV2(
         }
         log.warn("BootImgHeader constructor")
         val info = Struct(FORMAT_STRING).unpack(iS)
-        assert(20 == info.size)
+        check(20 == info.size)
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like Android Boot Image Header")
         }
@@ -87,7 +87,7 @@ open class BootHeaderV2(
         }
 
         this.headerSize = (info[17] as UInt).toInt()
-        assert(this.headerSize.toInt() in intArrayOf(BOOT_IMAGE_HEADER_V2_SIZE,
+        check(this.headerSize.toInt() in intArrayOf(BOOT_IMAGE_HEADER_V2_SIZE,
                 BOOT_IMAGE_HEADER_V1_SIZE, BOOT_IMAGE_HEADER_V0_SIZE)) {
             "header size ${this.headerSize} illegal"
         }
@@ -109,7 +109,7 @@ open class BootHeaderV2(
         val pageSizeChoices: MutableSet<Long> = mutableSetOf<Long>().apply {
             (11..14).forEach { add(2.0.pow(it).toLong()) }
         }
-        assert(pageSizeChoices.contains(pageSize.toLong())) { "invalid parameter [pageSize=$pageSize], (choose from $pageSizeChoices)" }
+        check(pageSizeChoices.contains(pageSize.toLong())) { "invalid parameter [pageSize=$pageSize], (choose from $pageSizeChoices)" }
         return Struct(FORMAT_STRING).pack(
                 magic,
                 //10I
@@ -168,8 +168,7 @@ open class BootHeaderV2(
         const val BOOT_IMAGE_HEADER_V0_SIZE = 0
 
         init {
-            assert(BOOT_IMAGE_HEADER_V2_SIZE == Struct(FORMAT_STRING).calcSize())
+            check(BOOT_IMAGE_HEADER_V2_SIZE == Struct(FORMAT_STRING).calcSize())
         }
-
     }
 }

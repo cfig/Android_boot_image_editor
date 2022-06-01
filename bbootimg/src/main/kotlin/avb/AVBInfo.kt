@@ -19,19 +19,19 @@ import avb.blob.AuthBlob
 import avb.blob.AuxBlob
 import avb.blob.Footer
 import avb.blob.Header
-import avb.desc.*
+import avb.desc.UnknownDescriptor
 import cfig.Avb
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.paddingWith
+import cfig.helper.Helper.DataSrc
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.File
-import java.io.FileInputStream
 
 /*
-    a wonderfaul base64 encoder/decoder: https://cryptii.com/base64-to-hex
+    a wonderful base64 encoder/decoder: https://cryptii.com/base64-to-hex
  */
 class AVBInfo(
     var header: Header? = null,
@@ -64,7 +64,7 @@ class AVBInfo(
 
             public_key_metadata_size = auxBlob!!.pubkeyMeta?.pkmd?.size?.toLong() ?: 0L
             public_key_metadata_offset = public_key_offset + public_key_size
-            log.info("pkmd size: $public_key_metadata_size, pkmd offset : $public_key_metadata_offset")
+            log.debug("pkmd size: $public_key_metadata_size, pkmd offset : $public_key_metadata_offset")
         }.encode()
         //2 - auth blob
         val authBlob = AuthBlob.createBlob(headerBlob, newAuxBlob, alg.name)
@@ -88,33 +88,29 @@ class AVBInfo(
         private val log = LoggerFactory.getLogger(AVBInfo::class.java)
         private val mapper = ObjectMapper()
 
-        private data class Glance(
+        data class Glance(
             var footer: Footer?,
             var vbMetaOffset: Long
         )
 
-        private fun imageGlance(imageFile: String): Glance {
+        private fun imageGlance(dataSrc: DataSrc<*>): Glance {
             val ret = Glance(null, 0)
-            // footer
-            FileInputStream(imageFile).use { fis ->
-                fis.skip(File(imageFile).length() - Footer.SIZE)
-                try {
-                    ret.footer = Footer(fis)
-                    ret.vbMetaOffset = ret.footer!!.vbMetaOffset
-                    log.info("$imageFile: $ret.footer")
-                } catch (e: IllegalArgumentException) {
-                    log.info("image $imageFile has no AVB Footer")
-                }
+            try {
+                ret.footer = Footer(dataSrc.readFully(Pair(-Footer.SIZE.toLong(), Footer.SIZE)))
+                ret.vbMetaOffset = ret.footer!!.vbMetaOffset
+                log.info("${dataSrc.getName()}: $ret.footer")
+            } catch (e: IllegalArgumentException) {
+                log.info("image ${dataSrc.getName()} has no AVB Footer")
             }
             return ret
         }
 
-        fun parseFrom(imageFile: String): AVBInfo {
-            log.info("parseFrom($imageFile) ...")
+        fun parseFrom(dataSrc: DataSrc<*>): AVBInfo {
+            log.info("parseFrom(${dataSrc.getName()}) ...")
             // glance
-            val (footer, vbMetaOffset) = imageGlance(imageFile)
+            val (footer, vbMetaOffset) = imageGlance(dataSrc)
             // header
-            val vbMetaHeader = Header(ByteArrayInputStream(Helper.readFully(imageFile, vbMetaOffset, Header.SIZE)))
+            val vbMetaHeader = Header(dataSrc.readFully(Pair(vbMetaOffset, Header.SIZE)))
             log.debug(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(vbMetaHeader))
 
             val atlas = mutableMapOf<String, Pair<Long, Int>>()
@@ -130,9 +126,9 @@ class AVBInfo(
             val ai = AVBInfo(vbMetaHeader, null, AuxBlob(), footer)
             // Auth blob
             if (vbMetaHeader.authentication_data_block_size > 0) {
-                val ba = Helper.readFully(imageFile, atlas["auth.hash"]!!)
+                val ba = dataSrc.readFully(atlas["auth.hash"]!!)
                 log.debug("Parsed Auth Hash (Header & Aux Blob): " + Hex.encodeHexString(ba))
-                val bb = Helper.readFully(imageFile, atlas["auth.sig"]!!)
+                val bb = dataSrc.readFully(atlas["auth.sig"]!!)
                 log.debug("Parsed Auth Signature (of hash): " + Hex.encodeHexString(bb))
                 ai.authBlob = AuthBlob()
                 ai.authBlob!!.offset = atlas["auth"]!!.first
@@ -141,10 +137,10 @@ class AVBInfo(
                 ai.authBlob!!.signature = Hex.encodeHexString(bb)
             }
             // aux
-            val rawAuxBlob = Helper.readFully(imageFile, atlas["aux"]!!)
+            val rawAuxBlob = dataSrc.readFully(atlas["aux"]!!)
             // aux - desc
             if (vbMetaHeader.descriptors_size > 0) {
-                val descriptors = UnknownDescriptor.parseDescriptors2(
+                val descriptors = UnknownDescriptor.parseDescriptors(
                     ByteArrayInputStream(
                         rawAuxBlob.copyOfRange(vbMetaHeader.descriptors_offset.toInt(), rawAuxBlob.size)
                     ),
@@ -176,7 +172,7 @@ class AVBInfo(
                 )
                 log.debug("Parsed Pub Key Metadata: " + Helper.toHexString(ai.auxBlob!!.pubkeyMeta!!.pkmd))
             }
-            log.debug("vbmeta info of [$imageFile] has been analyzed")
+            log.debug("vbmeta info of [${dataSrc.getName()}] has been analyzed")
             return ai
         }
     }

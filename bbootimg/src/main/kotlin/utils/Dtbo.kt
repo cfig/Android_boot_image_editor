@@ -7,6 +7,7 @@ import cfig.bootimg.Common
 import cfig.bootimg.Signer
 import cfig.bootimg.v3.VendorBoot
 import cfig.helper.Helper
+import cfig.helper.Helper.DataSrc
 import cfig.packable.VBMetaParser
 import cfig.utils.DTC
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -44,7 +45,7 @@ class Dtbo(
             internal const val SIZE = 32
 
             init {
-                assert(Struct(FORMAT_STRING).calcSize() == SIZE)
+                check(Struct(FORMAT_STRING).calcSize() == SIZE)
             }
         }
 
@@ -53,7 +54,7 @@ class Dtbo(
                 return
             }
             val info = Struct(FORMAT_STRING).unpack(iS)
-            assert(8 == info.size)
+            check(8 == info.size)
             if ((info[0] as UInt).toLong() != magic) {
                 throw IllegalArgumentException("stream doesn't look like DTBO header")
             }
@@ -103,13 +104,13 @@ class Dtbo(
             internal const val SIZE = 32
 
             init {
-                assert(Struct(FORMAT_STRING).calcSize() == SIZE)
+                check(Struct(FORMAT_STRING).calcSize() == SIZE)
             }
         }
 
         constructor(iS: InputStream) : this() {
             val info = Struct(FORMAT_STRING).unpack(iS)
-            assert(8 == info.size)
+            check(8 == info.size)
             entrySize = info[0] as Int
             entryOffset = info[1] as Int
             id = info[2] as Int
@@ -155,7 +156,7 @@ class Dtbo(
 
     fun extractVBMeta(): Dtbo {
         try {
-            AVBInfo.parseFrom(info.output).dumpDefault(info.output)
+            AVBInfo.parseFrom(DataSrc(info.output)).dumpDefault(info.output)
         } catch (e: Exception) {
             log.error("extraceVBMeta(): $e")
         }

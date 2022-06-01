@@ -61,7 +61,7 @@ class HashDescriptor(var flags: Int = 0,
             throw IllegalArgumentException("Given data does not look like a |hash| descriptor")
         }
         val payload = Struct("${this.partition_name_len}s${this.salt_len}b${this.digest_len}b").unpack(data)
-        assert(3 == payload.size)
+        check(3 == payload.size)
         this.partition_name = payload[0] as String
         this.salt = payload[1] as ByteArray
         this.digest = payload[2] as ByteArray

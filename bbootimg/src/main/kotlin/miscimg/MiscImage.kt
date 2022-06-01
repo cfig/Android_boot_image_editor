@@ -89,7 +89,7 @@ data class MiscImage(
             const val SIZE = 2048
 
             init {
-                assert(SIZE == Struct(FORMAT_STRING).calcSize())
+                check(SIZE == Struct(FORMAT_STRING).calcSize())
             }
 
             /*
@@ -188,7 +188,7 @@ data class MiscImage(
             const val SIZE = 64
 
             init {
-                assert(SIZE == Struct(FORMAT_STRING).calcSize())
+                check(SIZE == Struct(FORMAT_STRING).calcSize())
             }
         }
 

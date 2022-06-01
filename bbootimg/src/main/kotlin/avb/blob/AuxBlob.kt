@@ -16,14 +16,13 @@ package avb.blob
 
 import avb.alg.Algorithm
 import avb.desc.*
+import cc.cfig.io.Struct
 import cfig.helper.CryptoHelper
 import cfig.helper.Helper
-import cc.cfig.io.Struct
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey
 import org.slf4j.LoggerFactory
-import java.nio.file.Files
-import java.nio.file.Paths
+import java.io.File
 
 @JsonIgnoreProperties("descriptorSize")
 class AuxBlob(
@@ -34,7 +33,8 @@ class AuxBlob(
     var hashDescriptors: MutableList<HashDescriptor> = mutableListOf(),
     var kernelCmdlineDescriptors: MutableList<KernelCmdlineDescriptor> = mutableListOf(),
     var chainPartitionDescriptors: MutableList<ChainPartitionDescriptor> = mutableListOf(),
-    var unknownDescriptors: MutableList<UnknownDescriptor> = mutableListOf()) {
+    var unknownDescriptors: MutableList<UnknownDescriptor> = mutableListOf()
+) {
 
     val descriptorSize: Int
         get(): Int {
@@ -42,25 +42,26 @@ class AuxBlob(
         }
 
     data class PubKeyInfo(
-            var offset: Long = 0L,
-            var size: Long = 0L,
-            var pubkey: ByteArray = byteArrayOf()
+        var offset: Long = 0L,
+        var size: Long = 0L,
+        var pubkey: ByteArray = byteArrayOf()
     )
 
     data class PubKeyMetadataInfo(
-            var offset: Long = 0L,
-            var size: Long = 0L,
-            var pkmd: ByteArray = byteArrayOf()
+        var offset: Long = 0L,
+        var size: Long = 0L,
+        var pkmd: ByteArray = byteArrayOf()
     )
 
     private fun encodeDescriptors(): ByteArray {
         return mutableListOf<Descriptor>().let { descList ->
-            arrayOf(this.propertyDescriptors,        //tag 0
-                    this.hashTreeDescriptors,        //tag 1
-                    this.hashDescriptors,            //tag 2
-                    this.kernelCmdlineDescriptors,   //tag 3
-                    this.chainPartitionDescriptors,  //tag 4
-                    this.unknownDescriptors          //tag X
+            arrayOf(
+                this.propertyDescriptors,        //tag 0
+                this.hashTreeDescriptors,        //tag 1
+                this.hashDescriptors,            //tag 2
+                this.kernelCmdlineDescriptors,   //tag 3
+                this.chainPartitionDescriptors,  //tag 4
+                this.unknownDescriptors          //tag X
             ).forEach { typedList ->
                 typedList.forEach { descList.add(it) }
             }
@@ -96,8 +97,9 @@ class AuxBlob(
         }
 
         val auxSize = Helper.round_to_multiple(
-                (encodedDesc.size + encodedKey.size + encodedPkmd.size).toLong(),
-                64)
+            (encodedDesc.size + encodedKey.size + encodedPkmd.size).toLong(),
+            64
+        )
         return Struct("${auxSize}b").pack(Helper.join(encodedDesc, encodedKey, encodedPkmd))
     }
 
@@ -135,13 +137,10 @@ class AuxBlob(
         fun encodePubKey(alg: Algorithm, key: ByteArray? = null): ByteArray {
             var encodedKey = byteArrayOf()
             if (alg.public_key_num_bytes > 0) {
-                var algKey: ByteArray? = key
-                if (key == null) {
-                    algKey = Files.readAllBytes((Paths.get(alg.defaultKey)))
-                }
-                val rsa = CryptoHelper.KeyBox.parse4(algKey!!).key as RSAPrivateKey //BC RSA
+                val algKey: ByteArray = key ?: File(alg.defaultKey).readBytes()
+                val rsa = CryptoHelper.KeyBox.parse4(algKey).key as RSAPrivateKey //BC RSA
                 encodedKey = CryptoHelper.KeyBox.encodeRSAkey(rsa)
-                assert(alg.public_key_num_bytes == encodedKey.size)
+                check(alg.public_key_num_bytes == encodedKey.size)
             } else {
                 log.info("encodePubKey(): No key to encode for algorithm " + alg.name)
             }

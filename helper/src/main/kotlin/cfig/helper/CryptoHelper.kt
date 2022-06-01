@@ -42,7 +42,7 @@ class CryptoHelper {
 
                 val p = PemReader(InputStreamReader(ByteArrayInputStream(data))).readPemObject()
                 if (p != null) {
-                    log.info("parse PEM: " + p.type)
+                    log.debug("parse PEM: " + p.type)
                     ret = when (p.type) {
                         "RSA PUBLIC KEY", "PUBLIC KEY" -> {
                             try {
@@ -174,13 +174,17 @@ class CryptoHelper {
                 require(rsa.modulus.bitLength() == numBits)
                 val b = BigInteger.valueOf(2).pow(32)
                 val n0inv = b.minus(rsa.modulus.modInverse(b)).toLong()
-                val rrModn = BigInteger.valueOf(4).pow(numBits).rem(rsa.modulus)
-                val unsignedModulo = rsa.modulus.toByteArray().sliceArray(1..numBits / 8) //remove sign byte
+                val rrModn = BigInteger.valueOf(4).pow(numBits).rem(rsa.modulus).toByteArray().let {
+                    it.sliceArray(it.size - numBits/8 until it.size)
+                }
+                val unsignedModulo = rsa.modulus.toByteArray().let {
+                    it.sliceArray(it.size - numBits/8 until it.size)
+                }
                 return Struct("!II${numBits / 8}b${numBits / 8}b").pack(
                     numBits,
                     n0inv,
                     unsignedModulo,
-                    rrModn.toByteArray()
+                    rrModn
                 )
             }
 

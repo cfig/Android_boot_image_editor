@@ -44,6 +44,7 @@ def generate_gki_certificate(image, avbtool, name, algorithm, key, salt,
         avbtool_cmd += ['--salt', salt]
 
     avbtool_cmd += additional_avb_args
+    print(avbtool_cmd)
 
     subprocess.check_call(avbtool_cmd)
 

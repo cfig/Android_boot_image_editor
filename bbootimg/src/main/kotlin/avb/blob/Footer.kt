@@ -15,6 +15,7 @@
 package avb.blob
 
 import cc.cfig.io.Struct
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -47,7 +48,7 @@ data class Footer constructor(
     @Throws(IllegalArgumentException::class)
     constructor(iS: InputStream) : this() {
         val info = Struct(FORMAT_STRING).unpack(iS)
-        assert(7 == info.size)
+        check(7 == info.size)
         if (MAGIC != (info[0] as String)) {
             throw IllegalArgumentException("stream doesn't look like valid AVB Footer")
         }
@@ -57,6 +58,9 @@ data class Footer constructor(
         vbMetaOffset = (info[4] as ULong).toLong()
         vbMetaSize = (info[5] as ULong).toLong()
     }
+
+    @Throws(IllegalArgumentException::class)
+    constructor(data: ByteArray) : this(ByteArrayInputStream(data))
 
     constructor(originalImageSize: Long, vbMetaOffset: Long, vbMetaSize: Long)
             : this(FOOTER_VERSION_MAJOR, FOOTER_VERSION_MINOR, originalImageSize, vbMetaOffset, vbMetaSize)
@@ -93,7 +97,7 @@ data class Footer constructor(
         private const val FORMAT_STRING = "!4s2L3Q${RESERVED}x"
 
         init {
-            assert(SIZE == Struct(FORMAT_STRING).calcSize())
+            check(SIZE == Struct(FORMAT_STRING).calcSize())
         }
     }
 }

@@ -19,6 +19,7 @@ import cfig.bootimg.Common.Companion.probeHeaderVersion
 import cfig.bootimg.v2.BootV2
 import cfig.bootimg.v2.BootV2Dialects
 import cfig.bootimg.v3.BootV3
+import cfig.helper.Helper
 import cfig.helper.Helper.Companion.deleteIfExists
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -119,6 +120,12 @@ class BootImgParser : IPackable {
     }
 
     override fun `@verify`(fileName: String) {
+        File(Helper.prop("workDir")).let {
+            if (!it.exists()) {
+                it.mkdirs()
+            }
+        }
+
         super.`@verify`(fileName)
     }
 

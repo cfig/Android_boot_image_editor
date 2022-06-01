@@ -17,6 +17,7 @@ package cfig.packable
 import avb.AVBInfo
 import cfig.Avb
 import cfig.helper.Helper
+import cfig.helper.Helper.DataSrc
 import cfig.helper.Helper.Companion.deleteIfExists
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
@@ -39,7 +40,7 @@ class VBMetaParser : IPackable {
                 it.mkdirs()
             }
         }
-        AVBInfo.parseFrom(fileName).dumpDefault(fileName)
+        AVBInfo.parseFrom(DataSrc(fileName)).dumpDefault(fileName)
     }
 
     override fun pack(fileName: String) {

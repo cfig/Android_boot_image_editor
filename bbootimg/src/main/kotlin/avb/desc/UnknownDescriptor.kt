@@ -71,30 +71,7 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 
         private const val FORMAT = "!QQ"
         private val log = LoggerFactory.getLogger(UnknownDescriptor::class.java)
 
-        fun parseDescriptors(stream: InputStream, totalSize: Long): List<UnknownDescriptor> {
-            log.debug("Parse descriptors stream, SIZE = $totalSize")
-            val ret: MutableList<UnknownDescriptor> = mutableListOf()
-            var currentSize = 0L
-            while (true) {
-                val desc = UnknownDescriptor(stream)
-                currentSize += desc.data.size + SIZE
-                log.debug("current SIZE = $currentSize")
-                ret.add(desc)
-                if (currentSize == totalSize) {
-                    log.debug("parse descriptor done")
-                    break
-                } else if (currentSize > totalSize) {
-                    log.error("Read more than expected")
-                    throw IllegalStateException("Read more than expected")
-                } else {
-                    log.debug(desc.toString())
-                    log.debug("read another descriptor")
-                }
-            }
-            return ret
-        }
-
-        fun parseDescriptors2(stream: InputStream, totalSize: Long): List<Descriptor> {
+        fun parseDescriptors(stream: InputStream, totalSize: Long): List<Descriptor> {
             log.debug("Parse descriptors stream, SIZE = $totalSize")
             val ret: MutableList<Descriptor> = mutableListOf()
             var currentSize = 0L
@@ -120,7 +97,7 @@ class UnknownDescriptor(var data: ByteArray = byteArrayOf()) : Descriptor(0, 0, 
         }
 
         init {
-            assert(SIZE == Struct(FORMAT).calcSize())
+            check(SIZE == Struct(FORMAT).calcSize())
         }
     }
 }

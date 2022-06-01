@@ -21,6 +21,7 @@ import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
 import cfig.bootimg.v3.VendorBoot
 import cfig.helper.Helper
+import cfig.helper.Helper.DataSrc
 import cfig.packable.VBMetaParser
 import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -244,7 +245,7 @@ data class BootV2Dialects(
 
     fun extractVBMeta(): BootV2Dialects {
         if (this.info.verify.startsWith("VB2.0")) {
-            AVBInfo.parseFrom(info.output).dumpDefault(info.output)
+            AVBInfo.parseFrom(DataSrc(info.output)).dumpDefault(info.output)
             if (File("vbmeta.img").exists()) {
                 log.warn("Found vbmeta.img, parsing ...")
                 VBMetaParser().unpack("vbmeta.img")

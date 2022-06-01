@@ -23,6 +23,7 @@ import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Common.Companion.getPaddingSize
 import cfig.bootimg.Signer
 import cfig.helper.Helper
+import cfig.helper.Helper.DataSrc
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -231,17 +232,6 @@ data class BootV3(
             this.ramdisk.file = this.ramdisk.file + ".$fmt"
         }
         //bootsig
-        if (info.signatureSize > 0) {
-            Helper.extractFile(
-                info.output, this.bootSignature.file,
-                this.bootSignature.position.toLong(), this.bootSignature.size
-            )
-            try {
-                AVBInfo.parseFrom(this.bootSignature.file).dumpDefault(this.bootSignature.file)
-            } catch (e: IllegalArgumentException) {
-                log.warn("boot signature is invalid")
-            }
-        }
 
         //dump info again
         mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
@@ -249,8 +239,9 @@ data class BootV3(
     }
 
     fun extractVBMeta(): BootV3 {
+        // vbmeta in image
         try {
-            AVBInfo.parseFrom(info.output).dumpDefault(info.output)
+            AVBInfo.parseFrom(DataSrc(info.output)).dumpDefault(info.output)
             if (File("vbmeta.img").exists()) {
                 log.warn("Found vbmeta.img, parsing ...")
                 VBMetaParser().unpack("vbmeta.img")
@@ -259,6 +250,51 @@ data class BootV3(
             log.warn(e.message)
             log.warn("failed to parse vbmeta info")
         }
+
+        //GKI 1.0 bootsig
+        if (info.signatureSize > 0) {
+            Helper.extractFile(
+                info.output, this.bootSignature.file,
+                this.bootSignature.position.toLong(), this.bootSignature.size
+            )
+            try {
+                val bootsig = AVBInfo.parseFrom(DataSrc(this.bootSignature.file)).dumpDefault(this.bootSignature.file)
+                Avb.verify(bootsig, "${workDir}bootsig")
+            } catch (e: IllegalArgumentException) {
+                log.warn("boot signature is invalid")
+            }
+            return this
+        }
+
+        //GKI 2.0 bootsig
+        if (!File(Avb.getJsonFileName(info.output)).exists()) {
+            log.info("no AVB info found in ${info.output}")
+            return this
+        }
+        log.info("probing 16KB boot signature ...")
+        val mainBlob = ObjectMapper().readValue(
+            File(Avb.getJsonFileName(info.output)),
+            AVBInfo::class.java
+        )
+        val bootSig16kData =
+            DataSrc(DataSrc(info.output).readFully(Pair(mainBlob.footer!!.originalImageSize - 16 * 1024, 16 * 1024)))
+        try {
+            val blob1 = AVBInfo.parseFrom(bootSig16kData)
+                .also { it.dumpDefault("bootsig." + it.auxBlob!!.hashDescriptors[0].partition_name) }
+            val blob2 =
+                AVBInfo.parseFrom(DataSrc(bootSig16kData.readFully(blob1.encode().size until bootSig16kData.getLength())))
+                    .also { it.dumpDefault("bootsig." + it.auxBlob!!.hashDescriptors[0].partition_name) }
+            File("build/unzip_boot/generic_kernel_avb").writeBytes(bootSig16kData.readFully(blob1.encode().size until bootSig16kData.getLength()))
+            File("build/unzip_boot/kernel").copyTo(File("build/unzip_boot/generic_kernel.img"), true)
+            System.setProperty("more", "build/unzip_boot")
+            Avb.verify(blob2, "generic_kernel_avb")
+
+            log.info(blob1.auxBlob!!.hashDescriptors[0].partition_name)
+            log.info(blob2.auxBlob!!.hashDescriptors[0].partition_name)
+        } catch (e: IllegalArgumentException) {
+            log.warn("can not find boot signature: " + e.message)
+        }
+
         return this
     }
 

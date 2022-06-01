@@ -17,6 +17,7 @@ package cfig.helper
 import cfig.helper.ZipHelper.Companion.dumpEntry
 import org.apache.commons.compress.archivers.zip.ZipFile
 import org.junit.After
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -46,7 +47,17 @@ class ZipHelperTest {
     fun dumpEntry() {
         val zf = ZipHelperTest::class.java.classLoader.getResource("appcompat.zip").file
         ZipFile(zf).use {
-           it.dumpEntry("webview.log", File("out/webview.log"))
+            it.dumpEntry("webview.log", File("out/webview.log"))
+        }
+    }
+
+    @Test
+    fun testDataSrc() {
+        if (File("/proc/cpuinfo").exists()) {
+            val ds1 = Helper.DataSrc("/proc/cpuinfo")
+            Assert.assertTrue(ds1.readFully(0L..31).contentEquals(ds1.readFully(Pair(0, 32))))
+            val d2 = Helper.DataSrc(ds1.readFully(0L..31))
+            Assert.assertTrue(d2.readFully(0..15L).contentEquals(d2.readFully(Pair(0, 16))))
         }
     }
 }

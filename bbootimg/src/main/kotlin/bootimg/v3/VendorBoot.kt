@@ -21,6 +21,7 @@ import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
 import cfig.helper.Helper
+import cfig.helper.Helper.DataSrc
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -124,7 +125,7 @@ data class VendorBoot(
             const val SIZE = 108
 
             init {
-                assert(Struct(FORMAT_STRING).calcSize() == SIZE)
+                check(Struct(FORMAT_STRING).calcSize() == SIZE)
             }
         }
 
@@ -133,7 +134,7 @@ data class VendorBoot(
                 return
             }
             val info = Struct(FORMAT_STRING).unpack(iS)
-            assert((3 + 1 + 1) == info.size)
+            check((3 + 1 + 1) == info.size)
             this.size = (info[0] as UInt).toInt()
             this.offset = (info[1] as UInt).toInt()
             this.type = VrtType.fromInt((info[2] as UInt).toInt())
@@ -372,7 +373,7 @@ data class VendorBoot(
 
     fun extractVBMeta(): VendorBoot {
         try {
-            AVBInfo.parseFrom(info.output).dumpDefault(info.output)
+            AVBInfo.parseFrom(DataSrc(info.output)).dumpDefault(info.output)
         } catch (e: Exception) {
             log.error("extraceVBMeta(): $e")
         }

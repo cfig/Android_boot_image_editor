@@ -72,7 +72,7 @@ class KernelCmdlineDescriptor(
         const val flagHashTreeDisabled = 2
 
         init {
-            assert(SIZE == Struct(FORMAT_STRING).calcSize())
+            check(SIZE == Struct(FORMAT_STRING).calcSize())
         }
     }
 }

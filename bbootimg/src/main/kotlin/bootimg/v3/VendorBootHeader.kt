@@ -42,7 +42,7 @@ class VendorBootHeader(
         }
         log.warn("VendorBootHeader constructor")
         val info = Struct(FORMAT_STRING).unpack(iS)
-        assert(16 == info.size)
+        check(16 == info.size)
         if (info[0] != magic) {
             throw IllegalArgumentException("stream doesn't look like Android Vendor Boot Image")
         }
@@ -134,7 +134,7 @@ class VendorBootHeader(
                 "I"   //[v4] bootconfig size
 
         init {
-            assert(Struct(FORMAT_STRING).calcSize() == VENDOR_BOOT_IMAGE_HEADER_V4_SIZE)
+            check(Struct(FORMAT_STRING).calcSize() == VENDOR_BOOT_IMAGE_HEADER_V4_SIZE)
         }
     }
 
