@@ -23,7 +23,7 @@ import avb.desc.UnknownDescriptor
 import cfig.Avb
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.paddingWith
-import cfig.helper.Helper.DataSrc
+import cfig.helper.Dumpling
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
@@ -93,24 +93,24 @@ class AVBInfo(
             var vbMetaOffset: Long
         )
 
-        private fun imageGlance(dataSrc: DataSrc<*>): Glance {
+        private fun imageGlance(dp: Dumpling<*>): Glance {
             val ret = Glance(null, 0)
             try {
-                ret.footer = Footer(dataSrc.readFully(Pair(-Footer.SIZE.toLong(), Footer.SIZE)))
+                ret.footer = Footer(dp.readFully(Pair(-Footer.SIZE.toLong(), Footer.SIZE)))
                 ret.vbMetaOffset = ret.footer!!.vbMetaOffset
-                log.info("${dataSrc.getName()}: $ret.footer")
+                log.info("${dp.getName()}: $ret.footer")
             } catch (e: IllegalArgumentException) {
-                log.info("image ${dataSrc.getName()} has no AVB Footer")
+                log.info("image ${dp.getName()} has no AVB Footer")
             }
             return ret
         }
 
-        fun parseFrom(dataSrc: DataSrc<*>): AVBInfo {
-            log.info("parseFrom(${dataSrc.getName()}) ...")
+        fun parseFrom(dp: Dumpling<*>): AVBInfo {
+            log.info("parseFrom(${dp.getName()}) ...")
             // glance
-            val (footer, vbMetaOffset) = imageGlance(dataSrc)
+            val (footer, vbMetaOffset) = imageGlance(dp)
             // header
-            val vbMetaHeader = Header(dataSrc.readFully(Pair(vbMetaOffset, Header.SIZE)))
+            val vbMetaHeader = Header(dp.readFully(Pair(vbMetaOffset, Header.SIZE)))
             log.debug(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(vbMetaHeader))
 
             val atlas = mutableMapOf<String, Pair<Long, Int>>()
@@ -126,9 +126,9 @@ class AVBInfo(
             val ai = AVBInfo(vbMetaHeader, null, AuxBlob(), footer)
             // Auth blob
             if (vbMetaHeader.authentication_data_block_size > 0) {
-                val ba = dataSrc.readFully(atlas["auth.hash"]!!)
+                val ba = dp.readFully(atlas["auth.hash"]!!)
                 log.debug("Parsed Auth Hash (Header & Aux Blob): " + Hex.encodeHexString(ba))
-                val bb = dataSrc.readFully(atlas["auth.sig"]!!)
+                val bb = dp.readFully(atlas["auth.sig"]!!)
                 log.debug("Parsed Auth Signature (of hash): " + Hex.encodeHexString(bb))
                 ai.authBlob = AuthBlob()
                 ai.authBlob!!.offset = atlas["auth"]!!.first
@@ -137,7 +137,7 @@ class AVBInfo(
                 ai.authBlob!!.signature = Hex.encodeHexString(bb)
             }
             // aux
-            val rawAuxBlob = dataSrc.readFully(atlas["aux"]!!)
+            val rawAuxBlob = dp.readFully(atlas["aux"]!!)
             // aux - desc
             if (vbMetaHeader.descriptors_size > 0) {
                 val descriptors = UnknownDescriptor.parseDescriptors(
@@ -172,7 +172,7 @@ class AVBInfo(
                 )
                 log.debug("Parsed Pub Key Metadata: " + Helper.toHexString(ai.auxBlob!!.pubkeyMeta!!.pkmd))
             }
-            log.debug("vbmeta info of [${dataSrc.getName()}] has been analyzed")
+            log.debug("vbmeta info of [${dp.getName()}] has been analyzed")
             return ai
         }
     }

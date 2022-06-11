@@ -234,30 +234,14 @@ class CryptoHelper {
                 return MessageDigest.getInstance("SHA-256").digest(inData)
             }
 
-            //fun hash(file: String, algorithm: String): ByteArray {
-            //    val md = MessageDigest.getInstance(algorithm)
-            //    FileInputStream(file).use { fis ->
-            //        val buffer = ByteArray(1024 * 1024)
-            //        while (true) {
-            //            val bytesRead = fis.read(buffer)
-            //            if (bytesRead <= 0) break
-            //            md.update(buffer, 0, bytesRead)
-            //        }
-            //    }
-            //    return md.digest()
-            //}
-            fun hash(file: String, algorithm: String): ByteArray {
-                return hash(file, listOf(Pair(0, File(file).length())), algorithm)
-            }
-
-            fun hash(file: String, coordinates: List<Pair<Long, Long>>, algorithm: String): ByteArray {
+            fun hash(ds: Dumpling<*>, coordinates: List<Pair<Long, Long>>, algorithm: String): ByteArray {
                 require(coordinates.isNotEmpty())
                 coordinates.forEach {
                     require(it.first >= 0 && it.second > 0)
                 }
                 return MessageDigest.getInstance(algorithm).let { md ->
                     coordinates.forEach { coordinate ->
-                        FileInputStream(file).use { fis ->
+                        ds.getInputStream().use { fis ->
                             fis.skip(coordinate.first)
                             val ibs = 1024 * 1024
                             val buffer = ByteArray(ibs)
@@ -279,6 +263,14 @@ class CryptoHelper {
                     }
                     md
                 }.digest()
+            }
+
+            fun hash(file: String, algorithm: String): ByteArray {
+                return hash(Dumpling(file), listOf(Pair(0, File(file).length())), algorithm)
+            }
+
+            fun hash(ds: Dumpling<*>, algorithm: String): ByteArray {
+                return hash(ds, listOf(Pair(0, ds.getLength())), algorithm)
             }
         }
     }

@@ -17,7 +17,7 @@ package avb.desc
 import avb.blob.Header
 import cfig.helper.CryptoHelper
 import cfig.helper.Helper
-import cfig.helper.Helper.DataSrc
+import cfig.helper.Dumpling
 import cc.cfig.io.Struct
 import org.slf4j.LoggerFactory
 import java.io.*
@@ -113,7 +113,7 @@ class HashTreeDescriptor(
         for (item in fileNames) {
             if (File(item).exists()) {
                 val trimmedHash = this.genMerkleTree(item, "hash.tree")
-                val readTree = DataSrc(item).readFully(Pair(this.tree_offset, this.tree_size.toInt()))
+                val readTree = Dumpling(item).readFully(Pair(this.tree_offset, this.tree_size.toInt()))
                 val ourHtHash = CryptoHelper.Hasher.sha256(File("hash.tree").readBytes())
                 val diskHtHash = CryptoHelper.Hasher.sha256(readTree)
                 if (!ourHtHash.contentEquals(diskHtHash)) {

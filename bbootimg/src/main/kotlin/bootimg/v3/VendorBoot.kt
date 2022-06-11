@@ -21,7 +21,7 @@ import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
 import cfig.helper.Helper
-import cfig.helper.Helper.DataSrc
+import cfig.helper.Dumpling
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -156,6 +156,7 @@ data class VendorBoot(
     companion object {
         private val log = LoggerFactory.getLogger(VendorBoot::class.java)
         private val workDir = Helper.prop("workDir")
+        private val mapper = ObjectMapper()
         fun parse(fileName: String): VendorBoot {
             val ret = VendorBoot()
             FileInputStream(fileName).use { fis ->
@@ -373,7 +374,7 @@ data class VendorBoot(
 
     fun extractVBMeta(): VendorBoot {
         try {
-            AVBInfo.parseFrom(DataSrc(info.output)).dumpDefault(info.output)
+            AVBInfo.parseFrom(Dumpling(info.output)).dumpDefault(info.output)
         } catch (e: Exception) {
             log.error("extraceVBMeta(): $e")
         }
@@ -413,8 +414,15 @@ data class VendorBoot(
                 it.addRow("bootconfig", this.bootconfig.file)
             }
             it.addRule()
-            it.addRow("AVB info", Avb.getJsonFileName(info.output))
-            it.addRule()
+            Avb.getJsonFileName(info.output).let { jsonFile ->
+                it.addRow("AVB info", Avb.getJsonFileName(info.output))
+                if (File(jsonFile).exists()) {
+                    mapper.readValue(File(jsonFile), AVBInfo::class.java).let { ai ->
+                        it.addRow("\\-- signing key", Avb.inspectKey(ai))
+                    }
+                }
+                it.addRule()
+            }
             it
         }
         val tabVBMeta = AsciiTable().let {

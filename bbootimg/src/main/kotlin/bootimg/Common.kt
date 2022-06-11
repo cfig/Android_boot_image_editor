@@ -160,6 +160,14 @@ class Common {
                     ZipHelper.lz4cat(s.dumpFile + ".lz4", s.dumpFile)
                     ret = "lz4"
                 }
+                ZipHelper.isAndroidCpio(s.dumpFile) -> {
+                    log.info("ramdisk is uncompressed cpio")
+                    Files.copy(
+                        Paths.get(s.dumpFile), Paths.get(s.dumpFile + ".cpio"),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                    )
+                    ret = "cpio"
+                }
                 else -> {
                     throw IllegalArgumentException("ramdisk is in unknown format")
                 }
@@ -272,6 +280,11 @@ class Common {
                     val f = ramdiskGz.removeSuffix(".xz")
                     AndroidCpio().pack(root, f, "${f}_filelist.txt")
                     FileInputStream(f).use { ZipHelper.xz(ramdiskGz, it) }
+                }
+                ramdiskGz.endsWith(".cpio") -> {
+                    val f = ramdiskGz.removeSuffix(".cpio")
+                    AndroidCpio().pack(root, f, "${f}_filelist.txt")
+                    File(f).copyTo(File(ramdiskGz), true)
                 }
                 else -> {
                     throw IllegalArgumentException("$ramdiskGz is not supported")

@@ -24,7 +24,8 @@ import avb.desc.HashDescriptor
 import cfig.helper.CryptoHelper
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.paddingWith
-import cfig.helper.Helper.DataSrc
+import cfig.helper.Dumpling
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
 import org.apache.commons.exec.CommandLine
@@ -205,7 +206,7 @@ class Avb {
                         it.auxBlob!!.hashDescriptors.get(0).partition_name
                     }
                 //read hashDescriptor from image
-                val newHashDesc = AVBInfo.parseFrom(DataSrc("$fileName.signed"))
+                val newHashDesc = AVBInfo.parseFrom(Dumpling("$fileName.signed"))
                 check(newHashDesc.auxBlob!!.hashDescriptors.size == 1)
                 var seq = -1 //means not found
                 //main vbmeta
@@ -236,32 +237,22 @@ class Avb {
             }
         }
 
-        fun verify(ai: AVBInfo, image_file: String, parent: String = ""): Array<Any> {
+        fun verify(ai: AVBInfo, dp: Dumpling<*>, parent: String = ""): Array<Any> {
             val ret: Array<Any> = arrayOf(true, "")
-            val localParent = parent.ifEmpty { image_file }
+            val localParent = parent.ifEmpty { dp.getLabel() }
             //header
-            val rawHeaderBlob = DataSrc(image_file).readFully(Pair(ai.footer?.vbMetaOffset ?: 0, Header.SIZE))
+            val rawHeaderBlob = dp.readFully(Pair(ai.footer?.vbMetaOffset ?: 0, Header.SIZE))
             // aux
             val vbOffset = ai.footer?.vbMetaOffset ?: 0
             //@formatter:off
-            val rawAuxBlob = DataSrc(image_file).readFully(
-                    Pair(vbOffset + Header.SIZE + ai.header!!.authentication_data_block_size,
-                        ai.header!!.auxiliary_data_block_size.toInt()))
+            val rawAuxBlob = dp.readFully(
+                Pair(vbOffset + Header.SIZE + ai.header!!.authentication_data_block_size,
+                    ai.header!!.auxiliary_data_block_size.toInt()))
             //@formatter:on
             //integrity check
             val declaredAlg = Algorithms.get(ai.header!!.algorithm_type)
             if (declaredAlg!!.public_key_num_bytes > 0) {
-                val gkiPubKey = if (declaredAlg.algorithm_type == 1) AuxBlob.encodePubKey(
-                    declaredAlg,
-                    File("aosp/make/target/product/gsi/testkey_rsa2048.pem").readBytes()
-                ) else null
-                if (AuxBlob.encodePubKey(declaredAlg).contentEquals(ai.auxBlob!!.pubkey!!.pubkey)) {
-                    log.info("VERIFY($localParent): signed with dev key: " + declaredAlg.defaultKey)
-                } else if (gkiPubKey.contentEquals(ai.auxBlob!!.pubkey!!.pubkey)) {
-                    log.info("VERIFY($localParent): signed with dev GKI key: " + declaredAlg.defaultKey)
-                } else {
-                    log.info("VERIFY($localParent): signed with release key")
-                }
+                inspectKey(ai)
                 val calcHash =
                     Helper.join(declaredAlg.padding, AuthBlob.calcHash(rawHeaderBlob, rawAuxBlob, declaredAlg.name))
                 val readHash = Helper.join(declaredAlg.padding, Helper.fromHexString(ai.authBlob!!.hash!!))
@@ -293,7 +284,7 @@ class Avb {
             ai.auxBlob!!.chainPartitionDescriptors.forEach {
                 val vRet = it.verify(
                     prefixes.map { prefix -> "$prefix${it.partition_name}.img" },
-                    image_file + "->Chain[${it.partition_name}]"
+                    dp.getLabel() + "->Chain[${it.partition_name}]"
                 )
                 if (vRet[0] as Boolean) {
                     log.info("VERIFY($localParent->Chain[${it.partition_name}]): " + "PASS")
@@ -307,7 +298,7 @@ class Avb {
             ai.auxBlob!!.hashDescriptors.forEach {
                 val vRet = it.verify(
                     prefixes.map { prefix -> "$prefix${it.partition_name}.img" },
-                    image_file + "->HashDescriptor[${it.partition_name}]"
+                    dp.getLabel() + "->HashDescriptor[${it.partition_name}]"
                 )
                 if (vRet[0] as Boolean) {
                     log.info("VERIFY($localParent->HashDescriptor[${it.partition_name}]): ${it.hash_algorithm} " + "PASS")
@@ -321,7 +312,7 @@ class Avb {
             ai.auxBlob!!.hashTreeDescriptors.forEach {
                 val vRet = it.verify(
                     prefixes.map { prefix -> "$prefix${it.partition_name}.img" },
-                    image_file + "->HashTreeDescriptor[${it.partition_name}]"
+                    dp.getLabel() + "->HashTreeDescriptor[${it.partition_name}]"
                 )
                 if (vRet[0] as Boolean) {
                     log.info("VERIFY($localParent->HashTreeDescriptor[${it.partition_name}]): ${it.hash_algorithm} " + "PASS")
@@ -333,6 +324,52 @@ class Avb {
             }
 
             return ret
+        }
+
+        fun inspectKey(ai: AVBInfo): String {
+            var ret = "NONE"
+            if (ai.auxBlob!!.pubkey == null) {
+                log.info("vbmeta blob is unsigned")
+                return ret
+            }
+            val declaredAlg = Algorithms.get(ai.header!!.algorithm_type)
+            val gkiPubKey = if (declaredAlg!!.algorithm_type == 1) AuxBlob.encodePubKey(
+                declaredAlg,
+                File("aosp/make/target/product/gsi/testkey_rsa2048.pem").readBytes()
+            ) else null
+            if (AuxBlob.encodePubKey(declaredAlg).contentEquals(ai.auxBlob!!.pubkey!!.pubkey)) {
+                log.info("signed with dev key: " + declaredAlg.defaultKey)
+                ret = declaredAlg.defaultKey
+            } else if (gkiPubKey.contentEquals(ai.auxBlob!!.pubkey!!.pubkey)) {
+                log.info("signed with dev GKI key: " + declaredAlg.defaultKey)
+                ret = declaredAlg.defaultKey
+            } else {
+                val keys = ObjectMapper().readValue(
+                    this::class.java.classLoader.getResource("known_keys.json"),
+                    object : TypeReference<List<KnownPublicKey>>() {})
+                val found = keys.filter { it.pubk.contentEquals(ai.auxBlob!!.pubkey!!.pubkey) }
+                if (found.isNotEmpty()) {
+                    log.info("signed with release key: '${found[0].device}' by ${found[0].manufacturer}")
+                    log.warn("Found key: ${found[0].toShortString()}")
+                    ret = "${found[0].device} by ${found[0].manufacturer}"
+                } else {
+                    log.info("signed with release key")
+                    ret = "private release key"
+                }
+            }
+            return ret
+        }
+
+        data class KnownPublicKey(
+            var device: String = "",
+            var manufacturer: String = "",
+            var algorithm: String = "",
+            var pubk: ByteArray = byteArrayOf(),
+            var sha1: String = ""
+        ) {
+            fun toShortString(): String {
+                return "PublicKey(device='$device' by '$manufacturer', algorithm='$algorithm', sha1='$sha1')"
+            }
         }
     }
 }

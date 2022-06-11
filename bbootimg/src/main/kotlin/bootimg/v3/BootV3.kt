@@ -23,7 +23,7 @@ import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Common.Companion.getPaddingSize
 import cfig.bootimg.Signer
 import cfig.helper.Helper
-import cfig.helper.Helper.DataSrc
+import cfig.helper.Dumpling
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -241,7 +241,7 @@ data class BootV3(
     fun extractVBMeta(): BootV3 {
         // vbmeta in image
         try {
-            AVBInfo.parseFrom(DataSrc(info.output)).dumpDefault(info.output)
+            val ai = AVBInfo.parseFrom(Dumpling(info.output)).dumpDefault(info.output)
             if (File("vbmeta.img").exists()) {
                 log.warn("Found vbmeta.img, parsing ...")
                 VBMetaParser().unpack("vbmeta.img")
@@ -253,16 +253,21 @@ data class BootV3(
 
         //GKI 1.0 bootsig
         if (info.signatureSize > 0) {
-            Helper.extractFile(
-                info.output, this.bootSignature.file,
-                this.bootSignature.position.toLong(), this.bootSignature.size
-            )
-            try {
-                val bootsig = AVBInfo.parseFrom(DataSrc(this.bootSignature.file)).dumpDefault(this.bootSignature.file)
-                Avb.verify(bootsig, "${workDir}bootsig")
-            } catch (e: IllegalArgumentException) {
-                log.warn("boot signature is invalid")
-            }
+            log.info("GKI 1.0 signature")
+            Dumpling(info.output).readFully(Pair(this.bootSignature.position.toLong(), this.bootSignature.size))
+                .let { bootsigData ->
+                    File(this.bootSignature.file).writeBytes(bootsigData)
+                    if (bootsigData.any { it.toInt() != 0 }) {
+                        try {
+                            val bootsig = AVBInfo.parseFrom(Dumpling(bootsigData)).dumpDefault(this.bootSignature.file)
+                            Avb.verify(bootsig, Dumpling(bootsigData, "bootsig"))
+                        } catch (e: IllegalArgumentException) {
+                            log.warn("GKI 1.0 boot signature is invalid")
+                        }
+                    } else {
+                        log.warn("GKI 1.0 boot signature has only NULL data")
+                    }
+                }
             return this
         }
 
@@ -277,18 +282,22 @@ data class BootV3(
             AVBInfo::class.java
         )
         val bootSig16kData =
-            DataSrc(DataSrc(info.output).readFully(Pair(mainBlob.footer!!.originalImageSize - 16 * 1024, 16 * 1024)))
+            Dumpling(Dumpling(info.output).readFully(Pair(mainBlob.footer!!.originalImageSize - 16 * 1024, 16 * 1024)))
         try {
             val blob1 = AVBInfo.parseFrom(bootSig16kData)
-                .also { it.dumpDefault("bootsig." + it.auxBlob!!.hashDescriptors[0].partition_name) }
+                .also { check(it.auxBlob!!.hashDescriptors[0].partition_name == "boot") }
+                .also { it.dumpDefault("sig.boot") }
             val blob2 =
-                AVBInfo.parseFrom(DataSrc(bootSig16kData.readFully(blob1.encode().size until bootSig16kData.getLength())))
-                    .also { it.dumpDefault("bootsig." + it.auxBlob!!.hashDescriptors[0].partition_name) }
-            File("build/unzip_boot/generic_kernel_avb").writeBytes(bootSig16kData.readFully(blob1.encode().size until bootSig16kData.getLength()))
-            File("build/unzip_boot/kernel").copyTo(File("build/unzip_boot/generic_kernel.img"), true)
-            System.setProperty("more", "build/unzip_boot")
-            Avb.verify(blob2, "generic_kernel_avb")
-
+                AVBInfo.parseFrom(Dumpling(bootSig16kData.readFully(blob1.encode().size until bootSig16kData.getLength())))
+                    .also { check(it.auxBlob!!.hashDescriptors[0].partition_name == "generic_kernel") }
+                    .also { it.dumpDefault("sig.kernel") }
+            val gkiAvbData = bootSig16kData.readFully(blob1.encode().size until bootSig16kData.getLength())
+            File("${workDir}kernel.img").let { gki ->
+                File("${workDir}kernel").copyTo(gki)
+                System.setProperty("more", workDir)
+                Avb.verify(blob2, Dumpling(gkiAvbData))
+                gki.delete()
+            }
             log.info(blob1.auxBlob!!.hashDescriptors[0].partition_name)
             log.info(blob2.auxBlob!!.hashDescriptors[0].partition_name)
         } catch (e: IllegalArgumentException) {
@@ -329,14 +338,41 @@ data class BootV3(
                 it.addRule()
             }
             if (this.info.signatureSize > 0) {
-                it.addRow("boot signature", this.bootSignature.file)
-                Avb.getJsonFileName(this.bootSignature.file).let { jsFile ->
-                    it.addRow("\\-- decoded boot signature", if (File(jsFile).exists()) jsFile else "N/A")
+                it.addRow("GKI signature 1.0", this.bootSignature.file)
+                File(Avb.getJsonFileName(this.bootSignature.file)).let { jsFile ->
+                    it.addRow("\\-- decoded boot signature", if (jsFile.exists()) jsFile.path else "N/A")
+                    if (jsFile.exists()) {
+                        it.addRow("\\------ signing key", Avb.inspectKey(mapper.readValue(jsFile, AVBInfo::class.java)))
+                    }
                 }
                 it.addRule()
             }
+
+            //GKI signature 2.0
+            File(Avb.getJsonFileName("sig.boot")).let { jsonFile ->
+                if (jsonFile.exists()) {
+                    it.addRow("GKI signature 2.0", this.bootSignature.file)
+                    it.addRow("\\-- boot", jsonFile.path)
+                    it.addRow("\\------ signing key", Avb.inspectKey(mapper.readValue(jsonFile, AVBInfo::class.java)))
+                }
+            }
+            File(Avb.getJsonFileName("sig.kernel")).let { jsonFile ->
+                if (jsonFile.exists()) {
+                    val readBackAvb = mapper.readValue(jsonFile, AVBInfo::class.java)
+                    it.addRow("\\-- kernel", jsonFile.path)
+                    it.addRow("\\------ signing key", Avb.inspectKey(readBackAvb))
+                    it.addRule()
+                }
+            }
+
+            //AVB info
             Avb.getJsonFileName(info.output).let { jsonFile ->
                 it.addRow("AVB info", if (File(jsonFile).exists()) jsonFile else "NONE")
+                if (File(jsonFile).exists()) {
+                    mapper.readValue(File(jsonFile), AVBInfo::class.java).let { ai ->
+                        it.addRow("\\------ signing key", Avb.inspectKey(ai))
+                    }
+                }
             }
             it.addRule()
             it

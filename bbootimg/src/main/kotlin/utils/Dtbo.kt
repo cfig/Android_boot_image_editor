@@ -7,7 +7,7 @@ import cfig.bootimg.Common
 import cfig.bootimg.Signer
 import cfig.bootimg.v3.VendorBoot
 import cfig.helper.Helper
-import cfig.helper.Helper.DataSrc
+import cfig.helper.Dumpling
 import cfig.packable.VBMetaParser
 import cfig.utils.DTC
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -156,7 +156,7 @@ class Dtbo(
 
     fun extractVBMeta(): Dtbo {
         try {
-            AVBInfo.parseFrom(DataSrc(info.output)).dumpDefault(info.output)
+            AVBInfo.parseFrom(Dumpling(info.output)).dumpDefault(info.output)
         } catch (e: Exception) {
             log.error("extraceVBMeta(): $e")
         }

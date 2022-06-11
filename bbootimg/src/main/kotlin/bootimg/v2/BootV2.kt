@@ -19,9 +19,10 @@ import cfig.Avb
 import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
+import cfig.bootimg.v3.BootV3
 import cfig.bootimg.v3.VendorBoot
 import cfig.helper.Helper
-import cfig.helper.Helper.DataSrc
+import cfig.helper.Dumpling
 import cfig.packable.VBMetaParser
 import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -77,6 +78,7 @@ data class BootV2(
     companion object {
         private val log = LoggerFactory.getLogger(BootV2::class.java)
         private val workDir = Helper.prop("workDir")
+        private val mapper = ObjectMapper()
 
         fun parse(fileName: String): BootV2 {
             val ret = BootV2()
@@ -184,9 +186,8 @@ data class BootV2(
     }
 
     fun extractImages(): BootV2 {
-        val workDir = Helper.prop("workDir")
         //info
-        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + info.json), this)
+        mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + info.json), this)
         //kernel
         Common.dumpKernel(Helper.Slice(info.output, kernel.position.toInt(), kernel.size, kernel.file!!))
         //ramdisk
@@ -196,7 +197,7 @@ data class BootV2(
             )
             this.ramdisk.file = this.ramdisk.file!! + ".$fmt"
             //dump info again
-            ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
+            mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         }
         //second bootloader
         secondBootloader?.let {
@@ -226,7 +227,7 @@ data class BootV2(
 
     fun extractVBMeta(): BootV2 {
         if (this.info.verify.startsWith("VB2.0")) {
-            AVBInfo.parseFrom(DataSrc(info.output)).dumpDefault(info.output)
+            AVBInfo.parseFrom(Dumpling(info.output)).dumpDefault(info.output)
             if (File("vbmeta.img").exists()) {
                 log.warn("Found vbmeta.img, parsing ...")
                 VBMetaParser().unpack("vbmeta.img")
@@ -238,7 +239,6 @@ data class BootV2(
     }
 
     fun printSummary(): BootV2 {
-        val workDir = Helper.prop("workDir")
         val tableHeader = AsciiTable().apply {
             addRule()
             addRow("What", "Where")
@@ -254,7 +254,17 @@ data class BootV2(
                 } else {
                     "verify fail"
                 }
-                it.addRow("AVB info [$verifyStatus]", Avb.getJsonFileName(info.output))
+                Avb.getJsonFileName(info.output).let { jsonFile ->
+                    it.addRow("AVB info [$verifyStatus]", jsonFile)
+                    if (File(jsonFile).exists()) {
+                        mapper.readValue(File(jsonFile), AVBInfo::class.java).let { ai ->
+                            val inspectRet = Avb.inspectKey(ai)
+                            if (inspectRet != "NONE") {
+                                it.addRow("\\-- signing key", inspectRet)
+                            }
+                        }
+                    }
+                }
             }
             //kernel
             it.addRule()

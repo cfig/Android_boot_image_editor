@@ -15,10 +15,13 @@
 package cfig.packable
 
 import avb.AVBInfo
+import avb.alg.Algorithms
 import cfig.Avb
+import cfig.helper.CryptoHelper
+import cfig.helper.Dumpling
 import cfig.helper.Helper
-import cfig.helper.Helper.DataSrc
 import cfig.helper.Helper.Companion.deleteIfExists
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -40,7 +43,8 @@ class VBMetaParser : IPackable {
                 it.mkdirs()
             }
         }
-        AVBInfo.parseFrom(DataSrc(fileName)).dumpDefault(fileName)
+        val ai = AVBInfo.parseFrom(Dumpling(fileName)).dumpDefault(fileName)
+        log.info("Signing Key: " + Avb.inspectKey(ai))
     }
 
     override fun pack(fileName: String) {

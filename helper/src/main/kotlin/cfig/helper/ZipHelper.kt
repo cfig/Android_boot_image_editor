@@ -352,6 +352,11 @@ class ZipHelper {
             }
         }
 
+        fun isAndroidCpio(compressedFile: String): Boolean {
+            return Dumpling(compressedFile).readFully(0L..5)
+                .contentEquals(byteArrayOf(0x30, 0x37, 0x30, 0x37, 0x30, 0x31))
+        }
+
         fun isGZ(compressedFile: String): Boolean {
             return try {
                 FileInputStream(compressedFile).use { fis ->

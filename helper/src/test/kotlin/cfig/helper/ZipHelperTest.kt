@@ -54,9 +54,9 @@ class ZipHelperTest {
     @Test
     fun testDataSrc() {
         if (File("/proc/cpuinfo").exists()) {
-            val ds1 = Helper.DataSrc("/proc/cpuinfo")
+            val ds1 = Dumpling("/proc/cpuinfo")
             Assert.assertTrue(ds1.readFully(0L..31).contentEquals(ds1.readFully(Pair(0, 32))))
-            val d2 = Helper.DataSrc(ds1.readFully(0L..31))
+            val d2 = Dumpling(ds1.readFully(0L..31))
             Assert.assertTrue(d2.readFully(0..15L).contentEquals(d2.readFully(Pair(0, 16))))
         }
     }

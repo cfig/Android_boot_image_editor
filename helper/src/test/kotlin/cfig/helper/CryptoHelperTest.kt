@@ -1,7 +1,6 @@
 package cfig.helper
 
 import org.junit.Assert.assertEquals
-import org.junit.Test
 import java.io.File
 
 class CryptoHelperTest {
@@ -35,7 +34,7 @@ class CryptoHelperTest {
 
     fun geographicalHash() {
         val f = "/home/work/boot/payload.bin"
-        val dg = CryptoHelper.Hasher.hash(f, listOf(Pair(0, 1862657060)), "sha-256")
+        val dg = CryptoHelper.Hasher.hash(Dumpling(f), listOf(Pair(0, 1862657060)), "sha-256")
         println(Helper.toHexString(dg))
     }
 }

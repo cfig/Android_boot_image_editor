@@ -17,6 +17,7 @@ package cc.cfig.droid.ota
 import cc.cfig.io.Struct
 import cfig.helper.CryptoHelper.Hasher
 import cfig.helper.Helper
+import cfig.helper.Dumpling
 import chromeos_update_engine.UpdateMetadata
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -88,10 +89,10 @@ class Payload {
             }
 
             val calcMetadataHash =
-                Hasher.hash(inFileName, listOf(Pair(0L, ret.metaSize.toLong())), "sha-256")
+                Hasher.hash(Dumpling(inFileName), listOf(Pair(0L, ret.metaSize.toLong())), "sha-256")
             log.info("calc meta hash: " + Helper.toHexString(calcMetadataHash))
             val calcPayloadHash = Hasher.hash(
-                inFileName, listOf(
+                Dumpling(inFileName), listOf(
                     Pair(0L, ret.metaSize.toLong()),
                     Pair(ret.metaSize.toLong() + ret.header.metaSigLen, ret.manifest.signaturesOffset)
                 ), "sha-256"
