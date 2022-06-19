@@ -57,6 +57,19 @@ class DtboParser(val workDir: File) : IPackable {
             .printPackSummary()
     }
 
+    override fun pull(fileName: String, deviceName: String) {
+        super.pull(fileName, deviceName)
+    }
+
+    override fun flash(fileName: String, deviceName: String) {
+        val stem = fileName.substring(0, fileName.indexOf("."))
+        super.flash("$fileName.signed", stem)
+
+        if (File("vbmeta.img.signed").exists()) {
+            super.flash("vbmeta.img.signed", "vbmeta")
+        }
+    }
+
     override fun `@verify`(fileName: String) {
         super.`@verify`(fileName)
     }
