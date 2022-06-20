@@ -218,7 +218,11 @@ data class VendorBoot(
             }
             val tab = AsciiTable().let {
                 it.addRule()
-                it.addRow("re-packed $imageName", "$imageName.signed")
+                if (File("$imageName.signed").exists()) {
+                    it.addRow("re-packed $imageName", "$imageName.signed")
+                } else {
+                    it.addRow("re-packed $imageName", "$imageName.clear")
+                }
                 it.addRule()
                 it
             }
@@ -313,7 +317,13 @@ data class VendorBoot(
 
     fun sign(): VendorBoot {
         val avbtool = String.format(Helper.prop("avbtool"), "v1.2")
-        Signer.signAVB(info.output, this.info.imageSize, avbtool)
+        File(Avb.getJsonFileName(info.output)).let {
+            if (it.exists()) {
+                Signer.signAVB(info.output, this.info.imageSize, avbtool)
+            } else {
+                log.warn("skip signing of ${info.output}")
+            }
+        }
         return this
     }
 
@@ -415,11 +425,13 @@ data class VendorBoot(
             }
             it.addRule()
             Avb.getJsonFileName(info.output).let { jsonFile ->
-                it.addRow("AVB info", Avb.getJsonFileName(info.output))
                 if (File(jsonFile).exists()) {
+                    it.addRow("AVB info", jsonFile)
                     mapper.readValue(File(jsonFile), AVBInfo::class.java).let { ai ->
                         it.addRow("\\-- signing key", Avb.inspectKey(ai))
                     }
+                } else {
+                    it.addRow("AVB info", "none")
                 }
                 it.addRule()
             }
