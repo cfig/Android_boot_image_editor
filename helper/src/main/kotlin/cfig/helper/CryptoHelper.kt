@@ -14,10 +14,7 @@ import org.slf4j.LoggerFactory
 import java.io.*
 import java.math.BigInteger
 import java.math.RoundingMode
-import java.security.KeyFactory
-import java.security.KeyStore
-import java.security.MessageDigest
-import java.security.Security
+import java.security.*
 import java.security.cert.Certificate
 import java.security.cert.CertificateFactory
 import java.security.spec.PKCS8EncodedKeySpec
@@ -91,7 +88,7 @@ class CryptoHelper {
                     }
                     if (bSuccess) return KeyBox(
                         KeyFormat.DER,
-                        sun.security.rsa.RSAPrivateCrtKeyImpl::class,
+                        PrivateKey::class,
                         ret
                     )
                     //try 2
