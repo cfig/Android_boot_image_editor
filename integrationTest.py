@@ -172,6 +172,8 @@ def main():
     # Issue 88: boot image V4 without boot signature,
     #  and Issue 75: allow duplicated entry in cpio
     verifySingleDir(resDir2, "issue_88")
+    # Issue 92: unsigned vendor_boot
+    verifySingleDir(resDir2, "issue_91_unsigned_vendor_boot")
 
     log.info(successLogo)
 
