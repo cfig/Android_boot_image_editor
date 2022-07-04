@@ -23,6 +23,7 @@ import cfig.bootimg.Signer
 import cfig.helper.Helper
 import cfig.helper.Dumpling
 import cfig.packable.VBMetaParser
+import cfig.utils.DTC
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
 import org.apache.commons.exec.CommandLine
@@ -263,6 +264,10 @@ data class VendorBoot(
                 }
                 this.ramdisk.size = this.ramdisk_table.ramdidks.sumOf { File(it.file).length() }.toInt()
             }
+        }
+        //update dtb
+        if (File(this.dtb.file + ".src").exists()) {
+            check(DTC().compile(this.dtb.file + ".src", this.dtb.file)) { "fail to compile dts" }
         }
         this.dtb.size = File(this.dtb.file).length().toInt()
         //header

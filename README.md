@@ -173,6 +173,35 @@ Please note that to use 'gradle flash', your host machine must be connectted to 
 </details>
 
 <details>
+  <summary>edit device-tree blob(dtb) inside vendor_boot.img</summary>
+
+If you want to edit the device-tree blob in place:
+
+```bash
+cp <your_vendor_boot_image> vendor_boot.img
+cp <your_vbmeta_image> vbmeta.img
+./gradlew unpack
+==> now you can edit build/unzip_boot/dtb.src directly
+./gradlew pack
+```
+
+During unpack stage, dtb will be dumped to file `build/unzip_boot/dtb`, dts will be decompiled to `build/unzip_boot/dtb.src`.
+You can edit `dtb.src` directly, and it will be compiled to dtb duing repack stage.
+
+If you just want to replace the dtb with the one that is compiled outside this tool, please
+
+```bash
+cp <your_vendor_boot_image> vendor_boot.img
+cp <your_vbmeta_image> vbmeta.img
+./gradlew unpack
+rm build/unzip_boot/dtb.src
+cp <your_dtb> build/unzip_boot/dtb
+./gradlew pack
+```
+
+</details>
+
+<details>
   <summary>working with system.img</summary>
 
 First enable **hacking mode** by setting `bHackingMode = true` in file `build.gradle.kts`, then
