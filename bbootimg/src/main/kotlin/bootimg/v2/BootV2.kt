@@ -25,6 +25,7 @@ import cfig.helper.Helper
 import cfig.helper.Dumpling
 import cfig.packable.VBMetaParser
 import cfig.utils.EnvironmentVerifier
+import cfig.utils.DTC
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
 import org.apache.commons.exec.CommandLine
@@ -385,6 +386,9 @@ data class BootV2(
         }
         //refresh dtb size
         dtb?.let { theDtb ->
+            if (File(theDtb.file!! + ".src").exists()) {
+                check(DTC().compile(theDtb.file!! + ".src", theDtb.file!!)) { "fail to compile dts" }
+            }
             theDtb.size = File(theDtb.file!!).length().toInt()
         }
         //refresh image hash
