@@ -90,7 +90,7 @@ class Launcher {
                 }
                 FileOutputStream(kFile, false).use {
                     it.write(keyPair.private.encoded)
-                    log.info("RSA priv key(len=$kLen) written to $kFile")
+                    log.info("RSA priv key(len=$kLen) written to $kFile.pk8")
                 }
 
                 dumpPem(PemObject("RSA PRIVATE KEY", pk8toPk1(keyPair.private).encoded), "$kFile.pem.pk1")
@@ -99,6 +99,7 @@ class Launcher {
                     it.write(keyPair.public.encoded)
                     log.info("RSA pub  key(len=$kLen) written to $kFile.pub")
                 }
+                dumpPem(PemObject("RSA PUBLIC KEY", keyPair.public.encoded), "$kFile.pem.pub")
             }
             "toPub" -> {
                 val k = CryptoHelper.KeyBox.parse4(File(kFile).readBytes())

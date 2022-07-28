@@ -15,7 +15,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.7.0"
+    kotlin("jvm") version "1.7.0"
     `java-library`
     application
 }

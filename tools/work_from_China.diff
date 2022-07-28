@@ -1,0 +1,63 @@
+diff --git a/aosp/boot_signer/build.gradle.kts b/aosp/boot_signer/build.gradle.kts
+index be7419c..a8826c9 100644
+--- a/aosp/boot_signer/build.gradle.kts
++++ b/aosp/boot_signer/build.gradle.kts
+@@ -5,7 +5,7 @@ plugins {
+ }
+ 
+ repositories {
+-    mavenCentral()
++    maven { setUrl("https://maven.aliyun.com/repository/public/") }
+ }
+ 
+ dependencies {
+diff --git a/bbootimg/build.gradle.kts b/bbootimg/build.gradle.kts
+index 19833eb..f3b73a6 100644
+--- a/bbootimg/build.gradle.kts
++++ b/bbootimg/build.gradle.kts
+@@ -20,7 +20,7 @@ plugins {
+ }
+ 
+ repositories {
+-    mavenCentral()
++    maven { setUrl("https://maven.aliyun.com/repository/public/") }
+ }
+ 
+ dependencies {
+diff --git a/build.gradle.kts b/build.gradle.kts
+index e133f36..7537313 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -15,7 +15,7 @@ if (parseGradleVersion(gradle.gradleVersion) < 6) {
+ 
+ buildscript {
+     repositories {
+-        mavenCentral()
++        maven { setUrl("https://maven.aliyun.com/repository/public/") }
+     }
+     dependencies {
+         classpath("org.apache.commons:commons-exec:1.3")
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+index 41dfb87..931fed7 100644
+--- a/gradle/wrapper/gradle-wrapper.properties
++++ b/gradle/wrapper/gradle-wrapper.properties
+@@ -1,5 +1,5 @@
+ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+-distributionUrl=https\://services.gradle.org/distributions/gradle-7.4-bin.zip
++distributionUrl=https\://mirrors.cloud.tencent.com/gradle/gradle-7.4-bin.zip
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+diff --git a/helper/build.gradle.kts b/helper/build.gradle.kts
+index 34b9439..2fd6e84 100644
+--- a/helper/build.gradle.kts
++++ b/helper/build.gradle.kts
+@@ -21,7 +21,7 @@ plugins {
+ }
+ 
+ repositories {
+-    mavenCentral()
++    maven { setUrl("https://maven.aliyun.com/repository/public/") }
+ }
+ 
+ dependencies {
