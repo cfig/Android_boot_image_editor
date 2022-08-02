@@ -14,13 +14,15 @@
 
 package cfig.utils
 
-import cfig.packable.IPackable
-import org.slf4j.LoggerFactory
-import cfig.helper.Helper.Companion.check_call
-import java.io.FileInputStream
-import java.io.File
-import com.fasterxml.jackson.databind.ObjectMapper
 import avb.blob.Footer
+import cc.cfig.io.Struct
+import cfig.helper.Helper
+import cfig.helper.Helper.Companion.check_call
+import cfig.packable.IPackable
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.slf4j.LoggerFactory
+import java.io.File
+import java.io.FileInputStream
 
 class SparseImgParser : IPackable {
     override val loopNo: Int
@@ -36,12 +38,18 @@ class SparseImgParser : IPackable {
     }
 
     override fun capabilities(): List<String> {
-        return listOf("^(system|system_ext|system_other|vendor|product|cache|userdata|super|oem)\\.img$")
+        return listOf("^(system|system_ext|system_other|vendor|product|cache|userdata|super|oem|vendor_dlkm|odm_dlkm)\\.img$")
     }
 
     override fun unpack(fileName: String) {
         clear()
-        simg2img(fileName, "$fileName.unsparse")
+        if (isSparse(fileName)) {
+            simg2img(fileName, "$fileName.unsparse")
+        } else if (isExt4(fileName)) {
+            log.info("$fileName is raw ext4 image")
+        } else {
+            log.info("$fileName is raw image")
+        }
     }
 
     override fun pack(fileName: String) {
@@ -83,5 +91,20 @@ class SparseImgParser : IPackable {
 
     override fun flash(fileName: String, deviceName: String) {
         TODO("not implemented")
+    }
+
+    private fun isSparse(fileName: String): Boolean {
+        val magic = Helper.Companion.readFully(fileName, 0, 4)
+        return Struct(">I").pack(SPARSE_MAGIC).contentEquals(magic)
+    }
+
+    private fun isExt4(fileName: String): Boolean {
+        val superBlock = Helper.readFully(fileName, 1024, 64)
+        val magic = byteArrayOf(superBlock[0x38], superBlock[0x39])
+        return Struct(">h").pack(0x53ef).contentEquals(magic)
+    }
+
+    companion object {
+        private val SPARSE_MAGIC: UInt = 0x3aff26edu
     }
 }
