@@ -200,7 +200,7 @@ class Helper {
                 it.streamHandler = PumpStreamHandler(outputStream)
                 it.execute(CommandLine.parse(this))
             }
-            log.info(outputStream.toString().trim())
+            log.debug(outputStream.toString().trim())
             return outputStream.toString().trim()
         }
 

@@ -16,13 +16,17 @@ package cfig.utils
 
 import avb.blob.Footer
 import cc.cfig.io.Struct
+import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.check_call
+import cfig.helper.Helper.Companion.check_output
 import cfig.packable.IPackable
 import com.fasterxml.jackson.databind.ObjectMapper
+import de.vandermeer.asciitable.AsciiTable
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
+import java.util.*
 
 class SparseImgParser : IPackable {
     override val loopNo: Int
@@ -38,22 +42,56 @@ class SparseImgParser : IPackable {
     }
 
     override fun capabilities(): List<String> {
-        return listOf("^(system|system_ext|system_other|vendor|product|cache|userdata|super|oem|vendor_dlkm|odm_dlkm)\\.img$")
+        return listOf(
+            "^(system|system_ext|system_other|system_dlkm)\\.img$",
+            "^(vendor|vendor_dlkm|product|cache|userdata|super|oem|odm|odm_dlkm)\\.img$"
+        )
     }
 
     override fun unpack(fileName: String) {
         clear()
+        var target = fileName
         if (isSparse(fileName)) {
-            simg2img(fileName, "$fileName.unsparse")
+            val tempFile = UUID.randomUUID().toString()
+            outerFsType = "sparse"
+            val rawFile = "$workDir${File(fileName).nameWithoutExtension}"
+            simg2img(fileName, tempFile)
+            target = if (isExt4(tempFile)) {
+                innerFsType = "ext4"
+                "$rawFile.ext4"
+            } else if (isErofs(tempFile)) {
+                innerFsType = "erofs"
+                "$rawFile.erofs"
+            } else {
+                "$rawFile.raw"
+            }
+            File(tempFile).renameTo(File(target))
         } else if (isExt4(fileName)) {
-            log.info("$fileName is raw ext4 image")
-        } else {
-            log.info("$fileName is raw image")
+            outerFsType = "ext4"
+            innerFsType = "ext4"
+        } else if (isErofs(fileName)) {
+            outerFsType = "erofs"
+            innerFsType = "erofs"
         }
+        when (innerFsType) {
+            "ext4" -> {
+                extractExt4(target)
+            }
+
+            "erofs" -> {
+                extraceErofs(target)
+            }
+
+            else -> {
+                log.warn("unsuported image type: $innerFsType")
+            }
+        }
+        File("${workDir}mount").mkdir()
+        printSummary(fileName)
     }
 
     override fun pack(fileName: String) {
-        img2simg("$fileName.unsparse", "$fileName.new")
+        TODO("not implemented")
     }
 
     // invoked solely by reflection
@@ -76,21 +114,22 @@ class SparseImgParser : IPackable {
     private fun simg2img(sparseIn: String, flatOut: String) {
         log.info("parsing Android sparse image $sparseIn ...")
         "$simg2imgBin $sparseIn $flatOut".check_call()
-        "file $sparseIn".check_call()
-        "file $flatOut".check_call()
         log.info("parsed Android sparse image $sparseIn -> $flatOut")
     }
 
     private fun img2simg(flatIn: String, sparseOut: String) {
         log.info("transforming image to Android sparse format: $flatIn ...")
         "$img2simgBin $flatIn $sparseOut".check_call()
-        "file $flatIn".check_call()
-        "file $sparseOut".check_call()
         log.info("transformed Android sparse image: $flatIn -> $sparseOut")
     }
 
     override fun flash(fileName: String, deviceName: String) {
         TODO("not implemented")
+    }
+
+    fun clear(fileName: String) {
+        super.clear()
+        File(fileName).deleleIfExists()
     }
 
     private fun isSparse(fileName: String): Boolean {
@@ -104,7 +143,85 @@ class SparseImgParser : IPackable {
         return Struct(">h").pack(0x53ef).contentEquals(magic)
     }
 
+    // https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/magic.h#L23
+    private fun isErofs(fileName: String): Boolean {
+        val magic = Helper.readFully(fileName, 1024, 4)
+        return Struct(">I").pack(0xe2e1f5e0).contentEquals(magic)
+    }
+
+    private fun extractExt4(fileName: String) {
+        if (EnvironmentVerifier().has7z) {
+            val stem = File(fileName).nameWithoutExtension
+            val outStr = "7z x $fileName -y -o$workDir$stem".check_output()
+            File("$workDir/$stem.log").writeText(outStr)
+        } else {
+            log.warn("Please install 7z for ext4 extraction")
+        }
+    }
+
+    private fun extraceErofs(fileName: String) {
+        log.info("sudo mount $fileName -o loop -t erofs ${workDir}mount")
+    }
+
+    private fun printSummary(fileName: String) {
+        val stem = File(fileName).nameWithoutExtension
+        val tail = AsciiTable().apply {
+            addRule()
+            addRow("To view erofs contents:")
+        }
+        val tab = AsciiTable().apply {
+            addRule()
+            addRow("What", "Where")
+            addRule()
+            addRow("image ($outerFsType)", fileName)
+            ("$workDir$stem.ext4").let { ext4 ->
+                if (File(ext4).exists()) {
+                    addRule()
+                    addRow("converted image (ext4)", ext4)
+                }
+            }
+            ("$workDir$stem.erofs").let {
+                if (File(it).exists()) {
+                    addRule()
+                    addRow("converted image (erofs)", it)
+                    tail.addRule()
+                    tail.addRow("sudo mount $it -o loop -t erofs ${workDir}mount")
+                    tail.addRule()
+                } else if (innerFsType == "erofs") {
+                    tail.addRule()
+                    tail.addRow("sudo mount $fileName -o loop -t erofs ${workDir}mount")
+                    tail.addRule()
+                }
+            }
+            ("$workDir$stem").let {
+                if (File(it).exists()) {
+                    addRule()
+                    if (File(it).isFile) {
+                        addRow("converted image (raw)", it)
+                    } else {
+                        addRow("extracted content", it)
+                    }
+                }
+            }
+            ("$workDir$stem.log").let {
+                if (File(it).exists()) {
+                    addRule()
+                    addRow("log", it)
+                }
+            }
+            if (innerFsType == "erofs") {
+                addRule()
+                addRow("mount point", "${workDir}mount")
+            }
+            addRule()
+        }
+        log.info("\n" + tab.render() + "\n" + if (innerFsType == "erofs") tail.render() else "")
+    }
+
     companion object {
         private val SPARSE_MAGIC: UInt = 0x3aff26edu
+        private val workDir = Helper.prop("workDir")
+        private var outerFsType = "raw"
+        private var innerFsType = "raw"
     }
 }

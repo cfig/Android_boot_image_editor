@@ -8,7 +8,7 @@ A tool for reverse engineering Android ROM images.
 
 #### install required packages
 
-Linux: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-11-jdk gcc g++ python3 python-is-python3`
+Linux: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-11-jdk gcc g++ python3 python-is-python3 p7zip-full`
 
 Mac: `brew install lz4 xz dtc`
 

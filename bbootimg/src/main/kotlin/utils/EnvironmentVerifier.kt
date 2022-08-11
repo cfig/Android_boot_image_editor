@@ -69,6 +69,18 @@ class EnvironmentVerifier {
             return true
         }
 
+    val has7z: Boolean
+        get(): Boolean {
+            try {
+                Runtime.getRuntime().exec("7z i")
+                log.debug("7z available")
+            } catch (e: Exception) {
+                log.warn("7z not installed")
+                return false
+            }
+            return true
+        }
+
     val hasDtc: Boolean
         get(): Boolean {
             try {

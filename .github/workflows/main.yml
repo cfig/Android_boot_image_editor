@@ -31,7 +31,7 @@ jobs:
           java-version: 11
 
       - name: apt
-        run: sudo apt install device-tree-compiler
+        run: sudo apt install device-tree-compiler p7zip-full
 
       # Runs a single command using the runners shell
       - name: Unit Test
