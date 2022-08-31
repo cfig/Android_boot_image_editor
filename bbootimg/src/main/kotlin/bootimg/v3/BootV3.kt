@@ -189,6 +189,7 @@ data class BootV3(
         }
 
         Helper.assertFileEquals(this.info.output + ".clear", this.info.output + ".google")
+        File(this.info.output + ".google").delete()
         return this
     }
 

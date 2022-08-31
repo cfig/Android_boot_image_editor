@@ -70,6 +70,7 @@ class Signer {
                 DefaultExecutor().execute(this)
             }
             Helper.assertFileEquals("$output.signed", "$output.signed2")
+            File("$output.signed2").delete()
             //TODO: decide what to verify
             //Parser.verifyAVBIntegrity(cfg.info.output + ".signed", avbtool)
             //Parser.verifyAVBIntegrity(cfg.info.output + ".signed2", avbtool)

@@ -230,7 +230,8 @@ Then flash vbmeta.img.signed to your device.
 </details>
 
 ## boot.img layout
-Read [layout](doc/layout.md) of Android boot.img and vendor\_boot.img.
+Read [boot layout](doc/layout.md) of Android boot.img and vendor\_boot.img.
+Read [miac layout](doc/misc_image_layout.md) of misc\.img
 
 ## References and Acknowledgement
 <details>

@@ -99,6 +99,8 @@ Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read fi
 
 ## 2. boot.img v3-v4
 
+For partitions: `/boot` and `/init_boot`.
+
 ### header
 
               item                        size in bytes             position
@@ -138,6 +140,8 @@ Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read fi
     +-----------------------------------------------------------+
 
 ## 3. vendor\_boot.img v3-v4
+
+For partitions: `/vendor_boot`.
 
 ### header
 
@@ -298,7 +302,7 @@ Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read fi
        │                  ├─────────────────────┤
        │                  │ vendor ramdisk n    │
        ├──────────────────┴─────────────────────┤
-       │  generic ramdisk                       │
+       │  generic ramdisk (from init_boot/boot) │
        ├──────────────────┬─────────────────────┤
        │                  │parameters           │
        │                  ├─────────────────────┤
