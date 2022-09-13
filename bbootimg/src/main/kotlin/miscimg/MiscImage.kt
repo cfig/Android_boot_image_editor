@@ -2,7 +2,6 @@ package miscimg
 
 import cc.cfig.io.Struct
 import cfig.helper.Helper
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import java.io.FileInputStream
 
@@ -12,8 +11,6 @@ data class MiscImage(
 ) {
     companion object {
         private val log = LoggerFactory.getLogger(MiscImage::class.java)
-        private val mapper = ObjectMapper()
-        private val workDir = Helper.prop("workDir")
 
         fun parse(fileName: String): MiscImage {
             val ret = MiscImage()
@@ -46,7 +43,7 @@ data class MiscImage(
             this.status = info[1] as String
             this.recovery = info[2] as String
             this.stage = info[3] as String
-            //this.reserved = info[4] as ByteArray
+            this.reserved = info[4] as ByteArray
         }
 
         fun encode(): ByteArray {
@@ -55,7 +52,7 @@ data class MiscImage(
                 this.stage,
                 this.recovery,
                 this.stage,
-                byteArrayOf()
+                this.reserved,
             )
         }
 
@@ -85,7 +82,6 @@ data class MiscImage(
 
         companion object {
             private const val FORMAT_STRING = "32s32s768s32s1184b"
-            private val log = LoggerFactory.getLogger(BootloaderMessage::class.java)
             const val SIZE = 2048
 
             init {
