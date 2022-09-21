@@ -477,7 +477,11 @@ data class VendorBoot(
                                 addArgument("--board_id$boardIdIndex")
                                 addArgument("0x" + Integer.toHexString((boardIdValue as Int)))
                             }
-                        addArgument("--ramdisk_name").addArgument(it.name, true)
+                        if (EnvironmentVerifier().isWindows) {
+                            addArgument("--ramdisk_name").addArgument("\"${it.name}\"", false)
+                        } else {
+                            addArgument("--ramdisk_name").addArgument(it.name, true)
+                        }
                         addArgument("--vendor_ramdisk_fragment").addArgument(it.file)
                     }
                     if (bootconfig.file.isNotBlank()) {
