@@ -109,6 +109,25 @@ class Helper {
             return extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
         }
 
+        private fun transport(src: RandomAccessFile, sink: DataOutput, length: Int) {
+            val ibs = 1024 * 1024
+            val buffer = ByteArray(ibs)
+            var bytesRemaining = length
+            while (bytesRemaining > 0) {
+                log.debug("Remain $bytesRemaining, reading ...")
+                val bytesRead = src.read(buffer)
+                if (bytesRemaining > ibs) {
+                    check(bytesRead == ibs) { "bytesRemaining=$bytesRemaining, ibs=$ibs, bytesRead=$bytesRead" }
+                    sink.write(buffer)
+                } else {
+                    check(bytesRead >= bytesRemaining)
+                    sink.write(buffer, 0, bytesRemaining)
+                }
+                bytesRemaining -= bytesRead
+                log.debug("Read $bytesRead, remain $bytesRemaining")
+            }
+        }
+
         fun extractFile(fileName: String, outImgName: String, offset: Long, length: Int) {
             if (0 == length) {
                 return
@@ -116,9 +135,7 @@ class Helper {
             RandomAccessFile(fileName, "r").use { inRaf ->
                 RandomAccessFile(outImgName, "rw").use { outRaf ->
                     inRaf.seek(offset)
-                    val data = ByteArray(length)
-                    check(length == inRaf.read(data))
-                    outRaf.write(data)
+                    transport(inRaf, outRaf, length)
                 }
             }
         }
