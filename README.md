@@ -229,6 +229,19 @@ Then flash vbmeta.img.signed to your device.
 
 </details>
 
+<details>
+
+  <summary>How to merge init_boot.img into boot.img</summary>
+
+* unpack init_boot.img and copy out "build/unzip_boot/root".
+* clear workspace by `gradle clear`, then unpack boot.img
+* copy back the "build/unzip_boot/root"
+* edit build/unzip_boot/boot.json
+- change `ramdisk.size` to 1
+- change `ramdisk.file` from "build/unzip_boot/ramdisk.img" to "build/unzip_boot/ramdisk.img.lz4"
+
+</details>
+
 ## boot.img layout
 Read [boot layout](doc/layout.md) of Android boot.img and vendor\_boot.img.
 Read [miac layout](doc/misc_image_layout.md) of misc\.img
@@ -268,12 +281,3 @@ This project is developed with products by Jetbrains.
 </a>
 
 </details>
-
-How to merge init_boot.img into boot.img:
-* unpack init_boot.img and copy out "build/unzip_boot/root".
-* clear workspace by `gradle clear`, then unpack boot.img
-* copy back the "build/unzip_boot/root"
-* edit build/unzip_boot/boot.json
-- change `ramdisk.size` to 1
-- change `ramdisk.file` from "build/unzip_boot/ramdisk.img" to "build/unzip_boot/ramdisk.img.lz4"
-
