@@ -28,7 +28,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 11
+          java-version: 17
 
       - name: apt
         run: sudo apt install device-tree-compiler p7zip-full
@@ -53,7 +53,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 11
+          java-version: 17
 
       - name: brew
         run: brew install dtc
@@ -76,7 +76,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 11
+          java-version: 17
 
       - name: Set up Python
         uses: actions/setup-python@v2

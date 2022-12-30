@@ -44,8 +44,8 @@ index 8049c68..2e33ce8 100644
 @@ -1,5 +1,5 @@
  distributionBase=GRADLE_USER_HOME
  distributionPath=wrapper/dists
--distributionUrl=https\://services.gradle.org/distributions/gradle-7.5-bin.zip
-+distributionUrl=https\://mirrors.cloud.tencent.com/gradle/gradle-7.5-bin.zip
+-distributionUrl=https\://services.gradle.org/distributions/gradle-7.6-bin.zip
++distributionUrl=https\://mirrors.cloud.tencent.com/gradle/gradle-7.6-bin.zip
  zipStoreBase=GRADLE_USER_HOME
  zipStorePath=wrapper/dists
 diff --git a/helper/build.gradle.kts b/helper/build.gradle.kts

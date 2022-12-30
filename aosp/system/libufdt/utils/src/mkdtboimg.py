@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # Copyright 2017, The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -1018,7 +1018,7 @@ def print_usage(cmd, _):
 def main():
     """Main entry point for mkdtboimg."""
 
-    parser = argparse.ArgumentParser(prog='mkdtboimg.py')
+    parser = argparse.ArgumentParser()
 
     subparser = parser.add_subparsers(title='subcommand',
                                       description='Valid subcommands')

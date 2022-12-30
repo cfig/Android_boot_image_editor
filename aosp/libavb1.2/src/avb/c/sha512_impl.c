@@ -36,6 +36,7 @@
  */
 
 #include "avb_sha.h"
+#include "avb_crypto_ops_impl.h"
 
 #define SHFR(x, n) (x >> n)
 #define ROTR(x, n) ((x >> n) | (x << ((sizeof(x) << 3) - n)))
@@ -131,7 +132,8 @@ static const uint64_t sha512_k[80] = {
 
 /* SHA-512 implementation */
 
-void avb_sha512_init(AvbSHA512Ctx* ctx) {
+void avb_sha512_init(AvbSHA512Ctx* avb_ctx) {
+  AvbSHA512ImplCtx* ctx = (AvbSHA512ImplCtx*)avb_ctx->reserved;
 #ifdef UNROLL_LOOPS_SHA512
   ctx->h[0] = sha512_h0[0];
   ctx->h[1] = sha512_h0[1];
@@ -152,7 +154,7 @@ void avb_sha512_init(AvbSHA512Ctx* ctx) {
   ctx->tot_len = 0;
 }
 
-static void SHA512_transform(AvbSHA512Ctx* ctx,
+static void SHA512_transform(AvbSHA512ImplCtx* ctx,
                              const uint8_t* message,
                              size_t block_nb) {
   uint64_t w[80];
@@ -318,7 +320,8 @@ static void SHA512_transform(AvbSHA512Ctx* ctx,
   }
 }
 
-void avb_sha512_update(AvbSHA512Ctx* ctx, const uint8_t* data, size_t len) {
+void avb_sha512_update(AvbSHA512Ctx* avb_ctx, const uint8_t* data, size_t len) {
+  AvbSHA512ImplCtx* ctx = (AvbSHA512ImplCtx*)avb_ctx->reserved;
   size_t block_nb;
   size_t new_len, rem_len, tmp_len;
   const uint8_t* shifted_data;
@@ -349,7 +352,8 @@ void avb_sha512_update(AvbSHA512Ctx* ctx, const uint8_t* data, size_t len) {
   ctx->tot_len += (block_nb + 1) << 7;
 }
 
-uint8_t* avb_sha512_final(AvbSHA512Ctx* ctx) {
+uint8_t* avb_sha512_final(AvbSHA512Ctx* avb_ctx) {
+  AvbSHA512ImplCtx* ctx = (AvbSHA512ImplCtx*)avb_ctx->reserved;
   size_t block_nb;
   size_t pm_len;
   uint64_t len_b;
@@ -371,18 +375,18 @@ uint8_t* avb_sha512_final(AvbSHA512Ctx* ctx) {
   SHA512_transform(ctx, ctx->block, block_nb);
 
 #ifdef UNROLL_LOOPS_SHA512
-  UNPACK64(ctx->h[0], &ctx->buf[0]);
-  UNPACK64(ctx->h[1], &ctx->buf[8]);
-  UNPACK64(ctx->h[2], &ctx->buf[16]);
-  UNPACK64(ctx->h[3], &ctx->buf[24]);
-  UNPACK64(ctx->h[4], &ctx->buf[32]);
-  UNPACK64(ctx->h[5], &ctx->buf[40]);
-  UNPACK64(ctx->h[6], &ctx->buf[48]);
-  UNPACK64(ctx->h[7], &ctx->buf[56]);
+  UNPACK64(ctx->h[0], &avb_ctx->buf[0]);
+  UNPACK64(ctx->h[1], &avb_ctx->buf[8]);
+  UNPACK64(ctx->h[2], &avb_ctx->buf[16]);
+  UNPACK64(ctx->h[3], &avb_ctx->buf[24]);
+  UNPACK64(ctx->h[4], &avb_ctx->buf[32]);
+  UNPACK64(ctx->h[5], &avb_ctx->buf[40]);
+  UNPACK64(ctx->h[6], &avb_ctx->buf[48]);
+  UNPACK64(ctx->h[7], &avb_ctx->buf[56]);
 #else
   for (i = 0; i < 8; i++)
-    UNPACK64(ctx->h[i], &ctx->buf[i << 3]);
+    UNPACK64(ctx->h[i], &avb_ctx->buf[i << 3]);
 #endif /* UNROLL_LOOPS_SHA512 */
 
-  return ctx->buf;
+  return avb_ctx->buf;
 }

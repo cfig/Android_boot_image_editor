@@ -15,7 +15,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.7.20"
+    kotlin("jvm") version "1.8.0"
     `java-library`
     application
 }
@@ -53,7 +53,7 @@ tasks.withType<KotlinCompile>().all {
     kotlinOptions {
         freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
         freeCompilerArgs += "-opt-in=kotlin.ExperimentalUnsignedTypes"
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
 

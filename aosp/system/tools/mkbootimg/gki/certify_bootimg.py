@@ -132,7 +132,7 @@ def get_avb_image_size(image):
     return 0
 
 
-def add_avb_footer(image, partition_size):
+def add_avb_footer(image, partition_size, extra_footer_args):
     """Appends a AVB hash footer to the image."""
 
     avbtool_cmd = ['avbtool', 'add_hash_footer', '--image', image,
@@ -143,6 +143,7 @@ def add_avb_footer(image, partition_size):
     else:
         avbtool_cmd.extend(['--dynamic_partition_size'])
 
+    avbtool_cmd.extend(extra_footer_args)
     subprocess.check_call(avbtool_cmd)
 
 
@@ -160,12 +161,24 @@ def load_dict_from_file(path):
     return d
 
 
-def load_gki_info_file(gki_info_file, extra_args):
-    """Loads extra args from |gki_info_file| into |extra_args|."""
+def load_gki_info_file(gki_info_file, extra_args, extra_footer_args):
+    """Loads extra arguments from the gki info file.
+
+    Args:
+        gki_info_file: path to a gki-info.txt.
+        extra_args: the extra arguments forwarded to avbtool when creating
+          the gki certificate.
+        extra_footer_args: the extra arguments forwarded to avbtool when
+          creating the avb footer.
+
+    """
     info_dict = load_dict_from_file(gki_info_file)
     if 'certify_bootimg_extra_args' in info_dict:
         extra_args.extend(
             shlex.split(info_dict['certify_bootimg_extra_args']))
+    if 'certify_bootimg_extra_footer_args' in info_dict:
+        extra_footer_args.extend(
+            shlex.split(info_dict['certify_bootimg_extra_footer_args']))
 
 
 def get_archive_name_and_format_for_shutil(path):
@@ -206,6 +219,8 @@ def parse_cmdline():
     # Optional args.
     parser.add_argument('--extra_args', default=[], action='append',
                         help='extra arguments to be forwarded to avbtool')
+    parser.add_argument('--extra_footer_args', default=[], action='append',
+                        help='extra arguments for adding the avb footer')
 
     args = parser.parse_args()
 
@@ -218,13 +233,21 @@ def parse_cmdline():
         extra_args.extend(shlex.split(a))
     args.extra_args = extra_args
 
+    extra_footer_args = []
+    for a in args.extra_footer_args:
+        extra_footer_args.extend(shlex.split(a))
+    args.extra_footer_args = extra_footer_args
+
     if args.gki_info:
-        load_gki_info_file(args.gki_info, args.extra_args)
+        load_gki_info_file(args.gki_info,
+                           args.extra_args,
+                           args.extra_footer_args)
 
     return args
 
 
-def certify_bootimg(boot_img, output_img, algorithm, key, extra_args):
+def certify_bootimg(boot_img, output_img, algorithm, key, extra_args,
+                    extra_footer_args):
     """Certify a GKI boot image by generating and appending a boot_signature."""
     with tempfile.TemporaryDirectory() as temp_dir:
         boot_tmp = os.path.join(temp_dir, 'boot.tmp')
@@ -234,26 +257,27 @@ def certify_bootimg(boot_img, output_img, algorithm, key, extra_args):
         add_certificate(boot_tmp, algorithm, key, extra_args)
 
         avb_partition_size = get_avb_image_size(boot_img)
-        add_avb_footer(boot_tmp, avb_partition_size)
+        add_avb_footer(boot_tmp, avb_partition_size, extra_footer_args)
 
         # We're done, copy the temp image to the final output.
         shutil.copy2(boot_tmp, output_img)
 
 
 def certify_bootimg_archive(boot_img_archive, output_archive,
-                            algorithm, key, extra_args):
+                            algorithm, key, extra_args, extra_footer_args):
     """Similar to certify_bootimg(), but for an archive of boot images."""
     with tempfile.TemporaryDirectory() as unpack_dir:
         shutil.unpack_archive(boot_img_archive, unpack_dir)
 
         gki_info_file = os.path.join(unpack_dir, 'gki-info.txt')
         if os.path.exists(gki_info_file):
-            load_gki_info_file(gki_info_file, extra_args)
+            load_gki_info_file(gki_info_file, extra_args, extra_footer_args)
 
         for boot_img in glob.glob(os.path.join(unpack_dir, 'boot*.img')):
             print(f'Certifying {os.path.basename(boot_img)} ...')
             certify_bootimg(boot_img=boot_img, output_img=boot_img,
-                            algorithm=algorithm, key=key, extra_args=extra_args)
+                            algorithm=algorithm, key=key, extra_args=extra_args,
+                            extra_footer_args=extra_footer_args)
 
         print(f'Making certified archive: {output_archive}')
         archive_file_name, archive_format = (
@@ -275,10 +299,11 @@ def main():
 
     if args.boot_img_archive:
         certify_bootimg_archive(args.boot_img_archive, args.output,
-                                args.algorithm, args.key, args.extra_args)
+                                args.algorithm, args.key, args.extra_args,
+                                args.extra_footer_args)
     else:
         certify_bootimg(args.boot_img, args.output, args.algorithm,
-                        args.key, args.extra_args)
+                        args.key, args.extra_args, args.extra_footer_args)
 
 
 if __name__ == '__main__':

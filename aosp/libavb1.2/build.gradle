@@ -1,5 +1,4 @@
 apply plugin: "c"
-apply plugin: "cpp"
 
 model {
     buildTypes {

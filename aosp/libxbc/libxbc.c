@@ -53,7 +53,7 @@ static bool isTrailerPresent(uint64_t bootconfig_end_addr) {
 /*
  * Add a string of boot config parameters to memory appended by the trailer.
  */
-int32_t addBootConfigParameters(char* params, uint32_t params_size,
+int32_t addBootConfigParameters(const char* params, uint32_t params_size,
     uint64_t bootconfig_start_addr, uint32_t bootconfig_size) {
     if (!params || !bootconfig_start_addr) {
         return -1;

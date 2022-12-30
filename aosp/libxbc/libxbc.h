@@ -43,7 +43,7 @@ extern "C" {
  * @param bootconfig_size size of the current bootconfig section in bytes.
  * @return number of bytes added to the boot config section. -1 for error.
  */
-int addBootConfigParameters(char *params, uint32_t params_size,
+int addBootConfigParameters(const char *params, uint32_t params_size,
                             uint64_t bootconfig_start_addr,
                             uint32_t bootconfig_size);
 

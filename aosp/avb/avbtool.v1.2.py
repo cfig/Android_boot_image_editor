@@ -930,18 +930,22 @@ class ImageHandler(object):
                                   struct.calcsize(ImageChunk.FORMAT)))
     self._read_header()
 
-  def append_raw(self, data):
+  def append_raw(self, data, multiple_block_size=True):
     """Appends a RAW chunk to the sparse file.
 
-    The length of the given data must be a multiple of the block size.
+    The length of the given data must be a multiple of the block size,
+    unless |multiple_block_size| is False.
 
     Arguments:
       data: Data to append as bytes.
+      multiple_block_size: whether to check the length of the
+        data is a multiple of the block size.
 
     Raises:
       OSError: If ImageHandler was initialized in read-only mode.
     """
-    assert len(data) % self.block_size == 0
+    if multiple_block_size:
+      assert len(data) % self.block_size == 0
 
     if self._read_only:
       raise OSError('ImageHandler is in read-only mode.')
@@ -3684,7 +3688,12 @@ class Avb(object):
       # Ensure image is multiple of block_size.
       rounded_image_size = round_to_multiple(image.image_size, block_size)
       if rounded_image_size > image.image_size:
-        image.append_raw('\0' * (rounded_image_size - image.image_size))
+        # If we need to round up the image size, it means the length of the
+        # data to append is not a multiple of block size.
+        # Setting multiple_block_size to false, so append_raw() will not
+        # require it.
+        image.append_raw(b'\0' * (rounded_image_size - image.image_size),
+                         multiple_block_size=False)
 
       # If image size exceeds the maximum image size, fail.
       if partition_size > 0:
@@ -3753,7 +3762,8 @@ class Avb(object):
       padding_needed = (round_to_multiple(len(hash_tree), image.block_size) -
                         len(hash_tree))
       hash_tree_with_padding = hash_tree + b'\0' * padding_needed
-      image.append_raw(hash_tree_with_padding)
+      if len(hash_tree_with_padding) > 0:
+        image.append_raw(hash_tree_with_padding)
       len_hashtree_and_fec = len(hash_tree_with_padding)
 
       # Generate FEC codes, if requested.

@@ -36,6 +36,7 @@
  */
 
 #include "avb_sha.h"
+#include "avb_crypto_ops_impl.h"
 
 #define SHFR(x, n) (x >> n)
 #define ROTR(x, n) ((x >> n) | (x << ((sizeof(x) << 3) - n)))
@@ -112,7 +113,8 @@ static const uint32_t sha256_k[64] = {
     0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2};
 
 /* SHA-256 implementation */
-void avb_sha256_init(AvbSHA256Ctx* ctx) {
+void avb_sha256_init(AvbSHA256Ctx* avb_ctx) {
+  AvbSHA256ImplCtx* ctx = (AvbSHA256ImplCtx*)avb_ctx->reserved;
 #ifndef UNROLL_LOOPS
   int i;
   for (i = 0; i < 8; i++) {
@@ -133,7 +135,7 @@ void avb_sha256_init(AvbSHA256Ctx* ctx) {
   ctx->tot_len = 0;
 }
 
-static void SHA256_transform(AvbSHA256Ctx* ctx,
+static void SHA256_transform(AvbSHA256ImplCtx* ctx,
                              const uint8_t* message,
                              size_t block_nb) {
   uint32_t w[64];
@@ -332,7 +334,8 @@ static void SHA256_transform(AvbSHA256Ctx* ctx,
   }
 }
 
-void avb_sha256_update(AvbSHA256Ctx* ctx, const uint8_t* data, size_t len) {
+void avb_sha256_update(AvbSHA256Ctx* avb_ctx, const uint8_t* data, size_t len) {
+  AvbSHA256ImplCtx* ctx = (AvbSHA256ImplCtx*)avb_ctx->reserved;
   size_t block_nb;
   size_t new_len, rem_len, tmp_len;
   const uint8_t* shifted_data;
@@ -363,7 +366,8 @@ void avb_sha256_update(AvbSHA256Ctx* ctx, const uint8_t* data, size_t len) {
   ctx->tot_len += (block_nb + 1) << 6;
 }
 
-uint8_t* avb_sha256_final(AvbSHA256Ctx* ctx) {
+uint8_t* avb_sha256_final(AvbSHA256Ctx* avb_ctx) {
+  AvbSHA256ImplCtx* ctx = (AvbSHA256ImplCtx*)avb_ctx->reserved;
   size_t block_nb;
   size_t pm_len;
   uint64_t len_b;
@@ -385,18 +389,18 @@ uint8_t* avb_sha256_final(AvbSHA256Ctx* ctx) {
 
 #ifndef UNROLL_LOOPS
   for (i = 0; i < 8; i++) {
-    UNPACK32(ctx->h[i], &ctx->buf[i << 2]);
+    UNPACK32(ctx->h[i], &avb_ctx->buf[i << 2]);
   }
 #else
-  UNPACK32(ctx->h[0], &ctx->buf[0]);
-  UNPACK32(ctx->h[1], &ctx->buf[4]);
-  UNPACK32(ctx->h[2], &ctx->buf[8]);
-  UNPACK32(ctx->h[3], &ctx->buf[12]);
-  UNPACK32(ctx->h[4], &ctx->buf[16]);
-  UNPACK32(ctx->h[5], &ctx->buf[20]);
-  UNPACK32(ctx->h[6], &ctx->buf[24]);
-  UNPACK32(ctx->h[7], &ctx->buf[28]);
+  UNPACK32(ctx->h[0], &avb_ctx->buf[0]);
+  UNPACK32(ctx->h[1], &avb_ctx->buf[4]);
+  UNPACK32(ctx->h[2], &avb_ctx->buf[8]);
+  UNPACK32(ctx->h[3], &avb_ctx->buf[12]);
+  UNPACK32(ctx->h[4], &avb_ctx->buf[16]);
+  UNPACK32(ctx->h[5], &avb_ctx->buf[20]);
+  UNPACK32(ctx->h[6], &avb_ctx->buf[24]);
+  UNPACK32(ctx->h[7], &avb_ctx->buf[28]);
 #endif /* !UNROLL_LOOPS */
 
-  return ctx->buf;
+  return avb_ctx->buf;
 }

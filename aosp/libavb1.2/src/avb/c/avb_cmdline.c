@@ -353,6 +353,10 @@ AvbSlotVerifyResult avb_append_options(
         // remapped by avb_manage_hashtree_error_mode().
         avb_assert_not_reached();
         break;
+      case AVB_HASHTREE_ERROR_MODE_PANIC:
+        verity_mode = "panicking";
+        dm_verity_mode = "panic_on_corruption";
+        break;
     }
     new_ret = avb_replace(
         slot_data->cmdline, "$(ANDROID_VERITY_MODE)", dm_verity_mode);

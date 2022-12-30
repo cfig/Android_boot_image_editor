@@ -8,16 +8,16 @@ A tool for reverse engineering Android ROM images.
 
 #### install required packages
 
-Linux: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-11-jdk gcc g++ python3 python-is-python3 p7zip-full`
+Linux: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python3 python-is-python3 p7zip-full`
 
 Mac: `brew install lz4 xz dtc`
 
-Mac: Make sure you have `JDK9+` properly installed.
+Mac: Make sure you have `JDK9+` properly installed. JDK 17 is recommended.
 
-Windows Subsystem for Linux(WSL): `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-11-jdk gcc g++ python`
+Windows Subsystem for Linux(WSL): `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python`
 
 Windows: Make sure you have `python3`, `JDK9+` and `openssl` properly installed.
-An easy way is to install [Anaconda](https://www.anaconda.com/products/individual#windows) and [Oracle JDK 11](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html), then run the program under anaconda PowerShell.
+An easy way is to install [Anaconda](https://www.anaconda.com/products/individual#windows) and [Oracle JDK 17](https://www.oracle.com/java/technologies/downloads/#java17), then run the program under anaconda PowerShell.
 Or install them with chocolate: `choco install openssl dtc-msys2`
 
 #### Parsing and packing
@@ -95,11 +95,12 @@ This will enable c++ modules, which is necessary for working with sparse images.
 | TS10                           | Topway       | Y                    | 10                       | car headunit, @mariodantas |
 | Pixel XL (marlin)              | HTC          | Y                    | 9.0.0 (PPR2.180905.006, <Br>Sep 2018)| [more ...](doc/additional_tricks.md#pixel-xl-marlin) |
 | K3 (CPH1955)                   | OPPO         | Y for recovery.img<Br> N for boot.img  | Pie    | [more](doc/additional_tricks.md#k3-cph1955) |
-| Z18 (NX606J)                    | ZTE          | Y                    | 8.1.0                    | [more...](doc/additional_tricks.md#nx606j) |
+| Z18 (NX606J)                   | ZTE          | Y                    | 8.1.0                    | [more...](doc/additional_tricks.md#nx606j) |
 | Nexus 9 (volantis/flounder)    | HTC          | Y(with some tricks)  | 7.1.1 (N9F27M, Oct 2017) | [tricks](doc/additional_tricks.md#tricks-for-nexus-9volantis)|
 | Nexus 5x (bullhead)            | LG           | Y                    | 6.0.0_r12 (MDA89E)       |      |
 | Moto X (2013) T-Mobile         | Motorola     | N                    |                          |      |
 | X7 (PD1602_A_3.12.8)           | VIVO         | N                    | ?                        | [Issue 35](https://github.com/cfig/Android_boot_image_editor/issues/35) |
+| Realme GT Neo 3                | Realme       | N                    | 12                       | [Issue 105](https://github.com/cfig/Android_boot_image_editor/issues/105) |
 
 ## more examples
 <details>
