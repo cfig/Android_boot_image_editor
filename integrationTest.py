@@ -78,7 +78,7 @@ def verifySingleJson(jsonFile, func = None):
     subprocess.check_call(gradleWrapper + " pack", shell = True)
     for k, v in verifyItems["hash"].items():
         log.info("%s : %s" % (k, v))
-        unittest.TestCase().assertEqual(v, hashFile(k))
+        unittest.TestCase().assertIn(hashFile(k), v.split())
     try:
         subprocess.check_call(gradleWrapper + " clear", shell = True)
     except Exception as e:
@@ -161,9 +161,8 @@ def main():
     verifySingleJson("%s/issue_59/recovery.json" % resDir2, func = lambda: shutil.rmtree("build/unzip_boot/root", ignore_errors = False))
     # Issue 71: dtbo
     if platform.system() != "Darwin":
-        pass
-        #verifySingleDir(resDir2, "issue_71")
-        #verifySingleDir(resDir2, "issue_71/redfin")
+        verifySingleDir(resDir2, "issue_71")
+        verifySingleDir(resDir2, "issue_71/redfin")
     else:
         log.info("dtbo not fully supported on MacOS, skip testing")
     # Issue 83: init_boot

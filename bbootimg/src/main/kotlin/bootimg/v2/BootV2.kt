@@ -80,6 +80,7 @@ data class BootV2(
         private val log = LoggerFactory.getLogger(BootV2::class.java)
         private val workDir = Helper.prop("workDir")
         private val mapper = ObjectMapper()
+        private val dtsSuffix = Helper.prop("config.dts_suffix")
 
         fun parse(fileName: String): BootV2 {
             val ret = BootV2()
@@ -305,8 +306,8 @@ data class BootV2(
                 if (theDtb.size > 0) {
                     it.addRule()
                     it.addRow("dtb", theDtb.file)
-                    if (File(theDtb.file + ".src").exists()) {
-                        it.addRow("\\-- decompiled dts", theDtb.file + ".src")
+                    if (File(theDtb.file + ".${dtsSuffix}").exists()) {
+                        it.addRow("\\-- decompiled dts", theDtb.file + ".${dtsSuffix}")
                     }
                 }
             }
@@ -386,8 +387,8 @@ data class BootV2(
         }
         //refresh dtb size
         dtb?.let { theDtb ->
-            if (File(theDtb.file!! + ".src").exists()) {
-                check(DTC().compile(theDtb.file!! + ".src", theDtb.file!!)) { "fail to compile dts" }
+            if (File(theDtb.file!! + ".${dtsSuffix}").exists()) {
+                check(DTC().compile(theDtb.file!! + ".${dtsSuffix}", theDtb.file!!)) { "fail to compile dts" }
             }
             theDtb.size = File(theDtb.file!!).length().toInt()
         }

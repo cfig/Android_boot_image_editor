@@ -36,6 +36,7 @@ class DtboParser(val workDir: File) : IPackable {
     private val log = LoggerFactory.getLogger(DtboParser::class.java)
     private val envv = EnvironmentVerifier()
     private val dtboMaker = Helper.prop("dtboMaker")
+    private val dtsSuffix = Helper.prop("config.dts_suffix")
 
     override fun capabilities(): List<String> {
         return listOf("^dtbo\\.img$")
@@ -139,7 +140,7 @@ class DtboParser(val workDir: File) : IPackable {
         if (envv.hasDtc) {
             for (i in 0 until Integer.parseInt(props.getProperty("dt_entry_count"))) {
                 val inputDtb = "$dtbPath.$i"
-                val outputSrc = File(outDir + "/" + File(inputDtb).name + ".src").path
+                val outputSrc = File(outDir + "/" + File(inputDtb).name + ".${dtsSuffix}").path
                 DTC().decompile(inputDtb, outputSrc)
             }
         } else {

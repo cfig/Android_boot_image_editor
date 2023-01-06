@@ -182,7 +182,7 @@ class Common {
             Helper.extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
             //extract DTB
             if (EnvironmentVerifier().hasDtc) {
-                DTC().decompile(s.dumpFile, s.dumpFile + ".src")
+                DTC().decompile(s.dumpFile, s.dumpFile + "." + Helper.prop("config.dts_suffix"))
             }
         }
 

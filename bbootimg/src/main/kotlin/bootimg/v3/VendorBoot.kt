@@ -158,6 +158,7 @@ data class VendorBoot(
         private val log = LoggerFactory.getLogger(VendorBoot::class.java)
         private val workDir = Helper.prop("workDir")
         private val mapper = ObjectMapper()
+        private val dtsSuffix = Helper.prop("config.dts_suffix")
         fun parse(fileName: String): VendorBoot {
             val ret = VendorBoot()
             FileInputStream(fileName).use { fis ->
@@ -266,8 +267,8 @@ data class VendorBoot(
             }
         }
         //update dtb
-        if (File(this.dtb.file + ".src").exists()) {
-            check(DTC().compile(this.dtb.file + ".src", this.dtb.file)) { "fail to compile dts" }
+        if (File(this.dtb.file + ".${dtsSuffix}").exists()) {
+            check(DTC().compile(this.dtb.file + ".${dtsSuffix}", this.dtb.file)) { "fail to compile dts" }
         }
         this.dtb.size = File(this.dtb.file).length().toInt()
         //header
@@ -421,8 +422,8 @@ data class VendorBoot(
             }
             it.addRule()
             it.addRow("dtb", this.dtb.file)
-            if (File(this.dtb.file + ".src").exists()) {
-                it.addRow("\\-- decompiled dts", dtb.file + ".src")
+            if (File(this.dtb.file + ".${dtsSuffix}").exists()) {
+                it.addRow("\\-- decompiled dts", dtb.file + ".${dtsSuffix}")
             }
             if (this.bootconfig.size > 0) {
                 it.addRule()

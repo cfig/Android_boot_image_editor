@@ -152,6 +152,7 @@ class Dtbo(
 
         private val log = LoggerFactory.getLogger(Dtbo::class.java)
         private val outDir = Helper.prop("workDir")
+        private val dtsSuffix = Helper.prop("config.dts_suffix")
     }
 
     fun extractVBMeta(): Dtbo {
@@ -186,7 +187,7 @@ class Dtbo(
                 .toInt()
             // Part II - a
             for (index in 0 until dtEntries.size) {
-                DTC().compile("${outDir}dt/dt.${index}.src", "${outDir}dt/dt.${index}")
+                DTC().compile("${outDir}dt/dt.${index}.${dtsSuffix}", "${outDir}dt/dt.${index}")
             }
             // Part II - b
             var offset = DtboHeader.SIZE + (header.entryCount * DeviceTreeTableEntry.SIZE)
@@ -221,7 +222,7 @@ class Dtbo(
             it.addRow("image info", outDir + info.output.removeSuffix(".img") + ".json")
             it.addRule()
             it.addRow("device-tree blob   (${this.header.entryCount} blobs)", "${outDir}dt/dt.*")
-            it.addRow("\\-- device-tree source ", "${outDir}dt/dt.*.src")
+            it.addRow("\\-- device-tree source ", "${outDir}dt/dt.*.${dtsSuffix}")
             it.addRule()
             it.addRow("AVB info", Avb.getJsonFileName(info.output))
             it.addRule()

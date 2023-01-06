@@ -78,6 +78,7 @@ data class BootV2Dialects(
     companion object {
         private val log = LoggerFactory.getLogger(BootV2Dialects::class.java)
         private val workDir = Helper.prop("workDir")
+        private val dtsSuffix = Helper.prop("config.dts_suffix")
 
         fun parse(fileName: String): BootV2Dialects {
             val ret = BootV2Dialects()
@@ -313,8 +314,8 @@ data class BootV2Dialects(
                 if (theDtb.size > 0) {
                     it.addRule()
                     it.addRow("dtb", theDtb.file)
-                    if (File(theDtb.file + ".src").exists()) {
-                        it.addRow("\\-- decompiled dts", theDtb.file + ".src")
+                    if (File(theDtb.file + ".${dtsSuffix}").exists()) {
+                        it.addRow("\\-- decompiled dts", theDtb.file + ".${dtsSuffix}")
                     }
                 }
             }

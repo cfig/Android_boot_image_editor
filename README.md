@@ -182,12 +182,12 @@ If you want to edit the device-tree blob in place:
 cp <your_vendor_boot_image> vendor_boot.img
 cp <your_vbmeta_image> vbmeta.img
 ./gradlew unpack
-==> now you can edit build/unzip_boot/dtb.src directly
+==> now you can edit build/unzip_boot/dtb.dts directly
 ./gradlew pack
 ```
 
-During unpack stage, dtb will be dumped to file `build/unzip_boot/dtb`, dts will be decompiled to `build/unzip_boot/dtb.src`.
-You can edit `dtb.src` directly, and it will be compiled to dtb duing repack stage.
+During unpack stage, dtb will be dumped to file `build/unzip_boot/dtb`, dts will be decompiled to `build/unzip_boot/dtb.dts`.
+You can edit `dtb.dts` directly, and it will be compiled to dtb duing repack stage.
 
 If you just want to replace the dtb with the one that is compiled outside this tool, please
 
@@ -195,7 +195,7 @@ If you just want to replace the dtb with the one that is compiled outside this t
 cp <your_vendor_boot_image> vendor_boot.img
 cp <your_vbmeta_image> vbmeta.img
 ./gradlew unpack
-rm build/unzip_boot/dtb.src
+rm build/unzip_boot/dtb.dts
 cp <your_dtb> build/unzip_boot/dtb
 ./gradlew pack
 ```

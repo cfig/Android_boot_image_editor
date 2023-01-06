@@ -37,6 +37,9 @@ jobs:
       - name: Unit Test
         run: ./gradlew check && ./gradlew clean || true
 
+      - name: enable gradle native
+        run: sed -i "s/bHackingMode = false/bHackingMode = true/g" build.gradle.kts
+
       # Runs a set of commands using the runners shell
       - name: Integration Test
         run: |
