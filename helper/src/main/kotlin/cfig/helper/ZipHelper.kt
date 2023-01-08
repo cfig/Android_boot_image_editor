@@ -53,6 +53,17 @@ class ZipHelper {
     companion object {
         private val log = LoggerFactory.getLogger("ZipHelper")
 
+        val isMacOS: Boolean
+            get() = System.getProperty("os.name").contains("Mac")
+
+        val isLinux: Boolean
+            get() = System.getProperty("os.name").contains("Linux")
+
+        val isWindows: Boolean
+            get() = System.getProperty("os.name").contains("Windows")
+
+        private var lz4prog = ""
+
         /*
             unzip(): unzip fileName to outDir
          */
@@ -317,9 +328,39 @@ class ZipHelper {
             log.info("decompress(xz) done: $compressedFile -> $decompressedFile")
         }
 
+        private fun getLz4Prog(): String {
+            if (lz4prog.isBlank()) {
+                lz4prog = "lz4"
+                if (isWindows) {
+                    try {
+                        Runtime.getRuntime().exec(arrayOf("tools/bin/lz4.exe", "--version"), null, null)
+                        lz4prog = "tools/bin/lz4.exe"
+                    } catch (e: Exception) {
+                        log.warn("lz4 not installed")
+                    }
+                }
+            }
+            return lz4prog
+        }
+
+        val hasLz4: Boolean
+            get() : Boolean {
+                try {
+                    Runtime.getRuntime().exec(arrayOf(getLz4Prog(), "--version"), null, null)
+                    log.debug("lz4 available")
+                } catch (e: Exception) {
+                    log.warn("lz4 not installed")
+                    if (isMacOS) {
+                        log.warn("For Mac OS: \n\n\tbrew install lz4\n")
+                    }
+                    return false
+                }
+                return true
+            }
+
         fun isLz4(compressedFile: String): Boolean {
             return try {
-                "lz4 -t $compressedFile".check_call()
+                "${getLz4Prog()} -t $compressedFile".check_call()
                 true
             } catch (e: Exception) {
                 false
@@ -327,7 +368,7 @@ class ZipHelper {
         }
 
         fun lz4cat(lz4File: String, outFile: String) {
-            "lz4 -d -fv $lz4File $outFile".check_call()
+            "${getLz4Prog()} -d -fv $lz4File $outFile".check_call()
         }
 
         fun lz4(lz4File: String, inputStream: InputStream) {
@@ -335,8 +376,8 @@ class ZipHelper {
                 val baosE = ByteArrayOutputStream()
                 DefaultExecutor().let { exec ->
                     exec.streamHandler = PumpStreamHandler(fos, baosE, inputStream)
-                    val cmd = CommandLine.parse("lz4 -l -12")
-                    if ("lz4 --version".check_output().contains("r\\d+,".toRegex())) {
+                    val cmd = CommandLine.parse("${getLz4Prog()} -l -12")
+                    if ("${getLz4Prog()} --version".check_output().contains("r\\d+,".toRegex())) {
                         log.warn("lz4 version obsolete, needs update")
                     } else {
                         cmd.addArgument("--favor-decSpeed")

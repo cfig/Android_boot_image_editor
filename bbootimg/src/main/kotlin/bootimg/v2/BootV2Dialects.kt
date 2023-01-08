@@ -19,9 +19,8 @@ import cfig.Avb
 import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
-import cfig.bootimg.v3.VendorBoot
-import cfig.helper.Helper
 import cfig.helper.Dumpling
+import cfig.helper.Helper
 import cfig.packable.VBMetaParser
 import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -540,7 +539,7 @@ data class BootV2Dialects(
     }
 
     fun printPackSummary(): BootV2Dialects {
-        VendorBoot.printPackSummary(info.output)
+        Common.printPackSummary(info.output)
         return this
     }
 

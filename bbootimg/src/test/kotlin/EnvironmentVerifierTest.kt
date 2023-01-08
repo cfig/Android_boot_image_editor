@@ -19,12 +19,6 @@ class EnvironmentVerifierTest {
     private val envv = EnvironmentVerifier()
 
     @Test
-    fun getHasLz4() {
-        val hasLz4 = envv.hasLz4
-        println("hasLz4 = $hasLz4")
-    }
-
-    @Test
     fun getHasDtc() {
         val hasDtc = envv.hasDtc
         println("hasDtc = $hasDtc")

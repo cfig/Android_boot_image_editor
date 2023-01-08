@@ -21,6 +21,7 @@ import cfig.utils.DTC
 import cfig.helper.Helper
 import cfig.helper.ZipHelper
 import cfig.utils.KernelExtractor
+import com.github.freva.asciitable.HorizontalAlign
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.PumpStreamHandler
@@ -389,6 +390,54 @@ class Common {
             } catch (e: NumberFormatException) {
                 log.warn("can not parse osVersion from $osVersion")
                 10
+            }
+        }
+
+        fun table2String(prints: List<Pair<String, String>>): String {
+            return com.github.freva.asciitable.AsciiTable.getTable(
+                com.github.freva.asciitable.AsciiTable.BASIC_ASCII,
+                prints, mutableListOf(
+                    com.github.freva.asciitable.Column().header("What")
+                        .headerAlign(HorizontalAlign.CENTER)
+                        .dataAlign(HorizontalAlign.LEFT)
+                        .with { it.first },
+                    com.github.freva.asciitable.Column().header("Where")
+                        .headerAlign(HorizontalAlign.CENTER)
+                        .dataAlign(HorizontalAlign.LEFT)
+                        .with { it.second }))
+        }
+
+        fun printPackSummary(imageName: String) {
+            val prints: MutableList<Pair<String, String>> = mutableListOf()
+            val tableHeader = de.vandermeer.asciitable.AsciiTable().apply {
+                addRule(); addRow("What", "Where"); addRule()
+            }
+            val tab = de.vandermeer.asciitable.AsciiTable().let {
+                it.addRule()
+                if (File("$imageName.signed").exists()) {
+                    it.addRow("re-packed $imageName", "$imageName.signed")
+                    prints.add(Pair("re-packed $imageName", "$imageName.signed"))
+                } else {
+                    it.addRow("re-packed $imageName", "$imageName.clear")
+                    prints.add(Pair("re-packed $imageName", "$imageName.clear"))
+                }
+                it.addRule()
+                it
+            }
+            if (File("vbmeta.img").exists()) {
+                if (File("vbmeta.img.signed").exists()) {
+                    tab.addRow("re-packed vbmeta", "vbmeta.img.signed")
+                    prints.add(Pair("re-packed vbmeta", "vbmeta.img.signed"))
+                } else {
+                    tab.addRow("re-packed vbmeta", "-")
+                    prints.add(Pair("re-packed vbmeta", "-"))
+                }
+                tab.addRule()
+            }
+            if (EnvironmentVerifier().isWindows) {
+                log.info("\n" + Common.table2String(prints))
+            } else {
+                log.info("\n\t\t\tPack Summary of ${imageName}\n{}\n{}", tableHeader.render(), tab.render())
             }
         }
     }

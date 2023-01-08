@@ -17,13 +17,14 @@ package cfig.bootimg.v3
 import avb.AVBInfo
 import cc.cfig.io.Struct
 import cfig.Avb
-import cfig.utils.EnvironmentVerifier
+import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
-import cfig.helper.Helper
 import cfig.helper.Dumpling
+import cfig.helper.Helper
 import cfig.packable.VBMetaParser
 import cfig.utils.DTC
+import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
 import org.apache.commons.exec.CommandLine
@@ -211,34 +212,6 @@ data class VendorBoot(
             ret.info.imageSize = File(fileName).length()
             return ret
         }
-
-        fun printPackSummary(imageName: String) {
-            val tableHeader = AsciiTable().apply {
-                addRule()
-                addRow("What", "Where")
-                addRule()
-            }
-            val tab = AsciiTable().let {
-                it.addRule()
-                if (File("$imageName.signed").exists()) {
-                    it.addRow("re-packed $imageName", "$imageName.signed")
-                } else {
-                    it.addRow("re-packed $imageName", "$imageName.clear")
-                }
-                it.addRule()
-                it
-            }
-            if (File("vbmeta.img").exists()) {
-                if (File("vbmeta.img.signed").exists()) {
-                    tab.addRow("re-packed vbmeta", "vbmeta.img.signed")
-                } else {
-                    tab.addRow("re-packed vbmeta", "-")
-                }
-                tab.addRule()
-            }
-            log.info("\n\t\t\tPack Summary of ${imageName}\n{}\n{}", tableHeader.render(), tab.render())
-        }
-
     }
 
     fun pack(): VendorBoot {
@@ -402,6 +375,7 @@ data class VendorBoot(
     }
 
     fun printUnpackSummary(): VendorBoot {
+        val prints: MutableList<Pair<String, String>> = mutableListOf()
         val tableHeader = AsciiTable().apply {
             addRule()
             addRow("What", "Where")
@@ -410,34 +384,47 @@ data class VendorBoot(
         val tab = AsciiTable().let {
             it.addRule()
             it.addRow("image info", workDir + info.output.removeSuffix(".img") + ".json")
+            prints.add(Pair("image info", workDir + info.output.removeSuffix(".img") + ".json"))
             it.addRule()
             it.addRow("ramdisk", this.ramdisk.file)
+            prints.add(Pair("ramdisk", this.ramdisk.file))
             if (this.ramdisk_table.size > 0) {
                 this.ramdisk_table.ramdidks.forEachIndexed { index, entry ->
+                    //fancy ascii
                     it.addRow("-- ${entry.type} ramdisk[${index + 1}/${this.ramdisk_table.ramdidks.size}]", entry.file)
                     it.addRow("------- extracted rootfs", "${workDir}root.${index + 1}")
+                    //basic ascii
+                    prints.add(Pair(" -- ${entry.type} ramdisk[${index + 1}/${this.ramdisk_table.ramdidks.size}]", entry.file))
+                    prints.add(Pair(" ------- extracted rootfs", "${workDir}root.${index + 1}"))
                 }
             } else {
                 it.addRow("\\-- extracted ramdisk rootfs", "${workDir}root")
+                prints.add(Pair("\\-- extracted ramdisk rootfs", "${workDir}root"))
             }
             it.addRule()
             it.addRow("dtb", this.dtb.file)
+            prints.add(Pair("dtb", this.dtb.file))
             if (File(this.dtb.file + ".${dtsSuffix}").exists()) {
                 it.addRow("\\-- decompiled dts", dtb.file + ".${dtsSuffix}")
+                prints.add(Pair("\\-- decompiled dts", dtb.file + ".${dtsSuffix}"))
             }
             if (this.bootconfig.size > 0) {
                 it.addRule()
                 it.addRow("bootconfig", this.bootconfig.file)
+                prints.add(Pair("bootconfig", this.bootconfig.file))
             }
             it.addRule()
             Avb.getJsonFileName(info.output).let { jsonFile ->
                 if (File(jsonFile).exists()) {
                     it.addRow("AVB info", jsonFile)
+                    prints.add(Pair("AVB info", jsonFile))
                     mapper.readValue(File(jsonFile), AVBInfo::class.java).let { ai ->
                         it.addRow("\\-- signing key", Avb.inspectKey(ai))
+                        prints.add(Pair(" \\-- signing key", Avb.inspectKey(ai)))
                     }
                 } else {
                     it.addRow("AVB info", "none")
+                    prints.add(Pair("AVB info", "none"))
                 }
                 it.addRule()
             }
@@ -447,18 +434,23 @@ data class VendorBoot(
             if (File("vbmeta.img").exists()) {
                 it.addRule()
                 it.addRow("vbmeta.img", Avb.getJsonFileName("vbmeta.img"))
+                prints.add(Pair("vbmeta.img", Avb.getJsonFileName("vbmeta.img")))
                 it.addRule()
                 "\n" + it.render()
             } else {
                 ""
             }
         }
-        log.info("\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}", tableHeader.render(), tab.render(), tabVBMeta)
+        if (EnvironmentVerifier().isWindows) {
+            log.info("\n" + Common.table2String(prints))
+        } else {
+            log.info("\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}", tableHeader.render(), tab.render(), tabVBMeta)
+        }
         return this
     }
 
     fun printPackSummary(): VendorBoot {
-        printPackSummary(info.output)
+        Common.printPackSummary(info.output)
         return this
     }
 

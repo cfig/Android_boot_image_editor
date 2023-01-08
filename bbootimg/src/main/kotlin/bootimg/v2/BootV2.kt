@@ -19,14 +19,13 @@ import cfig.Avb
 import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
-import cfig.bootimg.v3.BootV3
-import cfig.bootimg.v3.VendorBoot
-import cfig.helper.Helper
 import cfig.helper.Dumpling
+import cfig.helper.Helper
 import cfig.packable.VBMetaParser
-import cfig.utils.EnvironmentVerifier
 import cfig.utils.DTC
+import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.freva.asciitable.HorizontalAlign
 import de.vandermeer.asciitable.AsciiTable
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
@@ -240,7 +239,8 @@ data class BootV2(
         return this
     }
 
-    fun printSummary(): BootV2 {
+    fun printUnpackSummary(): BootV2 {
+        val prints: MutableList<Pair<String, String>> = mutableListOf()
         val tableHeader = AsciiTable().apply {
             addRule()
             addRow("What", "Where")
@@ -249,6 +249,7 @@ data class BootV2(
         val tab = AsciiTable().let {
             it.addRule()
             it.addRow("image info", workDir + info.output.removeSuffix(".img") + ".json")
+            prints.add(Pair("image info", workDir + info.output.removeSuffix(".img") + ".json"))
             if (this.info.verify.startsWith("VB2.0")) {
                 it.addRule()
                 val verifyStatus = if (this.info.verify.contains("PASS")) {
@@ -258,11 +259,13 @@ data class BootV2(
                 }
                 Avb.getJsonFileName(info.output).let { jsonFile ->
                     it.addRow("AVB info [$verifyStatus]", jsonFile)
+                    prints.add(Pair("AVB info [$verifyStatus]", jsonFile))
                     if (File(jsonFile).exists()) {
                         mapper.readValue(File(jsonFile), AVBInfo::class.java).let { ai ->
                             val inspectRet = Avb.inspectKey(ai)
                             if (inspectRet != "NONE") {
                                 it.addRow("\\-- signing key", inspectRet)
+                                prints.add(Pair("\\-- signing key", inspectRet))
                             }
                         }
                     }
@@ -271,27 +274,33 @@ data class BootV2(
             //kernel
             it.addRule()
             it.addRow("kernel", this.kernel.file)
+            prints.add(Pair("kernel", this.kernel.file.toString()))
             File(Helper.prop("kernelVersionFile")).let { kernelVersionFile ->
                 if (kernelVersionFile.exists()) {
                     it.addRow("\\-- version " + kernelVersionFile.readLines().toString(), kernelVersionFile.path)
+                    prints.add(Pair("\\-- version " + kernelVersionFile.readLines().toString(), kernelVersionFile.path))
                 }
             }
             File(Helper.prop("kernelConfigFile")).let { kernelConfigFile ->
                 if (kernelConfigFile.exists()) {
                     it.addRow("\\-- config", kernelConfigFile.path)
+                    prints.add(Pair("\\-- config", kernelConfigFile.path))
                 }
             }
             //ramdisk
             if (this.ramdisk.size > 0) {
                 it.addRule()
                 it.addRow("ramdisk", this.ramdisk.file)
+                prints.add(Pair("ramdisk", this.ramdisk.file.toString()))
                 it.addRow("\\-- extracted ramdisk rootfs", "${workDir}root")
+                prints.add(Pair("\\-- extracted ramdisk rootfs", "${workDir}root"))
             }
             //second
             this.secondBootloader?.let { theSecondBootloader ->
                 if (theSecondBootloader.size > 0) {
                     it.addRule()
                     it.addRow("second bootloader", theSecondBootloader.file)
+                    prints.add(Pair("second bootloader", theSecondBootloader.file.toString()))
                 }
             }
             //dtbo
@@ -299,6 +308,7 @@ data class BootV2(
                 if (theDtbo.size > 0) {
                     it.addRule()
                     it.addRow("recovery dtbo", theDtbo.file)
+                    prints.add(Pair("recovery dtbo", theDtbo.file.toString()))
                 }
             }
             //dtb
@@ -306,8 +316,10 @@ data class BootV2(
                 if (theDtb.size > 0) {
                     it.addRule()
                     it.addRow("dtb", theDtb.file)
+                    prints.add(Pair("dtb", theDtb.file.toString()))
                     if (File(theDtb.file + ".${dtsSuffix}").exists()) {
                         it.addRow("\\-- decompiled dts", theDtb.file + ".${dtsSuffix}")
+                        prints.add(Pair("\\-- decompiled dts", theDtb.file + ".${dtsSuffix}"))
                     }
                 }
             }
@@ -319,16 +331,31 @@ data class BootV2(
             if (File("vbmeta.img").exists()) {
                 it.addRule()
                 it.addRow("vbmeta.img", Avb.getJsonFileName("vbmeta.img"))
+                prints.add(Pair("vbmeta.img", Avb.getJsonFileName("vbmeta.img")))
                 it.addRule()
                 "\n" + it.render()
             } else {
                 ""
             }
         }
-        log.info(
-            "\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}",
-            tableHeader.render(), tab.render(), tabVBMeta
-        )
+
+        if (EnvironmentVerifier().isWindows) {
+            log.info("\n" +
+                    com.github.freva.asciitable.AsciiTable.getTable(
+                        com.github.freva.asciitable.AsciiTable.BASIC_ASCII,
+                        prints, mutableListOf(
+                            com.github.freva.asciitable.Column().header("What")
+                                .dataAlign(HorizontalAlign.LEFT)
+                                .with { it.first },
+                            com.github.freva.asciitable.Column().header("Where").with { it.second })
+                    ))
+        } else {
+            log.info(
+                "\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}",
+                tableHeader.render(), tab.render(), tabVBMeta
+            )
+        }
+
         return this
     }
 
@@ -535,7 +562,7 @@ data class BootV2(
     }
 
     fun printPackSummary(): BootV2 {
-        VendorBoot.printPackSummary(info.output)
+        Common.printPackSummary(info.output)
         return this
     }
 

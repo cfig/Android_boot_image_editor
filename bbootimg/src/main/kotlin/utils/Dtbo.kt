@@ -5,9 +5,8 @@ import cc.cfig.io.Struct
 import cfig.Avb
 import cfig.bootimg.Common
 import cfig.bootimg.Signer
-import cfig.bootimg.v3.VendorBoot
-import cfig.helper.Helper
 import cfig.helper.Dumpling
+import cfig.helper.Helper
 import cfig.packable.VBMetaParser
 import cfig.utils.DTC
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -254,7 +253,7 @@ class Dtbo(
     }
 
     fun printPackSummary(): Dtbo {
-        VendorBoot.printPackSummary(info.output)
+        Common.printPackSummary(info.output)
         return this
     }
 }

@@ -34,9 +34,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     implementation("cc.cfig:io:0.2")
-    implementation("ch.qos.logback:logback-classic:1.2.11")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.3")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
+    implementation("ch.qos.logback:logback-classic:1.4.5")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.14.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.0")
     implementation("com.google.guava:guava:31.1-jre")
     implementation("org.apache.commons:commons-exec:1.3")
     implementation("org.apache.commons:commons-compress:1.21")
@@ -45,6 +45,7 @@ dependencies {
     implementation("junit:junit:4.13.2")
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
     implementation("de.vandermeer:asciitable:0.3.2")
+    implementation("com.github.freva:ascii-table:1.8.0")
     implementation("com.google.protobuf:protobuf-java:3.21.1")
     implementation(project(":helper"))
 

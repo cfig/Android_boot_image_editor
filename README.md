@@ -62,10 +62,11 @@ Well done you did it! The last step is to star this repo :smile
 
 | Image Type      | file names                              |  platforms    | note |
 | --------------- | -----------------------------------     | ----------    | ---- |
-| boot images     | boot.img, vendor_boot.img, init_boot.img|  all          | |
-| recovery images | recovery.img, recovery-two-step.img     |  all          | |
-| vbmeta images   | vbmeta.img, vbmeta_system.img etc.      |  all          | |
-| dtbo images     | dtbo.img                                | linux & mac   | |
+| boot            | boot.img, init_boot.img                 |  all          | |
+|vendor boot      | vendor_boot.img, vendor_boot-debug.img, vendor_kernel_boot.img |  all  | |
+| recovery        | recovery.img, recovery-two-step.img     |  all          | |
+| vbmeta          | vbmeta.img, vbmeta_system.img etc.      |  all          | |
+| dtbo            | dtbo.img                                | linux & mac   | |
 | sparse images   | system.img, vendor.img, product.img etc.| linux & mac   | need **hacking mode**\* |
 | OTA payload     | payload.bin                             | linux & mac   | |
 

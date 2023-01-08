@@ -45,7 +45,7 @@ class BootImgParser : IPackable {
                     .parse(fileName)
                     .extractImages()
                     .extractVBMeta()
-                    .printSummary()
+                    .printUnpackSummary()
                 log.debug(b2.toString())
             }
             in 3..4 -> {
@@ -53,7 +53,7 @@ class BootImgParser : IPackable {
                     .parse(fileName)
                     .extractImages()
                     .extractVBMeta()
-                    .printSummary()
+                    .printUnpackSummary()
                 log.debug(b3.toString())
             }
             else -> {

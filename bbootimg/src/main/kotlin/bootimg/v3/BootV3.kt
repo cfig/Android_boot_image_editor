@@ -18,6 +18,7 @@ import avb.AVBInfo
 import avb.alg.Algorithms
 import avb.blob.AuxBlob
 import cfig.Avb
+import cfig.bootimg.Common
 import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Common.Companion.getPaddingSize
@@ -308,7 +309,8 @@ data class BootV3(
         return this
     }
 
-    fun printSummary(): BootV3 {
+    fun printUnpackSummary(): BootV3 {
+        val prints: MutableList<Pair<String, String>> = mutableListOf()
         val workDir = Helper.prop("workDir")
         val tableHeader = AsciiTable().apply {
             addRule()
@@ -318,32 +320,43 @@ data class BootV3(
         val tab = AsciiTable().let {
             it.addRule()
             it.addRow("image info", workDir + info.output.removeSuffix(".img") + ".json")
+            prints.add(Pair("image info", workDir + info.output.removeSuffix(".img") + ".json"))
             it.addRule()
             if (this.kernel.size > 0) {
                 it.addRow("kernel", this.kernel.file)
+                prints.add(Pair("kernel", this.kernel.file))
                 File(Helper.prop("kernelVersionFile")).let { kernelVersionFile ->
                     if (kernelVersionFile.exists()) {
                         it.addRow("\\-- version " + kernelVersionFile.readLines().toString(), kernelVersionFile.path)
+                        prints.add(Pair("\\-- version " + kernelVersionFile.readLines().toString(), kernelVersionFile.path))
                     }
                 }
                 File(Helper.prop("kernelConfigFile")).let { kernelConfigFile ->
                     if (kernelConfigFile.exists()) {
                         it.addRow("\\-- config", kernelConfigFile.path)
+                        prints.add(Pair("\\-- config", kernelConfigFile.path))
                     }
                 }
                 it.addRule()
             }
             if (this.ramdisk.size > 0) {
+                //fancy
                 it.addRow("ramdisk", this.ramdisk.file)
                 it.addRow("\\-- extracted ramdisk rootfs", "${workDir}root")
                 it.addRule()
+                //basic
+                prints.add(Pair("ramdisk", this.ramdisk.file))
+                prints.add(Pair("\\-- extracted ramdisk rootfs", "${workDir}root"))
             }
             if (this.info.signatureSize > 0) {
                 it.addRow("GKI signature 1.0", this.bootSignature.file)
+                prints.add(Pair("GKI signature 1.0", this.bootSignature.file))
                 File(Avb.getJsonFileName(this.bootSignature.file)).let { jsFile ->
                     it.addRow("\\-- decoded boot signature", if (jsFile.exists()) jsFile.path else "N/A")
+                    prints.add(Pair("\\-- decoded boot signature", if (jsFile.exists()) jsFile.path else "N/A"))
                     if (jsFile.exists()) {
                         it.addRow("\\------ signing key", Avb.inspectKey(mapper.readValue(jsFile, AVBInfo::class.java)))
+                        prints.add(Pair("\\------ signing key", Avb.inspectKey(mapper.readValue(jsFile, AVBInfo::class.java))))
                     }
                 }
                 it.addRule()
@@ -355,6 +368,10 @@ data class BootV3(
                     it.addRow("GKI signature 2.0", this.bootSignature.file)
                     it.addRow("\\-- boot", jsonFile.path)
                     it.addRow("\\------ signing key", Avb.inspectKey(mapper.readValue(jsonFile, AVBInfo::class.java)))
+                    //basic
+                    prints.add(Pair("GKI signature 2.0", this.bootSignature.file))
+                    prints.add(Pair("\\-- boot", jsonFile.path))
+                    prints.add(Pair("\\------ signing key", Avb.inspectKey(mapper.readValue(jsonFile, AVBInfo::class.java))))
                 }
             }
             File(Avb.getJsonFileName("sig.kernel")).let { jsonFile ->
@@ -363,15 +380,20 @@ data class BootV3(
                     it.addRow("\\-- kernel", jsonFile.path)
                     it.addRow("\\------ signing key", Avb.inspectKey(readBackAvb))
                     it.addRule()
+                    //basic
+                    prints.add(Pair("\\-- kernel", jsonFile.path))
+                    prints.add(Pair("\\------ signing key", Avb.inspectKey(readBackAvb)))
                 }
             }
 
             //AVB info
             Avb.getJsonFileName(info.output).let { jsonFile ->
                 it.addRow("AVB info", if (File(jsonFile).exists()) jsonFile else "NONE")
+                prints.add(Pair("AVB info", if (File(jsonFile).exists()) jsonFile else "NONE"))
                 if (File(jsonFile).exists()) {
                     mapper.readValue(File(jsonFile), AVBInfo::class.java).let { ai ->
                         it.addRow("\\------ signing key", Avb.inspectKey(ai))
+                        prints.add(Pair("\\------ signing key", Avb.inspectKey(ai)))
                     }
                 }
             }
@@ -384,19 +406,25 @@ data class BootV3(
                 it.addRow("vbmeta.img", Avb.getJsonFileName("vbmeta.img"))
                 it.addRule()
                 "\n" + it.render()
+                //basic
+                prints.add(Pair("vbmeta.img", Avb.getJsonFileName("vbmeta.img")))
             } else {
                 ""
             }
         }
-        log.info(
-            "\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}",
-            tableHeader.render(), tab.render(), tabVBMeta
-        )
+        if (EnvironmentVerifier().isWindows) {
+            log.info("\n" + Common.table2String(prints))
+        } else {
+            log.info(
+                "\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}",
+                tableHeader.render(), tab.render(), tabVBMeta
+            )
+        }
         return this
     }
 
     fun printPackSummary(): BootV3 {
-        VendorBoot.printPackSummary(info.output)
+        Common.printPackSummary(info.output)
         return this
     }
 

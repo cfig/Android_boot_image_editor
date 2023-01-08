@@ -45,25 +45,10 @@ class EnvironmentVerifier {
     val hasGzip: Boolean
         get(): Boolean {
             try {
-                Runtime.getRuntime().exec("gzip -V")
+                Runtime.getRuntime().exec(arrayOf("gzip", "-V"), null, null)
                 log.debug("gzip available")
             } catch (e: Exception) {
                 log.warn("gzip unavailable")
-                return false
-            }
-            return true
-        }
-
-    val hasLz4: Boolean
-        get() : Boolean {
-            try {
-                Runtime.getRuntime().exec("lz4 --version")
-                log.debug("lz4 available")
-            } catch (e: Exception) {
-                log.warn("lz4 not installed")
-                if (isMacOS) {
-                    log.warn("For Mac OS: \n\n\tbrew install lz4\n")
-                }
                 return false
             }
             return true
@@ -107,6 +92,8 @@ class EnvironmentVerifier {
     val isWindows: Boolean
         get() = System.getProperty("os.name").contains("Windows")
 
+    var lz4prog: String = "lz4"
+
     private fun getJavaVersion(): Int {
         return System.getProperty("java.version").let { version ->
             if (version.startsWith("1.")) {
@@ -123,8 +110,8 @@ class EnvironmentVerifier {
     }
 
     init {
-        if (getJavaVersion() < 9) {
-            log.error("Java 9+ is required, while it's " + System.getProperty("java.version"))
+        if (getJavaVersion() < 11) {
+            log.error("Java 11+ is required, while it's " + System.getProperty("java.version"))
             exitProcess(1)
         } else {
             log.debug("Java version " + System.getProperty("java.version"))

@@ -15,6 +15,7 @@
 package cfig.utils
 
 import cfig.helper.Helper
+import cfig.helper.ZipHelper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.Logger
@@ -26,7 +27,7 @@ class KernelExtractor {
 
     fun envCheck(): Boolean {
         val envv = EnvironmentVerifier()
-        return envv.hasLz4 && envv.hasXz && envv.hasGzip
+        return ZipHelper.hasLz4 && envv.hasXz && envv.hasGzip
     }
 
     fun run(fileName: String, workDir: File? = null): List<String> {
