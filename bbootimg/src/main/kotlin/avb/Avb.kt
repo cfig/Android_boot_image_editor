@@ -237,6 +237,9 @@ class Avb {
             }
         }
 
+        /**
+         * verify the AVBInfo of [ai], the raw data is boxed into [dp].
+         */
         fun verify(ai: AVBInfo, dp: Dumpling<*>, parent: String = ""): Array<Any> {
             val ret: Array<Any> = arrayOf(true, "")
             val localParent = parent.ifEmpty { dp.getLabel() }

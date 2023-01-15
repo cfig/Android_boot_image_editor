@@ -99,29 +99,29 @@ Value at 0x28 is one of {0x00,0x01,0x02,0x03,0x04}, this filed should be read fi
 
 ## 2. boot.img v3-v4
 
-For partitions: `/boot` and `/init_boot`.
+For partitions: `/boot`, `/init_boot` or `/recovery`.
 
 ### header
 
               item                        size in bytes             position
     +-----------------------------------------------------------+    --> 0
-    |<MAGIC HEADER>                  |     8 (value=ANDROID!)   |
+    |<MAGIC HEADER>                  |   8 (value=ANDROID!)     |
     |--------------------------------+--------------------------|    --> 8
-    |<kernel size>                   |     4                    |
+    |<kernel size>                   |   4                      |
     |--------------------------------+--------------------------|    --> 12
-    |<ramdisk size>                  |     4                    |
+    |<ramdisk size>                  |   4                      |
     |--------------------------------+--------------------------|    --> 16
-    |<os version & os patch level>   |     4                    |
+    |<os version & os patch level>   |   4                      |
     |--------------------------------+--------------------------|    --> 20
-    |<header size>                   |     4                    |
+    |<header size>                   |   4                      |
     |--------------------------------+--------------------------|    --> 24
-    |<reserved>                      |     4 * 4                |
+    |<reserved>                      |   4 * 4                  |
     |--------------------------------+--------------------------|    --> 40 (0x28)
-    |<header version>                |     4 (value in [3|4])   |
+    |<header version>                |   4 (value in [3|4])     |
     |--------------------------------+--------------------------|    --> 44
-    |<cmdline>                       |     1024+512=1536        |
+    |<cmdline>                       |   1024+512=1536          |
     |--------------------------------+--------------------------|    --> 1580
-    |<signature_size>   (v4 only)    |     4                    |
+    |<signature_size>   (v4 only)    |   4 (values in [4096|0]) |
     |--------------------------------+--------------------------|    --> 1584
     |<padding>                       | min(n * page_size        |
     |                                |           - header_size) |
@@ -131,17 +131,19 @@ For partitions: `/boot` and `/init_boot`.
 
     +-----------------------------------------------------------+    --> pagesize
     |<kernel>                        |   kernel length          |
-    +-----------------------------------------------------------+
+    +-----------------------------------------------------------+    --> + kernel len
     |<ramdisk>                       |   ramdisk length         |
-    +-----------------------------------------------------------+
+    +-----------------------------------------------------------+    --> + ramdisk len
     |<boot signature>   (v4 only)    |   boot signature length  |
-    +--------------------------------+--------------------------+
+    |                                |   GKI 1.0 : 4K           |
+    |                                |   GKI 2.0 : 16K          |
+    +--------------------------------+--------------------------+    --> + boot sig len
     |<padding>                       | min(n * page_size - len) |
     +-----------------------------------------------------------+
 
 ## 3. vendor\_boot.img v3-v4
 
-For partitions: `/vendor_boot`.
+For partitions: `/vendor_boot` or `/vendor_kernel_boot`.
 
 ### header
 

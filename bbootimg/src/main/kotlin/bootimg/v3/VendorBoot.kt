@@ -266,12 +266,15 @@ data class VendorBoot(
             else -> {
                 ByteBuffer.allocate(1024 * 1024 * 128).let {
                     it.order(ByteOrder.LITTLE_ENDIAN)
-                    //1. vendor ramdisks and dtb
+                    //1. vendor ramdisks
                     C.writePaddedFiles(it, this.ramdisk_table.ramdidks.map { rd -> rd.file }, this.info.pageSize)
-                    C.writePaddedFile(it, this.dtb.file, this.info.pageSize)
-                    //2. vrt
+                    //2. dtb
+                    if (this.dtb.size > 0) {
+                        C.writePaddedFile(it, this.dtb.file, this.info.pageSize)
+                    }
+                    //3. vrt
                     it.put(this.ramdisk_table.update().encode(this.info.pageSize))
-                    //3. bootconfig
+                    //4. bootconfig
                     if (this.bootconfig.file.isNotBlank()) {
                         C.writePaddedFile(it, this.bootconfig.file, this.info.pageSize)
                     }
@@ -394,7 +397,9 @@ data class VendorBoot(
                     it.addRow("-- ${entry.type} ramdisk[${index + 1}/${this.ramdisk_table.ramdidks.size}]", entry.file)
                     it.addRow("------- extracted rootfs", "${workDir}root.${index + 1}")
                     //basic ascii
+                    //@formatter:off
                     prints.add(Pair(" -- ${entry.type} ramdisk[${index + 1}/${this.ramdisk_table.ramdidks.size}]", entry.file))
+                    //@formatter:on
                     prints.add(Pair(" ------- extracted rootfs", "${workDir}root.${index + 1}"))
                 }
             } else {
@@ -402,11 +407,16 @@ data class VendorBoot(
                 prints.add(Pair("\\-- extracted ramdisk rootfs", "${workDir}root"))
             }
             it.addRule()
-            it.addRow("dtb", this.dtb.file)
-            prints.add(Pair("dtb", this.dtb.file))
-            if (File(this.dtb.file + ".${dtsSuffix}").exists()) {
-                it.addRow("\\-- decompiled dts", dtb.file + ".${dtsSuffix}")
-                prints.add(Pair("\\-- decompiled dts", dtb.file + ".${dtsSuffix}"))
+            if (this.dtb.size > 0) {
+                it.addRow("dtb", this.dtb.file)
+                prints.add(Pair("dtb", this.dtb.file))
+                if (File(this.dtb.file + ".${dtsSuffix}").exists()) {
+                    it.addRow("\\-- decompiled dts", dtb.file + ".${dtsSuffix}")
+                    prints.add(Pair("\\-- decompiled dts", dtb.file + ".${dtsSuffix}"))
+                }
+            } else {
+                it.addRow("dtb", "-")
+                prints.add(Pair("dtb", "-"))
             }
             if (this.bootconfig.size > 0) {
                 it.addRule()
@@ -444,7 +454,9 @@ data class VendorBoot(
         if (EnvironmentVerifier().isWindows) {
             log.info("\n" + Common.table2String(prints))
         } else {
+            //@formatter:off
             log.info("\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}", tableHeader.render(), tab.render(), tabVBMeta)
+            //@formatter:on
         }
         return this
     }
@@ -485,7 +497,9 @@ data class VendorBoot(
             if (info.product.isNotBlank()) {
                 addArgument("--board").addArgument(info.product)
             }
-            addArgument("--dtb").addArgument(dtb.file)
+            if (dtb.size > 0) {
+                addArgument("--dtb").addArgument(dtb.file)
+            }
             addArgument("--vendor_cmdline").addArgument(info.cmdline, false)
             addArgument("--header_version").addArgument(info.headerVersion.toString())
             addArgument("--base").addArgument("0")

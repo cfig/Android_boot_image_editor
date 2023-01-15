@@ -5,6 +5,12 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 
+/**
+ * Dumpling: Boxed type of data sources, which is the [filling] of the dumpling.
+ * Constructor:
+ *  [filling] can be of type String (file name) or ByteArray
+ *  [label]   optional name of the Dumpling
+ */
 class Dumpling<in T>(private val filling: T, private val label: String? = null) {
     fun getLabel(): String {
         return label ?: getName()
