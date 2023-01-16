@@ -160,6 +160,7 @@ data class VendorBoot(
         private val workDir = Helper.prop("workDir")
         private val mapper = ObjectMapper()
         private val dtsSuffix = Helper.prop("config.dts_suffix")
+        private val environmentVerifier = EnvironmentVerifier()
         fun parse(fileName: String): VendorBoot {
             val ret = VendorBoot()
             FileInputStream(fileName).use { fis ->
@@ -451,7 +452,7 @@ data class VendorBoot(
                 ""
             }
         }
-        if (EnvironmentVerifier().isWindows) {
+        if (environmentVerifier.isWindows) {
             log.info("\n" + Common.table2String(prints))
         } else {
             //@formatter:off
@@ -467,7 +468,7 @@ data class VendorBoot(
     }
 
     private fun toCommandLine(): CommandLine {
-        val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""
+        val cmdPrefix = if (environmentVerifier.isWindows) "python " else ""
         return CommandLine.parse(cmdPrefix + Helper.prop("mkbootimg")).apply {
             when (info.headerVersion) {
                 3 -> {
@@ -482,7 +483,7 @@ data class VendorBoot(
                                 addArgument("--board_id$boardIdIndex")
                                 addArgument("0x" + Integer.toHexString((boardIdValue as Int)))
                             }
-                        if (EnvironmentVerifier().isWindows) {
+                        if (environmentVerifier.isWindows) {
                             addArgument("--ramdisk_name").addArgument("\"${it.name}\"", false)
                         } else {
                             addArgument("--ramdisk_name").addArgument(it.name, true)
@@ -500,7 +501,11 @@ data class VendorBoot(
             if (dtb.size > 0) {
                 addArgument("--dtb").addArgument(dtb.file)
             }
-            addArgument("--vendor_cmdline").addArgument(info.cmdline, false)
+            if (environmentVerifier.isWindows) {
+                addArgument("--vendor_cmdline").addArgument(info.cmdline.replace("\"", "\\\""), false)
+            } else {
+                addArgument("--vendor_cmdline").addArgument(info.cmdline, false)
+            }
             addArgument("--header_version").addArgument(info.headerVersion.toString())
             addArgument("--base").addArgument("0")
             addArgument("--tags_offset").addArgument(info.tagsLoadAddr.toString())

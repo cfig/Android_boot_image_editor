@@ -174,6 +174,8 @@ def main():
     verifySingleDir(resDir2, "issue_88")
     # Issue 92: unsigned vendor_boot
     verifySingleDir(resDir2, "issue_91_unsigned_vendor_boot")
+    # Issue 109: vendor_boot w/o dtb
+    verifySingleDir(resDir2, "issue_109_vendor_boot_no_dtb")
 
     log.info(successLogo)
 
