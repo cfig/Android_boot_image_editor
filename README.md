@@ -4,24 +4,17 @@
 
 A tool for reverse engineering Android ROM images.
 
+##  Requirements
+Make sure you have [JDK17](https://www.oracle.com/java/technologies/downloads/#java17) and [Python3](https://www.python.org/downloads/).
+
+* Linux / WSL: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python3 python-is-python3 p7zip-full`
+
+* Mac: `brew install lz4 xz dtc`
+
+* Windows: Install openssl and device-tree compiler with [chocolate](https://chocolatey.org/install)
+`choco install openssl dtc-msys2`
+
 ## Getting Started
-
-#### install required packages
-
-Linux: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python3 python-is-python3 p7zip-full`
-
-Mac: `brew install lz4 xz dtc`
-
-Mac: Make sure you have `JDK9+` properly installed. JDK 17 is recommended.
-
-Windows Subsystem for Linux(WSL): `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python`
-
-Windows: Make sure you have `python3`, `JDK9+` and `openssl` properly installed.
-An easy way is to install [Anaconda](https://www.anaconda.com/products/individual#windows) and [Oracle JDK 17](https://www.oracle.com/java/technologies/downloads/#java17), then run the program under anaconda PowerShell.
-Or install them with chocolate: `choco install openssl dtc-msys2`
-
-#### Parsing and packing
-
 Put your boot.img to current directory, then start gradle 'unpack' task:
 
 ```bash
@@ -60,15 +53,15 @@ Well done you did it! The last step is to star this repo :smile
 
 ## Supported ROM image types
 
-| Image Type      | file names                              |  platforms    | note |
-| --------------- | -----------------------------------     | ----------    | ---- |
-| boot            | boot.img, init_boot.img                 |  all          | |
-|vendor boot      | vendor_boot.img, vendor_boot-debug.img, vendor_kernel_boot.img |  all  | |
-| recovery        | recovery.img, recovery-two-step.img     |  all          | |
-| vbmeta          | vbmeta.img, vbmeta_system.img etc.      |  all          | |
-| dtbo            | dtbo.img                                | linux & mac   | |
-| sparse images   | system.img, vendor.img, product.img etc.| linux & mac   | need **hacking mode**\* |
-| OTA payload     | payload.bin                             | linux & mac   | |
+| Image Type      | file names                              | platforms   | note                    |
+| --------------- | -----------------------------------     |-------------|-------------------------|
+| boot            | boot.img, init_boot.img                 | all         |                         |
+|vendor boot      | vendor_boot.img, vendor_boot-debug.img, vendor_kernel_boot.img | all |          |
+| recovery        | recovery.img, recovery-two-step.img     | all         |                         |
+| vbmeta          | vbmeta.img, vbmeta_system.img etc.      | all         |                         |
+| dtbo            | dtbo.img                                | linux & mac |                         |
+| sparse images   | system.img, vendor.img, product.img etc.| linux & mac | need **hacking mode**\* |
+| OTA payload     | payload.bin                             | all         | Windows git-bash        |
 
 Please note that the boot.img MUST follows AOSP verified boot flow, either [Boot image signature](https://source.android.com/security/verifiedboot/verified-boot#signature_format) in VBoot 1.0 or [AVB HASH footer](https://android.googlesource.com/platform/external/avb/+/master/README.md#The-VBMeta-struct) (a.k.a. AVB) in VBoot 2.0.
 
