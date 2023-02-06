@@ -5,7 +5,7 @@
 A tool for reverse engineering Android ROM images.
 
 ##  Requirements
-Make sure you have [JDK17](https://www.oracle.com/java/technologies/downloads/#java17) and [Python3](https://www.python.org/downloads/).
+Make sure you have [JDK11+](https://www.oracle.com/java/technologies/downloads/#java17) and [Python3](https://www.python.org/downloads/).
 
 * Linux / WSL: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python3 python-is-python3 p7zip-full`
 

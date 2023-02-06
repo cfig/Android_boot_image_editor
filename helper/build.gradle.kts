@@ -49,11 +49,16 @@ dependencies {
     testImplementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
 tasks.withType<KotlinCompile>().all {
     kotlinOptions {
         freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
         freeCompilerArgs += "-opt-in=kotlin.ExperimentalUnsignedTypes"
-        jvmTarget = "17"
+        jvmTarget = "11"
     }
 }
 
