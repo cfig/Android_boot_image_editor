@@ -131,7 +131,11 @@ class BootImgParser : IPackable {
 
     override fun pull(fileName: String, deviceName: String) {
         super.pull(fileName, deviceName)
-        super.pull("vbmeta.img", "vbmeta")
+        try {
+            super.pull("vbmeta.img", "vbmeta")
+        } catch (e: Exception) {
+            log.warn("can not pull vbmeta.img")
+        }
     }
 
     fun clear(fileName: String) {

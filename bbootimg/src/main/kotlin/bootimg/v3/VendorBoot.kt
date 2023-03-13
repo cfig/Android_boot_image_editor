@@ -207,7 +207,7 @@ data class VendorBoot(
                     ret.bootconfig.file = workDir + "bootconfig"
                     ret.bootconfig.size = header.bootconfigSize
                     ret.bootconfig.position =
-                        ret.ramdisk_table.position + Helper.round_to_multiple(ret.bootconfig.size, header.pageSize)
+                        ret.ramdisk_table.position + Helper.round_to_multiple(ret.ramdisk_table.size, header.pageSize)
                 }
             }
             ret.info.imageSize = File(fileName).length()

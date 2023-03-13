@@ -55,7 +55,7 @@ Well done you did it! The last step is to star this repo :smile
 
 | Image Type      | file names                              | platforms   | note                    |
 | --------------- | -----------------------------------     |-------------|-------------------------|
-| boot            | boot.img, init_boot.img                 | all         |                         |
+| boot            | boot.img, init_boot.img, boot(-debug|-test-harness).img | all         |                         |
 |vendor boot      | vendor_boot.img, vendor_boot-debug.img, vendor_kernel_boot.img | all |          |
 | recovery        | recovery.img, recovery-two-step.img     | all         |                         |
 | vbmeta          | vbmeta.img, vbmeta_system.img etc.      | all         |                         |

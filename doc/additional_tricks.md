@@ -95,3 +95,12 @@ https://cateee.net/lkddb/web-lkddb/BOOT_CONFIG.html
 
 VTS requirement:
 if (S-launched, Kernel 5.10+), no "androidboot." should be placed in kernel commandline.
+
+## vendor_boot.img vs vendor_boot-debug.img
+vendor_boot-debug.img has 3 additional files:
+```
+adb_debug.prop
+force_debuggable
+userdebug_plat_sepolicy.cil
+```
+
