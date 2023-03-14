@@ -34,7 +34,7 @@ tasks {
     }
     val unpackTask by register<JavaExec>("unpack") {
         group = GROUP_ANDROID
-        main = "cfig.packable.PackableLauncherKt"
+        mainClass.value("cfig.packable.PackableLauncherKt")
         classpath = files("bbootimg/build/libs/bbootimg.jar")
         this.maxHeapSize = "128m"
         enableAssertions = true
@@ -44,7 +44,7 @@ tasks {
 
     val packTask by register<JavaExec>("pack") {
         group = GROUP_ANDROID
-        main = "cfig.packable.PackableLauncherKt"
+        mainClass.value("cfig.packable.PackableLauncherKt")
         classpath = files("bbootimg/build/libs/bbootimg.jar")
         this.maxHeapSize = "512m"
         enableAssertions = true
@@ -54,7 +54,7 @@ tasks {
 
     val flashTask by register("flash", JavaExec::class) {
         group = GROUP_ANDROID
-        main = "cfig.packable.PackableLauncherKt"
+        mainClass.value("cfig.packable.PackableLauncherKt")
         classpath = files("bbootimg/build/libs/bbootimg.jar")
         this.maxHeapSize = "512m"
         enableAssertions = true
@@ -65,7 +65,7 @@ tasks {
 
     val pullTask by register("pull", JavaExec::class) {
         group = GROUP_ANDROID
-        main = "cfig.packable.PackableLauncherKt"
+        mainClass.value("cfig.packable.PackableLauncherKt")
         classpath = files("bbootimg/build/libs/bbootimg.jar")
         this.maxHeapSize = "512m"
         enableAssertions = true
@@ -75,7 +75,7 @@ tasks {
 
     val clearTask by register("clear", JavaExec::class) {
         group = GROUP_ANDROID
-        main = "cfig.packable.PackableLauncherKt"
+        mainClass.value("cfig.packable.PackableLauncherKt")
         classpath = files("bbootimg/build/libs/bbootimg.jar")
         this.maxHeapSize = "512m"
         enableAssertions = true
