@@ -46,7 +46,7 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
     implementation("de.vandermeer:asciitable:0.3.2")
     implementation("com.github.freva:ascii-table:1.8.0")
-    implementation("com.google.protobuf:protobuf-java:3.21.1")
+    implementation("com.google.protobuf:protobuf-java:3.21.7")
     implementation(project(":helper"))
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")

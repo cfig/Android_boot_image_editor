@@ -32,14 +32,8 @@ class SparseImgParser : IPackable {
     override val loopNo: Int
         get() = 0
     private val log = LoggerFactory.getLogger(SparseImgParser::class.java)
-    private val simg2imgBin: String
-    private val img2simgBin: String
-
-    init {
-        val osSuffix = if (EnvironmentVerifier().isMacOS) "macos" else "linux"
-        simg2imgBin = "./aosp/libsparse/simg2img/build/install/main/release/$osSuffix/simg2img"
-        img2simgBin = "./aosp/libsparse/img2simg/build/install/main/release/$osSuffix/img2simg"
-    }
+    private val simg2imgBin = "simg2img"
+    private val img2simgBin = "img2simg"
 
     override fun capabilities(): List<String> {
         return listOf(

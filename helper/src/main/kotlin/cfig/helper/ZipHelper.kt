@@ -376,6 +376,9 @@ class ZipHelper {
                 val baosE = ByteArrayOutputStream()
                 DefaultExecutor().let { exec ->
                     exec.streamHandler = PumpStreamHandler(fos, baosE, inputStream)
+                    // -l: compress using Legacy format (Linux kernel compression)
+                    // -12: --best
+                    // --favor-decSpeed: compressed files decompress faster, but are less compressed
                     val cmd = CommandLine.parse("${getLz4Prog()} -l -12")
                     if ("${getLz4Prog()} --version".check_output().contains("r\\d+,".toRegex())) {
                         log.warn("lz4 version obsolete, needs update")

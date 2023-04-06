@@ -7,7 +7,7 @@ A tool for reverse engineering Android ROM images.
 ##  Requirements
 Make sure you have [JDK11+](https://www.oracle.com/java/technologies/downloads/#java17) and [Python3](https://www.python.org/downloads/).
 
-* Linux / WSL: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python3 python-is-python3 p7zip-full`
+* Linux / WSL: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python3 python-is-python3 p7zip-full android-sdk-libsparse-utils`
 
 * Mac: `brew install lz4 xz dtc`
 
@@ -60,22 +60,10 @@ Well done you did it! The last step is to star this repo :smile
 | recovery        | recovery.img, recovery-two-step.img     | all         |                         |
 | vbmeta          | vbmeta.img, vbmeta_system.img etc.      | all         |                         |
 | dtbo            | dtbo.img                                | linux & mac |                         |
-| sparse images   | system.img, vendor.img, product.img etc.| linux & mac | need **hacking mode**\* |
+| sparse images   | system.img, vendor.img, product.img etc.| linux       |                         |
 | OTA payload     | payload.bin                             | all         | Windows git-bash        |
 
 Please note that the boot.img MUST follows AOSP verified boot flow, either [Boot image signature](https://source.android.com/security/verifiedboot/verified-boot#signature_format) in VBoot 1.0 or [AVB HASH footer](https://android.googlesource.com/platform/external/avb/+/master/README.md#The-VBMeta-struct) (a.k.a. AVB) in VBoot 2.0.
-
-**hacking mode**\*:
-
-Open build.gradle.kts, Line #8, change
-```
-val bHackingMode = false
-```
-to
-```
-val bHackingMode = true
-```
-This will enable c++ modules, which is necessary for working with sparse images.
 
 ## compatible devices
 
@@ -199,7 +187,6 @@ cp <your_dtb> build/unzip_boot/dtb
 <details>
   <summary>working with system.img</summary>
 
-First enable **hacking mode** by setting `bHackingMode = true` in file `build.gradle.kts`, then
 ```bash
 cp <your_system_image> system.img
 ./gradlew unpack
