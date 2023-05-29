@@ -22,6 +22,7 @@ import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
 import cfig.helper.Dumpling
 import cfig.helper.Helper
+import cfig.helper.ZipHelper
 import cfig.packable.VBMetaParser
 import cfig.utils.DTC
 import cfig.utils.EnvironmentVerifier
@@ -37,7 +38,7 @@ import cfig.bootimg.Common as C
 
 data class VendorBoot(
     var info: MiscInfo = MiscInfo(),
-    var ramdisk: CommArgs = CommArgs(),
+    var ramdisk: RamdiskArgs = RamdiskArgs(),
     var dtb: CommArgs = CommArgs(),
     var ramdisk_table: Vrt = Vrt(),
     var bootconfig: CommArgs = CommArgs(),
@@ -47,6 +48,14 @@ data class VendorBoot(
         var position: Long = 0,
         var size: Int = 0,
         var loadAddr: Long = 0,
+    )
+
+    data class RamdiskArgs(
+        var file: String = "",
+        var position: Long = 0,
+        var size: Int = 0,
+        var loadAddr: Long = 0,
+        var xzFlags: String? = null
     )
 
     data class MiscInfo(
@@ -227,7 +236,7 @@ data class VendorBoot(
                     //Fixed: remove cpio in C/C++
                     //C.packRootfs("$workDir/root", this.ramdisk.file, parseOsMajor())
                     //enable advance JAVA cpio
-                    C.packRootfs("$workDir/root", this.ramdisk.file)
+                    C.packRootfs("$workDir/root", this.ramdisk.file, this.ramdisk.xzFlags)
                 }
                 this.ramdisk.size = File(this.ramdisk.file).length().toInt()
             }
@@ -235,7 +244,7 @@ data class VendorBoot(
                 this.ramdisk_table.ramdidks.forEachIndexed { index, it ->
                     File(it.file).deleleIfExists()
                     log.info(workDir + "root.${index + 1} -> " + it.file)
-                    C.packRootfs(workDir + "root.${index + 1}", it.file)
+                    C.packRootfs(workDir + "root.${index + 1}", it.file, this.ramdisk.xzFlags)
                 }
                 this.ramdisk.size = this.ramdisk_table.ramdidks.sumOf { File(it.file).length() }.toInt()
             }
@@ -345,6 +354,10 @@ data class VendorBoot(
             this.ramdisk_table.ramdidks.isEmpty())
         //@formatter:on
         this.ramdisk.file = this.ramdisk.file + ".$fmt"
+        if (fmt == "xz") {
+            val checkType = ZipHelper.xzStreamFlagCheckTypeToString(ZipHelper.parseStreamFlagCheckType(this.ramdisk.file))
+            this.ramdisk.xzFlags = checkType
+        }
         //dtb
         C.dumpDtb(Helper.Slice(info.output, dtb.position.toInt(), dtb.size, dtb.file))
         //vrt

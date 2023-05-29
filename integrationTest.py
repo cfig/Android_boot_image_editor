@@ -176,6 +176,8 @@ def main():
     verifySingleDir(resDir2, "issue_91_unsigned_vendor_boot")
     # Issue 109: vendor_boot w/o dtb
     verifySingleDir(resDir2, "issue_109_vendor_boot_no_dtb")
+    # Issue 117: xz crc32/crc64
+    verifySingleDir(resDir2, "issue_117_xz_crc")
 
     log.info(successLogo)
 

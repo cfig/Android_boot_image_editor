@@ -16,11 +16,13 @@ package cfig.bootimg.v2
 
 import avb.AVBInfo
 import cfig.Avb
+import cfig.bootimg.Common as C
 import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Signer
 import cfig.helper.Dumpling
 import cfig.helper.Helper
+import cfig.helper.ZipHelper
 import cfig.packable.VBMetaParser
 import cfig.utils.DTC
 import cfig.utils.EnvironmentVerifier
@@ -39,7 +41,7 @@ import java.nio.ByteOrder
 data class BootV2(
     var info: MiscInfo = MiscInfo(),
     var kernel: CommArgs = CommArgs(),
-    var ramdisk: CommArgs = CommArgs(),
+    var ramdisk: RamdiskArgs = RamdiskArgs(),
     var secondBootloader: CommArgs? = null,
     var recoveryDtbo: CommArgsLong? = null,
     var dtb: CommArgsLong? = null,
@@ -66,6 +68,14 @@ data class BootV2(
         var position: Long = 0,
         var size: Int = 0,
         var loadOffset: Long = 0,
+    )
+
+    data class RamdiskArgs(
+        var file: String? = null,
+        var position: Long = 0,
+        var size: Int = 0,
+        var loadOffset: Long = 0,
+        var xzFlags: String? = null
     )
 
     data class CommArgsLong(
@@ -193,10 +203,14 @@ data class BootV2(
         Common.dumpKernel(Helper.Slice(info.output, kernel.position.toInt(), kernel.size, kernel.file!!))
         //ramdisk
         if (this.ramdisk.size > 0) {
-            val fmt = Common.dumpRamdisk(
+            val fmt = C.dumpRamdisk(
                 Helper.Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file!!), "${workDir}root"
             )
             this.ramdisk.file = this.ramdisk.file!! + ".$fmt"
+            if (fmt == "xz") {
+                val checkType = ZipHelper.xzStreamFlagCheckTypeToString(ZipHelper.parseStreamFlagCheckType(this.ramdisk.file!!))
+                this.ramdisk.xzFlags = checkType
+            }
             //dump info again
             mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
         }
@@ -398,7 +412,7 @@ data class BootV2(
                 File(this.ramdisk.file!!).deleleIfExists()
                 File(this.ramdisk.file!!.removeSuffix(".gz")).deleleIfExists()
                 //Common.packRootfs("${workDir}/root", this.ramdisk.file!!, Common.parseOsMajor(info.osVersion.toString()))
-                Common.packRootfs("${workDir}/root", this.ramdisk.file!!)
+                Common.packRootfs("${workDir}/root", this.ramdisk.file!!, this.ramdisk.xzFlags)
             }
             this.ramdisk.size = File(this.ramdisk.file!!).length().toInt()
         }

@@ -17,11 +17,8 @@ package cfig.helper
 import cc.cfig.io.Struct
 import cfig.helper.Helper.Companion.check_call
 import cfig.helper.Helper.Companion.check_output
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
-import org.apache.commons.compress.archivers.zip.ZipFile
-import org.apache.commons.compress.archivers.zip.ZipMethod
+import org.apache.commons.compress.archivers.zip.*
+import org.apache.commons.compress.compressors.CompressorOutputStream
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
@@ -34,9 +31,10 @@ import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.PumpStreamHandler
 import org.slf4j.LoggerFactory
+import org.tukaani.xz.LZMA2Options
 import org.tukaani.xz.XZFormatException
+import org.tukaani.xz.XZOutputStream
 import java.io.*
-import java.lang.RuntimeException
 import java.net.URI
 import java.nio.file.FileSystems
 import java.nio.file.Files
@@ -49,6 +47,43 @@ import kotlin.reflect.jvm.isAccessible
 
 class ZipHelper {
     class ZipEntryRecipe(val data: ByteArray, val name: String, val method: ZipMethod)
+
+    class XZCompressorOutputStream2 : CompressorOutputStream {
+        private val out: XZOutputStream
+
+        constructor(outputStream: OutputStream?) {
+            out = XZOutputStream(outputStream, LZMA2Options())
+        }
+
+        constructor(outputStream: OutputStream?, checkType: Int) {
+            out = XZOutputStream(outputStream, LZMA2Options(), checkType)
+        }
+
+        @Throws(IOException::class)
+        override fun write(b: Int) {
+            out.write(b)
+        }
+
+        @Throws(IOException::class)
+        override fun write(buf: ByteArray, off: Int, len: Int) {
+            out.write(buf, off, len)
+        }
+
+        @Throws(IOException::class)
+        override fun flush() {
+            out.flush()
+        }
+
+        @Throws(IOException::class)
+        fun finish() {
+            out.finish()
+        }
+
+        @Throws(IOException::class)
+        override fun close() {
+            out.close()
+        }
+    }
 
     companion object {
         private val log = LoggerFactory.getLogger("ZipHelper")
@@ -86,9 +121,11 @@ class ZipHelper {
                             entryOut.mkdir()
                             log.debug("Unzipping[d]: ${entry.name}")
                         }
+
                         entry.isUnixSymlink -> {
                             throw IllegalArgumentException("this should not happen: Found dir ${entry.name}")
                         }
+
                         else -> {
                             val entryOut = File(outDir + "/" + entry.name)
                             log.debug("Unzipping[f]: ${entry.name}")
@@ -282,6 +319,54 @@ class ZipHelper {
             log.info("decompress(lzma) done: $compressedFile -> $decompressedFile")
         }
 
+        // https://tukaani.org/xz/xz-file-format.txt
+        // 2.1.1. Stream Header
+        fun parseStreamFlagCheckType(file: String): Int {
+            FileInputStream(file).use { fis ->
+                val ba = ByteArray(6)
+                check(fis.read(ba) == ba.size)
+                check(ba.contentEquals(byteArrayOf(0xfd.toByte(), 0x37, 0x7a, 0x58, 0x5a, 0x00))) {
+                    log.warn("wrong magic bytes in xz header")
+                }
+                check(fis.read(ba) == ba.size)
+                check(ba[0] == 0x00.toByte())
+                when (ba[1].toInt()) {
+                    0x00 -> log.info("NONE")
+                    0x01 -> log.info("CRC32")
+                    0x04 -> log.info("CRC64")
+                    0x0a -> log.info("SHA256")
+                    else -> throw IllegalArgumentException(
+                        "unsupported StreamFlag.CheckType: 0x" + ba[1].toInt().toString(16)
+                    )
+                }
+                return ba[1].toInt()
+            }
+        }
+
+        fun xzStreamFlagCheckTypeToString(type: Int): String {
+            return when (type) {
+                0x00 -> "NONE"
+                0x01 -> "CRC32"
+                0x04 -> "CRC64"
+                0x0a -> "SHA256"
+                else -> throw IllegalArgumentException(
+                    "unsupported StreamFlag.CheckType: 0x" + type.toString(16)
+                )
+            }
+        }
+
+        fun xzStreamFlagCheckTypeFromString(typeStr: String): Int {
+            return when (typeStr) {
+                "NONE" -> 0x00
+                "CRC32" -> 0x01
+                "CRC64" -> 0x04
+                "SHA256" -> 0x0a
+                else -> throw IllegalArgumentException(
+                    "unsupported StreamFlag.CheckType: 0x$typeStr"
+                )
+            }
+        }
+
         fun isXz(compressedFile: String): Boolean {
             return try {
                 FileInputStream(compressedFile).use { fis ->
@@ -294,10 +379,10 @@ class ZipHelper {
             }
         }
 
-        fun xz(compressedFile: String, fis: InputStream) {
-            log.info("Compress(xz) ... ")
+        fun xz(compressedFile: String, fis: InputStream, checkType: String) {
+            log.info("Compress(xz), with checkType $checkType... ")
             FileOutputStream(compressedFile).use { fos ->
-                XZCompressorOutputStream(fos).use { gos ->
+                XZCompressorOutputStream2(fos, ZipHelper.xzStreamFlagCheckTypeFromString(checkType)).use { gos ->
                     val buffer = ByteArray(1024)
                     while (true) {
                         val bytesRead = fis.read(buffer)

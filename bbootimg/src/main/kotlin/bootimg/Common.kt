@@ -258,7 +258,7 @@ class Common {
         }
 
         //using preset fs_config
-        fun packRootfs(rootDir: String, ramdiskGz: String) {
+        fun packRootfs(rootDir: String, ramdiskGz: String, compressorArgs: String? = null) {
             val root = File(rootDir).path
             log.info("Packing rootfs $root ...")
             when {
@@ -280,7 +280,7 @@ class Common {
                 ramdiskGz.endsWith(".xz") -> {
                     val f = ramdiskGz.removeSuffix(".xz")
                     AndroidCpio().pack(root, f, "${f}_filelist.txt")
-                    FileInputStream(f).use { ZipHelper.xz(ramdiskGz, it) }
+                    FileInputStream(f).use { ZipHelper.xz(ramdiskGz, it, compressorArgs!!) }
                 }
                 ramdiskGz.endsWith(".cpio") -> {
                     val f = ramdiskGz.removeSuffix(".cpio")

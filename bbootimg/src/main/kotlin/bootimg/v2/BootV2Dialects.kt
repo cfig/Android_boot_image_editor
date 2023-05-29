@@ -37,7 +37,7 @@ import java.nio.ByteOrder
 data class BootV2Dialects(
     var info: MiscInfo = MiscInfo(),
     var kernel: CommArgs = CommArgs(),
-    var ramdisk: CommArgs = CommArgs(),
+    var ramdisk: BootV2.RamdiskArgs = BootV2.RamdiskArgs(),
     var secondBootloader: CommArgs? = null,
     var recoveryDtbo: CommArgsLong? = null,
     var dtb: CommArgsLong? = null,
@@ -378,7 +378,7 @@ data class BootV2Dialects(
                 File(this.ramdisk.file!!).deleleIfExists()
                 File(this.ramdisk.file!!.removeSuffix(".gz")).deleleIfExists()
                 //Common.packRootfs("${workDir}/root", this.ramdisk.file!!, Common.parseOsMajor(info.osVersion.toString()))
-                Common.packRootfs("${workDir}/root", this.ramdisk.file!!)
+                Common.packRootfs("${workDir}/root", this.ramdisk.file!!, this.ramdisk.xzFlags)
             }
             this.ramdisk.size = File(this.ramdisk.file!!).length().toInt()
         }

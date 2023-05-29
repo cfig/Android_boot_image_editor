@@ -69,7 +69,7 @@ class DeltaGenerator {
                 //try xz
                 File.createTempFile("pre", "suf").let { tempFile ->
                     tempFile.deleteOnExit()
-                    ZipHelper.xz(tempFile.absolutePath, ByteArrayInputStream(inData))
+                    ZipHelper.xz(tempFile.absolutePath, ByteArrayInputStream(inData), "CRC64")
                     log.debug("raw=${inData.size}, xz=" + tempFile.length())
                     if (bestSize > tempFile.length()) {
                         bestType = Type.REPLACE_XZ

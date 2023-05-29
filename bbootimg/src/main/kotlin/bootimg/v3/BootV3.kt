@@ -25,6 +25,7 @@ import cfig.bootimg.Common.Companion.getPaddingSize
 import cfig.bootimg.Signer
 import cfig.helper.Helper
 import cfig.helper.Dumpling
+import cfig.helper.ZipHelper
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -41,7 +42,7 @@ import cfig.bootimg.Common as C
 data class BootV3(
     var info: MiscInfo = MiscInfo(),
     var kernel: CommArgs = CommArgs(),
-    val ramdisk: CommArgs = CommArgs(),
+    val ramdisk: RamdiskArgs = RamdiskArgs(),
     var bootSignature: CommArgs = CommArgs(),
 ) {
     companion object {
@@ -105,6 +106,13 @@ data class BootV3(
         var size: Int = 0,
     )
 
+    data class RamdiskArgs (
+        var file: String = "",
+        var position: Int = 0,
+        var size: Int = 0,
+        var xzFlags: String? = null
+    )
+
     fun pack(): BootV3 {
         if (this.kernel.size > 0) {
             this.kernel.size = File(this.kernel.file).length().toInt()
@@ -119,7 +127,7 @@ data class BootV3(
                 //TODO: remove cpio in C/C++
                 //C.packRootfs("$workDir/root", this.ramdisk.file, C.parseOsMajor(info.osVersion))
                 // enable advance JAVA cpio
-                C.packRootfs("$workDir/root", this.ramdisk.file)
+                C.packRootfs("$workDir/root", this.ramdisk.file, this.ramdisk.xzFlags)
             }
             this.ramdisk.size = File(this.ramdisk.file).length().toInt()
         }
@@ -232,6 +240,10 @@ data class BootV3(
                 Helper.Slice(info.output, ramdisk.position, ramdisk.size, ramdisk.file), "${workDir}root"
             )
             this.ramdisk.file = this.ramdisk.file + ".$fmt"
+            if (fmt == "xz") {
+                val checkType = ZipHelper.xzStreamFlagCheckTypeToString(ZipHelper.parseStreamFlagCheckType(this.ramdisk.file))
+                this.ramdisk.xzFlags = checkType
+            }
         }
         //bootsig
 
