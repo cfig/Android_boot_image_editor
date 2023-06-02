@@ -200,7 +200,15 @@ data class BootV2(
         //info
         mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + info.json), this)
         //kernel
-        Common.dumpKernel(Helper.Slice(info.output, kernel.position.toInt(), kernel.size, kernel.file!!))
+        if (kernel.size > 0) {
+            Common.dumpKernel(Helper.Slice(info.output, kernel.position.toInt(), kernel.size, kernel.file!!))
+        } else {
+            kernel.file = null
+            log.warn("found boot image without kernel: ${this.info.output}")
+            check(info.output == "ramdisk.img") {
+                "This should not happen, please add comments at: https://github.com/cfig/Android_boot_image_editor/issues/122"
+            }
+        }
         //ramdisk
         if (this.ramdisk.size > 0) {
             val fmt = C.dumpRamdisk(
@@ -287,7 +295,11 @@ data class BootV2(
             }
             //kernel
             it.addRule()
-            it.addRow("kernel", this.kernel.file)
+            if (this.kernel.size > 0) {
+                it.addRow("kernel", this.kernel.file)
+            } else { //only for ramdisk.img, Issue #122
+                it.addRow("kernel", "NONE")
+            }
             prints.add(Pair("kernel", this.kernel.file.toString()))
             File(Helper.prop("kernelVersionFile")).let { kernelVersionFile ->
                 if (kernelVersionFile.exists()) {
@@ -399,7 +411,7 @@ data class BootV2(
 
     fun pack(): BootV2 {
         //refresh kernel size
-        this.kernel.size = File(this.kernel.file!!).length().toInt()
+        this.kernel.size = if (this.kernel.file != null) File(this.kernel.file!!).length().toInt() else 0
         //refresh ramdisk size
         if (this.ramdisk.file.isNullOrBlank()) {
             ramdisk.file = null
@@ -468,7 +480,9 @@ data class BootV2(
         val bytesV2 = ByteBuffer.allocate(maxOf(1024 * 1024 * 64, info.imageSize.toInt()))
             .let { bf ->
                 bf.order(ByteOrder.LITTLE_ENDIAN)
-                Common.writePaddedFile(bf, kernel.file!!, info.pageSize)
+                if (kernel.size > 0) {
+                    Common.writePaddedFile(bf, kernel.file!!, info.pageSize)
+                }
                 if (ramdisk.size > 0) {
                     Common.writePaddedFile(bf, ramdisk.file!!, info.pageSize)
                 }
@@ -506,8 +520,10 @@ data class BootV2(
         ret.addArgument(info.headerVersion.toString())
         ret.addArgument(" --base ")
         ret.addArgument("0x" + java.lang.Long.toHexString(0))
-        ret.addArgument(" --kernel ")
-        ret.addArgument(kernel.file!!)
+        if (kernel.size > 0) {
+            ret.addArgument(" --kernel ")
+            ret.addArgument(kernel.file!!)
+        }
         ret.addArgument(" --kernel_offset ")
         ret.addArgument("0x" + Integer.toHexString(kernel.loadOffset.toInt()))
         if (this.ramdisk.size > 0) {

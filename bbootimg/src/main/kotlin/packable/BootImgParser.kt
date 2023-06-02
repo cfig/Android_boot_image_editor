@@ -32,7 +32,8 @@ class BootImgParser : IPackable {
         get() = 0
 
     override fun capabilities(): List<String> {
-        return listOf("^boot(-debug)?\\.img$", "^recovery\\.img$", "^recovery-two-step\\.img$", "^init_boot\\.img$")
+        //ramdisk.img : Issue #122
+        return listOf("^boot(-debug)?\\.img$", "^recovery\\.img$", "^recovery-two-step\\.img$", "^init_boot\\.img$", "^ramdisk\\.img$")
     }
 
     override fun unpack(fileName: String) {
