@@ -16,6 +16,7 @@ package cfig.packable
 
 import cfig.utils.SparseImgParser
 import org.slf4j.LoggerFactory
+import packable.DeviceTreeParser
 import java.io.File
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
@@ -30,7 +31,8 @@ fun main(args: Array<String>) {
     val packablePool = mutableMapOf<List<String>, KClass<IPackable>>()
     listOf(
         DtboParser(), VBMetaParser(), BootImgParser(), SparseImgParser(), VendorBootParser(), PayloadBinParser(),
-        MiscImgParser()
+        MiscImgParser(),
+        DeviceTreeParser()
     ).forEach {
         @Suppress("UNCHECKED_CAST")
         packablePool.put(it.capabilities(), it::class as KClass<IPackable>)

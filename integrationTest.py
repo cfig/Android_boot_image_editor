@@ -180,6 +180,8 @@ def main():
     verifySingleDir(resDir2, "issue_117_xz_crc")
     # Issue 122: ramdisk.img, boot image v0
     verifySingleDir(resDir2, "issue_122_ramdisk_img")
+    # Issue 123: dtb
+    verifySingleDir(resDir2, "issue_123_dtb")
 
     log.info(successLogo)
 

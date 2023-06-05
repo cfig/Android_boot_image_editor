@@ -53,15 +53,16 @@ Well done you did it! The last step is to star this repo :smile
 
 ## Supported ROM image types
 
-| Image Type      | file names                              | platforms   | note                    |
-| --------------- | -----------------------------------     |-------------|-------------------------|
-| boot            | boot.img, init_boot.img, boot(-debug|-test-harness).img | all         |                         |
-|vendor boot      | vendor_boot.img, vendor_boot-debug.img, vendor_kernel_boot.img | all |          |
-| recovery        | recovery.img, recovery-two-step.img     | all         |                         |
-| vbmeta          | vbmeta.img, vbmeta_system.img etc.      | all         |                         |
-| dtbo            | dtbo.img                                | linux & mac |                         |
-| sparse images   | system.img, vendor.img, product.img etc.| linux       |                         |
-| OTA payload     | payload.bin                             | all         | Windows git-bash        |
+| Image Type      | file names                                                     | platforms   | note                    |
+| --------------- |----------------------------------------------------------------|-------------|-------------------------|
+| boot            | boot.img, init_boot.img, boot-debug.img, boot-test-harness.img | all         |                         |
+|vendor boot      | vendor_boot.img, vendor_boot-debug.img, vendor_kernel_boot.img | all         |                         |
+| recovery        | recovery.img, recovery-two-step.img                            | all         |                         |
+| vbmeta          | vbmeta.img, vbmeta_system.img etc.                             | all         |                         |
+| dtbo            | dtbo.img                                                       | linux & mac |                         |
+| dtb             | *.dtb                                                          | linux & mac |                         |
+| sparse images   | system.img, vendor.img, product.img etc.                       | linux       |                         |
+| OTA payload     | payload.bin                                                    | all         | Windows git-bash        |
 
 Please note that the boot.img MUST follows AOSP verified boot flow, either [Boot image signature](https://source.android.com/security/verifiedboot/verified-boot#signature_format) in VBoot 1.0 or [AVB HASH footer](https://android.googlesource.com/platform/external/avb/+/master/README.md#The-VBMeta-struct) (a.k.a. AVB) in VBoot 2.0.
 
@@ -69,6 +70,7 @@ Please note that the boot.img MUST follows AOSP verified boot flow, either [Boot
 
 | Device Model                   | Manufacturer | Compatible           | Android Version          | Note |
 |--------------------------------|--------------|----------------------|--------------------------|------|
+| Pixel 7 (panther)              | Google       | Y                    | 13 (TQ2A.230505.002) <Br>2023)| |
 | ADT-3 (adt3)                   | Askey/Google | Y                    | 12 (spp2.210219.010)     | amlogic inside, <Br>Android TV |
 | Pixel 3 (blueline)             | Google       | Y                    | 12 (spp2.210219.008, <Br>2021)| |
 | Pixel 3 (blueline)             | Google       | Y                    | 11 (RP1A.200720.009, <Br>2020)| [more ...](doc/additional_tricks.md#pixel-3-blueline) |
@@ -156,7 +158,7 @@ Please note that to use 'gradle flash', your host machine must be connectted to 
 </details>
 
 <details>
-  <summary>edit device-tree blob(dtb) inside vendor_boot.img</summary>
+  <summary>How to edit device tree blob(dtb) inside vendor_boot.img</summary>
 
 If you want to edit the device-tree blob in place:
 
@@ -180,6 +182,55 @@ cp <your_vbmeta_image> vbmeta.img
 rm build/unzip_boot/dtb.dts
 cp <your_dtb> build/unzip_boot/dtb
 ./gradlew pack
+```
+
+</details>
+
+<details>
+
+  <summary>How to pull device tree blob(dtb) from a rooted device</summary>
+
+If you have a rooted device and want to pull /proc/device-tree
+```bash
+touch fake.dtb
+./gradlew pull
+```
+This tool will copy `dtc` to the target device via `adb`, and dump the dtb and dts file. Eventually you should get something like this
+```
++--------+------------------------------+
+|  What  |            Where             |
++--------+------------------------------+
+| source | /proc/device-tree            |
++--------+------------------------------+
+| DTB    | panther.dtb                  |
++--------+------------------------------+
+| DTS    | build/unzip_boot/panther.dts |
++--------+------------------------------+
+
+```
+
+</details>
+
+<details>
+
+  <summary>How to work edit device tree blob(dtb) file</summary>
+
+If you have a dtb file and want to edit its content
+```bash
+cp <your_dtb_file> .
+./gradlew unpack
+```
+This tool will decompile it and put the decompiled source to build/unzip_boot.
+
+```
+                        Unpack Summary of panther.dtb
++------+------------------------------+
+| What |            Where             |
++------+------------------------------+
+| DTB  | panther.dtb                  |
++------+------------------------------+
+| DTS  | build/unzip_boot/panther.dts |
++------+------------------------------+
 ```
 
 </details>
@@ -255,11 +306,10 @@ https://android.googlesource.com/platform/system/core/+/refs/heads/master/libspa
 Android Nexus/Pixle factory images<br/>
 https://developers.google.cn/android/images<br/>
 
-This project is developed with products by Jetbrains.
+</details>
 
+This project is developed with products by Jetbrains.
 
 <a href="https://jb.gg/OpenSource">
   <img src="https://user-images.githubusercontent.com/1133314/116802621-c076be80-ab46-11eb-8a14-9454a933de7d.png" alt="drawing" width="80">
 </a>
-
-</details>
