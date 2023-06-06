@@ -73,7 +73,7 @@ class DeviceTreeParser : IPackable {
 
     fun clear(fileName: String) {
         super.clear()
-        listOf(".new").forEach {
+        listOf("", ".new").forEach {
             "$fileName$it".deleteIfExists()
         }
     }
