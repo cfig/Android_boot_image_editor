@@ -58,7 +58,7 @@ data class BootV3(
                 //info
                 ret.info.output = File(fileName).name
                 ret.info.json = File(fileName).name.removeSuffix(".img") + ".json"
-                ret.info.cmdline = header.cmdline
+                ret.info.cmdline = header.cmdline.trim()
                 ret.info.headerSize = header.headerSize
                 ret.info.headerVersion = header.headerVersion
                 ret.info.osVersion = header.osVersion

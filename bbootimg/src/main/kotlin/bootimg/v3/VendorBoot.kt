@@ -179,7 +179,7 @@ data class VendorBoot(
                 ret.info.headerSize = header.headerSize
                 ret.info.product = header.product
                 ret.info.tagsLoadAddr = header.tagsLoadAddr
-                ret.info.cmdline = header.cmdline
+                ret.info.cmdline = header.cmdline.trim()
                 ret.info.kernelLoadAddr = header.kernelLoadAddr
                 ret.info.pageSize = header.pageSize
                 ret.info.headerVersion = header.headerVersion
