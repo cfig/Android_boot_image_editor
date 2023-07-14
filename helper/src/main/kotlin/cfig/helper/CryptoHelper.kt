@@ -4,11 +4,19 @@ package cfig.helper
 
 import cc.cfig.io.Struct
 import com.google.common.math.BigIntegerMath
+import com.nimbusds.jose.Algorithm
+import com.nimbusds.jose.jwk.KeyUse
+import com.nimbusds.jose.util.Base64URL
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.apache.commons.exec.ExecuteException
 import org.apache.commons.exec.PumpStreamHandler
+import org.bouncycastle.asn1.ASN1InputStream
+import org.bouncycastle.asn1.ASN1Primitive
+import org.bouncycastle.asn1.ASN1Sequence
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.pkcs.PKCS10CertificationRequest
+import org.bouncycastle.util.io.pem.PemObject
 import org.bouncycastle.util.io.pem.PemReader
 import org.slf4j.LoggerFactory
 import java.io.*
@@ -17,10 +25,8 @@ import java.math.RoundingMode
 import java.security.*
 import java.security.cert.Certificate
 import java.security.cert.CertificateFactory
-import java.security.spec.PKCS8EncodedKeySpec
-import java.security.spec.RSAPrivateKeySpec
-import java.security.spec.RSAPublicKeySpec
-import java.security.spec.X509EncodedKeySpec
+import java.security.cert.X509Certificate
+import java.security.spec.*
 import java.util.*
 import javax.crypto.Cipher
 import kotlin.reflect.KClass
@@ -52,6 +58,7 @@ class CryptoHelper {
                                     .generatePublic(keySpec) as java.security.interfaces.RSAPublicKey
                             }
                         }
+
                         "RSA PRIVATE KEY", "PRIVATE KEY" -> {
                             try {
                                 retClazz = org.bouncycastle.asn1.pkcs.RSAPrivateKey::class
@@ -63,14 +70,17 @@ class CryptoHelper {
                                     .generatePrivate(keySpec) as sun.security.rsa.RSAPrivateCrtKeyImpl
                             }
                         }
+
                         "CERTIFICATE REQUEST" -> {
                             retClazz = PKCS10CertificationRequest::class
                             PKCS10CertificationRequest(p.content)
                         }
+
                         "CERTIFICATE" -> {
                             retClazz = Certificate::class
                             CertificateFactory.getInstance("X.509").generateCertificate(ByteArrayInputStream(p.content))
                         }
+
                         else -> throw IllegalArgumentException("unsupported type: ${p.type}")
                     }
                     return KeyBox(KeyFormat.PEM, retClazz, ret)
@@ -166,16 +176,16 @@ class CryptoHelper {
                 from avbtool::encode_rsa_key()
              */
             fun encodeRSAkey(rsa: org.bouncycastle.asn1.pkcs.RSAPrivateKey): ByteArray {
-                require(65537.toBigInteger() == rsa.publicExponent)
+                check(65537.toBigInteger() == rsa.publicExponent)
                 val numBits: Int = BigIntegerMath.log2(rsa.modulus, RoundingMode.CEILING)
-                require(rsa.modulus.bitLength() == numBits)
+                check(rsa.modulus.bitLength() == numBits)
                 val b = BigInteger.valueOf(2).pow(32)
                 val n0inv = b.minus(rsa.modulus.modInverse(b)).toLong()
                 val rrModn = BigInteger.valueOf(4).pow(numBits).rem(rsa.modulus).toByteArray().let {
-                    it.sliceArray(it.size - numBits/8 until it.size)
+                    it.sliceArray(it.size - numBits / 8 until it.size)
                 }
                 val unsignedModulo = rsa.modulus.toByteArray().let {
-                    it.sliceArray(it.size - numBits/8 until it.size)
+                    it.sliceArray(it.size - numBits / 8 until it.size)
                 }
                 return Struct("!II${numBits / 8}b${numBits / 8}b").pack(
                     numBits,
@@ -199,14 +209,39 @@ class CryptoHelper {
                 return KeyFactory.getInstance("RSA").generatePublic(keySpec) as java.security.interfaces.RSAPublicKey
             }
 
-            fun decodePem(keyText: String): ByteArray {
-                val publicKeyPEM = keyText
-                    .replace("-----BEGIN .*-----".toRegex(), "")
-                    .replace(System.lineSeparator().toRegex(), "")
-                    .replace("\n", "")
-                    .replace("\r", "")
-                    .replace("-----END .*-----".toRegex(), "")
-                return Base64.getDecoder().decode(publicKeyPEM)
+            fun rsa2jwk(
+                inK: java.security.interfaces.RSAPrivateCrtKey,
+                keyName: String = "thePrivateKey"
+            ): com.nimbusds.jose.jwk.RSAKey {
+                return com.nimbusds.jose.jwk.RSAKey.Builder(Base64URL.encode(inK.modulus), Base64URL.encode(inK.publicExponent))
+                    .algorithm(Algorithm(inK.algorithm))
+                    .privateKey(inK)
+                    .keyUse(KeyUse.SIGNATURE)
+                    .keyID(keyName)
+                    .build()
+            }
+            fun rsa2jwk(
+                inK: java.security.interfaces.RSAPublicKey,
+                keyName: String = "thePublicKey"
+            ): com.nimbusds.jose.jwk.RSAKey {
+                return com.nimbusds.jose.jwk.RSAKey.Builder(Base64URL.encode(inK.modulus), Base64URL.encode(inK.publicExponent))
+                    .algorithm(Algorithm(inK.algorithm))
+                    .keyUse(KeyUse.SIGNATURE)
+                    .keyID(keyName)
+                    .build()
+            }
+
+            fun bcRSA2RSA(inK: org.bouncycastle.asn1.pkcs.RSAPrivateKey): PrivateKey {
+                return KeyFactory.getInstance("RSA").generatePrivate(
+                    RSAPrivateCrtKeySpec(
+                        inK.modulus, inK.publicExponent, inK.privateExponent, inK.prime1,
+                        inK.prime2, inK.exponent1, inK.exponent2, inK.coefficient
+                    )
+                )
+            }
+
+            fun pk8toPk1(pk8: java.security.PrivateKey): ASN1Primitive {
+                return PrivateKeyInfo.getInstance(pk8.encoded).parsePrivateKey().toASN1Primitive()
             }
         } //end-companion
     }
@@ -232,9 +267,9 @@ class CryptoHelper {
             }
 
             fun hash(ds: Dumpling<*>, coordinates: List<Pair<Long, Long>>, algorithm: String): ByteArray {
-                require(coordinates.isNotEmpty())
+                check(coordinates.isNotEmpty())
                 coordinates.forEach {
-                    require(it.first >= 0 && it.second > 0)
+                    check(it.first >= 0 && it.second > 0)
                 }
                 return MessageDigest.getInstance(algorithm).let { md ->
                     coordinates.forEach { coordinate ->
@@ -329,6 +364,191 @@ class CryptoHelper {
 
             fun sha256rsa(inData: ByteArray, inKey: java.security.PrivateKey): ByteArray {
                 return rsa(Hasher.sha256(inData), inKey)
+            }
+        }
+    }
+
+    data class UnBoxed(
+        /*
+            EC PRIVATE KEY, OPENSSH PRIVATE KEY, CERTIFICATE REQUEST, CERTIFICATE
+            RSA PRIVATE KEY, PRIVATE KEY, RSA PUBLIC KEY, PUBLIC KEY
+         */
+        val pemType: String? = null,
+        val asn1: Boolean = false,
+        val data: ByteArray = byteArrayOf(),
+        // RSA PRIVATE KEY, RSA PUBLIC KEY
+        var rawAsn1Type: String? = null,
+        // AvbRSAPublicKey
+        var rawType: String? = null,
+    ) {
+        fun parse(): Any? {
+            var ret: Any? = null
+            when (this.pemType) {
+                "EC PRIVATE KEY" -> {
+                    check(this.asn1)
+                    log.warn("not supported yet: " + this.pemType)
+                }
+
+                "OPENSSH PRIVATE KEY" -> { //Since OpenSSH 7.8
+                    check(!this.asn1)
+                    log.warn("not supported yet: " + this.pemType)
+                }
+
+                "CERTIFICATE REQUEST" -> {
+                    ret = PKCS10CertificationRequest(this.data)
+                    log.warn("Found: PEM(${ret.subject} CSR)")
+                }
+
+                "CERTIFICATE" -> {
+                    ret = CertificateFactory.getInstance("X.509").generateCertificate(ByteArrayInputStream(this.data))
+                    check(ret is X509Certificate)
+                    log.info("alg=" + ret.sigAlgName)
+                    check(ret.publicKey is java.security.interfaces.RSAPublicKey)
+                    log.info("Found: PEM(${ret.type} Cert) -> ${this.pemType}")
+                }
+
+                "RSA PRIVATE KEY", "PRIVATE KEY" -> run {
+                    check(this.asn1)
+                    //org.bouncycastle.asn1.pkcs.RSAPrivateKey::class
+                    try {
+                        ret = org.bouncycastle.asn1.pkcs.RSAPrivateKey.getInstance(this.data)
+                        check(ret is org.bouncycastle.asn1.pkcs.RSAPrivateKey)
+                        log.info("Found: PEM(PKCS1v2) -> ${this.pemType}")
+                        return@run
+                    } catch (_: java.lang.ClassCastException) {
+                    }
+                    val keySpec = PKCS8EncodedKeySpec(this.data)
+                    // sun.security.rsa.RSAPrivateCrtKeyImpl sun.security.rsa.RSAPrivateKeyImpl
+                    ret = KeyFactory.getInstance("RSA").generatePrivate(keySpec)
+                    check(ret is java.security.interfaces.RSAPrivateKey)
+                    log.info("Found: PEM(PKCS#8) -> ${this.pemType}")
+                }
+
+                "RSA PUBLIC KEY", "PUBLIC KEY" -> {
+                    check(this.asn1)
+                    try {
+                        ret = org.bouncycastle.asn1.pkcs.RSAPublicKey.getInstance(this.data)
+                        check(ret is org.bouncycastle.asn1.pkcs.RSAPublicKey)
+                        log.info(ret.toString())
+                        log.info("Found: PEM -> ${this.pemType}")
+                    } catch (_: IllegalArgumentException) {
+                    }
+                    val keySpec = X509EncodedKeySpec(this.data)
+                    ret = KeyFactory.getInstance("RSA").generatePublic(keySpec)
+                    check(ret is java.security.interfaces.RSAPublicKey)
+                    log.info("Found: PEM(PKCS#8) -> ${this.pemType}")
+                }
+
+                null -> run {
+                    // AvbRSAPublicKey
+                    if (!this.asn1) {
+                        try {
+                            ret = KeyBox.decodeRSAkey(this.data)
+                            this.rawType = "AvbRSAPublicKey"
+                            log.info("Found: raw(AVB Public Key) -> ${this.rawType}")
+                            return@run
+                        } catch (_: IllegalStateException) {
+                        }
+                    }
+                    check(this.asn1)
+                    // PRIVATE KEY (RSA)
+                    try {
+                        ret = org.bouncycastle.asn1.pkcs.RSAPrivateKey.getInstance(this.data)
+                        check(ret is org.bouncycastle.asn1.pkcs.RSAPrivateKey)
+                        this.rawAsn1Type = "RSA PRIVATE KEY"
+                        log.info("Found: raw(PKCS1v2) -> ${this.rawAsn1Type}")
+                        return@run
+                    } catch (_: java.lang.ClassCastException) {
+                    }
+                    // PRIVATE KEY (RSA)
+                    try {
+                        val keySpec = PKCS8EncodedKeySpec(this.data)
+                        // java.security.interfaces.RSAPrivateCrtKey || java.security.interfaces.RSAPrivateKey
+                        ret = KeyFactory.getInstance("RSA").generatePrivate(keySpec)
+                        check(ret is java.security.interfaces.RSAPrivateCrtKey)
+                        this.rawAsn1Type = "RSA PRIVATE KEY"
+                        log.info("Found: raw(PKCS#8) -> ${this.rawAsn1Type}")
+                        return@run
+                    } catch (_: InvalidKeySpecException) {
+                    }
+                    // PUBLIC KEY (RSA)
+                    try {
+                        ret = org.bouncycastle.asn1.pkcs.RSAPublicKey.getInstance(this.data)
+                        check(ret is org.bouncycastle.asn1.pkcs.RSAPublicKey)
+                        this.rawAsn1Type = "RSA PUBLIC KEY"
+                        log.info(ret.toString())
+                        log.info("Found: raw() -> ${this.rawAsn1Type}")
+                        return@run
+                    } catch (_: IllegalArgumentException) {
+                    }
+                    // PUBLIC KEY (RSA)
+                    val keySpec = X509EncodedKeySpec(this.data)
+                    ret = KeyFactory.getInstance("RSA").generatePublic(keySpec)
+                    check(ret is java.security.interfaces.RSAPublicKey)
+                    this.rawAsn1Type = "RSA PUBLIC KEY"
+                    log.info("Found: raw(PKCS#8) -> ${this.rawAsn1Type}")
+                }
+
+                else -> {
+                    log.warn("#####################: ${this.pemType}")
+                }
+            }
+            return ret
+        }
+
+        companion object {
+            fun fromData(data: ByteArray): UnBoxed {
+                PemReader(InputStreamReader(ByteArrayInputStream(data))).use { pr ->
+                    var obj: PemObject? = null
+                    if (pr.readPemObject().also { obj = it } != null) {
+                        //log.debug("PEM: ${obj!!.type}")
+                        val isAsn1 = isValidAsn1(obj!!.content)
+                        //log.debug("asn1=$isAsn1")
+                        return UnBoxed(obj!!.type!!, isAsn1, obj!!.content)
+                    } else {
+                        //log.info("not pem")
+                        val isAsn1 = isValidAsn1(data)
+                        //log.info("asn1=$isAsn1")
+                        return UnBoxed(null, isAsn1, data)
+                    }
+                }
+            }
+
+            @Throws(IOException::class)
+            fun isValidAsn1(data: ByteArray): Boolean {
+                return try {
+                    ASN1InputStream(data).use { input ->
+                        var obj: ASN1Primitive? = null
+                        while (input.readObject() != null) {
+                        }
+                        true
+                    }
+                } catch (e: IOException) {
+                    false
+                }
+            }
+
+            fun parseASN1(data: ByteArray) {
+                ASN1InputStream(data).use { input ->
+                    var obj: ASN1Primitive? = null
+                    while (input.readObject().also { obj = it } != null) {
+                        parseASN1Object(obj!!)
+                    }
+                }
+            }
+
+            private fun parseASN1Object(asn1Object: ASN1Primitive) {
+                if (asn1Object is ASN1Sequence) {
+                    log.info("[SEQ] " + asn1Object.size() + " objects")
+                    for (i in 0 until asn1Object.size()) {
+                        val element = asn1Object.getObjectAt(i).toASN1Primitive()
+                        parseASN1Object(element) // Recursively parse each element
+                    }
+                } else {
+                    // Handle other ASN1Primitive types as needed
+                    // For example, you can print the element's content:
+                    log.info("[OBJ] $asn1Object")
+                }
             }
         }
     }

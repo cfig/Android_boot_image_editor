@@ -10,6 +10,7 @@ successLogo = """
 """
 resDir = "src/integrationTest/resources"
 resDir2 = "src/integrationTest/resources_2"
+resDir3 = "src/integrationTest/resources_3"
 log = logging.getLogger('TEST')
 log.setLevel(logging.DEBUG)
 consoleHandler = logging.StreamHandler(sys.stdout)
@@ -182,6 +183,8 @@ def main():
     verifySingleDir(resDir2, "issue_122_ramdisk_img")
     # Issue 123: dtb
     verifySingleDir(resDir2, "issue_123_dtb")
+    # Issue 125: cmdline trim
+    verifySingleDir(resDir3, "issue_125_trim_cmdline")
 
     log.info(successLogo)
 

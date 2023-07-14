@@ -2,8 +2,10 @@
 
 package cfig.helper
 
-import org.bouncycastle.asn1.ASN1Primitive
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
+import cfig.helper.CryptoHelper.KeyBox.Companion.bcRSA2RSA
+import cfig.helper.CryptoHelper.KeyBox.Companion.pk8toPk1
+import cfig.helper.CryptoHelper.KeyBox.Companion.rsa2jwk
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.bouncycastle.util.io.pem.PemObject
 import org.bouncycastle.util.io.pem.PemWriter
 import org.slf4j.LoggerFactory
@@ -14,6 +16,7 @@ import java.io.FileWriter
 import java.math.BigInteger
 import java.security.KeyFactory
 import java.security.KeyPairGenerator
+import java.security.cert.X509Certificate
 import java.security.spec.RSAPublicKeySpec
 import java.util.*
 import kotlin.system.exitProcess
@@ -70,10 +73,6 @@ class Launcher {
         }
     }
 
-    private fun pk8toPk1(pk8: java.security.PrivateKey): ASN1Primitive {
-        return PrivateKeyInfo.getInstance(pk8.encoded).parsePrivateKey().toASN1Primitive()
-    }
-
     fun processCommand(inFile: String, info2: Properties) {
         FileInputStream(inFile).use { fis ->
             info2.load(fis)
@@ -88,7 +87,7 @@ class Launcher {
                     it.initialize(kLen)
                     it.generateKeyPair()
                 }
-                FileOutputStream(kFile, false).use {
+                FileOutputStream(kFile + ".pk8", false).use {
                     it.write(keyPair.private.encoded)
                     log.info("RSA priv key(len=$kLen) written to $kFile.pk8")
                 }
@@ -101,6 +100,7 @@ class Launcher {
                 }
                 dumpPem(PemObject("RSA PUBLIC KEY", keyPair.public.encoded), "$kFile.pem.pub")
             }
+
             "toPub" -> {
                 val k = CryptoHelper.KeyBox.parse4(File(kFile).readBytes())
                 if (k.key is org.bouncycastle.asn1.pkcs.RSAPrivateKey) {
@@ -111,12 +111,14 @@ class Launcher {
                     throw IllegalArgumentException("not supported")
                 }
             }
+
             "parse" -> {
                 val k = CryptoHelper.KeyBox.parse4(File(kFile).readBytes())
                 log.info("fmt=" + k.fmt.toString())
                 log.info("clazz=" + k.clazz)
                 log.info("key=" + k.key)
             }
+
             else -> {
                 //pass
             }
@@ -127,38 +129,33 @@ class Launcher {
         val preFile = info2.getProperty("file")
         info2["file"] = (if (preFile == null) "" else "$preFile,") + File(inFile).canonicalFile.path
         info2["propFile"] = File(info2.getProperty("file")).name + ".prop"
-        val k = CryptoHelper.KeyBox.parse4(File(inFile).readBytes())
-        info2["fileType"] = k.fmt
-        info2["fileClazz"] = k.clazz
-        log.info("Recognized ${k.fmt}: " + k.clazz)
-        if (k.key is sun.security.x509.X509CertImpl) {
-            val crt = k.key
-            val crtSubj = (crt.get("x509.info") as sun.security.x509.X509CertInfo).get("subject").toString()
-            val subj2 = crtSubj
-                .replace(", ", "/")
-                .replace("EMAILADDRESS", "emailAddress")
-                .replace("\\s".toRegex(), "")
-            info2.setProperty("csr.info", "/$subj2")
+        val unboxed = CryptoHelper.UnBoxed.fromData(File(inFile).readBytes())
+        val k2 = unboxed.parse()
+        var retJwk: com.nimbusds.jose.jwk.RSAKey? = null
+        if (k2 is java.security.interfaces.RSAPrivateCrtKey) {
+            retJwk = rsa2jwk(k2)
+            //log.info(retJwk.toJSONString())
+        } else if (k2 is org.bouncycastle.asn1.pkcs.RSAPrivateKey) {
+            val privk = bcRSA2RSA(k2)
+            check(privk is java.security.interfaces.RSAPrivateCrtKey)
+            retJwk = rsa2jwk(privk)
+            //log.info(retJwk.toJSONString())
+        } else if (k2 is java.security.interfaces.RSAPublicKey) {
+            retJwk = rsa2jwk(k2)
+            //log.info(retJwk.toJSONString())
+        } else if (k2 is X509Certificate) {
+            retJwk = rsa2jwk(k2.publicKey as java.security.interfaces.RSAPublicKey)
+        } else {
+            log.info("Found other: " + k2!!::class.java.toString())
         }
-        if (k.key is sun.security.rsa.RSAPrivateCrtKeyImpl) {
-            val pk8 = k.key
-            info2.setProperty("rsa.len", pk8.modulus.bitLength().toString())
-            info2["rsa.modulus"] = Helper.toHexString(pk8.modulus.toByteArray())
-            info2["rsa.privateExponent"] = Helper.toHexString(pk8.privateExponent.toByteArray())
-            info2["rsa.publicExponent"] = Helper.toHexString(pk8.publicExponent.toByteArray())
-            info2["rsa.primeP"] = Helper.toHexString(pk8.primeP.toByteArray())
-            info2["rsa.primeQ"] = Helper.toHexString(pk8.primeQ.toByteArray())
+        if (retJwk != null) {
+            log.info("transforming: $inFile --> out.jwk ...")
+            File("out.jwk").writeText(
+                ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(
+                    ObjectMapper().readValue(retJwk.toJSONString(), Any::class.java)
+                )
+            )
         }
-        if (k.key is org.bouncycastle.asn1.pkcs.RSAPrivateKey) {
-            val rsa = k.key
-            info2.setProperty("rsa.len", rsa.modulus.bitLength().toString())
-            info2["rsa.modulus"] = Helper.toHexString(rsa.modulus.toByteArray())
-            info2["rsa.privateExponent"] = Helper.toHexString(rsa.privateExponent.toByteArray())
-            info2["rsa.publicExponent"] = Helper.toHexString(rsa.publicExponent.toByteArray())
-            info2["rsa.primeP"] = Helper.toHexString(rsa.prime1.toByteArray())
-            info2["rsa.primeQ"] = Helper.toHexString(rsa.prime2.toByteArray())
-        }
-
     }
 }
 
@@ -195,11 +192,6 @@ fun main(args: Array<String>) {
         args.forEachIndexed { index, s ->
             log.warn("[${index + 1}/${args.size}] Processing $s ...")
             Launcher().processFile(s, info2)
-        }
-        FileOutputStream(info2.getProperty("propFile")).use { fos ->
-            info2.setProperty("all_cmds", allSupportedCommands)
-            info2.store(fos, null)
-            log.info("Writing to " + info2.getProperty("propFile"))
         }
     }
 }

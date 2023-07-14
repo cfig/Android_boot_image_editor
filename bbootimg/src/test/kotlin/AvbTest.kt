@@ -14,12 +14,17 @@
 
 import avb.desc.UnknownDescriptor
 import avb.desc.HashDescriptor
+import cfig.Avb
+import cfig.helper.CryptoHelper
+import cfig.helper.Dumpling
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
 import org.junit.Test
-
 import org.junit.Assert.*
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
+import java.io.File
 
 class AvbTest {
     private val log = LoggerFactory.getLogger(AvbTest::class.java)
@@ -40,5 +45,32 @@ class AvbTest {
         log.info(hashdDesc.toString())
         val descAnalyzed = desc.analyze()
         assertTrue(descAnalyzed is HashDescriptor)
+    }
+
+    @Test
+    fun verifyKnownKeysJson() {
+        val keys = ObjectMapper().readValue(
+            this::class.java.classLoader.getResource("known_keys.json"),
+            object : TypeReference<List<Avb.Companion.KnownPublicKey>>() {})
+        keys.forEachIndexed { _, knownPublicKey ->
+            verifySha1(knownPublicKey)
+        }
+        val outStr = ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(keys)
+        log.info(outStr)
+    }
+
+    private fun verifySha1(known: Avb.Companion.KnownPublicKey) {
+        val hash = CryptoHelper.Hasher.hash(Dumpling(known.pubk), "sha-1")
+        if (known.sha1.isBlank()) {
+            log.info("+ add new sha1")
+            known.sha1 = Hex.encodeHexString(hash)
+        } else {
+            if (known.sha1 == Hex.encodeHexString(hash)) {
+                log.info("= sha1 match")
+            } else {
+                log.error("- sha1 mismatch")
+                throw IllegalArgumentException("sha1 mismatch")
+            }
+        }
     }
 }
