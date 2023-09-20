@@ -17,6 +17,8 @@ package cfig.helper
 import cc.cfig.io.Struct
 import cfig.helper.Helper.Companion.check_call
 import cfig.helper.Helper.Companion.check_output
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.archivers.zip.*
 import org.apache.commons.compress.compressors.CompressorOutputStream
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
@@ -38,6 +40,7 @@ import java.io.*
 import java.net.URI
 import java.nio.file.FileSystems
 import java.nio.file.Files
+import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
@@ -589,6 +592,24 @@ class ZipHelper {
                 }
             }
             log.info("compress(bzip2) done: $compressedFile")
+        }
+
+        fun makeTar(compressedFile: String, srcDir: String) {
+            FileOutputStream(compressedFile).use { fos ->
+                val appendTarEntry: (TarArchiveOutputStream, String) -> Unit = { tarOut, entry ->
+                    tarOut.putArchiveEntry(TarArchiveEntry(File(entry)))
+                    tarOut.write(File(entry).readBytes())
+                    tarOut.closeArchiveEntry()
+                }
+                TarArchiveOutputStream(fos).use { to ->
+                    Files.walk(Paths.get(srcDir))
+                        .filter { Files.isRegularFile(it) }
+                        .forEach {
+                            log.info("tar << $it")
+                            appendTarEntry(to, it.toString())
+                        }
+                }
+            }
         }
     } // end-of-companion
 }

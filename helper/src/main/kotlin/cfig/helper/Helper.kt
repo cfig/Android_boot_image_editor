@@ -267,8 +267,8 @@ class Helper {
                 log.error("fail to execute [$cmd]")
                 ret = false
             }
-            log.debug("stdout [$outStream]")
-            log.debug("stderr [$errStream]")
+            log.debug("stdout [{}]", outStream)
+            log.debug("stderr [{}]", errStream)
             return arrayOf(ret, outStream.toByteArray(), errStream.toByteArray())
         }
 
@@ -284,8 +284,8 @@ class Helper {
             } catch (e: ExecuteException) {
                 log.error("fail to execute [$cmd]")
             }
-            log.debug("stdout [$outStream]")
-            log.debug("stderr [$errStream]")
+            log.debug("stdout [{}]", outStream)
+            log.debug("stderr [{}]", errStream)
             return arrayOf(outStream.toByteArray(), errStream.toByteArray())
         }
 
@@ -395,6 +395,43 @@ class Helper {
 
         fun readFully(data: ByteArray, coordinate: Pair<Long, Int>): ByteArray {
             return readFully(data, coordinate.first, coordinate.second)
+        }
+
+        fun adbCmd(cmd: String): String {
+            val outputStream = ByteArrayOutputStream()
+            val exec = DefaultExecutor()
+            exec.streamHandler = PumpStreamHandler(outputStream)
+            val cmdline = "adb shell $cmd"
+            log.info(cmdline)
+            exec.execute(CommandLine.parse(cmdline))
+            //println(outputStream)
+            return outputStream.toString().trim()
+        }
+
+        fun str2range(str: String): List<IntRange> {
+            return str.trim().let { ranges ->
+                val ret = mutableListOf<IntRange>()
+                ranges.split(",").forEach { rangeItem ->
+                    rangeItem.split("-").let { v ->
+                        when (v.size) {
+                            1 -> {
+                                if (v.get(0).isNotEmpty()) {
+                                    ret.add(IntRange(v.get(0).toInt(), v.get(0).toInt()))
+                                } else {
+                                    //pass
+                                }
+                            }
+                            2 -> {
+                                ret.add(IntRange(v.get(0).toInt(), v.get(1).toInt()))
+                            }
+                            else -> {
+                                throw IllegalArgumentException("invalid range: [$rangeItem]")
+                            }
+                        }
+                    }
+                }
+                ret
+            }
         }
 
         private val log = LoggerFactory.getLogger("Helper")
