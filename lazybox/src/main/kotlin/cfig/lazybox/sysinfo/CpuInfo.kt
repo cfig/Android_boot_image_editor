@@ -39,9 +39,9 @@ class CpuInfo(
         }
 
         val getAdbCmdResult: (String, Boolean) -> String? =  { cmd, check ->
-            Helper.powerRun2(cmd, null).let {
+            Helper.powerRun2("adb shell $cmd", null).let {
                 if (it[0] as Boolean) {
-                    String(it[1] as ByteArray)
+                    String(it[1] as ByteArray).trim()
                 } else {
                     if (check) {
                         log.warn(String(it[1] as ByteArray))
