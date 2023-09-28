@@ -50,7 +50,11 @@ class MiscImgParser : IPackable {
         File(fileName).copyTo(out, true)
         RandomAccessFile(out.name, "rw").use { raf ->
             raf.write(misc.bcb.encode())
-            raf.seek(32 * 1024)
+            raf.seek(MiscImage.MiscBootControl.OFFSET)
+            if (misc.mbcb != null) {
+                raf.write(misc.mbcb!!.encode())
+            }
+            raf.seek(MiscImage.VirtualABMessage.OFFSET)
             if (misc.virtualAB != null) {
                 raf.write(misc.virtualAB!!.encode())
             }
