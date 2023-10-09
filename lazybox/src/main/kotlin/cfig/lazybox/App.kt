@@ -1,6 +1,7 @@
 package cfig.lazybox
 
 import cfig.lazybox.sysinfo.CpuInfo
+import cfig.lazybox.sysinfo.Pidstat
 import cfig.lazybox.sysinfo.SysInfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
@@ -15,7 +16,7 @@ fun main(args: Array<String>) {
         println("Usage: args: (Array<String>) ...")
         println("   or: function [arguments]...")
         println("\nCurrently defined functions:")
-        println("\tcpuinfo sysinfo")
+        println("\tcpuinfo sysinfo sysstat pidstat")
         exitProcess(0)
     }
     if (args.get(0) == "cpuinfo") {
@@ -29,5 +30,11 @@ fun main(args: Array<String>) {
     }
     if (args.get(0) == "sysinfo") {
         SysInfo().run()
+    }
+    if (args.get(0) == "sysstat") {
+        println("adb shell /data/vendor/sadc -F -L -S ALL 2 20 /data/vendor")
+    }
+    if (args.get(0) == "pidstat") {
+        Pidstat.run()
     }
 }
