@@ -74,6 +74,8 @@ def prepare(zipFile):
     list2 = []
     purgeFolder(tmp1)
     purgeFolder(tmp2)
+    os.mkdir(tmp1)
+    os.mkdir(tmp2)
 
     with ZipFile(zipFile, 'r') as zf:
         zf.extractall(path=tmp1)

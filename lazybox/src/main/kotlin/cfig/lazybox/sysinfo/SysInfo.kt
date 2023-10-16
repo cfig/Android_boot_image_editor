@@ -30,6 +30,21 @@ class SysInfo {
         }
     }
 
+    fun makeTar(tarFile: String, srcDir: String, fmt: String) {
+        val pyScript =
+            """
+import os, sys, subprocess, gzip, logging, shutil, tarfile, os.path
+def makeTar(output_filename, source_dir):
+   with tarfile.open(output_filename, "w:%s") as tar:
+       tar.add(source_dir, arcname=os.path.basename(source_dir))
+makeTar("%s", "%s")
+""".trim()
+        val tmp = Files.createTempFile(Paths.get("."), "xx.", ".yy")
+        tmp.writeText(String.format(fmt, pyScript, tarFile, srcDir))
+        ("python " + tmp.fileName).check_call()
+        tmp.deleteIfExists()
+    }
+
     private fun makeTar(tarFile: String, srcDir: String) {
         val pyScript =
             """

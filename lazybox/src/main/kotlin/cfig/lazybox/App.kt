@@ -1,5 +1,6 @@
 package cfig.lazybox
 
+import cfig.lazybox.sysinfo.BootChart
 import cfig.lazybox.sysinfo.CpuInfo
 import cfig.lazybox.sysinfo.Pidstat
 import cfig.lazybox.sysinfo.SysInfo
@@ -16,7 +17,10 @@ fun main(args: Array<String>) {
         println("Usage: args: (Array<String>) ...")
         println("   or: function [arguments]...")
         println("\nCurrently defined functions:")
-        println("\tcpuinfo sysinfo sysstat pidstat")
+        println("\tcpuinfo sysinfo sysstat pidstat bootchart")
+        println("\nCommand Usage:")
+        println("bootchart: generate Android bootchart")
+        println("pidstat  : given a pid, profile its CPU usage")
         exitProcess(0)
     }
     if (args.get(0) == "cpuinfo") {
@@ -36,5 +40,8 @@ fun main(args: Array<String>) {
     }
     if (args.get(0) == "pidstat") {
         Pidstat.run()
+    }
+    if (args.get(0) == "bootchart") {
+        BootChart.run()
     }
 }

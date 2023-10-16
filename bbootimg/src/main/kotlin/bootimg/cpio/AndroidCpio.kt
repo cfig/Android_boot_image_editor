@@ -70,6 +70,7 @@ class AndroidCpio {
                         ino = inodeNumber++
                     )
                 }
+
                 Files.isDirectory(item.toPath()) -> {
                     log.debug("DIR: " + item.path + ", " + item.toPath())
                     AndroidCpioEntry(
@@ -79,6 +80,7 @@ class AndroidCpio {
                         ino = inodeNumber++
                     )
                 }
+
                 Files.isRegularFile(item.toPath()) -> {
                     log.debug("REG: " + item.path)
                     AndroidCpioEntry(
@@ -88,6 +90,7 @@ class AndroidCpio {
                         ino = inodeNumber++
                     )
                 }
+
                 else -> {
                     throw IllegalArgumentException("do not support file " + item.name)
                 }
@@ -142,10 +145,12 @@ class AndroidCpio {
                     log.warn("${entry.name} has NO fsconfig/prefix match")
                 }
             }
+
             1 -> {
                 log.debug("${entry.name} == preset fsconfig")
                 entry.statMode = itemConfig[0].statMode
             }
+
             else -> {
                 //Issue #75: https://github.com/cfig/Android_boot_image_editor/issues/75
                 //Reason: cpio may have multiple entries with the same name, that's caused by man-made errors
@@ -248,6 +253,7 @@ class AndroidCpio {
                             Files.createSymbolicLink(Paths.get(outEntryName), Paths.get(String(buffer)))
                         }
                     }
+
                     entry.isRegularFile -> {
                         entryInfo.note = ("REG " + entryInfo.note)
                         File(outEntryName).also { it.parentFile.mkdirs() }.writeBytes(buffer)
@@ -260,6 +266,7 @@ class AndroidCpio {
                             )
                         }
                     }
+
                     entry.isDirectory -> {
                         entryInfo.note = ("DIR " + entryInfo.note)
                         File(outEntryName).mkdir()
@@ -272,6 +279,20 @@ class AndroidCpio {
                             //Windows
                         }
                     }
+
+                    entry.isCharacterDevice -> {
+                        entryInfo.note = ("CHAR " + entryInfo.note)
+                        File(outEntryName).also { it.parentFile.mkdirs() }.writeBytes(buffer)
+                        if (EnvironmentVerifier().isWindows) {
+                            //Windows: Posix not supported
+                        } else {
+                            Files.setPosixFilePermissions(
+                                Paths.get(outEntryName),
+                                Helper.modeToPermissions(((entry.mode and PERM_MASK) or 0b111_000_000).toInt())
+                            )
+                        }
+                    }
+
                     else -> throw IllegalArgumentException("??? type unknown")
                 }
                 File(outEntryName).setLastModified(entry.time)
