@@ -15,6 +15,7 @@
 package cfig.packable
 
 import cc.cfig.droid.ota.Payload
+import cfig.helper.Helper.Companion.deleteIfExists
 import org.slf4j.LoggerFactory
 
 class PayloadBinParser : IPackable {
@@ -45,6 +46,8 @@ class PayloadBinParser : IPackable {
     }
 
     fun clear(fileName: String) {
+        super.clear()
+        fileName.deleteIfExists()
     }
 
     override fun flash(fileName: String, deviceName: String) {

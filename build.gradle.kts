@@ -37,6 +37,7 @@ tasks {
         classpath = files("bbootimg/build/libs/bbootimg.jar")
         this.maxHeapSize = "128m"
         enableAssertions = true
+        systemProperties(mapOf("part" to System.getProperty("part", "")))
         args("unpack")
     }
     unpackTask.dependsOn("bbootimg:jar")

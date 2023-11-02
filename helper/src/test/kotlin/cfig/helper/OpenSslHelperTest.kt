@@ -14,9 +14,6 @@
 
 package cfig.helper
 
-import org.bouncycastle.asn1.est.CsrAttrs
-import org.bouncycastle.cert.X509CertificateHolder
-import org.bouncycastle.cert.crmf.CertificateRequestMessageBuilder
 import org.junit.Test
 import org.slf4j.LoggerFactory
 import java.io.File

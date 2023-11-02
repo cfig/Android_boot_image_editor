@@ -2,4 +2,7 @@
 .gradle
 build/
 local.properties
+.classpath
+.project
+.settings
 __pycache__

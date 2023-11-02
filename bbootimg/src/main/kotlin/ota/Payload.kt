@@ -16,8 +16,8 @@ package cc.cfig.droid.ota
 
 import cc.cfig.io.Struct
 import cfig.helper.CryptoHelper.Hasher
-import cfig.helper.Helper
 import cfig.helper.Dumpling
+import cfig.helper.Helper
 import chromeos_update_engine.UpdateMetadata
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -181,6 +181,14 @@ class Payload {
                 UpdateMetadata.InstallOperation.Type.REPLACE_XZ -> CommandLine("xzcat")
                 UpdateMetadata.InstallOperation.Type.REPLACE_BZ -> CommandLine("bzcat")
                 UpdateMetadata.InstallOperation.Type.REPLACE -> return inBytes
+                UpdateMetadata.InstallOperation.Type.ZERO -> {
+                    if (inBytes.any { it.toInt() != 0 }) {
+                        throw IllegalArgumentException("ZERO is not zero")
+                    }
+                    log.warn("op type ZERO: ${inBytes.size} bytes")
+                    return inBytes
+                }
+
                 else -> throw IllegalArgumentException(opType.toString())
             }
             cmd.addArgument("-")
@@ -196,7 +204,7 @@ class Payload {
                 sortBy { it.getDstExtents(0).startBlock }
             }
             ops.forEach { op ->
-                log.debug(pu.partitionName + ": " + (op.getDstExtents(0).startBlock * this.manifest.blockSize) + ", size=" + op.dataLength)
+                log.debug(pu.partitionName + ": " + (op.getDstExtents(0).startBlock * this.manifest.blockSize) + ", size=" + op.dataLength + ", type=" + op.type)
                 val piece = ByteArray(op.dataLength.toInt()).let {
                     ras.seek(this.dataOffset + op.dataOffset)
                     ras.read(it)
@@ -210,7 +218,7 @@ class Payload {
     fun setUp() {
         File(workDir).let {
             if (it.exists()) {
-               log.info("Removing $workDir")
+                log.info("Removing $workDir")
                 it.deleteRecursively()
             }
             log.info("Creating $workDir")
@@ -225,9 +233,21 @@ class Payload {
             val parts = this.manifest.partitionsList.map { it.partitionName }
             log.info("There are $totalNum partitions $parts")
             log.info("dumping images to $workDir")
-            this.manifest.partitionsList.forEach { pu ->
-                unpackInternal(ras, pu, String.format("%2d/%d", currentNum, totalNum))
-                currentNum++
+            val partArg = System.getProperty("part", "")
+            if (partArg.isNotBlank()) {
+                //Usage: gradle unpack -Dpart=vendor_boot
+                log.warn("dumping partition [$partArg] only")
+                this.manifest.partitionsList
+                    .filter { it.partitionName == partArg }
+                    .forEach { pu ->
+                        unpackInternal(ras, pu, String.format("%2d/%d", currentNum, totalNum))
+                        currentNum++
+                    }
+            } else {
+                this.manifest.partitionsList.forEach { pu ->
+                    unpackInternal(ras, pu, String.format("%2d/%d", currentNum, totalNum))
+                    currentNum++
+                }
             }
         }
     }

@@ -67,54 +67,6 @@ public final class UpdateMetadata {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private Extent(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              bitField0_ |= 0x00000001;
-              startBlock_ = input.readUInt64();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              numBlocks_ = input.readUInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_Extent_descriptor;
@@ -130,7 +82,7 @@ public final class UpdateMetadata {
 
     private int bitField0_;
     public static final int START_BLOCK_FIELD_NUMBER = 1;
-    private long startBlock_;
+    private long startBlock_ = 0L;
     /**
      * <code>optional uint64 start_block = 1;</code>
      * @return Whether the startBlock field is set.
@@ -149,7 +101,7 @@ public final class UpdateMetadata {
     }
 
     public static final int NUM_BLOCKS_FIELD_NUMBER = 2;
-    private long numBlocks_;
+    private long numBlocks_ = 0L;
     /**
      * <code>optional uint64 num_blocks = 2;</code>
      * @return Whether the numBlocks field is set.
@@ -187,7 +139,7 @@ public final class UpdateMetadata {
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeUInt64(2, numBlocks_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -204,7 +156,7 @@ public final class UpdateMetadata {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt64Size(2, numBlocks_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -229,7 +181,7 @@ public final class UpdateMetadata {
         if (getNumBlocks()
             != other.getNumBlocks()) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -250,7 +202,7 @@ public final class UpdateMetadata {
         hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
             getNumBlocks());
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -367,26 +319,20 @@ public final class UpdateMetadata {
 
       // Construct using chromeos_update_engine.UpdateMetadata.Extent.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         startBlock_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000001);
         numBlocks_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -413,6 +359,12 @@ public final class UpdateMetadata {
       @java.lang.Override
       public chromeos_update_engine.UpdateMetadata.Extent buildPartial() {
         chromeos_update_engine.UpdateMetadata.Extent result = new chromeos_update_engine.UpdateMetadata.Extent(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(chromeos_update_engine.UpdateMetadata.Extent result) {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
@@ -423,9 +375,7 @@ public final class UpdateMetadata {
           result.numBlocks_ = numBlocks_;
           to_bitField0_ |= 0x00000002;
         }
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
+        result.bitField0_ |= to_bitField0_;
       }
 
       @java.lang.Override
@@ -478,7 +428,7 @@ public final class UpdateMetadata {
         if (other.hasNumBlocks()) {
           setNumBlocks(other.getNumBlocks());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -493,17 +443,40 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        chromeos_update_engine.UpdateMetadata.Extent parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                startBlock_ = input.readUInt64();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                numBlocks_ = input.readUInt64();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (chromeos_update_engine.UpdateMetadata.Extent) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -531,8 +504,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setStartBlock(long value) {
-        bitField0_ |= 0x00000001;
+        
         startBlock_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -570,8 +544,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setNumBlocks(long value) {
-        bitField0_ |= 0x00000002;
+        
         numBlocks_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -618,7 +593,18 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Extent(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -645,7 +631,7 @@ public final class UpdateMetadata {
     /**
      * <code>repeated .chromeos_update_engine.Signatures.Signature signatures = 1;</code>
      */
-    java.util.List<chromeos_update_engine.UpdateMetadata.Signatures.Signature>
+    java.util.List<chromeos_update_engine.UpdateMetadata.Signatures.Signature> 
         getSignaturesList();
     /**
      * <code>repeated .chromeos_update_engine.Signatures.Signature signatures = 1;</code>
@@ -658,7 +644,7 @@ public final class UpdateMetadata {
     /**
      * <code>repeated .chromeos_update_engine.Signatures.Signature signatures = 1;</code>
      */
-    java.util.List<? extends chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder>
+    java.util.List<? extends chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder> 
         getSignaturesOrBuilderList();
     /**
      * <code>repeated .chromeos_update_engine.Signatures.Signature signatures = 1;</code>
@@ -694,56 +680,6 @@ public final class UpdateMetadata {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private Signatures(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                signatures_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.Signatures.Signature>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              signatures_.add(
-                  input.readMessage(chromeos_update_engine.UpdateMetadata.Signatures.Signature.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          signatures_ = java.util.Collections.unmodifiableList(signatures_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_Signatures_descriptor;
@@ -763,11 +699,15 @@ public final class UpdateMetadata {
 
       /**
        * <code>optional uint32 version = 1 [deprecated = true];</code>
+       * @deprecated chromeos_update_engine.Signatures.Signature.version is deprecated.
+       *     See update_metadata.proto;l=127
        * @return Whether the version field is set.
        */
       @java.lang.Deprecated boolean hasVersion();
       /**
        * <code>optional uint32 version = 1 [deprecated = true];</code>
+       * @deprecated chromeos_update_engine.Signatures.Signature.version is deprecated.
+       *     See update_metadata.proto;l=127
        * @return The version.
        */
       @java.lang.Deprecated int getVersion();
@@ -842,59 +782,6 @@ public final class UpdateMetadata {
       getUnknownFields() {
         return this.unknownFields;
       }
-      private Signature(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 8: {
-                bitField0_ |= 0x00000001;
-                version_ = input.readUInt32();
-                break;
-              }
-              case 18: {
-                bitField0_ |= 0x00000002;
-                data_ = input.readBytes();
-                break;
-              }
-              case 29: {
-                bitField0_ |= 0x00000004;
-                unpaddedSignatureSize_ = input.readFixed32();
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
-      }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_Signatures_Signature_descriptor;
@@ -910,9 +797,11 @@ public final class UpdateMetadata {
 
       private int bitField0_;
       public static final int VERSION_FIELD_NUMBER = 1;
-      private int version_;
+      private int version_ = 0;
       /**
        * <code>optional uint32 version = 1 [deprecated = true];</code>
+       * @deprecated chromeos_update_engine.Signatures.Signature.version is deprecated.
+       *     See update_metadata.proto;l=127
        * @return Whether the version field is set.
        */
       @java.lang.Override
@@ -921,6 +810,8 @@ public final class UpdateMetadata {
       }
       /**
        * <code>optional uint32 version = 1 [deprecated = true];</code>
+       * @deprecated chromeos_update_engine.Signatures.Signature.version is deprecated.
+       *     See update_metadata.proto;l=127
        * @return The version.
        */
       @java.lang.Override
@@ -929,7 +820,7 @@ public final class UpdateMetadata {
       }
 
       public static final int DATA_FIELD_NUMBER = 2;
-      private com.google.protobuf.ByteString data_;
+      private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes data = 2;</code>
        * @return Whether the data field is set.
@@ -948,7 +839,7 @@ public final class UpdateMetadata {
       }
 
       public static final int UNPADDED_SIGNATURE_SIZE_FIELD_NUMBER = 3;
-      private int unpaddedSignatureSize_;
+      private int unpaddedSignatureSize_ = 0;
       /**
        * <pre>
        * The DER encoded signature size of EC keys is nondeterministic for
@@ -1009,7 +900,7 @@ public final class UpdateMetadata {
         if (((bitField0_ & 0x00000004) != 0)) {
           output.writeFixed32(3, unpaddedSignatureSize_);
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -1030,7 +921,7 @@ public final class UpdateMetadata {
           size += com.google.protobuf.CodedOutputStream
             .computeFixed32Size(3, unpaddedSignatureSize_);
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -1060,7 +951,7 @@ public final class UpdateMetadata {
           if (getUnpaddedSignatureSize()
               != other.getUnpaddedSignatureSize()) return false;
         }
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -1083,7 +974,7 @@ public final class UpdateMetadata {
           hash = (37 * hash) + UNPADDED_SIGNATURE_SIZE_FIELD_NUMBER;
           hash = (53 * hash) + getUnpaddedSignatureSize();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -1200,28 +1091,21 @@ public final class UpdateMetadata {
 
         // Construct using chromeos_update_engine.UpdateMetadata.Signatures.Signature.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
           super.clear();
+          bitField0_ = 0;
           version_ = 0;
-          bitField0_ = (bitField0_ & ~0x00000001);
           data_ = com.google.protobuf.ByteString.EMPTY;
-          bitField0_ = (bitField0_ & ~0x00000002);
           unpaddedSignatureSize_ = 0;
-          bitField0_ = (bitField0_ & ~0x00000004);
           return this;
         }
 
@@ -1248,6 +1132,12 @@ public final class UpdateMetadata {
         @java.lang.Override
         public chromeos_update_engine.UpdateMetadata.Signatures.Signature buildPartial() {
           chromeos_update_engine.UpdateMetadata.Signatures.Signature result = new chromeos_update_engine.UpdateMetadata.Signatures.Signature(this);
+          if (bitField0_ != 0) { buildPartial0(result); }
+          onBuilt();
+          return result;
+        }
+
+        private void buildPartial0(chromeos_update_engine.UpdateMetadata.Signatures.Signature result) {
           int from_bitField0_ = bitField0_;
           int to_bitField0_ = 0;
           if (((from_bitField0_ & 0x00000001) != 0)) {
@@ -1255,16 +1145,14 @@ public final class UpdateMetadata {
             to_bitField0_ |= 0x00000001;
           }
           if (((from_bitField0_ & 0x00000002) != 0)) {
+            result.data_ = data_;
             to_bitField0_ |= 0x00000002;
           }
-          result.data_ = data_;
           if (((from_bitField0_ & 0x00000004) != 0)) {
             result.unpaddedSignatureSize_ = unpaddedSignatureSize_;
             to_bitField0_ |= 0x00000004;
           }
-          result.bitField0_ = to_bitField0_;
-          onBuilt();
-          return result;
+          result.bitField0_ |= to_bitField0_;
         }
 
         @java.lang.Override
@@ -1320,7 +1208,7 @@ public final class UpdateMetadata {
           if (other.hasUnpaddedSignatureSize()) {
             setUnpaddedSignatureSize(other.getUnpaddedSignatureSize());
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -1335,17 +1223,45 @@ public final class UpdateMetadata {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          chromeos_update_engine.UpdateMetadata.Signatures.Signature parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 8: {
+                  version_ = input.readUInt32();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 8
+                case 18: {
+                  data_ = input.readBytes();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 18
+                case 29: {
+                  unpaddedSignatureSize_ = input.readFixed32();
+                  bitField0_ |= 0x00000004;
+                  break;
+                } // case 29
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (chromeos_update_engine.UpdateMetadata.Signatures.Signature) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -1353,6 +1269,8 @@ public final class UpdateMetadata {
         private int version_ ;
         /**
          * <code>optional uint32 version = 1 [deprecated = true];</code>
+         * @deprecated chromeos_update_engine.Signatures.Signature.version is deprecated.
+         *     See update_metadata.proto;l=127
          * @return Whether the version field is set.
          */
         @java.lang.Override
@@ -1361,6 +1279,8 @@ public final class UpdateMetadata {
         }
         /**
          * <code>optional uint32 version = 1 [deprecated = true];</code>
+         * @deprecated chromeos_update_engine.Signatures.Signature.version is deprecated.
+         *     See update_metadata.proto;l=127
          * @return The version.
          */
         @java.lang.Override
@@ -1369,17 +1289,22 @@ public final class UpdateMetadata {
         }
         /**
          * <code>optional uint32 version = 1 [deprecated = true];</code>
+         * @deprecated chromeos_update_engine.Signatures.Signature.version is deprecated.
+         *     See update_metadata.proto;l=127
          * @param value The version to set.
          * @return This builder for chaining.
          */
         @java.lang.Deprecated public Builder setVersion(int value) {
-          bitField0_ |= 0x00000001;
+          
           version_ = value;
+          bitField0_ |= 0x00000001;
           onChanged();
           return this;
         }
         /**
          * <code>optional uint32 version = 1 [deprecated = true];</code>
+         * @deprecated chromeos_update_engine.Signatures.Signature.version is deprecated.
+         *     See update_metadata.proto;l=127
          * @return This builder for chaining.
          */
         @java.lang.Deprecated public Builder clearVersion() {
@@ -1412,11 +1337,9 @@ public final class UpdateMetadata {
          * @return This builder for chaining.
          */
         public Builder setData(com.google.protobuf.ByteString value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
+          if (value == null) { throw new NullPointerException(); }
           data_ = value;
+          bitField0_ |= 0x00000002;
           onChanged();
           return this;
         }
@@ -1484,8 +1407,9 @@ public final class UpdateMetadata {
          * @return This builder for chaining.
          */
         public Builder setUnpaddedSignatureSize(int value) {
-          bitField0_ |= 0x00000004;
+          
           unpaddedSignatureSize_ = value;
+          bitField0_ |= 0x00000004;
           onChanged();
           return this;
         }
@@ -1542,7 +1466,18 @@ public final class UpdateMetadata {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Signature(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -1563,6 +1498,7 @@ public final class UpdateMetadata {
     }
 
     public static final int SIGNATURES_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<chromeos_update_engine.UpdateMetadata.Signatures.Signature> signatures_;
     /**
      * <code>repeated .chromeos_update_engine.Signatures.Signature signatures = 1;</code>
@@ -1575,7 +1511,7 @@ public final class UpdateMetadata {
      * <code>repeated .chromeos_update_engine.Signatures.Signature signatures = 1;</code>
      */
     @java.lang.Override
-    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder>
+    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder> 
         getSignaturesOrBuilderList() {
       return signatures_;
     }
@@ -1619,7 +1555,7 @@ public final class UpdateMetadata {
       for (int i = 0; i < signatures_.size(); i++) {
         output.writeMessage(1, signatures_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -1632,7 +1568,7 @@ public final class UpdateMetadata {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, signatures_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -1649,7 +1585,7 @@ public final class UpdateMetadata {
 
       if (!getSignaturesList()
           .equals(other.getSignaturesList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -1664,7 +1600,7 @@ public final class UpdateMetadata {
         hash = (37 * hash) + SIGNATURES_FIELD_NUMBER;
         hash = (53 * hash) + getSignaturesList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -1781,29 +1717,25 @@ public final class UpdateMetadata {
 
       // Construct using chromeos_update_engine.UpdateMetadata.Signatures.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getSignaturesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (signaturesBuilder_ == null) {
           signatures_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          signatures_ = null;
           signaturesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -1830,7 +1762,13 @@ public final class UpdateMetadata {
       @java.lang.Override
       public chromeos_update_engine.UpdateMetadata.Signatures buildPartial() {
         chromeos_update_engine.UpdateMetadata.Signatures result = new chromeos_update_engine.UpdateMetadata.Signatures(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(chromeos_update_engine.UpdateMetadata.Signatures result) {
         if (signaturesBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             signatures_ = java.util.Collections.unmodifiableList(signatures_);
@@ -1840,8 +1778,10 @@ public final class UpdateMetadata {
         } else {
           result.signatures_ = signaturesBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(chromeos_update_engine.UpdateMetadata.Signatures result) {
+        int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override
@@ -1906,7 +1846,7 @@ public final class UpdateMetadata {
               signaturesBuilder_ = null;
               signatures_ = other.signatures_;
               bitField0_ = (bitField0_ & ~0x00000001);
-              signaturesBuilder_ =
+              signaturesBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getSignaturesFieldBuilder() : null;
             } else {
@@ -1914,7 +1854,7 @@ public final class UpdateMetadata {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -1929,17 +1869,43 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        chromeos_update_engine.UpdateMetadata.Signatures parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                chromeos_update_engine.UpdateMetadata.Signatures.Signature m =
+                    input.readMessage(
+                        chromeos_update_engine.UpdateMetadata.Signatures.Signature.PARSER,
+                        extensionRegistry);
+                if (signaturesBuilder_ == null) {
+                  ensureSignaturesIsMutable();
+                  signatures_.add(m);
+                } else {
+                  signaturesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (chromeos_update_engine.UpdateMetadata.Signatures) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -2139,7 +2105,7 @@ public final class UpdateMetadata {
       /**
        * <code>repeated .chromeos_update_engine.Signatures.Signature signatures = 1;</code>
        */
-      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder>
+      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder> 
            getSignaturesOrBuilderList() {
         if (signaturesBuilder_ != null) {
           return signaturesBuilder_.getMessageOrBuilderList();
@@ -2165,12 +2131,12 @@ public final class UpdateMetadata {
       /**
        * <code>repeated .chromeos_update_engine.Signatures.Signature signatures = 1;</code>
        */
-      public java.util.List<chromeos_update_engine.UpdateMetadata.Signatures.Signature.Builder>
+      public java.util.List<chromeos_update_engine.UpdateMetadata.Signatures.Signature.Builder> 
            getSignaturesBuilderList() {
         return getSignaturesFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.Signatures.Signature, chromeos_update_engine.UpdateMetadata.Signatures.Signature.Builder, chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder>
+          chromeos_update_engine.UpdateMetadata.Signatures.Signature, chromeos_update_engine.UpdateMetadata.Signatures.Signature.Builder, chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder> 
           getSignaturesFieldBuilder() {
         if (signaturesBuilder_ == null) {
           signaturesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
@@ -2216,7 +2182,18 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Signatures(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -2290,54 +2267,6 @@ public final class UpdateMetadata {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private PartitionInfo(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              bitField0_ |= 0x00000001;
-              size_ = input.readUInt64();
-              break;
-            }
-            case 18: {
-              bitField0_ |= 0x00000002;
-              hash_ = input.readBytes();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_PartitionInfo_descriptor;
@@ -2353,7 +2282,7 @@ public final class UpdateMetadata {
 
     private int bitField0_;
     public static final int SIZE_FIELD_NUMBER = 1;
-    private long size_;
+    private long size_ = 0L;
     /**
      * <code>optional uint64 size = 1;</code>
      * @return Whether the size field is set.
@@ -2372,7 +2301,7 @@ public final class UpdateMetadata {
     }
 
     public static final int HASH_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString hash_;
+    private com.google.protobuf.ByteString hash_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <code>optional bytes hash = 2;</code>
      * @return Whether the hash field is set.
@@ -2410,7 +2339,7 @@ public final class UpdateMetadata {
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeBytes(2, hash_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -2427,7 +2356,7 @@ public final class UpdateMetadata {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, hash_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -2452,7 +2381,7 @@ public final class UpdateMetadata {
         if (!getHash()
             .equals(other.getHash())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -2472,7 +2401,7 @@ public final class UpdateMetadata {
         hash = (37 * hash) + HASH_FIELD_NUMBER;
         hash = (53 * hash) + getHash().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -2589,26 +2518,20 @@ public final class UpdateMetadata {
 
       // Construct using chromeos_update_engine.UpdateMetadata.PartitionInfo.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         size_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000001);
         hash_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -2635,6 +2558,12 @@ public final class UpdateMetadata {
       @java.lang.Override
       public chromeos_update_engine.UpdateMetadata.PartitionInfo buildPartial() {
         chromeos_update_engine.UpdateMetadata.PartitionInfo result = new chromeos_update_engine.UpdateMetadata.PartitionInfo(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(chromeos_update_engine.UpdateMetadata.PartitionInfo result) {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
@@ -2642,12 +2571,10 @@ public final class UpdateMetadata {
           to_bitField0_ |= 0x00000001;
         }
         if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.hash_ = hash_;
           to_bitField0_ |= 0x00000002;
         }
-        result.hash_ = hash_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
+        result.bitField0_ |= to_bitField0_;
       }
 
       @java.lang.Override
@@ -2700,7 +2627,7 @@ public final class UpdateMetadata {
         if (other.hasHash()) {
           setHash(other.getHash());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -2715,17 +2642,40 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        chromeos_update_engine.UpdateMetadata.PartitionInfo parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                size_ = input.readUInt64();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 18: {
+                hash_ = input.readBytes();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (chromeos_update_engine.UpdateMetadata.PartitionInfo) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -2753,8 +2703,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setSize(long value) {
-        bitField0_ |= 0x00000001;
+        
         size_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -2792,11 +2743,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setHash(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
+        if (value == null) { throw new NullPointerException(); }
         hash_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -2843,7 +2792,18 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new PartitionInfo(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -2858,1610 +2818,6 @@ public final class UpdateMetadata {
 
     @java.lang.Override
     public chromeos_update_engine.UpdateMetadata.PartitionInfo getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface ImageInfoOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:chromeos_update_engine.ImageInfo)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>optional string board = 1;</code>
-     * @return Whether the board field is set.
-     */
-    boolean hasBoard();
-    /**
-     * <code>optional string board = 1;</code>
-     * @return The board.
-     */
-    java.lang.String getBoard();
-    /**
-     * <code>optional string board = 1;</code>
-     * @return The bytes for board.
-     */
-    com.google.protobuf.ByteString
-        getBoardBytes();
-
-    /**
-     * <code>optional string key = 2;</code>
-     * @return Whether the key field is set.
-     */
-    boolean hasKey();
-    /**
-     * <code>optional string key = 2;</code>
-     * @return The key.
-     */
-    java.lang.String getKey();
-    /**
-     * <code>optional string key = 2;</code>
-     * @return The bytes for key.
-     */
-    com.google.protobuf.ByteString
-        getKeyBytes();
-
-    /**
-     * <code>optional string channel = 3;</code>
-     * @return Whether the channel field is set.
-     */
-    boolean hasChannel();
-    /**
-     * <code>optional string channel = 3;</code>
-     * @return The channel.
-     */
-    java.lang.String getChannel();
-    /**
-     * <code>optional string channel = 3;</code>
-     * @return The bytes for channel.
-     */
-    com.google.protobuf.ByteString
-        getChannelBytes();
-
-    /**
-     * <code>optional string version = 4;</code>
-     * @return Whether the version field is set.
-     */
-    boolean hasVersion();
-    /**
-     * <code>optional string version = 4;</code>
-     * @return The version.
-     */
-    java.lang.String getVersion();
-    /**
-     * <code>optional string version = 4;</code>
-     * @return The bytes for version.
-     */
-    com.google.protobuf.ByteString
-        getVersionBytes();
-
-    /**
-     * <pre>
-     * If these values aren't present, they should be assumed to match
-     * the equivalent value above. They are normally only different for
-     * special image types such as nplusone images.
-     * </pre>
-     *
-     * <code>optional string build_channel = 5;</code>
-     * @return Whether the buildChannel field is set.
-     */
-    boolean hasBuildChannel();
-    /**
-     * <pre>
-     * If these values aren't present, they should be assumed to match
-     * the equivalent value above. They are normally only different for
-     * special image types such as nplusone images.
-     * </pre>
-     *
-     * <code>optional string build_channel = 5;</code>
-     * @return The buildChannel.
-     */
-    java.lang.String getBuildChannel();
-    /**
-     * <pre>
-     * If these values aren't present, they should be assumed to match
-     * the equivalent value above. They are normally only different for
-     * special image types such as nplusone images.
-     * </pre>
-     *
-     * <code>optional string build_channel = 5;</code>
-     * @return The bytes for buildChannel.
-     */
-    com.google.protobuf.ByteString
-        getBuildChannelBytes();
-
-    /**
-     * <code>optional string build_version = 6;</code>
-     * @return Whether the buildVersion field is set.
-     */
-    boolean hasBuildVersion();
-    /**
-     * <code>optional string build_version = 6;</code>
-     * @return The buildVersion.
-     */
-    java.lang.String getBuildVersion();
-    /**
-     * <code>optional string build_version = 6;</code>
-     * @return The bytes for buildVersion.
-     */
-    com.google.protobuf.ByteString
-        getBuildVersionBytes();
-  }
-  /**
-   * <pre>
-   * Describe an image we are based on in a human friendly way.
-   * Examples:
-   *   dev-channel, x86-alex, 1.2.3, mp-v3
-   *   nplusone-channel, x86-alex, 1.2.4, mp-v3, dev-channel, 1.2.3
-   * All fields will be set, if this message is present.
-   * </pre>
-   *
-   * Protobuf type {@code chromeos_update_engine.ImageInfo}
-   */
-  public static final class ImageInfo extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:chromeos_update_engine.ImageInfo)
-      ImageInfoOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use ImageInfo.newBuilder() to construct.
-    private ImageInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private ImageInfo() {
-      board_ = "";
-      key_ = "";
-      channel_ = "";
-      version_ = "";
-      buildChannel_ = "";
-      buildVersion_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new ImageInfo();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private ImageInfo(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              board_ = bs;
-              break;
-            }
-            case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000002;
-              key_ = bs;
-              break;
-            }
-            case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              channel_ = bs;
-              break;
-            }
-            case 34: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000008;
-              version_ = bs;
-              break;
-            }
-            case 42: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000010;
-              buildChannel_ = bs;
-              break;
-            }
-            case 50: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000020;
-              buildVersion_ = bs;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ImageInfo_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ImageInfo_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              chromeos_update_engine.UpdateMetadata.ImageInfo.class, chromeos_update_engine.UpdateMetadata.ImageInfo.Builder.class);
-    }
-
-    private int bitField0_;
-    public static final int BOARD_FIELD_NUMBER = 1;
-    private volatile java.lang.Object board_;
-    /**
-     * <code>optional string board = 1;</code>
-     * @return Whether the board field is set.
-     */
-    @java.lang.Override
-    public boolean hasBoard() {
-      return ((bitField0_ & 0x00000001) != 0);
-    }
-    /**
-     * <code>optional string board = 1;</code>
-     * @return The board.
-     */
-    @java.lang.Override
-    public java.lang.String getBoard() {
-      java.lang.Object ref = board_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          board_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string board = 1;</code>
-     * @return The bytes for board.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getBoardBytes() {
-      java.lang.Object ref = board_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        board_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int KEY_FIELD_NUMBER = 2;
-    private volatile java.lang.Object key_;
-    /**
-     * <code>optional string key = 2;</code>
-     * @return Whether the key field is set.
-     */
-    @java.lang.Override
-    public boolean hasKey() {
-      return ((bitField0_ & 0x00000002) != 0);
-    }
-    /**
-     * <code>optional string key = 2;</code>
-     * @return The key.
-     */
-    @java.lang.Override
-    public java.lang.String getKey() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          key_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string key = 2;</code>
-     * @return The bytes for key.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getKeyBytes() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        key_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int CHANNEL_FIELD_NUMBER = 3;
-    private volatile java.lang.Object channel_;
-    /**
-     * <code>optional string channel = 3;</code>
-     * @return Whether the channel field is set.
-     */
-    @java.lang.Override
-    public boolean hasChannel() {
-      return ((bitField0_ & 0x00000004) != 0);
-    }
-    /**
-     * <code>optional string channel = 3;</code>
-     * @return The channel.
-     */
-    @java.lang.Override
-    public java.lang.String getChannel() {
-      java.lang.Object ref = channel_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          channel_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string channel = 3;</code>
-     * @return The bytes for channel.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getChannelBytes() {
-      java.lang.Object ref = channel_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        channel_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int VERSION_FIELD_NUMBER = 4;
-    private volatile java.lang.Object version_;
-    /**
-     * <code>optional string version = 4;</code>
-     * @return Whether the version field is set.
-     */
-    @java.lang.Override
-    public boolean hasVersion() {
-      return ((bitField0_ & 0x00000008) != 0);
-    }
-    /**
-     * <code>optional string version = 4;</code>
-     * @return The version.
-     */
-    @java.lang.Override
-    public java.lang.String getVersion() {
-      java.lang.Object ref = version_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          version_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string version = 4;</code>
-     * @return The bytes for version.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getVersionBytes() {
-      java.lang.Object ref = version_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        version_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int BUILD_CHANNEL_FIELD_NUMBER = 5;
-    private volatile java.lang.Object buildChannel_;
-    /**
-     * <pre>
-     * If these values aren't present, they should be assumed to match
-     * the equivalent value above. They are normally only different for
-     * special image types such as nplusone images.
-     * </pre>
-     *
-     * <code>optional string build_channel = 5;</code>
-     * @return Whether the buildChannel field is set.
-     */
-    @java.lang.Override
-    public boolean hasBuildChannel() {
-      return ((bitField0_ & 0x00000010) != 0);
-    }
-    /**
-     * <pre>
-     * If these values aren't present, they should be assumed to match
-     * the equivalent value above. They are normally only different for
-     * special image types such as nplusone images.
-     * </pre>
-     *
-     * <code>optional string build_channel = 5;</code>
-     * @return The buildChannel.
-     */
-    @java.lang.Override
-    public java.lang.String getBuildChannel() {
-      java.lang.Object ref = buildChannel_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          buildChannel_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * If these values aren't present, they should be assumed to match
-     * the equivalent value above. They are normally only different for
-     * special image types such as nplusone images.
-     * </pre>
-     *
-     * <code>optional string build_channel = 5;</code>
-     * @return The bytes for buildChannel.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getBuildChannelBytes() {
-      java.lang.Object ref = buildChannel_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        buildChannel_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int BUILD_VERSION_FIELD_NUMBER = 6;
-    private volatile java.lang.Object buildVersion_;
-    /**
-     * <code>optional string build_version = 6;</code>
-     * @return Whether the buildVersion field is set.
-     */
-    @java.lang.Override
-    public boolean hasBuildVersion() {
-      return ((bitField0_ & 0x00000020) != 0);
-    }
-    /**
-     * <code>optional string build_version = 6;</code>
-     * @return The buildVersion.
-     */
-    @java.lang.Override
-    public java.lang.String getBuildVersion() {
-      java.lang.Object ref = buildVersion_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          buildVersion_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string build_version = 6;</code>
-     * @return The bytes for buildVersion.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getBuildVersionBytes() {
-      java.lang.Object ref = buildVersion_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        buildVersion_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (((bitField0_ & 0x00000001) != 0)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, board_);
-      }
-      if (((bitField0_ & 0x00000002) != 0)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, key_);
-      }
-      if (((bitField0_ & 0x00000004) != 0)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, channel_);
-      }
-      if (((bitField0_ & 0x00000008) != 0)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, version_);
-      }
-      if (((bitField0_ & 0x00000010) != 0)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, buildChannel_);
-      }
-      if (((bitField0_ & 0x00000020) != 0)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, buildVersion_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, board_);
-      }
-      if (((bitField0_ & 0x00000002) != 0)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, key_);
-      }
-      if (((bitField0_ & 0x00000004) != 0)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, channel_);
-      }
-      if (((bitField0_ & 0x00000008) != 0)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, version_);
-      }
-      if (((bitField0_ & 0x00000010) != 0)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, buildChannel_);
-      }
-      if (((bitField0_ & 0x00000020) != 0)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, buildVersion_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof chromeos_update_engine.UpdateMetadata.ImageInfo)) {
-        return super.equals(obj);
-      }
-      chromeos_update_engine.UpdateMetadata.ImageInfo other = (chromeos_update_engine.UpdateMetadata.ImageInfo) obj;
-
-      if (hasBoard() != other.hasBoard()) return false;
-      if (hasBoard()) {
-        if (!getBoard()
-            .equals(other.getBoard())) return false;
-      }
-      if (hasKey() != other.hasKey()) return false;
-      if (hasKey()) {
-        if (!getKey()
-            .equals(other.getKey())) return false;
-      }
-      if (hasChannel() != other.hasChannel()) return false;
-      if (hasChannel()) {
-        if (!getChannel()
-            .equals(other.getChannel())) return false;
-      }
-      if (hasVersion() != other.hasVersion()) return false;
-      if (hasVersion()) {
-        if (!getVersion()
-            .equals(other.getVersion())) return false;
-      }
-      if (hasBuildChannel() != other.hasBuildChannel()) return false;
-      if (hasBuildChannel()) {
-        if (!getBuildChannel()
-            .equals(other.getBuildChannel())) return false;
-      }
-      if (hasBuildVersion() != other.hasBuildVersion()) return false;
-      if (hasBuildVersion()) {
-        if (!getBuildVersion()
-            .equals(other.getBuildVersion())) return false;
-      }
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasBoard()) {
-        hash = (37 * hash) + BOARD_FIELD_NUMBER;
-        hash = (53 * hash) + getBoard().hashCode();
-      }
-      if (hasKey()) {
-        hash = (37 * hash) + KEY_FIELD_NUMBER;
-        hash = (53 * hash) + getKey().hashCode();
-      }
-      if (hasChannel()) {
-        hash = (37 * hash) + CHANNEL_FIELD_NUMBER;
-        hash = (53 * hash) + getChannel().hashCode();
-      }
-      if (hasVersion()) {
-        hash = (37 * hash) + VERSION_FIELD_NUMBER;
-        hash = (53 * hash) + getVersion().hashCode();
-      }
-      if (hasBuildChannel()) {
-        hash = (37 * hash) + BUILD_CHANNEL_FIELD_NUMBER;
-        hash = (53 * hash) + getBuildChannel().hashCode();
-      }
-      if (hasBuildVersion()) {
-        hash = (37 * hash) + BUILD_VERSION_FIELD_NUMBER;
-        hash = (53 * hash) + getBuildVersion().hashCode();
-      }
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static chromeos_update_engine.UpdateMetadata.ImageInfo parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static chromeos_update_engine.UpdateMetadata.ImageInfo parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static chromeos_update_engine.UpdateMetadata.ImageInfo parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static chromeos_update_engine.UpdateMetadata.ImageInfo parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static chromeos_update_engine.UpdateMetadata.ImageInfo parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static chromeos_update_engine.UpdateMetadata.ImageInfo parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static chromeos_update_engine.UpdateMetadata.ImageInfo parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static chromeos_update_engine.UpdateMetadata.ImageInfo parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static chromeos_update_engine.UpdateMetadata.ImageInfo parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static chromeos_update_engine.UpdateMetadata.ImageInfo parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static chromeos_update_engine.UpdateMetadata.ImageInfo parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static chromeos_update_engine.UpdateMetadata.ImageInfo parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(chromeos_update_engine.UpdateMetadata.ImageInfo prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * Describe an image we are based on in a human friendly way.
-     * Examples:
-     *   dev-channel, x86-alex, 1.2.3, mp-v3
-     *   nplusone-channel, x86-alex, 1.2.4, mp-v3, dev-channel, 1.2.3
-     * All fields will be set, if this message is present.
-     * </pre>
-     *
-     * Protobuf type {@code chromeos_update_engine.ImageInfo}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:chromeos_update_engine.ImageInfo)
-        chromeos_update_engine.UpdateMetadata.ImageInfoOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ImageInfo_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ImageInfo_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                chromeos_update_engine.UpdateMetadata.ImageInfo.class, chromeos_update_engine.UpdateMetadata.ImageInfo.Builder.class);
-      }
-
-      // Construct using chromeos_update_engine.UpdateMetadata.ImageInfo.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        board_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
-        key_ = "";
-        bitField0_ = (bitField0_ & ~0x00000002);
-        channel_ = "";
-        bitField0_ = (bitField0_ & ~0x00000004);
-        version_ = "";
-        bitField0_ = (bitField0_ & ~0x00000008);
-        buildChannel_ = "";
-        bitField0_ = (bitField0_ & ~0x00000010);
-        buildVersion_ = "";
-        bitField0_ = (bitField0_ & ~0x00000020);
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ImageInfo_descriptor;
-      }
-
-      @java.lang.Override
-      public chromeos_update_engine.UpdateMetadata.ImageInfo getDefaultInstanceForType() {
-        return chromeos_update_engine.UpdateMetadata.ImageInfo.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public chromeos_update_engine.UpdateMetadata.ImageInfo build() {
-        chromeos_update_engine.UpdateMetadata.ImageInfo result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public chromeos_update_engine.UpdateMetadata.ImageInfo buildPartial() {
-        chromeos_update_engine.UpdateMetadata.ImageInfo result = new chromeos_update_engine.UpdateMetadata.ImageInfo(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.board_ = board_;
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.key_ = key_;
-        if (((from_bitField0_ & 0x00000004) != 0)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        result.channel_ = channel_;
-        if (((from_bitField0_ & 0x00000008) != 0)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        result.version_ = version_;
-        if (((from_bitField0_ & 0x00000010) != 0)) {
-          to_bitField0_ |= 0x00000010;
-        }
-        result.buildChannel_ = buildChannel_;
-        if (((from_bitField0_ & 0x00000020) != 0)) {
-          to_bitField0_ |= 0x00000020;
-        }
-        result.buildVersion_ = buildVersion_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof chromeos_update_engine.UpdateMetadata.ImageInfo) {
-          return mergeFrom((chromeos_update_engine.UpdateMetadata.ImageInfo)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(chromeos_update_engine.UpdateMetadata.ImageInfo other) {
-        if (other == chromeos_update_engine.UpdateMetadata.ImageInfo.getDefaultInstance()) return this;
-        if (other.hasBoard()) {
-          bitField0_ |= 0x00000001;
-          board_ = other.board_;
-          onChanged();
-        }
-        if (other.hasKey()) {
-          bitField0_ |= 0x00000002;
-          key_ = other.key_;
-          onChanged();
-        }
-        if (other.hasChannel()) {
-          bitField0_ |= 0x00000004;
-          channel_ = other.channel_;
-          onChanged();
-        }
-        if (other.hasVersion()) {
-          bitField0_ |= 0x00000008;
-          version_ = other.version_;
-          onChanged();
-        }
-        if (other.hasBuildChannel()) {
-          bitField0_ |= 0x00000010;
-          buildChannel_ = other.buildChannel_;
-          onChanged();
-        }
-        if (other.hasBuildVersion()) {
-          bitField0_ |= 0x00000020;
-          buildVersion_ = other.buildVersion_;
-          onChanged();
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        chromeos_update_engine.UpdateMetadata.ImageInfo parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (chromeos_update_engine.UpdateMetadata.ImageInfo) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      private java.lang.Object board_ = "";
-      /**
-       * <code>optional string board = 1;</code>
-       * @return Whether the board field is set.
-       */
-      public boolean hasBoard() {
-        return ((bitField0_ & 0x00000001) != 0);
-      }
-      /**
-       * <code>optional string board = 1;</code>
-       * @return The board.
-       */
-      public java.lang.String getBoard() {
-        java.lang.Object ref = board_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            board_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>optional string board = 1;</code>
-       * @return The bytes for board.
-       */
-      public com.google.protobuf.ByteString
-          getBoardBytes() {
-        java.lang.Object ref = board_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          board_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string board = 1;</code>
-       * @param value The board to set.
-       * @return This builder for chaining.
-       */
-      public Builder setBoard(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        board_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string board = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearBoard() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        board_ = getDefaultInstance().getBoard();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string board = 1;</code>
-       * @param value The bytes for board to set.
-       * @return This builder for chaining.
-       */
-      public Builder setBoardBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        board_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object key_ = "";
-      /**
-       * <code>optional string key = 2;</code>
-       * @return Whether the key field is set.
-       */
-      public boolean hasKey() {
-        return ((bitField0_ & 0x00000002) != 0);
-      }
-      /**
-       * <code>optional string key = 2;</code>
-       * @return The key.
-       */
-      public java.lang.String getKey() {
-        java.lang.Object ref = key_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            key_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>optional string key = 2;</code>
-       * @return The bytes for key.
-       */
-      public com.google.protobuf.ByteString
-          getKeyBytes() {
-        java.lang.Object ref = key_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          key_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string key = 2;</code>
-       * @param value The key to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKey(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        key_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string key = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKey() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        key_ = getDefaultInstance().getKey();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string key = 2;</code>
-       * @param value The bytes for key to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKeyBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        key_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object channel_ = "";
-      /**
-       * <code>optional string channel = 3;</code>
-       * @return Whether the channel field is set.
-       */
-      public boolean hasChannel() {
-        return ((bitField0_ & 0x00000004) != 0);
-      }
-      /**
-       * <code>optional string channel = 3;</code>
-       * @return The channel.
-       */
-      public java.lang.String getChannel() {
-        java.lang.Object ref = channel_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            channel_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>optional string channel = 3;</code>
-       * @return The bytes for channel.
-       */
-      public com.google.protobuf.ByteString
-          getChannelBytes() {
-        java.lang.Object ref = channel_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          channel_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string channel = 3;</code>
-       * @param value The channel to set.
-       * @return This builder for chaining.
-       */
-      public Builder setChannel(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        channel_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string channel = 3;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearChannel() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        channel_ = getDefaultInstance().getChannel();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string channel = 3;</code>
-       * @param value The bytes for channel to set.
-       * @return This builder for chaining.
-       */
-      public Builder setChannelBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        channel_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object version_ = "";
-      /**
-       * <code>optional string version = 4;</code>
-       * @return Whether the version field is set.
-       */
-      public boolean hasVersion() {
-        return ((bitField0_ & 0x00000008) != 0);
-      }
-      /**
-       * <code>optional string version = 4;</code>
-       * @return The version.
-       */
-      public java.lang.String getVersion() {
-        java.lang.Object ref = version_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            version_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>optional string version = 4;</code>
-       * @return The bytes for version.
-       */
-      public com.google.protobuf.ByteString
-          getVersionBytes() {
-        java.lang.Object ref = version_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          version_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string version = 4;</code>
-       * @param value The version to set.
-       * @return This builder for chaining.
-       */
-      public Builder setVersion(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
-        version_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string version = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearVersion() {
-        bitField0_ = (bitField0_ & ~0x00000008);
-        version_ = getDefaultInstance().getVersion();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string version = 4;</code>
-       * @param value The bytes for version to set.
-       * @return This builder for chaining.
-       */
-      public Builder setVersionBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
-        version_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object buildChannel_ = "";
-      /**
-       * <pre>
-       * If these values aren't present, they should be assumed to match
-       * the equivalent value above. They are normally only different for
-       * special image types such as nplusone images.
-       * </pre>
-       *
-       * <code>optional string build_channel = 5;</code>
-       * @return Whether the buildChannel field is set.
-       */
-      public boolean hasBuildChannel() {
-        return ((bitField0_ & 0x00000010) != 0);
-      }
-      /**
-       * <pre>
-       * If these values aren't present, they should be assumed to match
-       * the equivalent value above. They are normally only different for
-       * special image types such as nplusone images.
-       * </pre>
-       *
-       * <code>optional string build_channel = 5;</code>
-       * @return The buildChannel.
-       */
-      public java.lang.String getBuildChannel() {
-        java.lang.Object ref = buildChannel_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            buildChannel_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * If these values aren't present, they should be assumed to match
-       * the equivalent value above. They are normally only different for
-       * special image types such as nplusone images.
-       * </pre>
-       *
-       * <code>optional string build_channel = 5;</code>
-       * @return The bytes for buildChannel.
-       */
-      public com.google.protobuf.ByteString
-          getBuildChannelBytes() {
-        java.lang.Object ref = buildChannel_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          buildChannel_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * If these values aren't present, they should be assumed to match
-       * the equivalent value above. They are normally only different for
-       * special image types such as nplusone images.
-       * </pre>
-       *
-       * <code>optional string build_channel = 5;</code>
-       * @param value The buildChannel to set.
-       * @return This builder for chaining.
-       */
-      public Builder setBuildChannel(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000010;
-        buildChannel_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * If these values aren't present, they should be assumed to match
-       * the equivalent value above. They are normally only different for
-       * special image types such as nplusone images.
-       * </pre>
-       *
-       * <code>optional string build_channel = 5;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearBuildChannel() {
-        bitField0_ = (bitField0_ & ~0x00000010);
-        buildChannel_ = getDefaultInstance().getBuildChannel();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * If these values aren't present, they should be assumed to match
-       * the equivalent value above. They are normally only different for
-       * special image types such as nplusone images.
-       * </pre>
-       *
-       * <code>optional string build_channel = 5;</code>
-       * @param value The bytes for buildChannel to set.
-       * @return This builder for chaining.
-       */
-      public Builder setBuildChannelBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000010;
-        buildChannel_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object buildVersion_ = "";
-      /**
-       * <code>optional string build_version = 6;</code>
-       * @return Whether the buildVersion field is set.
-       */
-      public boolean hasBuildVersion() {
-        return ((bitField0_ & 0x00000020) != 0);
-      }
-      /**
-       * <code>optional string build_version = 6;</code>
-       * @return The buildVersion.
-       */
-      public java.lang.String getBuildVersion() {
-        java.lang.Object ref = buildVersion_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            buildVersion_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>optional string build_version = 6;</code>
-       * @return The bytes for buildVersion.
-       */
-      public com.google.protobuf.ByteString
-          getBuildVersionBytes() {
-        java.lang.Object ref = buildVersion_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          buildVersion_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string build_version = 6;</code>
-       * @param value The buildVersion to set.
-       * @return This builder for chaining.
-       */
-      public Builder setBuildVersion(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000020;
-        buildVersion_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string build_version = 6;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearBuildVersion() {
-        bitField0_ = (bitField0_ & ~0x00000020);
-        buildVersion_ = getDefaultInstance().getBuildVersion();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string build_version = 6;</code>
-       * @param value The bytes for buildVersion to set.
-       * @return This builder for chaining.
-       */
-      public Builder setBuildVersionBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000020;
-        buildVersion_ = value;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:chromeos_update_engine.ImageInfo)
-    }
-
-    // @@protoc_insertion_point(class_scope:chromeos_update_engine.ImageInfo)
-    private static final chromeos_update_engine.UpdateMetadata.ImageInfo DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new chromeos_update_engine.UpdateMetadata.ImageInfo();
-    }
-
-    public static chromeos_update_engine.UpdateMetadata.ImageInfo getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<ImageInfo>
-        PARSER = new com.google.protobuf.AbstractParser<ImageInfo>() {
-      @java.lang.Override
-      public ImageInfo parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ImageInfo(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<ImageInfo> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<ImageInfo> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.ImageInfo getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -4533,7 +2889,7 @@ public final class UpdateMetadata {
      *
      * <code>repeated .chromeos_update_engine.Extent src_extents = 4;</code>
      */
-    java.util.List<chromeos_update_engine.UpdateMetadata.Extent>
+    java.util.List<chromeos_update_engine.UpdateMetadata.Extent> 
         getSrcExtentsList();
     /**
      * <pre>
@@ -4558,7 +2914,7 @@ public final class UpdateMetadata {
      *
      * <code>repeated .chromeos_update_engine.Extent src_extents = 4;</code>
      */
-    java.util.List<? extends chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>
+    java.util.List<? extends chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
         getSrcExtentsOrBuilderList();
     /**
      * <pre>
@@ -4598,7 +2954,7 @@ public final class UpdateMetadata {
     /**
      * <code>repeated .chromeos_update_engine.Extent dst_extents = 6;</code>
      */
-    java.util.List<chromeos_update_engine.UpdateMetadata.Extent>
+    java.util.List<chromeos_update_engine.UpdateMetadata.Extent> 
         getDstExtentsList();
     /**
      * <code>repeated .chromeos_update_engine.Extent dst_extents = 6;</code>
@@ -4611,7 +2967,7 @@ public final class UpdateMetadata {
     /**
      * <code>repeated .chromeos_update_engine.Extent dst_extents = 6;</code>
      */
-    java.util.List<? extends chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>
+    java.util.List<? extends chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
         getDstExtentsOrBuilderList();
     /**
      * <code>repeated .chromeos_update_engine.Extent dst_extents = 6;</code>
@@ -4724,110 +3080,6 @@ public final class UpdateMetadata {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private InstallOperation(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              int rawValue = input.readEnum();
-                @SuppressWarnings("deprecation")
-              chromeos_update_engine.UpdateMetadata.InstallOperation.Type value = chromeos_update_engine.UpdateMetadata.InstallOperation.Type.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(1, rawValue);
-              } else {
-                bitField0_ |= 0x00000001;
-                type_ = rawValue;
-              }
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              dataOffset_ = input.readUInt64();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000004;
-              dataLength_ = input.readUInt64();
-              break;
-            }
-            case 34: {
-              if (!((mutable_bitField0_ & 0x00000008) != 0)) {
-                srcExtents_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.Extent>();
-                mutable_bitField0_ |= 0x00000008;
-              }
-              srcExtents_.add(
-                  input.readMessage(chromeos_update_engine.UpdateMetadata.Extent.PARSER, extensionRegistry));
-              break;
-            }
-            case 40: {
-              bitField0_ |= 0x00000008;
-              srcLength_ = input.readUInt64();
-              break;
-            }
-            case 50: {
-              if (!((mutable_bitField0_ & 0x00000020) != 0)) {
-                dstExtents_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.Extent>();
-                mutable_bitField0_ |= 0x00000020;
-              }
-              dstExtents_.add(
-                  input.readMessage(chromeos_update_engine.UpdateMetadata.Extent.PARSER, extensionRegistry));
-              break;
-            }
-            case 56: {
-              bitField0_ |= 0x00000010;
-              dstLength_ = input.readUInt64();
-              break;
-            }
-            case 66: {
-              bitField0_ |= 0x00000020;
-              dataSha256Hash_ = input.readBytes();
-              break;
-            }
-            case 74: {
-              bitField0_ |= 0x00000040;
-              srcSha256Hash_ = input.readBytes();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000008) != 0)) {
-          srcExtents_ = java.util.Collections.unmodifiableList(srcExtents_);
-        }
-        if (((mutable_bitField0_ & 0x00000020) != 0)) {
-          dstExtents_ = java.util.Collections.unmodifiableList(dstExtents_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_InstallOperation_descriptor;
@@ -4848,7 +3100,7 @@ public final class UpdateMetadata {
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
        * <pre>
-       * Replace destination extents w/ attached data
+       * Replace destination extents w/ attached data.
        * </pre>
        *
        * <code>REPLACE = 0;</code>
@@ -4856,7 +3108,7 @@ public final class UpdateMetadata {
       REPLACE(0),
       /**
        * <pre>
-       * Replace destination extents w/ attached bzipped data
+       * Replace destination extents w/ attached bzipped data.
        * </pre>
        *
        * <code>REPLACE_BZ = 1;</code>
@@ -4864,7 +3116,7 @@ public final class UpdateMetadata {
       REPLACE_BZ(1),
       /**
        * <pre>
-       * Move source extents to destination extents
+       * Move source extents to target extents.
        * </pre>
        *
        * <code>MOVE = 2 [deprecated = true];</code>
@@ -4873,7 +3125,7 @@ public final class UpdateMetadata {
       MOVE(2),
       /**
        * <pre>
-       * The data is a bsdiff binary diff
+       * The data is a bsdiff binary diff.
        * </pre>
        *
        * <code>BSDIFF = 3 [deprecated = true];</code>
@@ -4937,11 +3189,31 @@ public final class UpdateMetadata {
        * <code>PUFFDIFF = 9;</code>
        */
       PUFFDIFF(9),
+      /**
+       * <pre>
+       * On minor version 8 or newer, these operations are supported:
+       * </pre>
+       *
+       * <code>ZUCCHINI = 11;</code>
+       */
+      ZUCCHINI(11),
+      /**
+       * <pre>
+       * On minor version 9 or newer, these operations are supported:
+       * </pre>
+       *
+       * <code>LZ4DIFF_BSDIFF = 12;</code>
+       */
+      LZ4DIFF_BSDIFF(12),
+      /**
+       * <code>LZ4DIFF_PUFFDIFF = 13;</code>
+       */
+      LZ4DIFF_PUFFDIFF(13),
       ;
 
       /**
        * <pre>
-       * Replace destination extents w/ attached data
+       * Replace destination extents w/ attached data.
        * </pre>
        *
        * <code>REPLACE = 0;</code>
@@ -4949,7 +3221,7 @@ public final class UpdateMetadata {
       public static final int REPLACE_VALUE = 0;
       /**
        * <pre>
-       * Replace destination extents w/ attached bzipped data
+       * Replace destination extents w/ attached bzipped data.
        * </pre>
        *
        * <code>REPLACE_BZ = 1;</code>
@@ -4957,7 +3229,7 @@ public final class UpdateMetadata {
       public static final int REPLACE_BZ_VALUE = 1;
       /**
        * <pre>
-       * Move source extents to destination extents
+       * Move source extents to target extents.
        * </pre>
        *
        * <code>MOVE = 2 [deprecated = true];</code>
@@ -4965,7 +3237,7 @@ public final class UpdateMetadata {
       @java.lang.Deprecated public static final int MOVE_VALUE = 2;
       /**
        * <pre>
-       * The data is a bsdiff binary diff
+       * The data is a bsdiff binary diff.
        * </pre>
        *
        * <code>BSDIFF = 3 [deprecated = true];</code>
@@ -5028,6 +3300,26 @@ public final class UpdateMetadata {
        * <code>PUFFDIFF = 9;</code>
        */
       public static final int PUFFDIFF_VALUE = 9;
+      /**
+       * <pre>
+       * On minor version 8 or newer, these operations are supported:
+       * </pre>
+       *
+       * <code>ZUCCHINI = 11;</code>
+       */
+      public static final int ZUCCHINI_VALUE = 11;
+      /**
+       * <pre>
+       * On minor version 9 or newer, these operations are supported:
+       * </pre>
+       *
+       * <code>LZ4DIFF_BSDIFF = 12;</code>
+       */
+      public static final int LZ4DIFF_BSDIFF_VALUE = 12;
+      /**
+       * <code>LZ4DIFF_PUFFDIFF = 13;</code>
+       */
+      public static final int LZ4DIFF_PUFFDIFF_VALUE = 13;
 
 
       public final int getNumber() {
@@ -5061,6 +3353,9 @@ public final class UpdateMetadata {
           case 7: return DISCARD;
           case 10: return BROTLI_BSDIFF;
           case 9: return PUFFDIFF;
+          case 11: return ZUCCHINI;
+          case 12: return LZ4DIFF_BSDIFF;
+          case 13: return LZ4DIFF_PUFFDIFF;
           default: return null;
         }
       }
@@ -5112,7 +3407,7 @@ public final class UpdateMetadata {
 
     private int bitField0_;
     public static final int TYPE_FIELD_NUMBER = 1;
-    private int type_;
+    private int type_ = 0;
     /**
      * <code>required .chromeos_update_engine.InstallOperation.Type type = 1;</code>
      * @return Whether the type field is set.
@@ -5125,13 +3420,12 @@ public final class UpdateMetadata {
      * @return The type.
      */
     @java.lang.Override public chromeos_update_engine.UpdateMetadata.InstallOperation.Type getType() {
-      @SuppressWarnings("deprecation")
-      chromeos_update_engine.UpdateMetadata.InstallOperation.Type result = chromeos_update_engine.UpdateMetadata.InstallOperation.Type.valueOf(type_);
+      chromeos_update_engine.UpdateMetadata.InstallOperation.Type result = chromeos_update_engine.UpdateMetadata.InstallOperation.Type.forNumber(type_);
       return result == null ? chromeos_update_engine.UpdateMetadata.InstallOperation.Type.REPLACE : result;
     }
 
     public static final int DATA_OFFSET_FIELD_NUMBER = 2;
-    private long dataOffset_;
+    private long dataOffset_ = 0L;
     /**
      * <pre>
      * Only minor version 6 or newer support 64 bits |data_offset| and
@@ -5164,7 +3458,7 @@ public final class UpdateMetadata {
     }
 
     public static final int DATA_LENGTH_FIELD_NUMBER = 3;
-    private long dataLength_;
+    private long dataLength_ = 0L;
     /**
      * <pre>
      * The length of the data in the delta file
@@ -5191,6 +3485,7 @@ public final class UpdateMetadata {
     }
 
     public static final int SRC_EXTENTS_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
     private java.util.List<chromeos_update_engine.UpdateMetadata.Extent> srcExtents_;
     /**
      * <pre>
@@ -5211,7 +3506,7 @@ public final class UpdateMetadata {
      * <code>repeated .chromeos_update_engine.Extent src_extents = 4;</code>
      */
     @java.lang.Override
-    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>
+    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
         getSrcExtentsOrBuilderList() {
       return srcExtents_;
     }
@@ -5251,7 +3546,7 @@ public final class UpdateMetadata {
     }
 
     public static final int SRC_LENGTH_FIELD_NUMBER = 5;
-    private long srcLength_;
+    private long srcLength_ = 0L;
     /**
      * <pre>
      * Byte length of src, equal to the number of blocks in src_extents *
@@ -5284,6 +3579,7 @@ public final class UpdateMetadata {
     }
 
     public static final int DST_EXTENTS_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
     private java.util.List<chromeos_update_engine.UpdateMetadata.Extent> dstExtents_;
     /**
      * <code>repeated .chromeos_update_engine.Extent dst_extents = 6;</code>
@@ -5296,7 +3592,7 @@ public final class UpdateMetadata {
      * <code>repeated .chromeos_update_engine.Extent dst_extents = 6;</code>
      */
     @java.lang.Override
-    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>
+    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
         getDstExtentsOrBuilderList() {
       return dstExtents_;
     }
@@ -5324,7 +3620,7 @@ public final class UpdateMetadata {
     }
 
     public static final int DST_LENGTH_FIELD_NUMBER = 7;
-    private long dstLength_;
+    private long dstLength_ = 0L;
     /**
      * <pre>
      * Byte length of dst, equal to the number of blocks in dst_extents *
@@ -5355,7 +3651,7 @@ public final class UpdateMetadata {
     }
 
     public static final int DATA_SHA256_HASH_FIELD_NUMBER = 8;
-    private com.google.protobuf.ByteString dataSha256Hash_;
+    private com.google.protobuf.ByteString dataSha256Hash_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * Optional SHA 256 hash of the blob associated with this operation.
@@ -5390,7 +3686,7 @@ public final class UpdateMetadata {
     }
 
     public static final int SRC_SHA256_HASH_FIELD_NUMBER = 9;
-    private com.google.protobuf.ByteString srcSha256Hash_;
+    private com.google.protobuf.ByteString srcSha256Hash_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * Indicates the SHA 256 hash of the source data referenced in src_extents at
@@ -5465,7 +3761,7 @@ public final class UpdateMetadata {
       if (((bitField0_ & 0x00000040) != 0)) {
         output.writeBytes(9, srcSha256Hash_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -5510,7 +3806,7 @@ public final class UpdateMetadata {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(9, srcSha256Hash_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -5563,7 +3859,7 @@ public final class UpdateMetadata {
         if (!getSrcSha256Hash()
             .equals(other.getSrcSha256Hash())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -5614,7 +3910,7 @@ public final class UpdateMetadata {
         hash = (37 * hash) + SRC_SHA256_HASH_FIELD_NUMBER;
         hash = (53 * hash) + getSrcSha256Hash().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -5731,50 +4027,39 @@ public final class UpdateMetadata {
 
       // Construct using chromeos_update_engine.UpdateMetadata.InstallOperation.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getSrcExtentsFieldBuilder();
-          getDstExtentsFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         type_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000001);
         dataOffset_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000002);
         dataLength_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000004);
         if (srcExtentsBuilder_ == null) {
           srcExtents_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
         } else {
+          srcExtents_ = null;
           srcExtentsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000008);
         srcLength_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000010);
         if (dstExtentsBuilder_ == null) {
           dstExtents_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000020);
         } else {
+          dstExtents_ = null;
           dstExtentsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000020);
         dstLength_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000040);
         dataSha256Hash_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000080);
         srcSha256Hash_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000100);
         return this;
       }
 
@@ -5801,20 +4086,13 @@ public final class UpdateMetadata {
       @java.lang.Override
       public chromeos_update_engine.UpdateMetadata.InstallOperation buildPartial() {
         chromeos_update_engine.UpdateMetadata.InstallOperation result = new chromeos_update_engine.UpdateMetadata.InstallOperation(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.type_ = type_;
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.dataOffset_ = dataOffset_;
-          to_bitField0_ |= 0x00000002;
-        }
-        if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.dataLength_ = dataLength_;
-          to_bitField0_ |= 0x00000004;
-        }
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(chromeos_update_engine.UpdateMetadata.InstallOperation result) {
         if (srcExtentsBuilder_ == null) {
           if (((bitField0_ & 0x00000008) != 0)) {
             srcExtents_ = java.util.Collections.unmodifiableList(srcExtents_);
@@ -5823,10 +4101,6 @@ public final class UpdateMetadata {
           result.srcExtents_ = srcExtents_;
         } else {
           result.srcExtents_ = srcExtentsBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000010) != 0)) {
-          result.srcLength_ = srcLength_;
-          to_bitField0_ |= 0x00000008;
         }
         if (dstExtentsBuilder_ == null) {
           if (((bitField0_ & 0x00000020) != 0)) {
@@ -5837,21 +4111,40 @@ public final class UpdateMetadata {
         } else {
           result.dstExtents_ = dstExtentsBuilder_.build();
         }
+      }
+
+      private void buildPartial0(chromeos_update_engine.UpdateMetadata.InstallOperation result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.type_ = type_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.dataOffset_ = dataOffset_;
+          to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.dataLength_ = dataLength_;
+          to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.srcLength_ = srcLength_;
+          to_bitField0_ |= 0x00000008;
+        }
         if (((from_bitField0_ & 0x00000040) != 0)) {
           result.dstLength_ = dstLength_;
           to_bitField0_ |= 0x00000010;
         }
         if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.dataSha256Hash_ = dataSha256Hash_;
           to_bitField0_ |= 0x00000020;
         }
-        result.dataSha256Hash_ = dataSha256Hash_;
         if (((from_bitField0_ & 0x00000100) != 0)) {
+          result.srcSha256Hash_ = srcSha256Hash_;
           to_bitField0_ |= 0x00000040;
         }
-        result.srcSha256Hash_ = srcSha256Hash_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
+        result.bitField0_ |= to_bitField0_;
       }
 
       @java.lang.Override
@@ -5925,7 +4218,7 @@ public final class UpdateMetadata {
               srcExtentsBuilder_ = null;
               srcExtents_ = other.srcExtents_;
               bitField0_ = (bitField0_ & ~0x00000008);
-              srcExtentsBuilder_ =
+              srcExtentsBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getSrcExtentsFieldBuilder() : null;
             } else {
@@ -5954,7 +4247,7 @@ public final class UpdateMetadata {
               dstExtentsBuilder_ = null;
               dstExtents_ = other.dstExtents_;
               bitField0_ = (bitField0_ & ~0x00000020);
-              dstExtentsBuilder_ =
+              dstExtentsBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getDstExtentsFieldBuilder() : null;
             } else {
@@ -5971,7 +4264,7 @@ public final class UpdateMetadata {
         if (other.hasSrcSha256Hash()) {
           setSrcSha256Hash(other.getSrcSha256Hash());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -5989,17 +4282,98 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        chromeos_update_engine.UpdateMetadata.InstallOperation parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                int tmpRaw = input.readEnum();
+                chromeos_update_engine.UpdateMetadata.InstallOperation.Type tmpValue =
+                    chromeos_update_engine.UpdateMetadata.InstallOperation.Type.forNumber(tmpRaw);
+                if (tmpValue == null) {
+                  mergeUnknownVarintField(1, tmpRaw);
+                } else {
+                  type_ = tmpRaw;
+                  bitField0_ |= 0x00000001;
+                }
+                break;
+              } // case 8
+              case 16: {
+                dataOffset_ = input.readUInt64();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                dataLength_ = input.readUInt64();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 34: {
+                chromeos_update_engine.UpdateMetadata.Extent m =
+                    input.readMessage(
+                        chromeos_update_engine.UpdateMetadata.Extent.PARSER,
+                        extensionRegistry);
+                if (srcExtentsBuilder_ == null) {
+                  ensureSrcExtentsIsMutable();
+                  srcExtents_.add(m);
+                } else {
+                  srcExtentsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 34
+              case 40: {
+                srcLength_ = input.readUInt64();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              case 50: {
+                chromeos_update_engine.UpdateMetadata.Extent m =
+                    input.readMessage(
+                        chromeos_update_engine.UpdateMetadata.Extent.PARSER,
+                        extensionRegistry);
+                if (dstExtentsBuilder_ == null) {
+                  ensureDstExtentsIsMutable();
+                  dstExtents_.add(m);
+                } else {
+                  dstExtentsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 50
+              case 56: {
+                dstLength_ = input.readUInt64();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 56
+              case 66: {
+                dataSha256Hash_ = input.readBytes();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 66
+              case 74: {
+                srcSha256Hash_ = input.readBytes();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 74
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (chromeos_update_engine.UpdateMetadata.InstallOperation) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -6018,8 +4392,7 @@ public final class UpdateMetadata {
        */
       @java.lang.Override
       public chromeos_update_engine.UpdateMetadata.InstallOperation.Type getType() {
-        @SuppressWarnings("deprecation")
-        chromeos_update_engine.UpdateMetadata.InstallOperation.Type result = chromeos_update_engine.UpdateMetadata.InstallOperation.Type.valueOf(type_);
+        chromeos_update_engine.UpdateMetadata.InstallOperation.Type result = chromeos_update_engine.UpdateMetadata.InstallOperation.Type.forNumber(type_);
         return result == null ? chromeos_update_engine.UpdateMetadata.InstallOperation.Type.REPLACE : result;
       }
       /**
@@ -6091,8 +4464,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setDataOffset(long value) {
-        bitField0_ |= 0x00000002;
+        
         dataOffset_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -6149,8 +4523,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setDataLength(long value) {
-        bitField0_ |= 0x00000004;
+        
         dataLength_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -6424,7 +4799,7 @@ public final class UpdateMetadata {
        *
        * <code>repeated .chromeos_update_engine.Extent src_extents = 4;</code>
        */
-      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>
+      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
            getSrcExtentsOrBuilderList() {
         if (srcExtentsBuilder_ != null) {
           return srcExtentsBuilder_.getMessageOrBuilderList();
@@ -6462,12 +4837,12 @@ public final class UpdateMetadata {
        *
        * <code>repeated .chromeos_update_engine.Extent src_extents = 4;</code>
        */
-      public java.util.List<chromeos_update_engine.UpdateMetadata.Extent.Builder>
+      public java.util.List<chromeos_update_engine.UpdateMetadata.Extent.Builder> 
            getSrcExtentsBuilderList() {
         return getSrcExtentsFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>
+          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
           getSrcExtentsFieldBuilder() {
         if (srcExtentsBuilder_ == null) {
           srcExtentsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
@@ -6525,8 +4900,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setSrcLength(long value) {
-        bitField0_ |= 0x00000010;
+        
         srcLength_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -6743,7 +5119,7 @@ public final class UpdateMetadata {
       /**
        * <code>repeated .chromeos_update_engine.Extent dst_extents = 6;</code>
        */
-      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>
+      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
            getDstExtentsOrBuilderList() {
         if (dstExtentsBuilder_ != null) {
           return dstExtentsBuilder_.getMessageOrBuilderList();
@@ -6769,12 +5145,12 @@ public final class UpdateMetadata {
       /**
        * <code>repeated .chromeos_update_engine.Extent dst_extents = 6;</code>
        */
-      public java.util.List<chromeos_update_engine.UpdateMetadata.Extent.Builder>
+      public java.util.List<chromeos_update_engine.UpdateMetadata.Extent.Builder> 
            getDstExtentsBuilderList() {
         return getDstExtentsFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>
+          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
           getDstExtentsFieldBuilder() {
         if (dstExtentsBuilder_ == null) {
           dstExtentsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
@@ -6829,8 +5205,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setDstLength(long value) {
-        bitField0_ |= 0x00000040;
+        
         dstLength_ = value;
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
@@ -6898,11 +5275,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setDataSha256Hash(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000080;
+        if (value == null) { throw new NullPointerException(); }
         dataSha256Hash_ = value;
+        bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
@@ -6966,11 +5341,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setSrcSha256Hash(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000100;
+        if (value == null) { throw new NullPointerException(); }
         srcSha256Hash_ = value;
+        bitField0_ |= 0x00000100;
         onChanged();
         return this;
       }
@@ -7023,7 +5396,18 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new InstallOperation(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -7038,6 +5422,1250 @@ public final class UpdateMetadata {
 
     @java.lang.Override
     public chromeos_update_engine.UpdateMetadata.InstallOperation getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CowMergeOperationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:chromeos_update_engine.CowMergeOperation)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional .chromeos_update_engine.CowMergeOperation.Type type = 1;</code>
+     * @return Whether the type field is set.
+     */
+    boolean hasType();
+    /**
+     * <code>optional .chromeos_update_engine.CowMergeOperation.Type type = 1;</code>
+     * @return The type.
+     */
+    chromeos_update_engine.UpdateMetadata.CowMergeOperation.Type getType();
+
+    /**
+     * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+     * @return Whether the srcExtent field is set.
+     */
+    boolean hasSrcExtent();
+    /**
+     * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+     * @return The srcExtent.
+     */
+    chromeos_update_engine.UpdateMetadata.Extent getSrcExtent();
+    /**
+     * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+     */
+    chromeos_update_engine.UpdateMetadata.ExtentOrBuilder getSrcExtentOrBuilder();
+
+    /**
+     * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+     * @return Whether the dstExtent field is set.
+     */
+    boolean hasDstExtent();
+    /**
+     * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+     * @return The dstExtent.
+     */
+    chromeos_update_engine.UpdateMetadata.Extent getDstExtent();
+    /**
+     * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+     */
+    chromeos_update_engine.UpdateMetadata.ExtentOrBuilder getDstExtentOrBuilder();
+
+    /**
+     * <pre>
+     * For COW_XOR, source location might be unaligned, so this field is in range
+     * [0, block_size), representing how much should the src_extent shift toward
+     * larger block number. If this field is non-zero, then src_extent will
+     * include 1 extra block in the end, as the merge op actually references the
+     * first |src_offset| bytes of that extra block. For example, if |dst_extent|
+     * is [10, 15], |src_offset| is 500, then src_extent might look like [25, 31].
+     * Note that |src_extent| contains 1 extra block than the |dst_extent|.
+     * </pre>
+     *
+     * <code>optional uint32 src_offset = 4;</code>
+     * @return Whether the srcOffset field is set.
+     */
+    boolean hasSrcOffset();
+    /**
+     * <pre>
+     * For COW_XOR, source location might be unaligned, so this field is in range
+     * [0, block_size), representing how much should the src_extent shift toward
+     * larger block number. If this field is non-zero, then src_extent will
+     * include 1 extra block in the end, as the merge op actually references the
+     * first |src_offset| bytes of that extra block. For example, if |dst_extent|
+     * is [10, 15], |src_offset| is 500, then src_extent might look like [25, 31].
+     * Note that |src_extent| contains 1 extra block than the |dst_extent|.
+     * </pre>
+     *
+     * <code>optional uint32 src_offset = 4;</code>
+     * @return The srcOffset.
+     */
+    int getSrcOffset();
+  }
+  /**
+   * <pre>
+   * Hints to VAB snapshot to skip writing some blocks if these blocks are
+   * identical to the ones on the source image. The src &amp; dst extents for each
+   * CowMergeOperation should be contiguous, and they're a subset of an OTA
+   * InstallOperation.
+   * During merge time, we need to follow the pre-computed sequence to avoid
+   * read after write, similar to the inplace update schema.
+   * </pre>
+   *
+   * Protobuf type {@code chromeos_update_engine.CowMergeOperation}
+   */
+  public static final class CowMergeOperation extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:chromeos_update_engine.CowMergeOperation)
+      CowMergeOperationOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CowMergeOperation.newBuilder() to construct.
+    private CowMergeOperation(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CowMergeOperation() {
+      type_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CowMergeOperation();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_CowMergeOperation_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_CowMergeOperation_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              chromeos_update_engine.UpdateMetadata.CowMergeOperation.class, chromeos_update_engine.UpdateMetadata.CowMergeOperation.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code chromeos_update_engine.CowMergeOperation.Type}
+     */
+    public enum Type
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <pre>
+       * identical blocks
+       * </pre>
+       *
+       * <code>COW_COPY = 0;</code>
+       */
+      COW_COPY(0),
+      /**
+       * <pre>
+       * used when src/dst blocks are highly similar
+       * </pre>
+       *
+       * <code>COW_XOR = 1;</code>
+       */
+      COW_XOR(1),
+      /**
+       * <pre>
+       * Raw replace operation
+       * </pre>
+       *
+       * <code>COW_REPLACE = 2;</code>
+       */
+      COW_REPLACE(2),
+      ;
+
+      /**
+       * <pre>
+       * identical blocks
+       * </pre>
+       *
+       * <code>COW_COPY = 0;</code>
+       */
+      public static final int COW_COPY_VALUE = 0;
+      /**
+       * <pre>
+       * used when src/dst blocks are highly similar
+       * </pre>
+       *
+       * <code>COW_XOR = 1;</code>
+       */
+      public static final int COW_XOR_VALUE = 1;
+      /**
+       * <pre>
+       * Raw replace operation
+       * </pre>
+       *
+       * <code>COW_REPLACE = 2;</code>
+       */
+      public static final int COW_REPLACE_VALUE = 2;
+
+
+      public final int getNumber() {
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Type valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static Type forNumber(int value) {
+        switch (value) {
+          case 0: return COW_COPY;
+          case 1: return COW_XOR;
+          case 2: return COW_REPLACE;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Type>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Type> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Type>() {
+              public Type findValueByNumber(int number) {
+                return Type.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return chromeos_update_engine.UpdateMetadata.CowMergeOperation.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Type[] VALUES = values();
+
+      public static Type valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Type(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:chromeos_update_engine.CowMergeOperation.Type)
+    }
+
+    private int bitField0_;
+    public static final int TYPE_FIELD_NUMBER = 1;
+    private int type_ = 0;
+    /**
+     * <code>optional .chromeos_update_engine.CowMergeOperation.Type type = 1;</code>
+     * @return Whether the type field is set.
+     */
+    @java.lang.Override public boolean hasType() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional .chromeos_update_engine.CowMergeOperation.Type type = 1;</code>
+     * @return The type.
+     */
+    @java.lang.Override public chromeos_update_engine.UpdateMetadata.CowMergeOperation.Type getType() {
+      chromeos_update_engine.UpdateMetadata.CowMergeOperation.Type result = chromeos_update_engine.UpdateMetadata.CowMergeOperation.Type.forNumber(type_);
+      return result == null ? chromeos_update_engine.UpdateMetadata.CowMergeOperation.Type.COW_COPY : result;
+    }
+
+    public static final int SRC_EXTENT_FIELD_NUMBER = 2;
+    private chromeos_update_engine.UpdateMetadata.Extent srcExtent_;
+    /**
+     * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+     * @return Whether the srcExtent field is set.
+     */
+    @java.lang.Override
+    public boolean hasSrcExtent() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+     * @return The srcExtent.
+     */
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.Extent getSrcExtent() {
+      return srcExtent_ == null ? chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance() : srcExtent_;
+    }
+    /**
+     * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+     */
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.ExtentOrBuilder getSrcExtentOrBuilder() {
+      return srcExtent_ == null ? chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance() : srcExtent_;
+    }
+
+    public static final int DST_EXTENT_FIELD_NUMBER = 3;
+    private chromeos_update_engine.UpdateMetadata.Extent dstExtent_;
+    /**
+     * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+     * @return Whether the dstExtent field is set.
+     */
+    @java.lang.Override
+    public boolean hasDstExtent() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+     * @return The dstExtent.
+     */
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.Extent getDstExtent() {
+      return dstExtent_ == null ? chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance() : dstExtent_;
+    }
+    /**
+     * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+     */
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.ExtentOrBuilder getDstExtentOrBuilder() {
+      return dstExtent_ == null ? chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance() : dstExtent_;
+    }
+
+    public static final int SRC_OFFSET_FIELD_NUMBER = 4;
+    private int srcOffset_ = 0;
+    /**
+     * <pre>
+     * For COW_XOR, source location might be unaligned, so this field is in range
+     * [0, block_size), representing how much should the src_extent shift toward
+     * larger block number. If this field is non-zero, then src_extent will
+     * include 1 extra block in the end, as the merge op actually references the
+     * first |src_offset| bytes of that extra block. For example, if |dst_extent|
+     * is [10, 15], |src_offset| is 500, then src_extent might look like [25, 31].
+     * Note that |src_extent| contains 1 extra block than the |dst_extent|.
+     * </pre>
+     *
+     * <code>optional uint32 src_offset = 4;</code>
+     * @return Whether the srcOffset field is set.
+     */
+    @java.lang.Override
+    public boolean hasSrcOffset() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <pre>
+     * For COW_XOR, source location might be unaligned, so this field is in range
+     * [0, block_size), representing how much should the src_extent shift toward
+     * larger block number. If this field is non-zero, then src_extent will
+     * include 1 extra block in the end, as the merge op actually references the
+     * first |src_offset| bytes of that extra block. For example, if |dst_extent|
+     * is [10, 15], |src_offset| is 500, then src_extent might look like [25, 31].
+     * Note that |src_extent| contains 1 extra block than the |dst_extent|.
+     * </pre>
+     *
+     * <code>optional uint32 src_offset = 4;</code>
+     * @return The srcOffset.
+     */
+    @java.lang.Override
+    public int getSrcOffset() {
+      return srcOffset_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeEnum(1, type_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeMessage(2, getSrcExtent());
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeMessage(3, getDstExtent());
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        output.writeUInt32(4, srcOffset_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, type_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getSrcExtent());
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, getDstExtent());
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(4, srcOffset_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof chromeos_update_engine.UpdateMetadata.CowMergeOperation)) {
+        return super.equals(obj);
+      }
+      chromeos_update_engine.UpdateMetadata.CowMergeOperation other = (chromeos_update_engine.UpdateMetadata.CowMergeOperation) obj;
+
+      if (hasType() != other.hasType()) return false;
+      if (hasType()) {
+        if (type_ != other.type_) return false;
+      }
+      if (hasSrcExtent() != other.hasSrcExtent()) return false;
+      if (hasSrcExtent()) {
+        if (!getSrcExtent()
+            .equals(other.getSrcExtent())) return false;
+      }
+      if (hasDstExtent() != other.hasDstExtent()) return false;
+      if (hasDstExtent()) {
+        if (!getDstExtent()
+            .equals(other.getDstExtent())) return false;
+      }
+      if (hasSrcOffset() != other.hasSrcOffset()) return false;
+      if (hasSrcOffset()) {
+        if (getSrcOffset()
+            != other.getSrcOffset()) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasType()) {
+        hash = (37 * hash) + TYPE_FIELD_NUMBER;
+        hash = (53 * hash) + type_;
+      }
+      if (hasSrcExtent()) {
+        hash = (37 * hash) + SRC_EXTENT_FIELD_NUMBER;
+        hash = (53 * hash) + getSrcExtent().hashCode();
+      }
+      if (hasDstExtent()) {
+        hash = (37 * hash) + DST_EXTENT_FIELD_NUMBER;
+        hash = (53 * hash) + getDstExtent().hashCode();
+      }
+      if (hasSrcOffset()) {
+        hash = (37 * hash) + SRC_OFFSET_FIELD_NUMBER;
+        hash = (53 * hash) + getSrcOffset();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static chromeos_update_engine.UpdateMetadata.CowMergeOperation parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static chromeos_update_engine.UpdateMetadata.CowMergeOperation parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.CowMergeOperation parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static chromeos_update_engine.UpdateMetadata.CowMergeOperation parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.CowMergeOperation parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static chromeos_update_engine.UpdateMetadata.CowMergeOperation parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.CowMergeOperation parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static chromeos_update_engine.UpdateMetadata.CowMergeOperation parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.CowMergeOperation parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static chromeos_update_engine.UpdateMetadata.CowMergeOperation parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.CowMergeOperation parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static chromeos_update_engine.UpdateMetadata.CowMergeOperation parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(chromeos_update_engine.UpdateMetadata.CowMergeOperation prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Hints to VAB snapshot to skip writing some blocks if these blocks are
+     * identical to the ones on the source image. The src &amp; dst extents for each
+     * CowMergeOperation should be contiguous, and they're a subset of an OTA
+     * InstallOperation.
+     * During merge time, we need to follow the pre-computed sequence to avoid
+     * read after write, similar to the inplace update schema.
+     * </pre>
+     *
+     * Protobuf type {@code chromeos_update_engine.CowMergeOperation}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:chromeos_update_engine.CowMergeOperation)
+        chromeos_update_engine.UpdateMetadata.CowMergeOperationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_CowMergeOperation_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_CowMergeOperation_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                chromeos_update_engine.UpdateMetadata.CowMergeOperation.class, chromeos_update_engine.UpdateMetadata.CowMergeOperation.Builder.class);
+      }
+
+      // Construct using chromeos_update_engine.UpdateMetadata.CowMergeOperation.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getSrcExtentFieldBuilder();
+          getDstExtentFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        type_ = 0;
+        srcExtent_ = null;
+        if (srcExtentBuilder_ != null) {
+          srcExtentBuilder_.dispose();
+          srcExtentBuilder_ = null;
+        }
+        dstExtent_ = null;
+        if (dstExtentBuilder_ != null) {
+          dstExtentBuilder_.dispose();
+          dstExtentBuilder_ = null;
+        }
+        srcOffset_ = 0;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_CowMergeOperation_descriptor;
+      }
+
+      @java.lang.Override
+      public chromeos_update_engine.UpdateMetadata.CowMergeOperation getDefaultInstanceForType() {
+        return chromeos_update_engine.UpdateMetadata.CowMergeOperation.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public chromeos_update_engine.UpdateMetadata.CowMergeOperation build() {
+        chromeos_update_engine.UpdateMetadata.CowMergeOperation result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public chromeos_update_engine.UpdateMetadata.CowMergeOperation buildPartial() {
+        chromeos_update_engine.UpdateMetadata.CowMergeOperation result = new chromeos_update_engine.UpdateMetadata.CowMergeOperation(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(chromeos_update_engine.UpdateMetadata.CowMergeOperation result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.type_ = type_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.srcExtent_ = srcExtentBuilder_ == null
+              ? srcExtent_
+              : srcExtentBuilder_.build();
+          to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.dstExtent_ = dstExtentBuilder_ == null
+              ? dstExtent_
+              : dstExtentBuilder_.build();
+          to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.srcOffset_ = srcOffset_;
+          to_bitField0_ |= 0x00000008;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof chromeos_update_engine.UpdateMetadata.CowMergeOperation) {
+          return mergeFrom((chromeos_update_engine.UpdateMetadata.CowMergeOperation)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(chromeos_update_engine.UpdateMetadata.CowMergeOperation other) {
+        if (other == chromeos_update_engine.UpdateMetadata.CowMergeOperation.getDefaultInstance()) return this;
+        if (other.hasType()) {
+          setType(other.getType());
+        }
+        if (other.hasSrcExtent()) {
+          mergeSrcExtent(other.getSrcExtent());
+        }
+        if (other.hasDstExtent()) {
+          mergeDstExtent(other.getDstExtent());
+        }
+        if (other.hasSrcOffset()) {
+          setSrcOffset(other.getSrcOffset());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                int tmpRaw = input.readEnum();
+                chromeos_update_engine.UpdateMetadata.CowMergeOperation.Type tmpValue =
+                    chromeos_update_engine.UpdateMetadata.CowMergeOperation.Type.forNumber(tmpRaw);
+                if (tmpValue == null) {
+                  mergeUnknownVarintField(1, tmpRaw);
+                } else {
+                  type_ = tmpRaw;
+                  bitField0_ |= 0x00000001;
+                }
+                break;
+              } // case 8
+              case 18: {
+                input.readMessage(
+                    getSrcExtentFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getDstExtentFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 32: {
+                srcOffset_ = input.readUInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private int type_ = 0;
+      /**
+       * <code>optional .chromeos_update_engine.CowMergeOperation.Type type = 1;</code>
+       * @return Whether the type field is set.
+       */
+      @java.lang.Override public boolean hasType() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional .chromeos_update_engine.CowMergeOperation.Type type = 1;</code>
+       * @return The type.
+       */
+      @java.lang.Override
+      public chromeos_update_engine.UpdateMetadata.CowMergeOperation.Type getType() {
+        chromeos_update_engine.UpdateMetadata.CowMergeOperation.Type result = chromeos_update_engine.UpdateMetadata.CowMergeOperation.Type.forNumber(type_);
+        return result == null ? chromeos_update_engine.UpdateMetadata.CowMergeOperation.Type.COW_COPY : result;
+      }
+      /**
+       * <code>optional .chromeos_update_engine.CowMergeOperation.Type type = 1;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
+       */
+      public Builder setType(chromeos_update_engine.UpdateMetadata.CowMergeOperation.Type value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000001;
+        type_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .chromeos_update_engine.CowMergeOperation.Type type = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearType() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        type_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private chromeos_update_engine.UpdateMetadata.Extent srcExtent_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> srcExtentBuilder_;
+      /**
+       * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+       * @return Whether the srcExtent field is set.
+       */
+      public boolean hasSrcExtent() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+       * @return The srcExtent.
+       */
+      public chromeos_update_engine.UpdateMetadata.Extent getSrcExtent() {
+        if (srcExtentBuilder_ == null) {
+          return srcExtent_ == null ? chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance() : srcExtent_;
+        } else {
+          return srcExtentBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+       */
+      public Builder setSrcExtent(chromeos_update_engine.UpdateMetadata.Extent value) {
+        if (srcExtentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          srcExtent_ = value;
+        } else {
+          srcExtentBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+       */
+      public Builder setSrcExtent(
+          chromeos_update_engine.UpdateMetadata.Extent.Builder builderForValue) {
+        if (srcExtentBuilder_ == null) {
+          srcExtent_ = builderForValue.build();
+        } else {
+          srcExtentBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+       */
+      public Builder mergeSrcExtent(chromeos_update_engine.UpdateMetadata.Extent value) {
+        if (srcExtentBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0) &&
+            srcExtent_ != null &&
+            srcExtent_ != chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance()) {
+            getSrcExtentBuilder().mergeFrom(value);
+          } else {
+            srcExtent_ = value;
+          }
+        } else {
+          srcExtentBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+       */
+      public Builder clearSrcExtent() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        srcExtent_ = null;
+        if (srcExtentBuilder_ != null) {
+          srcExtentBuilder_.dispose();
+          srcExtentBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.Extent.Builder getSrcExtentBuilder() {
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return getSrcExtentFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.ExtentOrBuilder getSrcExtentOrBuilder() {
+        if (srcExtentBuilder_ != null) {
+          return srcExtentBuilder_.getMessageOrBuilder();
+        } else {
+          return srcExtent_ == null ?
+              chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance() : srcExtent_;
+        }
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent src_extent = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
+          getSrcExtentFieldBuilder() {
+        if (srcExtentBuilder_ == null) {
+          srcExtentBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>(
+                  getSrcExtent(),
+                  getParentForChildren(),
+                  isClean());
+          srcExtent_ = null;
+        }
+        return srcExtentBuilder_;
+      }
+
+      private chromeos_update_engine.UpdateMetadata.Extent dstExtent_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> dstExtentBuilder_;
+      /**
+       * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+       * @return Whether the dstExtent field is set.
+       */
+      public boolean hasDstExtent() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+       * @return The dstExtent.
+       */
+      public chromeos_update_engine.UpdateMetadata.Extent getDstExtent() {
+        if (dstExtentBuilder_ == null) {
+          return dstExtent_ == null ? chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance() : dstExtent_;
+        } else {
+          return dstExtentBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+       */
+      public Builder setDstExtent(chromeos_update_engine.UpdateMetadata.Extent value) {
+        if (dstExtentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          dstExtent_ = value;
+        } else {
+          dstExtentBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+       */
+      public Builder setDstExtent(
+          chromeos_update_engine.UpdateMetadata.Extent.Builder builderForValue) {
+        if (dstExtentBuilder_ == null) {
+          dstExtent_ = builderForValue.build();
+        } else {
+          dstExtentBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+       */
+      public Builder mergeDstExtent(chromeos_update_engine.UpdateMetadata.Extent value) {
+        if (dstExtentBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) != 0) &&
+            dstExtent_ != null &&
+            dstExtent_ != chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance()) {
+            getDstExtentBuilder().mergeFrom(value);
+          } else {
+            dstExtent_ = value;
+          }
+        } else {
+          dstExtentBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+       */
+      public Builder clearDstExtent() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        dstExtent_ = null;
+        if (dstExtentBuilder_ != null) {
+          dstExtentBuilder_.dispose();
+          dstExtentBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.Extent.Builder getDstExtentBuilder() {
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return getDstExtentFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.ExtentOrBuilder getDstExtentOrBuilder() {
+        if (dstExtentBuilder_ != null) {
+          return dstExtentBuilder_.getMessageOrBuilder();
+        } else {
+          return dstExtent_ == null ?
+              chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance() : dstExtent_;
+        }
+      }
+      /**
+       * <code>optional .chromeos_update_engine.Extent dst_extent = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
+          getDstExtentFieldBuilder() {
+        if (dstExtentBuilder_ == null) {
+          dstExtentBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>(
+                  getDstExtent(),
+                  getParentForChildren(),
+                  isClean());
+          dstExtent_ = null;
+        }
+        return dstExtentBuilder_;
+      }
+
+      private int srcOffset_ ;
+      /**
+       * <pre>
+       * For COW_XOR, source location might be unaligned, so this field is in range
+       * [0, block_size), representing how much should the src_extent shift toward
+       * larger block number. If this field is non-zero, then src_extent will
+       * include 1 extra block in the end, as the merge op actually references the
+       * first |src_offset| bytes of that extra block. For example, if |dst_extent|
+       * is [10, 15], |src_offset| is 500, then src_extent might look like [25, 31].
+       * Note that |src_extent| contains 1 extra block than the |dst_extent|.
+       * </pre>
+       *
+       * <code>optional uint32 src_offset = 4;</code>
+       * @return Whether the srcOffset field is set.
+       */
+      @java.lang.Override
+      public boolean hasSrcOffset() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <pre>
+       * For COW_XOR, source location might be unaligned, so this field is in range
+       * [0, block_size), representing how much should the src_extent shift toward
+       * larger block number. If this field is non-zero, then src_extent will
+       * include 1 extra block in the end, as the merge op actually references the
+       * first |src_offset| bytes of that extra block. For example, if |dst_extent|
+       * is [10, 15], |src_offset| is 500, then src_extent might look like [25, 31].
+       * Note that |src_extent| contains 1 extra block than the |dst_extent|.
+       * </pre>
+       *
+       * <code>optional uint32 src_offset = 4;</code>
+       * @return The srcOffset.
+       */
+      @java.lang.Override
+      public int getSrcOffset() {
+        return srcOffset_;
+      }
+      /**
+       * <pre>
+       * For COW_XOR, source location might be unaligned, so this field is in range
+       * [0, block_size), representing how much should the src_extent shift toward
+       * larger block number. If this field is non-zero, then src_extent will
+       * include 1 extra block in the end, as the merge op actually references the
+       * first |src_offset| bytes of that extra block. For example, if |dst_extent|
+       * is [10, 15], |src_offset| is 500, then src_extent might look like [25, 31].
+       * Note that |src_extent| contains 1 extra block than the |dst_extent|.
+       * </pre>
+       *
+       * <code>optional uint32 src_offset = 4;</code>
+       * @param value The srcOffset to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSrcOffset(int value) {
+        
+        srcOffset_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * For COW_XOR, source location might be unaligned, so this field is in range
+       * [0, block_size), representing how much should the src_extent shift toward
+       * larger block number. If this field is non-zero, then src_extent will
+       * include 1 extra block in the end, as the merge op actually references the
+       * first |src_offset| bytes of that extra block. For example, if |dst_extent|
+       * is [10, 15], |src_offset| is 500, then src_extent might look like [25, 31].
+       * Note that |src_extent| contains 1 extra block than the |dst_extent|.
+       * </pre>
+       *
+       * <code>optional uint32 src_offset = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSrcOffset() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        srcOffset_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:chromeos_update_engine.CowMergeOperation)
+    }
+
+    // @@protoc_insertion_point(class_scope:chromeos_update_engine.CowMergeOperation)
+    private static final chromeos_update_engine.UpdateMetadata.CowMergeOperation DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new chromeos_update_engine.UpdateMetadata.CowMergeOperation();
+    }
+
+    public static chromeos_update_engine.UpdateMetadata.CowMergeOperation getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<CowMergeOperation>
+        PARSER = new com.google.protobuf.AbstractParser<CowMergeOperation>() {
+      @java.lang.Override
+      public CowMergeOperation parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<CowMergeOperation> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CowMergeOperation> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.CowMergeOperation getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -7188,7 +6816,7 @@ public final class UpdateMetadata {
      *
      * <code>repeated .chromeos_update_engine.Signatures.Signature new_partition_signature = 5;</code>
      */
-    java.util.List<chromeos_update_engine.UpdateMetadata.Signatures.Signature>
+    java.util.List<chromeos_update_engine.UpdateMetadata.Signatures.Signature> 
         getNewPartitionSignatureList();
     /**
      * <pre>
@@ -7222,7 +6850,7 @@ public final class UpdateMetadata {
      *
      * <code>repeated .chromeos_update_engine.Signatures.Signature new_partition_signature = 5;</code>
      */
-    java.util.List<? extends chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder>
+    java.util.List<? extends chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder> 
         getNewPartitionSignatureOrBuilderList();
     /**
      * <pre>
@@ -7276,7 +6904,7 @@ public final class UpdateMetadata {
      *
      * <code>repeated .chromeos_update_engine.InstallOperation operations = 8;</code>
      */
-    java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation>
+    java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation> 
         getOperationsList();
     /**
      * <pre>
@@ -7307,7 +6935,7 @@ public final class UpdateMetadata {
      *
      * <code>repeated .chromeos_update_engine.InstallOperation operations = 8;</code>
      */
-    java.util.List<? extends chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>
+    java.util.List<? extends chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder> 
         getOperationsOrBuilderList();
     /**
      * <pre>
@@ -7516,6 +7144,118 @@ public final class UpdateMetadata {
      * @return The fecRoots.
      */
     int getFecRoots();
+
+    /**
+     * <pre>
+     * Per-partition version used for downgrade detection, added
+     * as an effort to support partial updates. For most partitions,
+     * this is the build timestamp.
+     * </pre>
+     *
+     * <code>optional string version = 17;</code>
+     * @return Whether the version field is set.
+     */
+    boolean hasVersion();
+    /**
+     * <pre>
+     * Per-partition version used for downgrade detection, added
+     * as an effort to support partial updates. For most partitions,
+     * this is the build timestamp.
+     * </pre>
+     *
+     * <code>optional string version = 17;</code>
+     * @return The version.
+     */
+    java.lang.String getVersion();
+    /**
+     * <pre>
+     * Per-partition version used for downgrade detection, added
+     * as an effort to support partial updates. For most partitions,
+     * this is the build timestamp.
+     * </pre>
+     *
+     * <code>optional string version = 17;</code>
+     * @return The bytes for version.
+     */
+    com.google.protobuf.ByteString
+        getVersionBytes();
+
+    /**
+     * <pre>
+     * A sorted list of CowMergeOperation. When writing cow, we can choose to
+     * skip writing the raw bytes for these extents. During snapshot merge, the
+     * bytes will read from the source partitions instead.
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+     */
+    java.util.List<chromeos_update_engine.UpdateMetadata.CowMergeOperation> 
+        getMergeOperationsList();
+    /**
+     * <pre>
+     * A sorted list of CowMergeOperation. When writing cow, we can choose to
+     * skip writing the raw bytes for these extents. During snapshot merge, the
+     * bytes will read from the source partitions instead.
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+     */
+    chromeos_update_engine.UpdateMetadata.CowMergeOperation getMergeOperations(int index);
+    /**
+     * <pre>
+     * A sorted list of CowMergeOperation. When writing cow, we can choose to
+     * skip writing the raw bytes for these extents. During snapshot merge, the
+     * bytes will read from the source partitions instead.
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+     */
+    int getMergeOperationsCount();
+    /**
+     * <pre>
+     * A sorted list of CowMergeOperation. When writing cow, we can choose to
+     * skip writing the raw bytes for these extents. During snapshot merge, the
+     * bytes will read from the source partitions instead.
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+     */
+    java.util.List<? extends chromeos_update_engine.UpdateMetadata.CowMergeOperationOrBuilder> 
+        getMergeOperationsOrBuilderList();
+    /**
+     * <pre>
+     * A sorted list of CowMergeOperation. When writing cow, we can choose to
+     * skip writing the raw bytes for these extents. During snapshot merge, the
+     * bytes will read from the source partitions instead.
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+     */
+    chromeos_update_engine.UpdateMetadata.CowMergeOperationOrBuilder getMergeOperationsOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * Estimated size for COW image. This is used by libsnapshot
+     * as a hint. If set to 0, libsnapshot should use alternative
+     * methods for estimating size.
+     * </pre>
+     *
+     * <code>optional uint64 estimate_cow_size = 19;</code>
+     * @return Whether the estimateCowSize field is set.
+     */
+    boolean hasEstimateCowSize();
+    /**
+     * <pre>
+     * Estimated size for COW image. This is used by libsnapshot
+     * as a hint. If set to 0, libsnapshot should use alternative
+     * methods for estimating size.
+     * </pre>
+     *
+     * <code>optional uint64 estimate_cow_size = 19;</code>
+     * @return The estimateCowSize.
+     */
+    long getEstimateCowSize();
   }
   /**
    * <pre>
@@ -7542,6 +7282,8 @@ public final class UpdateMetadata {
       hashTreeAlgorithm_ = "";
       hashTreeSalt_ = com.google.protobuf.ByteString.EMPTY;
       fecRoots_ = 2;
+      version_ = "";
+      mergeOperations_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
@@ -7555,190 +7297,6 @@ public final class UpdateMetadata {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private PartitionUpdate(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              partitionName_ = bs;
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              runPostinstall_ = input.readBool();
-              break;
-            }
-            case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              postinstallPath_ = bs;
-              break;
-            }
-            case 34: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000008;
-              filesystemType_ = bs;
-              break;
-            }
-            case 42: {
-              if (!((mutable_bitField0_ & 0x00000010) != 0)) {
-                newPartitionSignature_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.Signatures.Signature>();
-                mutable_bitField0_ |= 0x00000010;
-              }
-              newPartitionSignature_.add(
-                  input.readMessage(chromeos_update_engine.UpdateMetadata.Signatures.Signature.PARSER, extensionRegistry));
-              break;
-            }
-            case 50: {
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000010) != 0)) {
-                subBuilder = oldPartitionInfo_.toBuilder();
-              }
-              oldPartitionInfo_ = input.readMessage(chromeos_update_engine.UpdateMetadata.PartitionInfo.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(oldPartitionInfo_);
-                oldPartitionInfo_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000010;
-              break;
-            }
-            case 58: {
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000020) != 0)) {
-                subBuilder = newPartitionInfo_.toBuilder();
-              }
-              newPartitionInfo_ = input.readMessage(chromeos_update_engine.UpdateMetadata.PartitionInfo.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(newPartitionInfo_);
-                newPartitionInfo_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000020;
-              break;
-            }
-            case 66: {
-              if (!((mutable_bitField0_ & 0x00000080) != 0)) {
-                operations_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.InstallOperation>();
-                mutable_bitField0_ |= 0x00000080;
-              }
-              operations_.add(
-                  input.readMessage(chromeos_update_engine.UpdateMetadata.InstallOperation.PARSER, extensionRegistry));
-              break;
-            }
-            case 72: {
-              bitField0_ |= 0x00000040;
-              postinstallOptional_ = input.readBool();
-              break;
-            }
-            case 82: {
-              chromeos_update_engine.UpdateMetadata.Extent.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000080) != 0)) {
-                subBuilder = hashTreeDataExtent_.toBuilder();
-              }
-              hashTreeDataExtent_ = input.readMessage(chromeos_update_engine.UpdateMetadata.Extent.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(hashTreeDataExtent_);
-                hashTreeDataExtent_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000080;
-              break;
-            }
-            case 90: {
-              chromeos_update_engine.UpdateMetadata.Extent.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000100) != 0)) {
-                subBuilder = hashTreeExtent_.toBuilder();
-              }
-              hashTreeExtent_ = input.readMessage(chromeos_update_engine.UpdateMetadata.Extent.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(hashTreeExtent_);
-                hashTreeExtent_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000100;
-              break;
-            }
-            case 98: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000200;
-              hashTreeAlgorithm_ = bs;
-              break;
-            }
-            case 106: {
-              bitField0_ |= 0x00000400;
-              hashTreeSalt_ = input.readBytes();
-              break;
-            }
-            case 114: {
-              chromeos_update_engine.UpdateMetadata.Extent.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000800) != 0)) {
-                subBuilder = fecDataExtent_.toBuilder();
-              }
-              fecDataExtent_ = input.readMessage(chromeos_update_engine.UpdateMetadata.Extent.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(fecDataExtent_);
-                fecDataExtent_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000800;
-              break;
-            }
-            case 122: {
-              chromeos_update_engine.UpdateMetadata.Extent.Builder subBuilder = null;
-              if (((bitField0_ & 0x00001000) != 0)) {
-                subBuilder = fecExtent_.toBuilder();
-              }
-              fecExtent_ = input.readMessage(chromeos_update_engine.UpdateMetadata.Extent.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(fecExtent_);
-                fecExtent_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00001000;
-              break;
-            }
-            case 128: {
-              bitField0_ |= 0x00002000;
-              fecRoots_ = input.readUInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000010) != 0)) {
-          newPartitionSignature_ = java.util.Collections.unmodifiableList(newPartitionSignature_);
-        }
-        if (((mutable_bitField0_ & 0x00000080) != 0)) {
-          operations_ = java.util.Collections.unmodifiableList(operations_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -7755,7 +7313,8 @@ public final class UpdateMetadata {
 
     private int bitField0_;
     public static final int PARTITION_NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object partitionName_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object partitionName_ = "";
     /**
      * <pre>
      * A platform-specific name to identify the partition set being updated. For
@@ -7784,7 +7343,7 @@ public final class UpdateMetadata {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -7807,7 +7366,7 @@ public final class UpdateMetadata {
         getPartitionNameBytes() {
       java.lang.Object ref = partitionName_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         partitionName_ = b;
@@ -7818,7 +7377,7 @@ public final class UpdateMetadata {
     }
 
     public static final int RUN_POSTINSTALL_FIELD_NUMBER = 2;
-    private boolean runPostinstall_;
+    private boolean runPostinstall_ = false;
     /**
      * <pre>
      * Whether this partition carries a filesystem with post-install program that
@@ -7849,7 +7408,8 @@ public final class UpdateMetadata {
     }
 
     public static final int POSTINSTALL_PATH_FIELD_NUMBER = 3;
-    private volatile java.lang.Object postinstallPath_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object postinstallPath_ = "";
     /**
      * <pre>
      * The path of the executable program to run during the post-install step,
@@ -7882,7 +7442,7 @@ public final class UpdateMetadata {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -7907,7 +7467,7 @@ public final class UpdateMetadata {
         getPostinstallPathBytes() {
       java.lang.Object ref = postinstallPath_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         postinstallPath_ = b;
@@ -7918,7 +7478,8 @@ public final class UpdateMetadata {
     }
 
     public static final int FILESYSTEM_TYPE_FIELD_NUMBER = 4;
-    private volatile java.lang.Object filesystemType_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object filesystemType_ = "";
     /**
      * <pre>
      * The filesystem type as passed to the mount(2) syscall when mounting the new
@@ -7951,7 +7512,7 @@ public final class UpdateMetadata {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -7976,7 +7537,7 @@ public final class UpdateMetadata {
         getFilesystemTypeBytes() {
       java.lang.Object ref = filesystemType_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         filesystemType_ = b;
@@ -7987,6 +7548,7 @@ public final class UpdateMetadata {
     }
 
     public static final int NEW_PARTITION_SIGNATURE_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
     private java.util.List<chromeos_update_engine.UpdateMetadata.Signatures.Signature> newPartitionSignature_;
     /**
      * <pre>
@@ -8013,7 +7575,7 @@ public final class UpdateMetadata {
      * <code>repeated .chromeos_update_engine.Signatures.Signature new_partition_signature = 5;</code>
      */
     @java.lang.Override
-    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder>
+    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder> 
         getNewPartitionSignatureOrBuilderList() {
       return newPartitionSignature_;
     }
@@ -8114,6 +7676,7 @@ public final class UpdateMetadata {
     }
 
     public static final int OPERATIONS_FIELD_NUMBER = 8;
+    @SuppressWarnings("serial")
     private java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation> operations_;
     /**
      * <pre>
@@ -8138,7 +7701,7 @@ public final class UpdateMetadata {
      * <code>repeated .chromeos_update_engine.InstallOperation operations = 8;</code>
      */
     @java.lang.Override
-    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>
+    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder> 
         getOperationsOrBuilderList() {
       return operations_;
     }
@@ -8184,7 +7747,7 @@ public final class UpdateMetadata {
     }
 
     public static final int POSTINSTALL_OPTIONAL_FIELD_NUMBER = 9;
-    private boolean postinstallOptional_;
+    private boolean postinstallOptional_ = false;
     /**
      * <pre>
      * Whether a failure in the postinstall step for this partition should be
@@ -8289,7 +7852,8 @@ public final class UpdateMetadata {
     }
 
     public static final int HASH_TREE_ALGORITHM_FIELD_NUMBER = 12;
-    private volatile java.lang.Object hashTreeAlgorithm_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object hashTreeAlgorithm_ = "";
     /**
      * <pre>
      * The hash algorithm used in verity hash tree.
@@ -8316,7 +7880,7 @@ public final class UpdateMetadata {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -8338,7 +7902,7 @@ public final class UpdateMetadata {
         getHashTreeAlgorithmBytes() {
       java.lang.Object ref = hashTreeAlgorithm_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         hashTreeAlgorithm_ = b;
@@ -8349,7 +7913,7 @@ public final class UpdateMetadata {
     }
 
     public static final int HASH_TREE_SALT_FIELD_NUMBER = 13;
-    private com.google.protobuf.ByteString hashTreeSalt_;
+    private com.google.protobuf.ByteString hashTreeSalt_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * The salt used for verity hash tree.
@@ -8452,7 +8016,7 @@ public final class UpdateMetadata {
     }
 
     public static final int FEC_ROOTS_FIELD_NUMBER = 16;
-    private int fecRoots_;
+    private int fecRoots_ = 2;
     /**
      * <pre>
      * The number of FEC roots.
@@ -8476,6 +8040,175 @@ public final class UpdateMetadata {
     @java.lang.Override
     public int getFecRoots() {
       return fecRoots_;
+    }
+
+    public static final int VERSION_FIELD_NUMBER = 17;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object version_ = "";
+    /**
+     * <pre>
+     * Per-partition version used for downgrade detection, added
+     * as an effort to support partial updates. For most partitions,
+     * this is the build timestamp.
+     * </pre>
+     *
+     * <code>optional string version = 17;</code>
+     * @return Whether the version field is set.
+     */
+    @java.lang.Override
+    public boolean hasVersion() {
+      return ((bitField0_ & 0x00004000) != 0);
+    }
+    /**
+     * <pre>
+     * Per-partition version used for downgrade detection, added
+     * as an effort to support partial updates. For most partitions,
+     * this is the build timestamp.
+     * </pre>
+     *
+     * <code>optional string version = 17;</code>
+     * @return The version.
+     */
+    @java.lang.Override
+    public java.lang.String getVersion() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          version_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Per-partition version used for downgrade detection, added
+     * as an effort to support partial updates. For most partitions,
+     * this is the build timestamp.
+     * </pre>
+     *
+     * <code>optional string version = 17;</code>
+     * @return The bytes for version.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getVersionBytes() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        version_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int MERGE_OPERATIONS_FIELD_NUMBER = 18;
+    @SuppressWarnings("serial")
+    private java.util.List<chromeos_update_engine.UpdateMetadata.CowMergeOperation> mergeOperations_;
+    /**
+     * <pre>
+     * A sorted list of CowMergeOperation. When writing cow, we can choose to
+     * skip writing the raw bytes for these extents. During snapshot merge, the
+     * bytes will read from the source partitions instead.
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+     */
+    @java.lang.Override
+    public java.util.List<chromeos_update_engine.UpdateMetadata.CowMergeOperation> getMergeOperationsList() {
+      return mergeOperations_;
+    }
+    /**
+     * <pre>
+     * A sorted list of CowMergeOperation. When writing cow, we can choose to
+     * skip writing the raw bytes for these extents. During snapshot merge, the
+     * bytes will read from the source partitions instead.
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.CowMergeOperationOrBuilder> 
+        getMergeOperationsOrBuilderList() {
+      return mergeOperations_;
+    }
+    /**
+     * <pre>
+     * A sorted list of CowMergeOperation. When writing cow, we can choose to
+     * skip writing the raw bytes for these extents. During snapshot merge, the
+     * bytes will read from the source partitions instead.
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+     */
+    @java.lang.Override
+    public int getMergeOperationsCount() {
+      return mergeOperations_.size();
+    }
+    /**
+     * <pre>
+     * A sorted list of CowMergeOperation. When writing cow, we can choose to
+     * skip writing the raw bytes for these extents. During snapshot merge, the
+     * bytes will read from the source partitions instead.
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+     */
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.CowMergeOperation getMergeOperations(int index) {
+      return mergeOperations_.get(index);
+    }
+    /**
+     * <pre>
+     * A sorted list of CowMergeOperation. When writing cow, we can choose to
+     * skip writing the raw bytes for these extents. During snapshot merge, the
+     * bytes will read from the source partitions instead.
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+     */
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.CowMergeOperationOrBuilder getMergeOperationsOrBuilder(
+        int index) {
+      return mergeOperations_.get(index);
+    }
+
+    public static final int ESTIMATE_COW_SIZE_FIELD_NUMBER = 19;
+    private long estimateCowSize_ = 0L;
+    /**
+     * <pre>
+     * Estimated size for COW image. This is used by libsnapshot
+     * as a hint. If set to 0, libsnapshot should use alternative
+     * methods for estimating size.
+     * </pre>
+     *
+     * <code>optional uint64 estimate_cow_size = 19;</code>
+     * @return Whether the estimateCowSize field is set.
+     */
+    @java.lang.Override
+    public boolean hasEstimateCowSize() {
+      return ((bitField0_ & 0x00008000) != 0);
+    }
+    /**
+     * <pre>
+     * Estimated size for COW image. This is used by libsnapshot
+     * as a hint. If set to 0, libsnapshot should use alternative
+     * methods for estimating size.
+     * </pre>
+     *
+     * <code>optional uint64 estimate_cow_size = 19;</code>
+     * @return The estimateCowSize.
+     */
+    @java.lang.Override
+    public long getEstimateCowSize() {
+      return estimateCowSize_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -8550,7 +8283,16 @@ public final class UpdateMetadata {
       if (((bitField0_ & 0x00002000) != 0)) {
         output.writeUInt32(16, fecRoots_);
       }
-      unknownFields.writeTo(output);
+      if (((bitField0_ & 0x00004000) != 0)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 17, version_);
+      }
+      for (int i = 0; i < mergeOperations_.size(); i++) {
+        output.writeMessage(18, mergeOperations_.get(i));
+      }
+      if (((bitField0_ & 0x00008000) != 0)) {
+        output.writeUInt64(19, estimateCowSize_);
+      }
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -8619,7 +8361,18 @@ public final class UpdateMetadata {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(16, fecRoots_);
       }
-      size += unknownFields.getSerializedSize();
+      if (((bitField0_ & 0x00004000) != 0)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(17, version_);
+      }
+      for (int i = 0; i < mergeOperations_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(18, mergeOperations_.get(i));
+      }
+      if (((bitField0_ & 0x00008000) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(19, estimateCowSize_);
+      }
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -8708,7 +8461,19 @@ public final class UpdateMetadata {
         if (getFecRoots()
             != other.getFecRoots()) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (hasVersion() != other.hasVersion()) return false;
+      if (hasVersion()) {
+        if (!getVersion()
+            .equals(other.getVersion())) return false;
+      }
+      if (!getMergeOperationsList()
+          .equals(other.getMergeOperationsList())) return false;
+      if (hasEstimateCowSize() != other.hasEstimateCowSize()) return false;
+      if (hasEstimateCowSize()) {
+        if (getEstimateCowSize()
+            != other.getEstimateCowSize()) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -8785,7 +8550,20 @@ public final class UpdateMetadata {
         hash = (37 * hash) + FEC_ROOTS_FIELD_NUMBER;
         hash = (53 * hash) + getFecRoots();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      if (hasVersion()) {
+        hash = (37 * hash) + VERSION_FIELD_NUMBER;
+        hash = (53 * hash) + getVersion().hashCode();
+      }
+      if (getMergeOperationsCount() > 0) {
+        hash = (37 * hash) + MERGE_OPERATIONS_FIELD_NUMBER;
+        hash = (53 * hash) + getMergeOperationsList().hashCode();
+      }
+      if (hasEstimateCowSize()) {
+        hash = (37 * hash) + ESTIMATE_COW_SIZE_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getEstimateCowSize());
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -8925,75 +8703,74 @@ public final class UpdateMetadata {
           getHashTreeExtentFieldBuilder();
           getFecDataExtentFieldBuilder();
           getFecExtentFieldBuilder();
+          getMergeOperationsFieldBuilder();
         }
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         partitionName_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
         runPostinstall_ = false;
-        bitField0_ = (bitField0_ & ~0x00000002);
         postinstallPath_ = "";
-        bitField0_ = (bitField0_ & ~0x00000004);
         filesystemType_ = "";
-        bitField0_ = (bitField0_ & ~0x00000008);
         if (newPartitionSignatureBuilder_ == null) {
           newPartitionSignature_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
         } else {
+          newPartitionSignature_ = null;
           newPartitionSignatureBuilder_.clear();
         }
-        if (oldPartitionInfoBuilder_ == null) {
-          oldPartitionInfo_ = null;
-        } else {
-          oldPartitionInfoBuilder_.clear();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        oldPartitionInfo_ = null;
+        if (oldPartitionInfoBuilder_ != null) {
+          oldPartitionInfoBuilder_.dispose();
+          oldPartitionInfoBuilder_ = null;
         }
-        bitField0_ = (bitField0_ & ~0x00000020);
-        if (newPartitionInfoBuilder_ == null) {
-          newPartitionInfo_ = null;
-        } else {
-          newPartitionInfoBuilder_.clear();
+        newPartitionInfo_ = null;
+        if (newPartitionInfoBuilder_ != null) {
+          newPartitionInfoBuilder_.dispose();
+          newPartitionInfoBuilder_ = null;
         }
-        bitField0_ = (bitField0_ & ~0x00000040);
         if (operationsBuilder_ == null) {
           operations_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000080);
         } else {
+          operations_ = null;
           operationsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000080);
         postinstallOptional_ = false;
-        bitField0_ = (bitField0_ & ~0x00000100);
-        if (hashTreeDataExtentBuilder_ == null) {
-          hashTreeDataExtent_ = null;
-        } else {
-          hashTreeDataExtentBuilder_.clear();
+        hashTreeDataExtent_ = null;
+        if (hashTreeDataExtentBuilder_ != null) {
+          hashTreeDataExtentBuilder_.dispose();
+          hashTreeDataExtentBuilder_ = null;
         }
-        bitField0_ = (bitField0_ & ~0x00000200);
-        if (hashTreeExtentBuilder_ == null) {
-          hashTreeExtent_ = null;
-        } else {
-          hashTreeExtentBuilder_.clear();
+        hashTreeExtent_ = null;
+        if (hashTreeExtentBuilder_ != null) {
+          hashTreeExtentBuilder_.dispose();
+          hashTreeExtentBuilder_ = null;
         }
-        bitField0_ = (bitField0_ & ~0x00000400);
         hashTreeAlgorithm_ = "";
-        bitField0_ = (bitField0_ & ~0x00000800);
         hashTreeSalt_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00001000);
-        if (fecDataExtentBuilder_ == null) {
-          fecDataExtent_ = null;
-        } else {
-          fecDataExtentBuilder_.clear();
+        fecDataExtent_ = null;
+        if (fecDataExtentBuilder_ != null) {
+          fecDataExtentBuilder_.dispose();
+          fecDataExtentBuilder_ = null;
         }
-        bitField0_ = (bitField0_ & ~0x00002000);
-        if (fecExtentBuilder_ == null) {
-          fecExtent_ = null;
-        } else {
-          fecExtentBuilder_.clear();
+        fecExtent_ = null;
+        if (fecExtentBuilder_ != null) {
+          fecExtentBuilder_.dispose();
+          fecExtentBuilder_ = null;
         }
-        bitField0_ = (bitField0_ & ~0x00004000);
         fecRoots_ = 2;
-        bitField0_ = (bitField0_ & ~0x00008000);
+        version_ = "";
+        if (mergeOperationsBuilder_ == null) {
+          mergeOperations_ = java.util.Collections.emptyList();
+        } else {
+          mergeOperations_ = null;
+          mergeOperationsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00020000);
+        estimateCowSize_ = 0L;
         return this;
       }
 
@@ -9020,24 +8797,13 @@ public final class UpdateMetadata {
       @java.lang.Override
       public chromeos_update_engine.UpdateMetadata.PartitionUpdate buildPartial() {
         chromeos_update_engine.UpdateMetadata.PartitionUpdate result = new chromeos_update_engine.UpdateMetadata.PartitionUpdate(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.partitionName_ = partitionName_;
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.runPostinstall_ = runPostinstall_;
-          to_bitField0_ |= 0x00000002;
-        }
-        if (((from_bitField0_ & 0x00000004) != 0)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        result.postinstallPath_ = postinstallPath_;
-        if (((from_bitField0_ & 0x00000008) != 0)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        result.filesystemType_ = filesystemType_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(chromeos_update_engine.UpdateMetadata.PartitionUpdate result) {
         if (newPartitionSignatureBuilder_ == null) {
           if (((bitField0_ & 0x00000010) != 0)) {
             newPartitionSignature_ = java.util.Collections.unmodifiableList(newPartitionSignature_);
@@ -9046,22 +8812,6 @@ public final class UpdateMetadata {
           result.newPartitionSignature_ = newPartitionSignature_;
         } else {
           result.newPartitionSignature_ = newPartitionSignatureBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000020) != 0)) {
-          if (oldPartitionInfoBuilder_ == null) {
-            result.oldPartitionInfo_ = oldPartitionInfo_;
-          } else {
-            result.oldPartitionInfo_ = oldPartitionInfoBuilder_.build();
-          }
-          to_bitField0_ |= 0x00000010;
-        }
-        if (((from_bitField0_ & 0x00000040) != 0)) {
-          if (newPartitionInfoBuilder_ == null) {
-            result.newPartitionInfo_ = newPartitionInfo_;
-          } else {
-            result.newPartitionInfo_ = newPartitionInfoBuilder_.build();
-          }
-          to_bitField0_ |= 0x00000020;
         }
         if (operationsBuilder_ == null) {
           if (((bitField0_ & 0x00000080) != 0)) {
@@ -9072,57 +8822,97 @@ public final class UpdateMetadata {
         } else {
           result.operations_ = operationsBuilder_.build();
         }
+        if (mergeOperationsBuilder_ == null) {
+          if (((bitField0_ & 0x00020000) != 0)) {
+            mergeOperations_ = java.util.Collections.unmodifiableList(mergeOperations_);
+            bitField0_ = (bitField0_ & ~0x00020000);
+          }
+          result.mergeOperations_ = mergeOperations_;
+        } else {
+          result.mergeOperations_ = mergeOperationsBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(chromeos_update_engine.UpdateMetadata.PartitionUpdate result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.partitionName_ = partitionName_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.runPostinstall_ = runPostinstall_;
+          to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.postinstallPath_ = postinstallPath_;
+          to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.filesystemType_ = filesystemType_;
+          to_bitField0_ |= 0x00000008;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.oldPartitionInfo_ = oldPartitionInfoBuilder_ == null
+              ? oldPartitionInfo_
+              : oldPartitionInfoBuilder_.build();
+          to_bitField0_ |= 0x00000010;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.newPartitionInfo_ = newPartitionInfoBuilder_ == null
+              ? newPartitionInfo_
+              : newPartitionInfoBuilder_.build();
+          to_bitField0_ |= 0x00000020;
+        }
         if (((from_bitField0_ & 0x00000100) != 0)) {
           result.postinstallOptional_ = postinstallOptional_;
           to_bitField0_ |= 0x00000040;
         }
         if (((from_bitField0_ & 0x00000200) != 0)) {
-          if (hashTreeDataExtentBuilder_ == null) {
-            result.hashTreeDataExtent_ = hashTreeDataExtent_;
-          } else {
-            result.hashTreeDataExtent_ = hashTreeDataExtentBuilder_.build();
-          }
+          result.hashTreeDataExtent_ = hashTreeDataExtentBuilder_ == null
+              ? hashTreeDataExtent_
+              : hashTreeDataExtentBuilder_.build();
           to_bitField0_ |= 0x00000080;
         }
         if (((from_bitField0_ & 0x00000400) != 0)) {
-          if (hashTreeExtentBuilder_ == null) {
-            result.hashTreeExtent_ = hashTreeExtent_;
-          } else {
-            result.hashTreeExtent_ = hashTreeExtentBuilder_.build();
-          }
+          result.hashTreeExtent_ = hashTreeExtentBuilder_ == null
+              ? hashTreeExtent_
+              : hashTreeExtentBuilder_.build();
           to_bitField0_ |= 0x00000100;
         }
         if (((from_bitField0_ & 0x00000800) != 0)) {
+          result.hashTreeAlgorithm_ = hashTreeAlgorithm_;
           to_bitField0_ |= 0x00000200;
         }
-        result.hashTreeAlgorithm_ = hashTreeAlgorithm_;
         if (((from_bitField0_ & 0x00001000) != 0)) {
+          result.hashTreeSalt_ = hashTreeSalt_;
           to_bitField0_ |= 0x00000400;
         }
-        result.hashTreeSalt_ = hashTreeSalt_;
         if (((from_bitField0_ & 0x00002000) != 0)) {
-          if (fecDataExtentBuilder_ == null) {
-            result.fecDataExtent_ = fecDataExtent_;
-          } else {
-            result.fecDataExtent_ = fecDataExtentBuilder_.build();
-          }
+          result.fecDataExtent_ = fecDataExtentBuilder_ == null
+              ? fecDataExtent_
+              : fecDataExtentBuilder_.build();
           to_bitField0_ |= 0x00000800;
         }
         if (((from_bitField0_ & 0x00004000) != 0)) {
-          if (fecExtentBuilder_ == null) {
-            result.fecExtent_ = fecExtent_;
-          } else {
-            result.fecExtent_ = fecExtentBuilder_.build();
-          }
+          result.fecExtent_ = fecExtentBuilder_ == null
+              ? fecExtent_
+              : fecExtentBuilder_.build();
           to_bitField0_ |= 0x00001000;
         }
         if (((from_bitField0_ & 0x00008000) != 0)) {
+          result.fecRoots_ = fecRoots_;
           to_bitField0_ |= 0x00002000;
         }
-        result.fecRoots_ = fecRoots_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
+        if (((from_bitField0_ & 0x00010000) != 0)) {
+          result.version_ = version_;
+          to_bitField0_ |= 0x00004000;
+        }
+        if (((from_bitField0_ & 0x00040000) != 0)) {
+          result.estimateCowSize_ = estimateCowSize_;
+          to_bitField0_ |= 0x00008000;
+        }
+        result.bitField0_ |= to_bitField0_;
       }
 
       @java.lang.Override
@@ -9170,21 +8960,21 @@ public final class UpdateMetadata {
       public Builder mergeFrom(chromeos_update_engine.UpdateMetadata.PartitionUpdate other) {
         if (other == chromeos_update_engine.UpdateMetadata.PartitionUpdate.getDefaultInstance()) return this;
         if (other.hasPartitionName()) {
-          bitField0_ |= 0x00000001;
           partitionName_ = other.partitionName_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         if (other.hasRunPostinstall()) {
           setRunPostinstall(other.getRunPostinstall());
         }
         if (other.hasPostinstallPath()) {
-          bitField0_ |= 0x00000004;
           postinstallPath_ = other.postinstallPath_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         if (other.hasFilesystemType()) {
-          bitField0_ |= 0x00000008;
           filesystemType_ = other.filesystemType_;
+          bitField0_ |= 0x00000008;
           onChanged();
         }
         if (newPartitionSignatureBuilder_ == null) {
@@ -9205,7 +8995,7 @@ public final class UpdateMetadata {
               newPartitionSignatureBuilder_ = null;
               newPartitionSignature_ = other.newPartitionSignature_;
               bitField0_ = (bitField0_ & ~0x00000010);
-              newPartitionSignatureBuilder_ =
+              newPartitionSignatureBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getNewPartitionSignatureFieldBuilder() : null;
             } else {
@@ -9237,7 +9027,7 @@ public final class UpdateMetadata {
               operationsBuilder_ = null;
               operations_ = other.operations_;
               bitField0_ = (bitField0_ & ~0x00000080);
-              operationsBuilder_ =
+              operationsBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getOperationsFieldBuilder() : null;
             } else {
@@ -9255,8 +9045,8 @@ public final class UpdateMetadata {
           mergeHashTreeExtent(other.getHashTreeExtent());
         }
         if (other.hasHashTreeAlgorithm()) {
-          bitField0_ |= 0x00000800;
           hashTreeAlgorithm_ = other.hashTreeAlgorithm_;
+          bitField0_ |= 0x00000800;
           onChanged();
         }
         if (other.hasHashTreeSalt()) {
@@ -9271,7 +9061,41 @@ public final class UpdateMetadata {
         if (other.hasFecRoots()) {
           setFecRoots(other.getFecRoots());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        if (other.hasVersion()) {
+          version_ = other.version_;
+          bitField0_ |= 0x00010000;
+          onChanged();
+        }
+        if (mergeOperationsBuilder_ == null) {
+          if (!other.mergeOperations_.isEmpty()) {
+            if (mergeOperations_.isEmpty()) {
+              mergeOperations_ = other.mergeOperations_;
+              bitField0_ = (bitField0_ & ~0x00020000);
+            } else {
+              ensureMergeOperationsIsMutable();
+              mergeOperations_.addAll(other.mergeOperations_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.mergeOperations_.isEmpty()) {
+            if (mergeOperationsBuilder_.isEmpty()) {
+              mergeOperationsBuilder_.dispose();
+              mergeOperationsBuilder_ = null;
+              mergeOperations_ = other.mergeOperations_;
+              bitField0_ = (bitField0_ & ~0x00020000);
+              mergeOperationsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getMergeOperationsFieldBuilder() : null;
+            } else {
+              mergeOperationsBuilder_.addAllMessages(other.mergeOperations_);
+            }
+          }
+        }
+        if (other.hasEstimateCowSize()) {
+          setEstimateCowSize(other.getEstimateCowSize());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -9294,17 +9118,161 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        chromeos_update_engine.UpdateMetadata.PartitionUpdate parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                partitionName_ = input.readBytes();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                runPostinstall_ = input.readBool();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 26: {
+                postinstallPath_ = input.readBytes();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                filesystemType_ = input.readBytes();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 42: {
+                chromeos_update_engine.UpdateMetadata.Signatures.Signature m =
+                    input.readMessage(
+                        chromeos_update_engine.UpdateMetadata.Signatures.Signature.PARSER,
+                        extensionRegistry);
+                if (newPartitionSignatureBuilder_ == null) {
+                  ensureNewPartitionSignatureIsMutable();
+                  newPartitionSignature_.add(m);
+                } else {
+                  newPartitionSignatureBuilder_.addMessage(m);
+                }
+                break;
+              } // case 42
+              case 50: {
+                input.readMessage(
+                    getOldPartitionInfoFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
+              case 58: {
+                input.readMessage(
+                    getNewPartitionInfoFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 58
+              case 66: {
+                chromeos_update_engine.UpdateMetadata.InstallOperation m =
+                    input.readMessage(
+                        chromeos_update_engine.UpdateMetadata.InstallOperation.PARSER,
+                        extensionRegistry);
+                if (operationsBuilder_ == null) {
+                  ensureOperationsIsMutable();
+                  operations_.add(m);
+                } else {
+                  operationsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 66
+              case 72: {
+                postinstallOptional_ = input.readBool();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 72
+              case 82: {
+                input.readMessage(
+                    getHashTreeDataExtentFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 82
+              case 90: {
+                input.readMessage(
+                    getHashTreeExtentFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 90
+              case 98: {
+                hashTreeAlgorithm_ = input.readBytes();
+                bitField0_ |= 0x00000800;
+                break;
+              } // case 98
+              case 106: {
+                hashTreeSalt_ = input.readBytes();
+                bitField0_ |= 0x00001000;
+                break;
+              } // case 106
+              case 114: {
+                input.readMessage(
+                    getFecDataExtentFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00002000;
+                break;
+              } // case 114
+              case 122: {
+                input.readMessage(
+                    getFecExtentFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00004000;
+                break;
+              } // case 122
+              case 128: {
+                fecRoots_ = input.readUInt32();
+                bitField0_ |= 0x00008000;
+                break;
+              } // case 128
+              case 138: {
+                version_ = input.readBytes();
+                bitField0_ |= 0x00010000;
+                break;
+              } // case 138
+              case 146: {
+                chromeos_update_engine.UpdateMetadata.CowMergeOperation m =
+                    input.readMessage(
+                        chromeos_update_engine.UpdateMetadata.CowMergeOperation.PARSER,
+                        extensionRegistry);
+                if (mergeOperationsBuilder_ == null) {
+                  ensureMergeOperationsIsMutable();
+                  mergeOperations_.add(m);
+                } else {
+                  mergeOperationsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 146
+              case 152: {
+                estimateCowSize_ = input.readUInt64();
+                bitField0_ |= 0x00040000;
+                break;
+              } // case 152
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (chromeos_update_engine.UpdateMetadata.PartitionUpdate) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -9358,7 +9326,7 @@ public final class UpdateMetadata {
           getPartitionNameBytes() {
         java.lang.Object ref = partitionName_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           partitionName_ = b;
@@ -9379,11 +9347,9 @@ public final class UpdateMetadata {
        */
       public Builder setPartitionName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+        if (value == null) { throw new NullPointerException(); }
         partitionName_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -9397,8 +9363,8 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder clearPartitionName() {
-        bitField0_ = (bitField0_ & ~0x00000001);
         partitionName_ = getDefaultInstance().getPartitionName();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -9414,11 +9380,9 @@ public final class UpdateMetadata {
        */
       public Builder setPartitionNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+        if (value == null) { throw new NullPointerException(); }
         partitionName_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -9464,8 +9428,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setRunPostinstall(boolean value) {
-        bitField0_ |= 0x00000002;
+        
         runPostinstall_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -9541,7 +9506,7 @@ public final class UpdateMetadata {
           getPostinstallPathBytes() {
         java.lang.Object ref = postinstallPath_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           postinstallPath_ = b;
@@ -9564,11 +9529,9 @@ public final class UpdateMetadata {
        */
       public Builder setPostinstallPath(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+        if (value == null) { throw new NullPointerException(); }
         postinstallPath_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -9584,8 +9547,8 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder clearPostinstallPath() {
-        bitField0_ = (bitField0_ & ~0x00000004);
         postinstallPath_ = getDefaultInstance().getPostinstallPath();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -9603,11 +9566,9 @@ public final class UpdateMetadata {
        */
       public Builder setPostinstallPathBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+        if (value == null) { throw new NullPointerException(); }
         postinstallPath_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -9667,7 +9628,7 @@ public final class UpdateMetadata {
           getFilesystemTypeBytes() {
         java.lang.Object ref = filesystemType_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           filesystemType_ = b;
@@ -9690,11 +9651,9 @@ public final class UpdateMetadata {
        */
       public Builder setFilesystemType(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
+        if (value == null) { throw new NullPointerException(); }
         filesystemType_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -9710,8 +9669,8 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder clearFilesystemType() {
-        bitField0_ = (bitField0_ & ~0x00000008);
         filesystemType_ = getDefaultInstance().getFilesystemType();
+        bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
@@ -9729,11 +9688,9 @@ public final class UpdateMetadata {
        */
       public Builder setFilesystemTypeBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
+        if (value == null) { throw new NullPointerException(); }
         filesystemType_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -10038,7 +9995,7 @@ public final class UpdateMetadata {
        *
        * <code>repeated .chromeos_update_engine.Signatures.Signature new_partition_signature = 5;</code>
        */
-      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder>
+      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder> 
            getNewPartitionSignatureOrBuilderList() {
         if (newPartitionSignatureBuilder_ != null) {
           return newPartitionSignatureBuilder_.getMessageOrBuilderList();
@@ -10085,12 +10042,12 @@ public final class UpdateMetadata {
        *
        * <code>repeated .chromeos_update_engine.Signatures.Signature new_partition_signature = 5;</code>
        */
-      public java.util.List<chromeos_update_engine.UpdateMetadata.Signatures.Signature.Builder>
+      public java.util.List<chromeos_update_engine.UpdateMetadata.Signatures.Signature.Builder> 
            getNewPartitionSignatureBuilderList() {
         return getNewPartitionSignatureFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.Signatures.Signature, chromeos_update_engine.UpdateMetadata.Signatures.Signature.Builder, chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder>
+          chromeos_update_engine.UpdateMetadata.Signatures.Signature, chromeos_update_engine.UpdateMetadata.Signatures.Signature.Builder, chromeos_update_engine.UpdateMetadata.Signatures.SignatureOrBuilder> 
           getNewPartitionSignatureFieldBuilder() {
         if (newPartitionSignatureBuilder_ == null) {
           newPartitionSignatureBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
@@ -10134,11 +10091,11 @@ public final class UpdateMetadata {
             throw new NullPointerException();
           }
           oldPartitionInfo_ = value;
-          onChanged();
         } else {
           oldPartitionInfoBuilder_.setMessage(value);
         }
         bitField0_ |= 0x00000020;
+        onChanged();
         return this;
       }
       /**
@@ -10148,11 +10105,11 @@ public final class UpdateMetadata {
           chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder builderForValue) {
         if (oldPartitionInfoBuilder_ == null) {
           oldPartitionInfo_ = builderForValue.build();
-          onChanged();
         } else {
           oldPartitionInfoBuilder_.setMessage(builderForValue.build());
         }
         bitField0_ |= 0x00000020;
+        onChanged();
         return this;
       }
       /**
@@ -10161,31 +10118,30 @@ public final class UpdateMetadata {
       public Builder mergeOldPartitionInfo(chromeos_update_engine.UpdateMetadata.PartitionInfo value) {
         if (oldPartitionInfoBuilder_ == null) {
           if (((bitField0_ & 0x00000020) != 0) &&
-              oldPartitionInfo_ != null &&
-              oldPartitionInfo_ != chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance()) {
-            oldPartitionInfo_ =
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.newBuilder(oldPartitionInfo_).mergeFrom(value).buildPartial();
+            oldPartitionInfo_ != null &&
+            oldPartitionInfo_ != chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance()) {
+            getOldPartitionInfoBuilder().mergeFrom(value);
           } else {
             oldPartitionInfo_ = value;
           }
-          onChanged();
         } else {
           oldPartitionInfoBuilder_.mergeFrom(value);
         }
         bitField0_ |= 0x00000020;
+        onChanged();
         return this;
       }
       /**
        * <code>optional .chromeos_update_engine.PartitionInfo old_partition_info = 6;</code>
        */
       public Builder clearOldPartitionInfo() {
-        if (oldPartitionInfoBuilder_ == null) {
-          oldPartitionInfo_ = null;
-          onChanged();
-        } else {
-          oldPartitionInfoBuilder_.clear();
-        }
         bitField0_ = (bitField0_ & ~0x00000020);
+        oldPartitionInfo_ = null;
+        if (oldPartitionInfoBuilder_ != null) {
+          oldPartitionInfoBuilder_.dispose();
+          oldPartitionInfoBuilder_ = null;
+        }
+        onChanged();
         return this;
       }
       /**
@@ -10211,7 +10167,7 @@ public final class UpdateMetadata {
        * <code>optional .chromeos_update_engine.PartitionInfo old_partition_info = 6;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder>
+          chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder> 
           getOldPartitionInfoFieldBuilder() {
         if (oldPartitionInfoBuilder_ == null) {
           oldPartitionInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -10254,11 +10210,11 @@ public final class UpdateMetadata {
             throw new NullPointerException();
           }
           newPartitionInfo_ = value;
-          onChanged();
         } else {
           newPartitionInfoBuilder_.setMessage(value);
         }
         bitField0_ |= 0x00000040;
+        onChanged();
         return this;
       }
       /**
@@ -10268,11 +10224,11 @@ public final class UpdateMetadata {
           chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder builderForValue) {
         if (newPartitionInfoBuilder_ == null) {
           newPartitionInfo_ = builderForValue.build();
-          onChanged();
         } else {
           newPartitionInfoBuilder_.setMessage(builderForValue.build());
         }
         bitField0_ |= 0x00000040;
+        onChanged();
         return this;
       }
       /**
@@ -10281,31 +10237,30 @@ public final class UpdateMetadata {
       public Builder mergeNewPartitionInfo(chromeos_update_engine.UpdateMetadata.PartitionInfo value) {
         if (newPartitionInfoBuilder_ == null) {
           if (((bitField0_ & 0x00000040) != 0) &&
-              newPartitionInfo_ != null &&
-              newPartitionInfo_ != chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance()) {
-            newPartitionInfo_ =
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.newBuilder(newPartitionInfo_).mergeFrom(value).buildPartial();
+            newPartitionInfo_ != null &&
+            newPartitionInfo_ != chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance()) {
+            getNewPartitionInfoBuilder().mergeFrom(value);
           } else {
             newPartitionInfo_ = value;
           }
-          onChanged();
         } else {
           newPartitionInfoBuilder_.mergeFrom(value);
         }
         bitField0_ |= 0x00000040;
+        onChanged();
         return this;
       }
       /**
        * <code>optional .chromeos_update_engine.PartitionInfo new_partition_info = 7;</code>
        */
       public Builder clearNewPartitionInfo() {
-        if (newPartitionInfoBuilder_ == null) {
-          newPartitionInfo_ = null;
-          onChanged();
-        } else {
-          newPartitionInfoBuilder_.clear();
-        }
         bitField0_ = (bitField0_ & ~0x00000040);
+        newPartitionInfo_ = null;
+        if (newPartitionInfoBuilder_ != null) {
+          newPartitionInfoBuilder_.dispose();
+          newPartitionInfoBuilder_ = null;
+        }
+        onChanged();
         return this;
       }
       /**
@@ -10331,7 +10286,7 @@ public final class UpdateMetadata {
        * <code>optional .chromeos_update_engine.PartitionInfo new_partition_info = 7;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder>
+          chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder> 
           getNewPartitionInfoFieldBuilder() {
         if (newPartitionInfoBuilder_ == null) {
           newPartitionInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -10629,7 +10584,7 @@ public final class UpdateMetadata {
        *
        * <code>repeated .chromeos_update_engine.InstallOperation operations = 8;</code>
        */
-      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>
+      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder> 
            getOperationsOrBuilderList() {
         if (operationsBuilder_ != null) {
           return operationsBuilder_.getMessageOrBuilderList();
@@ -10673,12 +10628,12 @@ public final class UpdateMetadata {
        *
        * <code>repeated .chromeos_update_engine.InstallOperation operations = 8;</code>
        */
-      public java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation.Builder>
+      public java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation.Builder> 
            getOperationsBuilderList() {
         return getOperationsFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.InstallOperation, chromeos_update_engine.UpdateMetadata.InstallOperation.Builder, chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>
+          chromeos_update_engine.UpdateMetadata.InstallOperation, chromeos_update_engine.UpdateMetadata.InstallOperation.Builder, chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder> 
           getOperationsFieldBuilder() {
         if (operationsBuilder_ == null) {
           operationsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
@@ -10730,8 +10685,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setPostinstallOptional(boolean value) {
-        bitField0_ |= 0x00000100;
+        
         postinstallOptional_ = value;
+        bitField0_ |= 0x00000100;
         onChanged();
         return this;
       }
@@ -10793,11 +10749,11 @@ public final class UpdateMetadata {
             throw new NullPointerException();
           }
           hashTreeDataExtent_ = value;
-          onChanged();
         } else {
           hashTreeDataExtentBuilder_.setMessage(value);
         }
         bitField0_ |= 0x00000200;
+        onChanged();
         return this;
       }
       /**
@@ -10811,11 +10767,11 @@ public final class UpdateMetadata {
           chromeos_update_engine.UpdateMetadata.Extent.Builder builderForValue) {
         if (hashTreeDataExtentBuilder_ == null) {
           hashTreeDataExtent_ = builderForValue.build();
-          onChanged();
         } else {
           hashTreeDataExtentBuilder_.setMessage(builderForValue.build());
         }
         bitField0_ |= 0x00000200;
+        onChanged();
         return this;
       }
       /**
@@ -10828,18 +10784,17 @@ public final class UpdateMetadata {
       public Builder mergeHashTreeDataExtent(chromeos_update_engine.UpdateMetadata.Extent value) {
         if (hashTreeDataExtentBuilder_ == null) {
           if (((bitField0_ & 0x00000200) != 0) &&
-              hashTreeDataExtent_ != null &&
-              hashTreeDataExtent_ != chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance()) {
-            hashTreeDataExtent_ =
-              chromeos_update_engine.UpdateMetadata.Extent.newBuilder(hashTreeDataExtent_).mergeFrom(value).buildPartial();
+            hashTreeDataExtent_ != null &&
+            hashTreeDataExtent_ != chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance()) {
+            getHashTreeDataExtentBuilder().mergeFrom(value);
           } else {
             hashTreeDataExtent_ = value;
           }
-          onChanged();
         } else {
           hashTreeDataExtentBuilder_.mergeFrom(value);
         }
         bitField0_ |= 0x00000200;
+        onChanged();
         return this;
       }
       /**
@@ -10850,13 +10805,13 @@ public final class UpdateMetadata {
        * <code>optional .chromeos_update_engine.Extent hash_tree_data_extent = 10;</code>
        */
       public Builder clearHashTreeDataExtent() {
-        if (hashTreeDataExtentBuilder_ == null) {
-          hashTreeDataExtent_ = null;
-          onChanged();
-        } else {
-          hashTreeDataExtentBuilder_.clear();
-        }
         bitField0_ = (bitField0_ & ~0x00000200);
+        hashTreeDataExtent_ = null;
+        if (hashTreeDataExtentBuilder_ != null) {
+          hashTreeDataExtentBuilder_.dispose();
+          hashTreeDataExtentBuilder_ = null;
+        }
+        onChanged();
         return this;
       }
       /**
@@ -10894,7 +10849,7 @@ public final class UpdateMetadata {
        * <code>optional .chromeos_update_engine.Extent hash_tree_data_extent = 10;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>
+          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
           getHashTreeDataExtentFieldBuilder() {
         if (hashTreeDataExtentBuilder_ == null) {
           hashTreeDataExtentBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -10949,11 +10904,11 @@ public final class UpdateMetadata {
             throw new NullPointerException();
           }
           hashTreeExtent_ = value;
-          onChanged();
         } else {
           hashTreeExtentBuilder_.setMessage(value);
         }
         bitField0_ |= 0x00000400;
+        onChanged();
         return this;
       }
       /**
@@ -10967,11 +10922,11 @@ public final class UpdateMetadata {
           chromeos_update_engine.UpdateMetadata.Extent.Builder builderForValue) {
         if (hashTreeExtentBuilder_ == null) {
           hashTreeExtent_ = builderForValue.build();
-          onChanged();
         } else {
           hashTreeExtentBuilder_.setMessage(builderForValue.build());
         }
         bitField0_ |= 0x00000400;
+        onChanged();
         return this;
       }
       /**
@@ -10984,18 +10939,17 @@ public final class UpdateMetadata {
       public Builder mergeHashTreeExtent(chromeos_update_engine.UpdateMetadata.Extent value) {
         if (hashTreeExtentBuilder_ == null) {
           if (((bitField0_ & 0x00000400) != 0) &&
-              hashTreeExtent_ != null &&
-              hashTreeExtent_ != chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance()) {
-            hashTreeExtent_ =
-              chromeos_update_engine.UpdateMetadata.Extent.newBuilder(hashTreeExtent_).mergeFrom(value).buildPartial();
+            hashTreeExtent_ != null &&
+            hashTreeExtent_ != chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance()) {
+            getHashTreeExtentBuilder().mergeFrom(value);
           } else {
             hashTreeExtent_ = value;
           }
-          onChanged();
         } else {
           hashTreeExtentBuilder_.mergeFrom(value);
         }
         bitField0_ |= 0x00000400;
+        onChanged();
         return this;
       }
       /**
@@ -11006,13 +10960,13 @@ public final class UpdateMetadata {
        * <code>optional .chromeos_update_engine.Extent hash_tree_extent = 11;</code>
        */
       public Builder clearHashTreeExtent() {
-        if (hashTreeExtentBuilder_ == null) {
-          hashTreeExtent_ = null;
-          onChanged();
-        } else {
-          hashTreeExtentBuilder_.clear();
-        }
         bitField0_ = (bitField0_ & ~0x00000400);
+        hashTreeExtent_ = null;
+        if (hashTreeExtentBuilder_ != null) {
+          hashTreeExtentBuilder_.dispose();
+          hashTreeExtentBuilder_ = null;
+        }
+        onChanged();
         return this;
       }
       /**
@@ -11050,7 +11004,7 @@ public final class UpdateMetadata {
        * <code>optional .chromeos_update_engine.Extent hash_tree_extent = 11;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>
+          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
           getHashTreeExtentFieldBuilder() {
         if (hashTreeExtentBuilder_ == null) {
           hashTreeExtentBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -11109,7 +11063,7 @@ public final class UpdateMetadata {
           getHashTreeAlgorithmBytes() {
         java.lang.Object ref = hashTreeAlgorithm_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           hashTreeAlgorithm_ = b;
@@ -11129,11 +11083,9 @@ public final class UpdateMetadata {
        */
       public Builder setHashTreeAlgorithm(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000800;
+        if (value == null) { throw new NullPointerException(); }
         hashTreeAlgorithm_ = value;
+        bitField0_ |= 0x00000800;
         onChanged();
         return this;
       }
@@ -11146,8 +11098,8 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder clearHashTreeAlgorithm() {
-        bitField0_ = (bitField0_ & ~0x00000800);
         hashTreeAlgorithm_ = getDefaultInstance().getHashTreeAlgorithm();
+        bitField0_ = (bitField0_ & ~0x00000800);
         onChanged();
         return this;
       }
@@ -11162,11 +11114,9 @@ public final class UpdateMetadata {
        */
       public Builder setHashTreeAlgorithmBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000800;
+        if (value == null) { throw new NullPointerException(); }
         hashTreeAlgorithm_ = value;
+        bitField0_ |= 0x00000800;
         onChanged();
         return this;
       }
@@ -11206,11 +11156,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setHashTreeSalt(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00001000;
+        if (value == null) { throw new NullPointerException(); }
         hashTreeSalt_ = value;
+        bitField0_ |= 0x00001000;
         onChanged();
         return this;
       }
@@ -11271,11 +11219,11 @@ public final class UpdateMetadata {
             throw new NullPointerException();
           }
           fecDataExtent_ = value;
-          onChanged();
         } else {
           fecDataExtentBuilder_.setMessage(value);
         }
         bitField0_ |= 0x00002000;
+        onChanged();
         return this;
       }
       /**
@@ -11289,11 +11237,11 @@ public final class UpdateMetadata {
           chromeos_update_engine.UpdateMetadata.Extent.Builder builderForValue) {
         if (fecDataExtentBuilder_ == null) {
           fecDataExtent_ = builderForValue.build();
-          onChanged();
         } else {
           fecDataExtentBuilder_.setMessage(builderForValue.build());
         }
         bitField0_ |= 0x00002000;
+        onChanged();
         return this;
       }
       /**
@@ -11306,18 +11254,17 @@ public final class UpdateMetadata {
       public Builder mergeFecDataExtent(chromeos_update_engine.UpdateMetadata.Extent value) {
         if (fecDataExtentBuilder_ == null) {
           if (((bitField0_ & 0x00002000) != 0) &&
-              fecDataExtent_ != null &&
-              fecDataExtent_ != chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance()) {
-            fecDataExtent_ =
-              chromeos_update_engine.UpdateMetadata.Extent.newBuilder(fecDataExtent_).mergeFrom(value).buildPartial();
+            fecDataExtent_ != null &&
+            fecDataExtent_ != chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance()) {
+            getFecDataExtentBuilder().mergeFrom(value);
           } else {
             fecDataExtent_ = value;
           }
-          onChanged();
         } else {
           fecDataExtentBuilder_.mergeFrom(value);
         }
         bitField0_ |= 0x00002000;
+        onChanged();
         return this;
       }
       /**
@@ -11328,13 +11275,13 @@ public final class UpdateMetadata {
        * <code>optional .chromeos_update_engine.Extent fec_data_extent = 14;</code>
        */
       public Builder clearFecDataExtent() {
-        if (fecDataExtentBuilder_ == null) {
-          fecDataExtent_ = null;
-          onChanged();
-        } else {
-          fecDataExtentBuilder_.clear();
-        }
         bitField0_ = (bitField0_ & ~0x00002000);
+        fecDataExtent_ = null;
+        if (fecDataExtentBuilder_ != null) {
+          fecDataExtentBuilder_.dispose();
+          fecDataExtentBuilder_ = null;
+        }
+        onChanged();
         return this;
       }
       /**
@@ -11372,7 +11319,7 @@ public final class UpdateMetadata {
        * <code>optional .chromeos_update_engine.Extent fec_data_extent = 14;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>
+          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
           getFecDataExtentFieldBuilder() {
         if (fecDataExtentBuilder_ == null) {
           fecDataExtentBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -11427,11 +11374,11 @@ public final class UpdateMetadata {
             throw new NullPointerException();
           }
           fecExtent_ = value;
-          onChanged();
         } else {
           fecExtentBuilder_.setMessage(value);
         }
         bitField0_ |= 0x00004000;
+        onChanged();
         return this;
       }
       /**
@@ -11445,11 +11392,11 @@ public final class UpdateMetadata {
           chromeos_update_engine.UpdateMetadata.Extent.Builder builderForValue) {
         if (fecExtentBuilder_ == null) {
           fecExtent_ = builderForValue.build();
-          onChanged();
         } else {
           fecExtentBuilder_.setMessage(builderForValue.build());
         }
         bitField0_ |= 0x00004000;
+        onChanged();
         return this;
       }
       /**
@@ -11462,18 +11409,17 @@ public final class UpdateMetadata {
       public Builder mergeFecExtent(chromeos_update_engine.UpdateMetadata.Extent value) {
         if (fecExtentBuilder_ == null) {
           if (((bitField0_ & 0x00004000) != 0) &&
-              fecExtent_ != null &&
-              fecExtent_ != chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance()) {
-            fecExtent_ =
-              chromeos_update_engine.UpdateMetadata.Extent.newBuilder(fecExtent_).mergeFrom(value).buildPartial();
+            fecExtent_ != null &&
+            fecExtent_ != chromeos_update_engine.UpdateMetadata.Extent.getDefaultInstance()) {
+            getFecExtentBuilder().mergeFrom(value);
           } else {
             fecExtent_ = value;
           }
-          onChanged();
         } else {
           fecExtentBuilder_.mergeFrom(value);
         }
         bitField0_ |= 0x00004000;
+        onChanged();
         return this;
       }
       /**
@@ -11484,13 +11430,13 @@ public final class UpdateMetadata {
        * <code>optional .chromeos_update_engine.Extent fec_extent = 15;</code>
        */
       public Builder clearFecExtent() {
-        if (fecExtentBuilder_ == null) {
-          fecExtent_ = null;
-          onChanged();
-        } else {
-          fecExtentBuilder_.clear();
-        }
         bitField0_ = (bitField0_ & ~0x00004000);
+        fecExtent_ = null;
+        if (fecExtentBuilder_ != null) {
+          fecExtentBuilder_.dispose();
+          fecExtentBuilder_ = null;
+        }
+        onChanged();
         return this;
       }
       /**
@@ -11528,7 +11474,7 @@ public final class UpdateMetadata {
        * <code>optional .chromeos_update_engine.Extent fec_extent = 15;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder>
+          chromeos_update_engine.UpdateMetadata.Extent, chromeos_update_engine.UpdateMetadata.Extent.Builder, chromeos_update_engine.UpdateMetadata.ExtentOrBuilder> 
           getFecExtentFieldBuilder() {
         if (fecExtentBuilder_ == null) {
           fecExtentBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -11576,8 +11522,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setFecRoots(int value) {
-        bitField0_ |= 0x00008000;
+        
         fecRoots_ = value;
+        bitField0_ |= 0x00008000;
         onChanged();
         return this;
       }
@@ -11592,6 +11539,534 @@ public final class UpdateMetadata {
       public Builder clearFecRoots() {
         bitField0_ = (bitField0_ & ~0x00008000);
         fecRoots_ = 2;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object version_ = "";
+      /**
+       * <pre>
+       * Per-partition version used for downgrade detection, added
+       * as an effort to support partial updates. For most partitions,
+       * this is the build timestamp.
+       * </pre>
+       *
+       * <code>optional string version = 17;</code>
+       * @return Whether the version field is set.
+       */
+      public boolean hasVersion() {
+        return ((bitField0_ & 0x00010000) != 0);
+      }
+      /**
+       * <pre>
+       * Per-partition version used for downgrade detection, added
+       * as an effort to support partial updates. For most partitions,
+       * this is the build timestamp.
+       * </pre>
+       *
+       * <code>optional string version = 17;</code>
+       * @return The version.
+       */
+      public java.lang.String getVersion() {
+        java.lang.Object ref = version_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            version_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Per-partition version used for downgrade detection, added
+       * as an effort to support partial updates. For most partitions,
+       * this is the build timestamp.
+       * </pre>
+       *
+       * <code>optional string version = 17;</code>
+       * @return The bytes for version.
+       */
+      public com.google.protobuf.ByteString
+          getVersionBytes() {
+        java.lang.Object ref = version_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          version_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Per-partition version used for downgrade detection, added
+       * as an effort to support partial updates. For most partitions,
+       * this is the build timestamp.
+       * </pre>
+       *
+       * <code>optional string version = 17;</code>
+       * @param value The version to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVersion(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        version_ = value;
+        bitField0_ |= 0x00010000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Per-partition version used for downgrade detection, added
+       * as an effort to support partial updates. For most partitions,
+       * this is the build timestamp.
+       * </pre>
+       *
+       * <code>optional string version = 17;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVersion() {
+        version_ = getDefaultInstance().getVersion();
+        bitField0_ = (bitField0_ & ~0x00010000);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Per-partition version used for downgrade detection, added
+       * as an effort to support partial updates. For most partitions,
+       * this is the build timestamp.
+       * </pre>
+       *
+       * <code>optional string version = 17;</code>
+       * @param value The bytes for version to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        version_ = value;
+        bitField0_ |= 0x00010000;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<chromeos_update_engine.UpdateMetadata.CowMergeOperation> mergeOperations_ =
+        java.util.Collections.emptyList();
+      private void ensureMergeOperationsIsMutable() {
+        if (!((bitField0_ & 0x00020000) != 0)) {
+          mergeOperations_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.CowMergeOperation>(mergeOperations_);
+          bitField0_ |= 0x00020000;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          chromeos_update_engine.UpdateMetadata.CowMergeOperation, chromeos_update_engine.UpdateMetadata.CowMergeOperation.Builder, chromeos_update_engine.UpdateMetadata.CowMergeOperationOrBuilder> mergeOperationsBuilder_;
+
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public java.util.List<chromeos_update_engine.UpdateMetadata.CowMergeOperation> getMergeOperationsList() {
+        if (mergeOperationsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(mergeOperations_);
+        } else {
+          return mergeOperationsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public int getMergeOperationsCount() {
+        if (mergeOperationsBuilder_ == null) {
+          return mergeOperations_.size();
+        } else {
+          return mergeOperationsBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.CowMergeOperation getMergeOperations(int index) {
+        if (mergeOperationsBuilder_ == null) {
+          return mergeOperations_.get(index);
+        } else {
+          return mergeOperationsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public Builder setMergeOperations(
+          int index, chromeos_update_engine.UpdateMetadata.CowMergeOperation value) {
+        if (mergeOperationsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMergeOperationsIsMutable();
+          mergeOperations_.set(index, value);
+          onChanged();
+        } else {
+          mergeOperationsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public Builder setMergeOperations(
+          int index, chromeos_update_engine.UpdateMetadata.CowMergeOperation.Builder builderForValue) {
+        if (mergeOperationsBuilder_ == null) {
+          ensureMergeOperationsIsMutable();
+          mergeOperations_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          mergeOperationsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public Builder addMergeOperations(chromeos_update_engine.UpdateMetadata.CowMergeOperation value) {
+        if (mergeOperationsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMergeOperationsIsMutable();
+          mergeOperations_.add(value);
+          onChanged();
+        } else {
+          mergeOperationsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public Builder addMergeOperations(
+          int index, chromeos_update_engine.UpdateMetadata.CowMergeOperation value) {
+        if (mergeOperationsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMergeOperationsIsMutable();
+          mergeOperations_.add(index, value);
+          onChanged();
+        } else {
+          mergeOperationsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public Builder addMergeOperations(
+          chromeos_update_engine.UpdateMetadata.CowMergeOperation.Builder builderForValue) {
+        if (mergeOperationsBuilder_ == null) {
+          ensureMergeOperationsIsMutable();
+          mergeOperations_.add(builderForValue.build());
+          onChanged();
+        } else {
+          mergeOperationsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public Builder addMergeOperations(
+          int index, chromeos_update_engine.UpdateMetadata.CowMergeOperation.Builder builderForValue) {
+        if (mergeOperationsBuilder_ == null) {
+          ensureMergeOperationsIsMutable();
+          mergeOperations_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          mergeOperationsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public Builder addAllMergeOperations(
+          java.lang.Iterable<? extends chromeos_update_engine.UpdateMetadata.CowMergeOperation> values) {
+        if (mergeOperationsBuilder_ == null) {
+          ensureMergeOperationsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, mergeOperations_);
+          onChanged();
+        } else {
+          mergeOperationsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public Builder clearMergeOperations() {
+        if (mergeOperationsBuilder_ == null) {
+          mergeOperations_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00020000);
+          onChanged();
+        } else {
+          mergeOperationsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public Builder removeMergeOperations(int index) {
+        if (mergeOperationsBuilder_ == null) {
+          ensureMergeOperationsIsMutable();
+          mergeOperations_.remove(index);
+          onChanged();
+        } else {
+          mergeOperationsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.CowMergeOperation.Builder getMergeOperationsBuilder(
+          int index) {
+        return getMergeOperationsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.CowMergeOperationOrBuilder getMergeOperationsOrBuilder(
+          int index) {
+        if (mergeOperationsBuilder_ == null) {
+          return mergeOperations_.get(index);  } else {
+          return mergeOperationsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.CowMergeOperationOrBuilder> 
+           getMergeOperationsOrBuilderList() {
+        if (mergeOperationsBuilder_ != null) {
+          return mergeOperationsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(mergeOperations_);
+        }
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.CowMergeOperation.Builder addMergeOperationsBuilder() {
+        return getMergeOperationsFieldBuilder().addBuilder(
+            chromeos_update_engine.UpdateMetadata.CowMergeOperation.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.CowMergeOperation.Builder addMergeOperationsBuilder(
+          int index) {
+        return getMergeOperationsFieldBuilder().addBuilder(
+            index, chromeos_update_engine.UpdateMetadata.CowMergeOperation.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * A sorted list of CowMergeOperation. When writing cow, we can choose to
+       * skip writing the raw bytes for these extents. During snapshot merge, the
+       * bytes will read from the source partitions instead.
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.CowMergeOperation merge_operations = 18;</code>
+       */
+      public java.util.List<chromeos_update_engine.UpdateMetadata.CowMergeOperation.Builder> 
+           getMergeOperationsBuilderList() {
+        return getMergeOperationsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          chromeos_update_engine.UpdateMetadata.CowMergeOperation, chromeos_update_engine.UpdateMetadata.CowMergeOperation.Builder, chromeos_update_engine.UpdateMetadata.CowMergeOperationOrBuilder> 
+          getMergeOperationsFieldBuilder() {
+        if (mergeOperationsBuilder_ == null) {
+          mergeOperationsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              chromeos_update_engine.UpdateMetadata.CowMergeOperation, chromeos_update_engine.UpdateMetadata.CowMergeOperation.Builder, chromeos_update_engine.UpdateMetadata.CowMergeOperationOrBuilder>(
+                  mergeOperations_,
+                  ((bitField0_ & 0x00020000) != 0),
+                  getParentForChildren(),
+                  isClean());
+          mergeOperations_ = null;
+        }
+        return mergeOperationsBuilder_;
+      }
+
+      private long estimateCowSize_ ;
+      /**
+       * <pre>
+       * Estimated size for COW image. This is used by libsnapshot
+       * as a hint. If set to 0, libsnapshot should use alternative
+       * methods for estimating size.
+       * </pre>
+       *
+       * <code>optional uint64 estimate_cow_size = 19;</code>
+       * @return Whether the estimateCowSize field is set.
+       */
+      @java.lang.Override
+      public boolean hasEstimateCowSize() {
+        return ((bitField0_ & 0x00040000) != 0);
+      }
+      /**
+       * <pre>
+       * Estimated size for COW image. This is used by libsnapshot
+       * as a hint. If set to 0, libsnapshot should use alternative
+       * methods for estimating size.
+       * </pre>
+       *
+       * <code>optional uint64 estimate_cow_size = 19;</code>
+       * @return The estimateCowSize.
+       */
+      @java.lang.Override
+      public long getEstimateCowSize() {
+        return estimateCowSize_;
+      }
+      /**
+       * <pre>
+       * Estimated size for COW image. This is used by libsnapshot
+       * as a hint. If set to 0, libsnapshot should use alternative
+       * methods for estimating size.
+       * </pre>
+       *
+       * <code>optional uint64 estimate_cow_size = 19;</code>
+       * @param value The estimateCowSize to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEstimateCowSize(long value) {
+        
+        estimateCowSize_ = value;
+        bitField0_ |= 0x00040000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Estimated size for COW image. This is used by libsnapshot
+       * as a hint. If set to 0, libsnapshot should use alternative
+       * methods for estimating size.
+       * </pre>
+       *
+       * <code>optional uint64 estimate_cow_size = 19;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEstimateCowSize() {
+        bitField0_ = (bitField0_ & ~0x00040000);
+        estimateCowSize_ = 0L;
         onChanged();
         return this;
       }
@@ -11628,7 +12103,18 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new PartitionUpdate(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -11772,67 +12258,6 @@ public final class UpdateMetadata {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private DynamicPartitionGroup(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              name_ = bs;
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              size_ = input.readUInt64();
-              break;
-            }
-            case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                partitionNames_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              partitionNames_.add(bs);
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000004) != 0)) {
-          partitionNames_ = partitionNames_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_DynamicPartitionGroup_descriptor;
@@ -11848,7 +12273,8 @@ public final class UpdateMetadata {
 
     private int bitField0_;
     public static final int NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object name_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
     /**
      * <pre>
      * Name of the group.
@@ -11875,7 +12301,7 @@ public final class UpdateMetadata {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -11897,7 +12323,7 @@ public final class UpdateMetadata {
         getNameBytes() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         name_ = b;
@@ -11908,7 +12334,7 @@ public final class UpdateMetadata {
     }
 
     public static final int SIZE_FIELD_NUMBER = 2;
-    private long size_;
+    private long size_ = 0L;
     /**
      * <pre>
      * Maximum size of the group. The sum of sizes of all partitions in the group
@@ -11937,6 +12363,7 @@ public final class UpdateMetadata {
     }
 
     public static final int PARTITION_NAMES_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
     private com.google.protobuf.LazyStringList partitionNames_;
     /**
      * <pre>
@@ -12014,7 +12441,7 @@ public final class UpdateMetadata {
       for (int i = 0; i < partitionNames_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, partitionNames_.getRaw(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -12038,7 +12465,7 @@ public final class UpdateMetadata {
         size += dataSize;
         size += 1 * getPartitionNamesList().size();
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -12065,7 +12492,7 @@ public final class UpdateMetadata {
       }
       if (!getPartitionNamesList()
           .equals(other.getPartitionNamesList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -12089,7 +12516,7 @@ public final class UpdateMetadata {
         hash = (37 * hash) + PARTITION_NAMES_FIELD_NUMBER;
         hash = (53 * hash) + getPartitionNamesList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -12206,26 +12633,20 @@ public final class UpdateMetadata {
 
       // Construct using chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         name_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
         size_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000002);
         partitionNames_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000004);
         return this;
@@ -12254,24 +12675,32 @@ public final class UpdateMetadata {
       @java.lang.Override
       public chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup buildPartial() {
         chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup result = new chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.name_ = name_;
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.size_ = size_;
-          to_bitField0_ |= 0x00000002;
-        }
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup result) {
         if (((bitField0_ & 0x00000004) != 0)) {
           partitionNames_ = partitionNames_.getUnmodifiableView();
           bitField0_ = (bitField0_ & ~0x00000004);
         }
         result.partitionNames_ = partitionNames_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.name_ = name_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.size_ = size_;
+          to_bitField0_ |= 0x00000002;
+        }
+        result.bitField0_ |= to_bitField0_;
       }
 
       @java.lang.Override
@@ -12319,8 +12748,8 @@ public final class UpdateMetadata {
       public Builder mergeFrom(chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup other) {
         if (other == chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup.getDefaultInstance()) return this;
         if (other.hasName()) {
-          bitField0_ |= 0x00000001;
           name_ = other.name_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         if (other.hasSize()) {
@@ -12336,7 +12765,7 @@ public final class UpdateMetadata {
           }
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -12354,17 +12783,46 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readBytes();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                size_ = input.readUInt64();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 26: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                ensurePartitionNamesIsMutable();
+                partitionNames_.add(bs);
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -12415,7 +12873,7 @@ public final class UpdateMetadata {
           getNameBytes() {
         java.lang.Object ref = name_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           name_ = b;
@@ -12435,11 +12893,9 @@ public final class UpdateMetadata {
        */
       public Builder setName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+        if (value == null) { throw new NullPointerException(); }
         name_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -12452,8 +12908,8 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder clearName() {
-        bitField0_ = (bitField0_ & ~0x00000001);
         name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -12468,11 +12924,9 @@ public final class UpdateMetadata {
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+        if (value == null) { throw new NullPointerException(); }
         name_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -12515,8 +12969,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setSize(long value) {
-        bitField0_ |= 0x00000002;
+        
         size_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -12603,10 +13058,8 @@ public final class UpdateMetadata {
        */
       public Builder setPartitionNames(
           int index, java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensurePartitionNamesIsMutable();
+        if (value == null) { throw new NullPointerException(); }
+        ensurePartitionNamesIsMutable();
         partitionNames_.set(index, value);
         onChanged();
         return this;
@@ -12622,10 +13075,8 @@ public final class UpdateMetadata {
        */
       public Builder addPartitionNames(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensurePartitionNamesIsMutable();
+        if (value == null) { throw new NullPointerException(); }
+        ensurePartitionNamesIsMutable();
         partitionNames_.add(value);
         onChanged();
         return this;
@@ -12672,10 +13123,8 @@ public final class UpdateMetadata {
        */
       public Builder addPartitionNamesBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensurePartitionNamesIsMutable();
+        if (value == null) { throw new NullPointerException(); }
+        ensurePartitionNamesIsMutable();
         partitionNames_.add(value);
         onChanged();
         return this;
@@ -12713,7 +13162,18 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DynamicPartitionGroup(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -12728,6 +13188,616 @@ public final class UpdateMetadata {
 
     @java.lang.Override
     public chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface VABCFeatureSetOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:chromeos_update_engine.VABCFeatureSet)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional bool threaded = 1;</code>
+     * @return Whether the threaded field is set.
+     */
+    boolean hasThreaded();
+    /**
+     * <code>optional bool threaded = 1;</code>
+     * @return The threaded.
+     */
+    boolean getThreaded();
+
+    /**
+     * <code>optional bool batch_writes = 2;</code>
+     * @return Whether the batchWrites field is set.
+     */
+    boolean hasBatchWrites();
+    /**
+     * <code>optional bool batch_writes = 2;</code>
+     * @return The batchWrites.
+     */
+    boolean getBatchWrites();
+  }
+  /**
+   * Protobuf type {@code chromeos_update_engine.VABCFeatureSet}
+   */
+  public static final class VABCFeatureSet extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:chromeos_update_engine.VABCFeatureSet)
+      VABCFeatureSetOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use VABCFeatureSet.newBuilder() to construct.
+    private VABCFeatureSet(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private VABCFeatureSet() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new VABCFeatureSet();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_VABCFeatureSet_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_VABCFeatureSet_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              chromeos_update_engine.UpdateMetadata.VABCFeatureSet.class, chromeos_update_engine.UpdateMetadata.VABCFeatureSet.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int THREADED_FIELD_NUMBER = 1;
+    private boolean threaded_ = false;
+    /**
+     * <code>optional bool threaded = 1;</code>
+     * @return Whether the threaded field is set.
+     */
+    @java.lang.Override
+    public boolean hasThreaded() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional bool threaded = 1;</code>
+     * @return The threaded.
+     */
+    @java.lang.Override
+    public boolean getThreaded() {
+      return threaded_;
+    }
+
+    public static final int BATCH_WRITES_FIELD_NUMBER = 2;
+    private boolean batchWrites_ = false;
+    /**
+     * <code>optional bool batch_writes = 2;</code>
+     * @return Whether the batchWrites field is set.
+     */
+    @java.lang.Override
+    public boolean hasBatchWrites() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>optional bool batch_writes = 2;</code>
+     * @return The batchWrites.
+     */
+    @java.lang.Override
+    public boolean getBatchWrites() {
+      return batchWrites_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeBool(1, threaded_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeBool(2, batchWrites_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(1, threaded_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, batchWrites_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof chromeos_update_engine.UpdateMetadata.VABCFeatureSet)) {
+        return super.equals(obj);
+      }
+      chromeos_update_engine.UpdateMetadata.VABCFeatureSet other = (chromeos_update_engine.UpdateMetadata.VABCFeatureSet) obj;
+
+      if (hasThreaded() != other.hasThreaded()) return false;
+      if (hasThreaded()) {
+        if (getThreaded()
+            != other.getThreaded()) return false;
+      }
+      if (hasBatchWrites() != other.hasBatchWrites()) return false;
+      if (hasBatchWrites()) {
+        if (getBatchWrites()
+            != other.getBatchWrites()) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasThreaded()) {
+        hash = (37 * hash) + THREADED_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getThreaded());
+      }
+      if (hasBatchWrites()) {
+        hash = (37 * hash) + BATCH_WRITES_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getBatchWrites());
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static chromeos_update_engine.UpdateMetadata.VABCFeatureSet parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static chromeos_update_engine.UpdateMetadata.VABCFeatureSet parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.VABCFeatureSet parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static chromeos_update_engine.UpdateMetadata.VABCFeatureSet parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.VABCFeatureSet parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static chromeos_update_engine.UpdateMetadata.VABCFeatureSet parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.VABCFeatureSet parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static chromeos_update_engine.UpdateMetadata.VABCFeatureSet parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.VABCFeatureSet parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static chromeos_update_engine.UpdateMetadata.VABCFeatureSet parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.VABCFeatureSet parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static chromeos_update_engine.UpdateMetadata.VABCFeatureSet parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(chromeos_update_engine.UpdateMetadata.VABCFeatureSet prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code chromeos_update_engine.VABCFeatureSet}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:chromeos_update_engine.VABCFeatureSet)
+        chromeos_update_engine.UpdateMetadata.VABCFeatureSetOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_VABCFeatureSet_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_VABCFeatureSet_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                chromeos_update_engine.UpdateMetadata.VABCFeatureSet.class, chromeos_update_engine.UpdateMetadata.VABCFeatureSet.Builder.class);
+      }
+
+      // Construct using chromeos_update_engine.UpdateMetadata.VABCFeatureSet.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        threaded_ = false;
+        batchWrites_ = false;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_VABCFeatureSet_descriptor;
+      }
+
+      @java.lang.Override
+      public chromeos_update_engine.UpdateMetadata.VABCFeatureSet getDefaultInstanceForType() {
+        return chromeos_update_engine.UpdateMetadata.VABCFeatureSet.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public chromeos_update_engine.UpdateMetadata.VABCFeatureSet build() {
+        chromeos_update_engine.UpdateMetadata.VABCFeatureSet result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public chromeos_update_engine.UpdateMetadata.VABCFeatureSet buildPartial() {
+        chromeos_update_engine.UpdateMetadata.VABCFeatureSet result = new chromeos_update_engine.UpdateMetadata.VABCFeatureSet(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(chromeos_update_engine.UpdateMetadata.VABCFeatureSet result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.threaded_ = threaded_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.batchWrites_ = batchWrites_;
+          to_bitField0_ |= 0x00000002;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof chromeos_update_engine.UpdateMetadata.VABCFeatureSet) {
+          return mergeFrom((chromeos_update_engine.UpdateMetadata.VABCFeatureSet)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(chromeos_update_engine.UpdateMetadata.VABCFeatureSet other) {
+        if (other == chromeos_update_engine.UpdateMetadata.VABCFeatureSet.getDefaultInstance()) return this;
+        if (other.hasThreaded()) {
+          setThreaded(other.getThreaded());
+        }
+        if (other.hasBatchWrites()) {
+          setBatchWrites(other.getBatchWrites());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                threaded_ = input.readBool();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                batchWrites_ = input.readBool();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private boolean threaded_ ;
+      /**
+       * <code>optional bool threaded = 1;</code>
+       * @return Whether the threaded field is set.
+       */
+      @java.lang.Override
+      public boolean hasThreaded() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional bool threaded = 1;</code>
+       * @return The threaded.
+       */
+      @java.lang.Override
+      public boolean getThreaded() {
+        return threaded_;
+      }
+      /**
+       * <code>optional bool threaded = 1;</code>
+       * @param value The threaded to set.
+       * @return This builder for chaining.
+       */
+      public Builder setThreaded(boolean value) {
+        
+        threaded_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool threaded = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearThreaded() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        threaded_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean batchWrites_ ;
+      /**
+       * <code>optional bool batch_writes = 2;</code>
+       * @return Whether the batchWrites field is set.
+       */
+      @java.lang.Override
+      public boolean hasBatchWrites() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional bool batch_writes = 2;</code>
+       * @return The batchWrites.
+       */
+      @java.lang.Override
+      public boolean getBatchWrites() {
+        return batchWrites_;
+      }
+      /**
+       * <code>optional bool batch_writes = 2;</code>
+       * @param value The batchWrites to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBatchWrites(boolean value) {
+        
+        batchWrites_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool batch_writes = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearBatchWrites() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        batchWrites_ = false;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:chromeos_update_engine.VABCFeatureSet)
+    }
+
+    // @@protoc_insertion_point(class_scope:chromeos_update_engine.VABCFeatureSet)
+    private static final chromeos_update_engine.UpdateMetadata.VABCFeatureSet DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new chromeos_update_engine.UpdateMetadata.VABCFeatureSet();
+    }
+
+    public static chromeos_update_engine.UpdateMetadata.VABCFeatureSet getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<VABCFeatureSet>
+        PARSER = new com.google.protobuf.AbstractParser<VABCFeatureSet>() {
+      @java.lang.Override
+      public VABCFeatureSet parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<VABCFeatureSet> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<VABCFeatureSet> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.VABCFeatureSet getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -12749,7 +13819,7 @@ public final class UpdateMetadata {
      *
      * <code>repeated .chromeos_update_engine.DynamicPartitionGroup groups = 1;</code>
      */
-    java.util.List<chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup>
+    java.util.List<chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup> 
         getGroupsList();
     /**
      * <pre>
@@ -12789,7 +13859,7 @@ public final class UpdateMetadata {
      *
      * <code>repeated .chromeos_update_engine.DynamicPartitionGroup groups = 1;</code>
      */
-    java.util.List<? extends chromeos_update_engine.UpdateMetadata.DynamicPartitionGroupOrBuilder>
+    java.util.List<? extends chromeos_update_engine.UpdateMetadata.DynamicPartitionGroupOrBuilder> 
         getGroupsOrBuilderList();
     /**
      * <pre>
@@ -12830,6 +13900,114 @@ public final class UpdateMetadata {
      * @return The snapshotEnabled.
      */
     boolean getSnapshotEnabled();
+
+    /**
+     * <pre>
+     * If this is set to false, update_engine should not use VABC regardless. If
+     * this is set to true, update_engine may choose to use VABC if device
+     * supports it, but not guaranteed.
+     * VABC stands for Virtual AB Compression
+     * </pre>
+     *
+     * <code>optional bool vabc_enabled = 3;</code>
+     * @return Whether the vabcEnabled field is set.
+     */
+    boolean hasVabcEnabled();
+    /**
+     * <pre>
+     * If this is set to false, update_engine should not use VABC regardless. If
+     * this is set to true, update_engine may choose to use VABC if device
+     * supports it, but not guaranteed.
+     * VABC stands for Virtual AB Compression
+     * </pre>
+     *
+     * <code>optional bool vabc_enabled = 3;</code>
+     * @return The vabcEnabled.
+     */
+    boolean getVabcEnabled();
+
+    /**
+     * <pre>
+     * The compression algorithm used by VABC. Available ones are "gz", "brotli".
+     * See system/core/fs_mgr/libsnapshot/cow_writer.cpp for available options,
+     * as this parameter is ultimated forwarded to libsnapshot's CowWriter
+     * </pre>
+     *
+     * <code>optional string vabc_compression_param = 4;</code>
+     * @return Whether the vabcCompressionParam field is set.
+     */
+    boolean hasVabcCompressionParam();
+    /**
+     * <pre>
+     * The compression algorithm used by VABC. Available ones are "gz", "brotli".
+     * See system/core/fs_mgr/libsnapshot/cow_writer.cpp for available options,
+     * as this parameter is ultimated forwarded to libsnapshot's CowWriter
+     * </pre>
+     *
+     * <code>optional string vabc_compression_param = 4;</code>
+     * @return The vabcCompressionParam.
+     */
+    java.lang.String getVabcCompressionParam();
+    /**
+     * <pre>
+     * The compression algorithm used by VABC. Available ones are "gz", "brotli".
+     * See system/core/fs_mgr/libsnapshot/cow_writer.cpp for available options,
+     * as this parameter is ultimated forwarded to libsnapshot's CowWriter
+     * </pre>
+     *
+     * <code>optional string vabc_compression_param = 4;</code>
+     * @return The bytes for vabcCompressionParam.
+     */
+    com.google.protobuf.ByteString
+        getVabcCompressionParamBytes();
+
+    /**
+     * <pre>
+     * COW version used by VABC. The represents the major version in the COW
+     * header
+     * </pre>
+     *
+     * <code>optional uint32 cow_version = 5;</code>
+     * @return Whether the cowVersion field is set.
+     */
+    boolean hasCowVersion();
+    /**
+     * <pre>
+     * COW version used by VABC. The represents the major version in the COW
+     * header
+     * </pre>
+     *
+     * <code>optional uint32 cow_version = 5;</code>
+     * @return The cowVersion.
+     */
+    int getCowVersion();
+
+    /**
+     * <pre>
+     * A collection of knobs to tune Virtual AB Compression
+     * </pre>
+     *
+     * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+     * @return Whether the vabcFeatureSet field is set.
+     */
+    boolean hasVabcFeatureSet();
+    /**
+     * <pre>
+     * A collection of knobs to tune Virtual AB Compression
+     * </pre>
+     *
+     * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+     * @return The vabcFeatureSet.
+     */
+    chromeos_update_engine.UpdateMetadata.VABCFeatureSet getVabcFeatureSet();
+    /**
+     * <pre>
+     * A collection of knobs to tune Virtual AB Compression
+     * </pre>
+     *
+     * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+     */
+    chromeos_update_engine.UpdateMetadata.VABCFeatureSetOrBuilder getVabcFeatureSetOrBuilder();
   }
   /**
    * <pre>
@@ -12849,6 +14027,7 @@ public final class UpdateMetadata {
     }
     private DynamicPartitionMetadata() {
       groups_ = java.util.Collections.emptyList();
+      vabcCompressionParam_ = "";
     }
 
     @java.lang.Override
@@ -12862,61 +14041,6 @@ public final class UpdateMetadata {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DynamicPartitionMetadata(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                groups_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              groups_.add(
-                  input.readMessage(chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup.PARSER, extensionRegistry));
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000001;
-              snapshotEnabled_ = input.readBool();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          groups_ = java.util.Collections.unmodifiableList(groups_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -12933,6 +14057,7 @@ public final class UpdateMetadata {
 
     private int bitField0_;
     public static final int GROUPS_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup> groups_;
     /**
      * <pre>
@@ -12963,7 +14088,7 @@ public final class UpdateMetadata {
      * <code>repeated .chromeos_update_engine.DynamicPartitionGroup groups = 1;</code>
      */
     @java.lang.Override
-    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.DynamicPartitionGroupOrBuilder>
+    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.DynamicPartitionGroupOrBuilder> 
         getGroupsOrBuilderList() {
       return groups_;
     }
@@ -13018,7 +14143,7 @@ public final class UpdateMetadata {
     }
 
     public static final int SNAPSHOT_ENABLED_FIELD_NUMBER = 2;
-    private boolean snapshotEnabled_;
+    private boolean snapshotEnabled_ = false;
     /**
      * <pre>
      * Whether dynamic partitions have snapshots during the update. If this is
@@ -13050,6 +14175,173 @@ public final class UpdateMetadata {
       return snapshotEnabled_;
     }
 
+    public static final int VABC_ENABLED_FIELD_NUMBER = 3;
+    private boolean vabcEnabled_ = false;
+    /**
+     * <pre>
+     * If this is set to false, update_engine should not use VABC regardless. If
+     * this is set to true, update_engine may choose to use VABC if device
+     * supports it, but not guaranteed.
+     * VABC stands for Virtual AB Compression
+     * </pre>
+     *
+     * <code>optional bool vabc_enabled = 3;</code>
+     * @return Whether the vabcEnabled field is set.
+     */
+    @java.lang.Override
+    public boolean hasVabcEnabled() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <pre>
+     * If this is set to false, update_engine should not use VABC regardless. If
+     * this is set to true, update_engine may choose to use VABC if device
+     * supports it, but not guaranteed.
+     * VABC stands for Virtual AB Compression
+     * </pre>
+     *
+     * <code>optional bool vabc_enabled = 3;</code>
+     * @return The vabcEnabled.
+     */
+    @java.lang.Override
+    public boolean getVabcEnabled() {
+      return vabcEnabled_;
+    }
+
+    public static final int VABC_COMPRESSION_PARAM_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object vabcCompressionParam_ = "";
+    /**
+     * <pre>
+     * The compression algorithm used by VABC. Available ones are "gz", "brotli".
+     * See system/core/fs_mgr/libsnapshot/cow_writer.cpp for available options,
+     * as this parameter is ultimated forwarded to libsnapshot's CowWriter
+     * </pre>
+     *
+     * <code>optional string vabc_compression_param = 4;</code>
+     * @return Whether the vabcCompressionParam field is set.
+     */
+    @java.lang.Override
+    public boolean hasVabcCompressionParam() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <pre>
+     * The compression algorithm used by VABC. Available ones are "gz", "brotli".
+     * See system/core/fs_mgr/libsnapshot/cow_writer.cpp for available options,
+     * as this parameter is ultimated forwarded to libsnapshot's CowWriter
+     * </pre>
+     *
+     * <code>optional string vabc_compression_param = 4;</code>
+     * @return The vabcCompressionParam.
+     */
+    @java.lang.Override
+    public java.lang.String getVabcCompressionParam() {
+      java.lang.Object ref = vabcCompressionParam_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          vabcCompressionParam_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The compression algorithm used by VABC. Available ones are "gz", "brotli".
+     * See system/core/fs_mgr/libsnapshot/cow_writer.cpp for available options,
+     * as this parameter is ultimated forwarded to libsnapshot's CowWriter
+     * </pre>
+     *
+     * <code>optional string vabc_compression_param = 4;</code>
+     * @return The bytes for vabcCompressionParam.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getVabcCompressionParamBytes() {
+      java.lang.Object ref = vabcCompressionParam_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        vabcCompressionParam_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int COW_VERSION_FIELD_NUMBER = 5;
+    private int cowVersion_ = 0;
+    /**
+     * <pre>
+     * COW version used by VABC. The represents the major version in the COW
+     * header
+     * </pre>
+     *
+     * <code>optional uint32 cow_version = 5;</code>
+     * @return Whether the cowVersion field is set.
+     */
+    @java.lang.Override
+    public boolean hasCowVersion() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <pre>
+     * COW version used by VABC. The represents the major version in the COW
+     * header
+     * </pre>
+     *
+     * <code>optional uint32 cow_version = 5;</code>
+     * @return The cowVersion.
+     */
+    @java.lang.Override
+    public int getCowVersion() {
+      return cowVersion_;
+    }
+
+    public static final int VABC_FEATURE_SET_FIELD_NUMBER = 6;
+    private chromeos_update_engine.UpdateMetadata.VABCFeatureSet vabcFeatureSet_;
+    /**
+     * <pre>
+     * A collection of knobs to tune Virtual AB Compression
+     * </pre>
+     *
+     * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+     * @return Whether the vabcFeatureSet field is set.
+     */
+    @java.lang.Override
+    public boolean hasVabcFeatureSet() {
+      return ((bitField0_ & 0x00000010) != 0);
+    }
+    /**
+     * <pre>
+     * A collection of knobs to tune Virtual AB Compression
+     * </pre>
+     *
+     * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+     * @return The vabcFeatureSet.
+     */
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.VABCFeatureSet getVabcFeatureSet() {
+      return vabcFeatureSet_ == null ? chromeos_update_engine.UpdateMetadata.VABCFeatureSet.getDefaultInstance() : vabcFeatureSet_;
+    }
+    /**
+     * <pre>
+     * A collection of knobs to tune Virtual AB Compression
+     * </pre>
+     *
+     * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+     */
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.VABCFeatureSetOrBuilder getVabcFeatureSetOrBuilder() {
+      return vabcFeatureSet_ == null ? chromeos_update_engine.UpdateMetadata.VABCFeatureSet.getDefaultInstance() : vabcFeatureSet_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -13076,7 +14368,19 @@ public final class UpdateMetadata {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeBool(2, snapshotEnabled_);
       }
-      unknownFields.writeTo(output);
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeBool(3, vabcEnabled_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, vabcCompressionParam_);
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        output.writeUInt32(5, cowVersion_);
+      }
+      if (((bitField0_ & 0x00000010) != 0)) {
+        output.writeMessage(6, getVabcFeatureSet());
+      }
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -13093,7 +14397,22 @@ public final class UpdateMetadata {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, snapshotEnabled_);
       }
-      size += unknownFields.getSerializedSize();
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(3, vabcEnabled_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, vabcCompressionParam_);
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(5, cowVersion_);
+      }
+      if (((bitField0_ & 0x00000010) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, getVabcFeatureSet());
+      }
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -13115,7 +14434,27 @@ public final class UpdateMetadata {
         if (getSnapshotEnabled()
             != other.getSnapshotEnabled()) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (hasVabcEnabled() != other.hasVabcEnabled()) return false;
+      if (hasVabcEnabled()) {
+        if (getVabcEnabled()
+            != other.getVabcEnabled()) return false;
+      }
+      if (hasVabcCompressionParam() != other.hasVabcCompressionParam()) return false;
+      if (hasVabcCompressionParam()) {
+        if (!getVabcCompressionParam()
+            .equals(other.getVabcCompressionParam())) return false;
+      }
+      if (hasCowVersion() != other.hasCowVersion()) return false;
+      if (hasCowVersion()) {
+        if (getCowVersion()
+            != other.getCowVersion()) return false;
+      }
+      if (hasVabcFeatureSet() != other.hasVabcFeatureSet()) return false;
+      if (hasVabcFeatureSet()) {
+        if (!getVabcFeatureSet()
+            .equals(other.getVabcFeatureSet())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -13135,7 +14474,24 @@ public final class UpdateMetadata {
         hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
             getSnapshotEnabled());
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      if (hasVabcEnabled()) {
+        hash = (37 * hash) + VABC_ENABLED_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getVabcEnabled());
+      }
+      if (hasVabcCompressionParam()) {
+        hash = (37 * hash) + VABC_COMPRESSION_PARAM_FIELD_NUMBER;
+        hash = (53 * hash) + getVabcCompressionParam().hashCode();
+      }
+      if (hasCowVersion()) {
+        hash = (37 * hash) + COW_VERSION_FIELD_NUMBER;
+        hash = (53 * hash) + getCowVersion();
+      }
+      if (hasVabcFeatureSet()) {
+        hash = (37 * hash) + VABC_FEATURE_SET_FIELD_NUMBER;
+        hash = (53 * hash) + getVabcFeatureSet().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -13268,19 +14624,29 @@ public final class UpdateMetadata {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
           getGroupsFieldBuilder();
+          getVabcFeatureSetFieldBuilder();
         }
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (groupsBuilder_ == null) {
           groups_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          groups_ = null;
           groupsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         snapshotEnabled_ = false;
-        bitField0_ = (bitField0_ & ~0x00000002);
+        vabcEnabled_ = false;
+        vabcCompressionParam_ = "";
+        cowVersion_ = 0;
+        vabcFeatureSet_ = null;
+        if (vabcFeatureSetBuilder_ != null) {
+          vabcFeatureSetBuilder_.dispose();
+          vabcFeatureSetBuilder_ = null;
+        }
         return this;
       }
 
@@ -13307,8 +14673,13 @@ public final class UpdateMetadata {
       @java.lang.Override
       public chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata buildPartial() {
         chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata result = new chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata result) {
         if (groupsBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             groups_ = java.util.Collections.unmodifiableList(groups_);
@@ -13318,13 +14689,34 @@ public final class UpdateMetadata {
         } else {
           result.groups_ = groupsBuilder_.build();
         }
+      }
+
+      private void buildPartial0(chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000002) != 0)) {
           result.snapshotEnabled_ = snapshotEnabled_;
           to_bitField0_ |= 0x00000001;
         }
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.vabcEnabled_ = vabcEnabled_;
+          to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.vabcCompressionParam_ = vabcCompressionParam_;
+          to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.cowVersion_ = cowVersion_;
+          to_bitField0_ |= 0x00000008;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.vabcFeatureSet_ = vabcFeatureSetBuilder_ == null
+              ? vabcFeatureSet_
+              : vabcFeatureSetBuilder_.build();
+          to_bitField0_ |= 0x00000010;
+        }
+        result.bitField0_ |= to_bitField0_;
       }
 
       @java.lang.Override
@@ -13389,7 +14781,7 @@ public final class UpdateMetadata {
               groupsBuilder_ = null;
               groups_ = other.groups_;
               bitField0_ = (bitField0_ & ~0x00000001);
-              groupsBuilder_ =
+              groupsBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getGroupsFieldBuilder() : null;
             } else {
@@ -13400,7 +14792,21 @@ public final class UpdateMetadata {
         if (other.hasSnapshotEnabled()) {
           setSnapshotEnabled(other.getSnapshotEnabled());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        if (other.hasVabcEnabled()) {
+          setVabcEnabled(other.getVabcEnabled());
+        }
+        if (other.hasVabcCompressionParam()) {
+          vabcCompressionParam_ = other.vabcCompressionParam_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        if (other.hasCowVersion()) {
+          setCowVersion(other.getCowVersion());
+        }
+        if (other.hasVabcFeatureSet()) {
+          mergeVabcFeatureSet(other.getVabcFeatureSet());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -13420,17 +14826,70 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup m =
+                    input.readMessage(
+                        chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup.PARSER,
+                        extensionRegistry);
+                if (groupsBuilder_ == null) {
+                  ensureGroupsIsMutable();
+                  groups_.add(m);
+                } else {
+                  groupsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 16: {
+                snapshotEnabled_ = input.readBool();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                vabcEnabled_ = input.readBool();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 34: {
+                vabcCompressionParam_ = input.readBytes();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 40: {
+                cowVersion_ = input.readUInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              case 50: {
+                input.readMessage(
+                    getVabcFeatureSetFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -13765,7 +15224,7 @@ public final class UpdateMetadata {
        *
        * <code>repeated .chromeos_update_engine.DynamicPartitionGroup groups = 1;</code>
        */
-      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.DynamicPartitionGroupOrBuilder>
+      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.DynamicPartitionGroupOrBuilder> 
            getGroupsOrBuilderList() {
         if (groupsBuilder_ != null) {
           return groupsBuilder_.getMessageOrBuilderList();
@@ -13818,12 +15277,12 @@ public final class UpdateMetadata {
        *
        * <code>repeated .chromeos_update_engine.DynamicPartitionGroup groups = 1;</code>
        */
-      public java.util.List<chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup.Builder>
+      public java.util.List<chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup.Builder> 
            getGroupsBuilderList() {
         return getGroupsFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup, chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup.Builder, chromeos_update_engine.UpdateMetadata.DynamicPartitionGroupOrBuilder>
+          chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup, chromeos_update_engine.UpdateMetadata.DynamicPartitionGroup.Builder, chromeos_update_engine.UpdateMetadata.DynamicPartitionGroupOrBuilder> 
           getGroupsFieldBuilder() {
         if (groupsBuilder_ == null) {
           groupsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
@@ -13881,8 +15340,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setSnapshotEnabled(boolean value) {
-        bitField0_ |= 0x00000002;
+        
         snapshotEnabled_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -13902,6 +15362,405 @@ public final class UpdateMetadata {
         snapshotEnabled_ = false;
         onChanged();
         return this;
+      }
+
+      private boolean vabcEnabled_ ;
+      /**
+       * <pre>
+       * If this is set to false, update_engine should not use VABC regardless. If
+       * this is set to true, update_engine may choose to use VABC if device
+       * supports it, but not guaranteed.
+       * VABC stands for Virtual AB Compression
+       * </pre>
+       *
+       * <code>optional bool vabc_enabled = 3;</code>
+       * @return Whether the vabcEnabled field is set.
+       */
+      @java.lang.Override
+      public boolean hasVabcEnabled() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <pre>
+       * If this is set to false, update_engine should not use VABC regardless. If
+       * this is set to true, update_engine may choose to use VABC if device
+       * supports it, but not guaranteed.
+       * VABC stands for Virtual AB Compression
+       * </pre>
+       *
+       * <code>optional bool vabc_enabled = 3;</code>
+       * @return The vabcEnabled.
+       */
+      @java.lang.Override
+      public boolean getVabcEnabled() {
+        return vabcEnabled_;
+      }
+      /**
+       * <pre>
+       * If this is set to false, update_engine should not use VABC regardless. If
+       * this is set to true, update_engine may choose to use VABC if device
+       * supports it, but not guaranteed.
+       * VABC stands for Virtual AB Compression
+       * </pre>
+       *
+       * <code>optional bool vabc_enabled = 3;</code>
+       * @param value The vabcEnabled to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVabcEnabled(boolean value) {
+        
+        vabcEnabled_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * If this is set to false, update_engine should not use VABC regardless. If
+       * this is set to true, update_engine may choose to use VABC if device
+       * supports it, but not guaranteed.
+       * VABC stands for Virtual AB Compression
+       * </pre>
+       *
+       * <code>optional bool vabc_enabled = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVabcEnabled() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        vabcEnabled_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object vabcCompressionParam_ = "";
+      /**
+       * <pre>
+       * The compression algorithm used by VABC. Available ones are "gz", "brotli".
+       * See system/core/fs_mgr/libsnapshot/cow_writer.cpp for available options,
+       * as this parameter is ultimated forwarded to libsnapshot's CowWriter
+       * </pre>
+       *
+       * <code>optional string vabc_compression_param = 4;</code>
+       * @return Whether the vabcCompressionParam field is set.
+       */
+      public boolean hasVabcCompressionParam() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <pre>
+       * The compression algorithm used by VABC. Available ones are "gz", "brotli".
+       * See system/core/fs_mgr/libsnapshot/cow_writer.cpp for available options,
+       * as this parameter is ultimated forwarded to libsnapshot's CowWriter
+       * </pre>
+       *
+       * <code>optional string vabc_compression_param = 4;</code>
+       * @return The vabcCompressionParam.
+       */
+      public java.lang.String getVabcCompressionParam() {
+        java.lang.Object ref = vabcCompressionParam_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            vabcCompressionParam_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The compression algorithm used by VABC. Available ones are "gz", "brotli".
+       * See system/core/fs_mgr/libsnapshot/cow_writer.cpp for available options,
+       * as this parameter is ultimated forwarded to libsnapshot's CowWriter
+       * </pre>
+       *
+       * <code>optional string vabc_compression_param = 4;</code>
+       * @return The bytes for vabcCompressionParam.
+       */
+      public com.google.protobuf.ByteString
+          getVabcCompressionParamBytes() {
+        java.lang.Object ref = vabcCompressionParam_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          vabcCompressionParam_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The compression algorithm used by VABC. Available ones are "gz", "brotli".
+       * See system/core/fs_mgr/libsnapshot/cow_writer.cpp for available options,
+       * as this parameter is ultimated forwarded to libsnapshot's CowWriter
+       * </pre>
+       *
+       * <code>optional string vabc_compression_param = 4;</code>
+       * @param value The vabcCompressionParam to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVabcCompressionParam(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        vabcCompressionParam_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The compression algorithm used by VABC. Available ones are "gz", "brotli".
+       * See system/core/fs_mgr/libsnapshot/cow_writer.cpp for available options,
+       * as this parameter is ultimated forwarded to libsnapshot's CowWriter
+       * </pre>
+       *
+       * <code>optional string vabc_compression_param = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVabcCompressionParam() {
+        vabcCompressionParam_ = getDefaultInstance().getVabcCompressionParam();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The compression algorithm used by VABC. Available ones are "gz", "brotli".
+       * See system/core/fs_mgr/libsnapshot/cow_writer.cpp for available options,
+       * as this parameter is ultimated forwarded to libsnapshot's CowWriter
+       * </pre>
+       *
+       * <code>optional string vabc_compression_param = 4;</code>
+       * @param value The bytes for vabcCompressionParam to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVabcCompressionParamBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        vabcCompressionParam_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+
+      private int cowVersion_ ;
+      /**
+       * <pre>
+       * COW version used by VABC. The represents the major version in the COW
+       * header
+       * </pre>
+       *
+       * <code>optional uint32 cow_version = 5;</code>
+       * @return Whether the cowVersion field is set.
+       */
+      @java.lang.Override
+      public boolean hasCowVersion() {
+        return ((bitField0_ & 0x00000010) != 0);
+      }
+      /**
+       * <pre>
+       * COW version used by VABC. The represents the major version in the COW
+       * header
+       * </pre>
+       *
+       * <code>optional uint32 cow_version = 5;</code>
+       * @return The cowVersion.
+       */
+      @java.lang.Override
+      public int getCowVersion() {
+        return cowVersion_;
+      }
+      /**
+       * <pre>
+       * COW version used by VABC. The represents the major version in the COW
+       * header
+       * </pre>
+       *
+       * <code>optional uint32 cow_version = 5;</code>
+       * @param value The cowVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCowVersion(int value) {
+        
+        cowVersion_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * COW version used by VABC. The represents the major version in the COW
+       * header
+       * </pre>
+       *
+       * <code>optional uint32 cow_version = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCowVersion() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        cowVersion_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private chromeos_update_engine.UpdateMetadata.VABCFeatureSet vabcFeatureSet_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          chromeos_update_engine.UpdateMetadata.VABCFeatureSet, chromeos_update_engine.UpdateMetadata.VABCFeatureSet.Builder, chromeos_update_engine.UpdateMetadata.VABCFeatureSetOrBuilder> vabcFeatureSetBuilder_;
+      /**
+       * <pre>
+       * A collection of knobs to tune Virtual AB Compression
+       * </pre>
+       *
+       * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+       * @return Whether the vabcFeatureSet field is set.
+       */
+      public boolean hasVabcFeatureSet() {
+        return ((bitField0_ & 0x00000020) != 0);
+      }
+      /**
+       * <pre>
+       * A collection of knobs to tune Virtual AB Compression
+       * </pre>
+       *
+       * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+       * @return The vabcFeatureSet.
+       */
+      public chromeos_update_engine.UpdateMetadata.VABCFeatureSet getVabcFeatureSet() {
+        if (vabcFeatureSetBuilder_ == null) {
+          return vabcFeatureSet_ == null ? chromeos_update_engine.UpdateMetadata.VABCFeatureSet.getDefaultInstance() : vabcFeatureSet_;
+        } else {
+          return vabcFeatureSetBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * A collection of knobs to tune Virtual AB Compression
+       * </pre>
+       *
+       * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+       */
+      public Builder setVabcFeatureSet(chromeos_update_engine.UpdateMetadata.VABCFeatureSet value) {
+        if (vabcFeatureSetBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          vabcFeatureSet_ = value;
+        } else {
+          vabcFeatureSetBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A collection of knobs to tune Virtual AB Compression
+       * </pre>
+       *
+       * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+       */
+      public Builder setVabcFeatureSet(
+          chromeos_update_engine.UpdateMetadata.VABCFeatureSet.Builder builderForValue) {
+        if (vabcFeatureSetBuilder_ == null) {
+          vabcFeatureSet_ = builderForValue.build();
+        } else {
+          vabcFeatureSetBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A collection of knobs to tune Virtual AB Compression
+       * </pre>
+       *
+       * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+       */
+      public Builder mergeVabcFeatureSet(chromeos_update_engine.UpdateMetadata.VABCFeatureSet value) {
+        if (vabcFeatureSetBuilder_ == null) {
+          if (((bitField0_ & 0x00000020) != 0) &&
+            vabcFeatureSet_ != null &&
+            vabcFeatureSet_ != chromeos_update_engine.UpdateMetadata.VABCFeatureSet.getDefaultInstance()) {
+            getVabcFeatureSetBuilder().mergeFrom(value);
+          } else {
+            vabcFeatureSet_ = value;
+          }
+        } else {
+          vabcFeatureSetBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A collection of knobs to tune Virtual AB Compression
+       * </pre>
+       *
+       * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+       */
+      public Builder clearVabcFeatureSet() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        vabcFeatureSet_ = null;
+        if (vabcFeatureSetBuilder_ != null) {
+          vabcFeatureSetBuilder_.dispose();
+          vabcFeatureSetBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A collection of knobs to tune Virtual AB Compression
+       * </pre>
+       *
+       * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.VABCFeatureSet.Builder getVabcFeatureSetBuilder() {
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return getVabcFeatureSetFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * A collection of knobs to tune Virtual AB Compression
+       * </pre>
+       *
+       * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.VABCFeatureSetOrBuilder getVabcFeatureSetOrBuilder() {
+        if (vabcFeatureSetBuilder_ != null) {
+          return vabcFeatureSetBuilder_.getMessageOrBuilder();
+        } else {
+          return vabcFeatureSet_ == null ?
+              chromeos_update_engine.UpdateMetadata.VABCFeatureSet.getDefaultInstance() : vabcFeatureSet_;
+        }
+      }
+      /**
+       * <pre>
+       * A collection of knobs to tune Virtual AB Compression
+       * </pre>
+       *
+       * <code>optional .chromeos_update_engine.VABCFeatureSet vabc_feature_set = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          chromeos_update_engine.UpdateMetadata.VABCFeatureSet, chromeos_update_engine.UpdateMetadata.VABCFeatureSet.Builder, chromeos_update_engine.UpdateMetadata.VABCFeatureSetOrBuilder> 
+          getVabcFeatureSetFieldBuilder() {
+        if (vabcFeatureSetBuilder_ == null) {
+          vabcFeatureSetBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              chromeos_update_engine.UpdateMetadata.VABCFeatureSet, chromeos_update_engine.UpdateMetadata.VABCFeatureSet.Builder, chromeos_update_engine.UpdateMetadata.VABCFeatureSetOrBuilder>(
+                  getVabcFeatureSet(),
+                  getParentForChildren(),
+                  isClean());
+          vabcFeatureSet_ = null;
+        }
+        return vabcFeatureSetBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -13936,7 +15795,18 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DynamicPartitionMetadata(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -13956,87 +15826,1701 @@ public final class UpdateMetadata {
 
   }
 
-  public interface DeltaArchiveManifestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:chromeos_update_engine.DeltaArchiveManifest)
+  public interface ApexInfoOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:chromeos_update_engine.ApexInfo)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <pre>
-     * Only present in major version = 1. List of install operations for the
-     * kernel and rootfs partitions. For major version = 2 see the |partitions|
-     * field.
-     * </pre>
-     *
-     * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
+     * <code>optional string package_name = 1;</code>
+     * @return Whether the packageName field is set.
      */
-    java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation>
-        getInstallOperationsList();
+    boolean hasPackageName();
     /**
-     * <pre>
-     * Only present in major version = 1. List of install operations for the
-     * kernel and rootfs partitions. For major version = 2 see the |partitions|
-     * field.
-     * </pre>
-     *
-     * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
+     * <code>optional string package_name = 1;</code>
+     * @return The packageName.
      */
-    chromeos_update_engine.UpdateMetadata.InstallOperation getInstallOperations(int index);
+    java.lang.String getPackageName();
     /**
-     * <pre>
-     * Only present in major version = 1. List of install operations for the
-     * kernel and rootfs partitions. For major version = 2 see the |partitions|
-     * field.
-     * </pre>
-     *
-     * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
+     * <code>optional string package_name = 1;</code>
+     * @return The bytes for packageName.
      */
-    int getInstallOperationsCount();
-    /**
-     * <pre>
-     * Only present in major version = 1. List of install operations for the
-     * kernel and rootfs partitions. For major version = 2 see the |partitions|
-     * field.
-     * </pre>
-     *
-     * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-     */
-    java.util.List<? extends chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>
-        getInstallOperationsOrBuilderList();
-    /**
-     * <pre>
-     * Only present in major version = 1. List of install operations for the
-     * kernel and rootfs partitions. For major version = 2 see the |partitions|
-     * field.
-     * </pre>
-     *
-     * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-     */
-    chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder getInstallOperationsOrBuilder(
-        int index);
+    com.google.protobuf.ByteString
+        getPackageNameBytes();
 
     /**
-     * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
+     * <code>optional int64 version = 2;</code>
+     * @return Whether the version field is set.
      */
-    java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation>
-        getKernelInstallOperationsList();
+    boolean hasVersion();
     /**
-     * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
+     * <code>optional int64 version = 2;</code>
+     * @return The version.
      */
-    chromeos_update_engine.UpdateMetadata.InstallOperation getKernelInstallOperations(int index);
+    long getVersion();
+
     /**
-     * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
+     * <code>optional bool is_compressed = 3;</code>
+     * @return Whether the isCompressed field is set.
      */
-    int getKernelInstallOperationsCount();
+    boolean hasIsCompressed();
     /**
-     * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
+     * <code>optional bool is_compressed = 3;</code>
+     * @return The isCompressed.
      */
-    java.util.List<? extends chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>
-        getKernelInstallOperationsOrBuilderList();
+    boolean getIsCompressed();
+
     /**
-     * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
+     * <code>optional int64 decompressed_size = 4;</code>
+     * @return Whether the decompressedSize field is set.
      */
-    chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder getKernelInstallOperationsOrBuilder(
+    boolean hasDecompressedSize();
+    /**
+     * <code>optional int64 decompressed_size = 4;</code>
+     * @return The decompressedSize.
+     */
+    long getDecompressedSize();
+  }
+  /**
+   * <pre>
+   * Definition has been duplicated from
+   * $ANDROID_BUILD_TOP/build/tools/releasetools/ota_metadata.proto. Keep in sync.
+   * </pre>
+   *
+   * Protobuf type {@code chromeos_update_engine.ApexInfo}
+   */
+  public static final class ApexInfo extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:chromeos_update_engine.ApexInfo)
+      ApexInfoOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ApexInfo.newBuilder() to construct.
+    private ApexInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ApexInfo() {
+      packageName_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ApexInfo();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ApexInfo_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ApexInfo_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              chromeos_update_engine.UpdateMetadata.ApexInfo.class, chromeos_update_engine.UpdateMetadata.ApexInfo.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int PACKAGE_NAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object packageName_ = "";
+    /**
+     * <code>optional string package_name = 1;</code>
+     * @return Whether the packageName field is set.
+     */
+    @java.lang.Override
+    public boolean hasPackageName() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional string package_name = 1;</code>
+     * @return The packageName.
+     */
+    @java.lang.Override
+    public java.lang.String getPackageName() {
+      java.lang.Object ref = packageName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          packageName_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string package_name = 1;</code>
+     * @return The bytes for packageName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPackageNameBytes() {
+      java.lang.Object ref = packageName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        packageName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int VERSION_FIELD_NUMBER = 2;
+    private long version_ = 0L;
+    /**
+     * <code>optional int64 version = 2;</code>
+     * @return Whether the version field is set.
+     */
+    @java.lang.Override
+    public boolean hasVersion() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>optional int64 version = 2;</code>
+     * @return The version.
+     */
+    @java.lang.Override
+    public long getVersion() {
+      return version_;
+    }
+
+    public static final int IS_COMPRESSED_FIELD_NUMBER = 3;
+    private boolean isCompressed_ = false;
+    /**
+     * <code>optional bool is_compressed = 3;</code>
+     * @return Whether the isCompressed field is set.
+     */
+    @java.lang.Override
+    public boolean hasIsCompressed() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <code>optional bool is_compressed = 3;</code>
+     * @return The isCompressed.
+     */
+    @java.lang.Override
+    public boolean getIsCompressed() {
+      return isCompressed_;
+    }
+
+    public static final int DECOMPRESSED_SIZE_FIELD_NUMBER = 4;
+    private long decompressedSize_ = 0L;
+    /**
+     * <code>optional int64 decompressed_size = 4;</code>
+     * @return Whether the decompressedSize field is set.
+     */
+    @java.lang.Override
+    public boolean hasDecompressedSize() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <code>optional int64 decompressed_size = 4;</code>
+     * @return The decompressedSize.
+     */
+    @java.lang.Override
+    public long getDecompressedSize() {
+      return decompressedSize_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, packageName_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeInt64(2, version_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeBool(3, isCompressed_);
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        output.writeInt64(4, decompressedSize_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, packageName_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, version_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(3, isCompressed_);
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(4, decompressedSize_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof chromeos_update_engine.UpdateMetadata.ApexInfo)) {
+        return super.equals(obj);
+      }
+      chromeos_update_engine.UpdateMetadata.ApexInfo other = (chromeos_update_engine.UpdateMetadata.ApexInfo) obj;
+
+      if (hasPackageName() != other.hasPackageName()) return false;
+      if (hasPackageName()) {
+        if (!getPackageName()
+            .equals(other.getPackageName())) return false;
+      }
+      if (hasVersion() != other.hasVersion()) return false;
+      if (hasVersion()) {
+        if (getVersion()
+            != other.getVersion()) return false;
+      }
+      if (hasIsCompressed() != other.hasIsCompressed()) return false;
+      if (hasIsCompressed()) {
+        if (getIsCompressed()
+            != other.getIsCompressed()) return false;
+      }
+      if (hasDecompressedSize() != other.hasDecompressedSize()) return false;
+      if (hasDecompressedSize()) {
+        if (getDecompressedSize()
+            != other.getDecompressedSize()) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasPackageName()) {
+        hash = (37 * hash) + PACKAGE_NAME_FIELD_NUMBER;
+        hash = (53 * hash) + getPackageName().hashCode();
+      }
+      if (hasVersion()) {
+        hash = (37 * hash) + VERSION_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getVersion());
+      }
+      if (hasIsCompressed()) {
+        hash = (37 * hash) + IS_COMPRESSED_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getIsCompressed());
+      }
+      if (hasDecompressedSize()) {
+        hash = (37 * hash) + DECOMPRESSED_SIZE_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getDecompressedSize());
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static chromeos_update_engine.UpdateMetadata.ApexInfo parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexInfo parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexInfo parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexInfo parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexInfo parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexInfo parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexInfo parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexInfo parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexInfo parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexInfo parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexInfo parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexInfo parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(chromeos_update_engine.UpdateMetadata.ApexInfo prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Definition has been duplicated from
+     * $ANDROID_BUILD_TOP/build/tools/releasetools/ota_metadata.proto. Keep in sync.
+     * </pre>
+     *
+     * Protobuf type {@code chromeos_update_engine.ApexInfo}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:chromeos_update_engine.ApexInfo)
+        chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ApexInfo_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ApexInfo_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                chromeos_update_engine.UpdateMetadata.ApexInfo.class, chromeos_update_engine.UpdateMetadata.ApexInfo.Builder.class);
+      }
+
+      // Construct using chromeos_update_engine.UpdateMetadata.ApexInfo.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        packageName_ = "";
+        version_ = 0L;
+        isCompressed_ = false;
+        decompressedSize_ = 0L;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ApexInfo_descriptor;
+      }
+
+      @java.lang.Override
+      public chromeos_update_engine.UpdateMetadata.ApexInfo getDefaultInstanceForType() {
+        return chromeos_update_engine.UpdateMetadata.ApexInfo.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public chromeos_update_engine.UpdateMetadata.ApexInfo build() {
+        chromeos_update_engine.UpdateMetadata.ApexInfo result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public chromeos_update_engine.UpdateMetadata.ApexInfo buildPartial() {
+        chromeos_update_engine.UpdateMetadata.ApexInfo result = new chromeos_update_engine.UpdateMetadata.ApexInfo(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(chromeos_update_engine.UpdateMetadata.ApexInfo result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.packageName_ = packageName_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.version_ = version_;
+          to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.isCompressed_ = isCompressed_;
+          to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.decompressedSize_ = decompressedSize_;
+          to_bitField0_ |= 0x00000008;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof chromeos_update_engine.UpdateMetadata.ApexInfo) {
+          return mergeFrom((chromeos_update_engine.UpdateMetadata.ApexInfo)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(chromeos_update_engine.UpdateMetadata.ApexInfo other) {
+        if (other == chromeos_update_engine.UpdateMetadata.ApexInfo.getDefaultInstance()) return this;
+        if (other.hasPackageName()) {
+          packageName_ = other.packageName_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (other.hasVersion()) {
+          setVersion(other.getVersion());
+        }
+        if (other.hasIsCompressed()) {
+          setIsCompressed(other.getIsCompressed());
+        }
+        if (other.hasDecompressedSize()) {
+          setDecompressedSize(other.getDecompressedSize());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                packageName_ = input.readBytes();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                version_ = input.readInt64();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                isCompressed_ = input.readBool();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 32: {
+                decompressedSize_ = input.readInt64();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object packageName_ = "";
+      /**
+       * <code>optional string package_name = 1;</code>
+       * @return Whether the packageName field is set.
+       */
+      public boolean hasPackageName() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional string package_name = 1;</code>
+       * @return The packageName.
+       */
+      public java.lang.String getPackageName() {
+        java.lang.Object ref = packageName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            packageName_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string package_name = 1;</code>
+       * @return The bytes for packageName.
+       */
+      public com.google.protobuf.ByteString
+          getPackageNameBytes() {
+        java.lang.Object ref = packageName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          packageName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string package_name = 1;</code>
+       * @param value The packageName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPackageName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        packageName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string package_name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPackageName() {
+        packageName_ = getDefaultInstance().getPackageName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string package_name = 1;</code>
+       * @param value The bytes for packageName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPackageNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        packageName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private long version_ ;
+      /**
+       * <code>optional int64 version = 2;</code>
+       * @return Whether the version field is set.
+       */
+      @java.lang.Override
+      public boolean hasVersion() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional int64 version = 2;</code>
+       * @return The version.
+       */
+      @java.lang.Override
+      public long getVersion() {
+        return version_;
+      }
+      /**
+       * <code>optional int64 version = 2;</code>
+       * @param value The version to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVersion(long value) {
+        
+        version_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 version = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVersion() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        version_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private boolean isCompressed_ ;
+      /**
+       * <code>optional bool is_compressed = 3;</code>
+       * @return Whether the isCompressed field is set.
+       */
+      @java.lang.Override
+      public boolean hasIsCompressed() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>optional bool is_compressed = 3;</code>
+       * @return The isCompressed.
+       */
+      @java.lang.Override
+      public boolean getIsCompressed() {
+        return isCompressed_;
+      }
+      /**
+       * <code>optional bool is_compressed = 3;</code>
+       * @param value The isCompressed to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIsCompressed(boolean value) {
+        
+        isCompressed_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool is_compressed = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIsCompressed() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        isCompressed_ = false;
+        onChanged();
+        return this;
+      }
+
+      private long decompressedSize_ ;
+      /**
+       * <code>optional int64 decompressed_size = 4;</code>
+       * @return Whether the decompressedSize field is set.
+       */
+      @java.lang.Override
+      public boolean hasDecompressedSize() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <code>optional int64 decompressed_size = 4;</code>
+       * @return The decompressedSize.
+       */
+      @java.lang.Override
+      public long getDecompressedSize() {
+        return decompressedSize_;
+      }
+      /**
+       * <code>optional int64 decompressed_size = 4;</code>
+       * @param value The decompressedSize to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDecompressedSize(long value) {
+        
+        decompressedSize_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 decompressed_size = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDecompressedSize() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        decompressedSize_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:chromeos_update_engine.ApexInfo)
+    }
+
+    // @@protoc_insertion_point(class_scope:chromeos_update_engine.ApexInfo)
+    private static final chromeos_update_engine.UpdateMetadata.ApexInfo DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new chromeos_update_engine.UpdateMetadata.ApexInfo();
+    }
+
+    public static chromeos_update_engine.UpdateMetadata.ApexInfo getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<ApexInfo>
+        PARSER = new com.google.protobuf.AbstractParser<ApexInfo>() {
+      @java.lang.Override
+      public ApexInfo parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ApexInfo> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ApexInfo> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.ApexInfo getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ApexMetadataOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:chromeos_update_engine.ApexMetadata)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+     */
+    java.util.List<chromeos_update_engine.UpdateMetadata.ApexInfo> 
+        getApexInfoList();
+    /**
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+     */
+    chromeos_update_engine.UpdateMetadata.ApexInfo getApexInfo(int index);
+    /**
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+     */
+    int getApexInfoCount();
+    /**
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+     */
+    java.util.List<? extends chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder> 
+        getApexInfoOrBuilderList();
+    /**
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+     */
+    chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder getApexInfoOrBuilder(
         int index);
+  }
+  /**
+   * <pre>
+   * Definition has been duplicated from
+   * $ANDROID_BUILD_TOP/build/tools/releasetools/ota_metadata.proto. Keep in sync.
+   * </pre>
+   *
+   * Protobuf type {@code chromeos_update_engine.ApexMetadata}
+   */
+  public static final class ApexMetadata extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:chromeos_update_engine.ApexMetadata)
+      ApexMetadataOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ApexMetadata.newBuilder() to construct.
+    private ApexMetadata(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ApexMetadata() {
+      apexInfo_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ApexMetadata();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ApexMetadata_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ApexMetadata_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              chromeos_update_engine.UpdateMetadata.ApexMetadata.class, chromeos_update_engine.UpdateMetadata.ApexMetadata.Builder.class);
+    }
+
+    public static final int APEX_INFO_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private java.util.List<chromeos_update_engine.UpdateMetadata.ApexInfo> apexInfo_;
+    /**
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<chromeos_update_engine.UpdateMetadata.ApexInfo> getApexInfoList() {
+      return apexInfo_;
+    }
+    /**
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder> 
+        getApexInfoOrBuilderList() {
+      return apexInfo_;
+    }
+    /**
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+     */
+    @java.lang.Override
+    public int getApexInfoCount() {
+      return apexInfo_.size();
+    }
+    /**
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+     */
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.ApexInfo getApexInfo(int index) {
+      return apexInfo_.get(index);
+    }
+    /**
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+     */
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder getApexInfoOrBuilder(
+        int index) {
+      return apexInfo_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < apexInfo_.size(); i++) {
+        output.writeMessage(1, apexInfo_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < apexInfo_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, apexInfo_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof chromeos_update_engine.UpdateMetadata.ApexMetadata)) {
+        return super.equals(obj);
+      }
+      chromeos_update_engine.UpdateMetadata.ApexMetadata other = (chromeos_update_engine.UpdateMetadata.ApexMetadata) obj;
+
+      if (!getApexInfoList()
+          .equals(other.getApexInfoList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getApexInfoCount() > 0) {
+        hash = (37 * hash) + APEX_INFO_FIELD_NUMBER;
+        hash = (53 * hash) + getApexInfoList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static chromeos_update_engine.UpdateMetadata.ApexMetadata parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexMetadata parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexMetadata parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexMetadata parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexMetadata parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexMetadata parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexMetadata parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexMetadata parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexMetadata parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexMetadata parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexMetadata parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static chromeos_update_engine.UpdateMetadata.ApexMetadata parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(chromeos_update_engine.UpdateMetadata.ApexMetadata prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Definition has been duplicated from
+     * $ANDROID_BUILD_TOP/build/tools/releasetools/ota_metadata.proto. Keep in sync.
+     * </pre>
+     *
+     * Protobuf type {@code chromeos_update_engine.ApexMetadata}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:chromeos_update_engine.ApexMetadata)
+        chromeos_update_engine.UpdateMetadata.ApexMetadataOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ApexMetadata_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ApexMetadata_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                chromeos_update_engine.UpdateMetadata.ApexMetadata.class, chromeos_update_engine.UpdateMetadata.ApexMetadata.Builder.class);
+      }
+
+      // Construct using chromeos_update_engine.UpdateMetadata.ApexMetadata.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        if (apexInfoBuilder_ == null) {
+          apexInfo_ = java.util.Collections.emptyList();
+        } else {
+          apexInfo_ = null;
+          apexInfoBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return chromeos_update_engine.UpdateMetadata.internal_static_chromeos_update_engine_ApexMetadata_descriptor;
+      }
+
+      @java.lang.Override
+      public chromeos_update_engine.UpdateMetadata.ApexMetadata getDefaultInstanceForType() {
+        return chromeos_update_engine.UpdateMetadata.ApexMetadata.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public chromeos_update_engine.UpdateMetadata.ApexMetadata build() {
+        chromeos_update_engine.UpdateMetadata.ApexMetadata result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public chromeos_update_engine.UpdateMetadata.ApexMetadata buildPartial() {
+        chromeos_update_engine.UpdateMetadata.ApexMetadata result = new chromeos_update_engine.UpdateMetadata.ApexMetadata(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(chromeos_update_engine.UpdateMetadata.ApexMetadata result) {
+        if (apexInfoBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            apexInfo_ = java.util.Collections.unmodifiableList(apexInfo_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.apexInfo_ = apexInfo_;
+        } else {
+          result.apexInfo_ = apexInfoBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(chromeos_update_engine.UpdateMetadata.ApexMetadata result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof chromeos_update_engine.UpdateMetadata.ApexMetadata) {
+          return mergeFrom((chromeos_update_engine.UpdateMetadata.ApexMetadata)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(chromeos_update_engine.UpdateMetadata.ApexMetadata other) {
+        if (other == chromeos_update_engine.UpdateMetadata.ApexMetadata.getDefaultInstance()) return this;
+        if (apexInfoBuilder_ == null) {
+          if (!other.apexInfo_.isEmpty()) {
+            if (apexInfo_.isEmpty()) {
+              apexInfo_ = other.apexInfo_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureApexInfoIsMutable();
+              apexInfo_.addAll(other.apexInfo_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.apexInfo_.isEmpty()) {
+            if (apexInfoBuilder_.isEmpty()) {
+              apexInfoBuilder_.dispose();
+              apexInfoBuilder_ = null;
+              apexInfo_ = other.apexInfo_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              apexInfoBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getApexInfoFieldBuilder() : null;
+            } else {
+              apexInfoBuilder_.addAllMessages(other.apexInfo_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                chromeos_update_engine.UpdateMetadata.ApexInfo m =
+                    input.readMessage(
+                        chromeos_update_engine.UpdateMetadata.ApexInfo.PARSER,
+                        extensionRegistry);
+                if (apexInfoBuilder_ == null) {
+                  ensureApexInfoIsMutable();
+                  apexInfo_.add(m);
+                } else {
+                  apexInfoBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<chromeos_update_engine.UpdateMetadata.ApexInfo> apexInfo_ =
+        java.util.Collections.emptyList();
+      private void ensureApexInfoIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          apexInfo_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.ApexInfo>(apexInfo_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          chromeos_update_engine.UpdateMetadata.ApexInfo, chromeos_update_engine.UpdateMetadata.ApexInfo.Builder, chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder> apexInfoBuilder_;
+
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public java.util.List<chromeos_update_engine.UpdateMetadata.ApexInfo> getApexInfoList() {
+        if (apexInfoBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(apexInfo_);
+        } else {
+          return apexInfoBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public int getApexInfoCount() {
+        if (apexInfoBuilder_ == null) {
+          return apexInfo_.size();
+        } else {
+          return apexInfoBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.ApexInfo getApexInfo(int index) {
+        if (apexInfoBuilder_ == null) {
+          return apexInfo_.get(index);
+        } else {
+          return apexInfoBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public Builder setApexInfo(
+          int index, chromeos_update_engine.UpdateMetadata.ApexInfo value) {
+        if (apexInfoBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureApexInfoIsMutable();
+          apexInfo_.set(index, value);
+          onChanged();
+        } else {
+          apexInfoBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public Builder setApexInfo(
+          int index, chromeos_update_engine.UpdateMetadata.ApexInfo.Builder builderForValue) {
+        if (apexInfoBuilder_ == null) {
+          ensureApexInfoIsMutable();
+          apexInfo_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          apexInfoBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public Builder addApexInfo(chromeos_update_engine.UpdateMetadata.ApexInfo value) {
+        if (apexInfoBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureApexInfoIsMutable();
+          apexInfo_.add(value);
+          onChanged();
+        } else {
+          apexInfoBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public Builder addApexInfo(
+          int index, chromeos_update_engine.UpdateMetadata.ApexInfo value) {
+        if (apexInfoBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureApexInfoIsMutable();
+          apexInfo_.add(index, value);
+          onChanged();
+        } else {
+          apexInfoBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public Builder addApexInfo(
+          chromeos_update_engine.UpdateMetadata.ApexInfo.Builder builderForValue) {
+        if (apexInfoBuilder_ == null) {
+          ensureApexInfoIsMutable();
+          apexInfo_.add(builderForValue.build());
+          onChanged();
+        } else {
+          apexInfoBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public Builder addApexInfo(
+          int index, chromeos_update_engine.UpdateMetadata.ApexInfo.Builder builderForValue) {
+        if (apexInfoBuilder_ == null) {
+          ensureApexInfoIsMutable();
+          apexInfo_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          apexInfoBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public Builder addAllApexInfo(
+          java.lang.Iterable<? extends chromeos_update_engine.UpdateMetadata.ApexInfo> values) {
+        if (apexInfoBuilder_ == null) {
+          ensureApexInfoIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, apexInfo_);
+          onChanged();
+        } else {
+          apexInfoBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public Builder clearApexInfo() {
+        if (apexInfoBuilder_ == null) {
+          apexInfo_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          apexInfoBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public Builder removeApexInfo(int index) {
+        if (apexInfoBuilder_ == null) {
+          ensureApexInfoIsMutable();
+          apexInfo_.remove(index);
+          onChanged();
+        } else {
+          apexInfoBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.ApexInfo.Builder getApexInfoBuilder(
+          int index) {
+        return getApexInfoFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder getApexInfoOrBuilder(
+          int index) {
+        if (apexInfoBuilder_ == null) {
+          return apexInfo_.get(index);  } else {
+          return apexInfoBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder> 
+           getApexInfoOrBuilderList() {
+        if (apexInfoBuilder_ != null) {
+          return apexInfoBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(apexInfo_);
+        }
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.ApexInfo.Builder addApexInfoBuilder() {
+        return getApexInfoFieldBuilder().addBuilder(
+            chromeos_update_engine.UpdateMetadata.ApexInfo.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.ApexInfo.Builder addApexInfoBuilder(
+          int index) {
+        return getApexInfoFieldBuilder().addBuilder(
+            index, chromeos_update_engine.UpdateMetadata.ApexInfo.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 1;</code>
+       */
+      public java.util.List<chromeos_update_engine.UpdateMetadata.ApexInfo.Builder> 
+           getApexInfoBuilderList() {
+        return getApexInfoFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          chromeos_update_engine.UpdateMetadata.ApexInfo, chromeos_update_engine.UpdateMetadata.ApexInfo.Builder, chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder> 
+          getApexInfoFieldBuilder() {
+        if (apexInfoBuilder_ == null) {
+          apexInfoBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              chromeos_update_engine.UpdateMetadata.ApexInfo, chromeos_update_engine.UpdateMetadata.ApexInfo.Builder, chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder>(
+                  apexInfo_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          apexInfo_ = null;
+        }
+        return apexInfoBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:chromeos_update_engine.ApexMetadata)
+    }
+
+    // @@protoc_insertion_point(class_scope:chromeos_update_engine.ApexMetadata)
+    private static final chromeos_update_engine.UpdateMetadata.ApexMetadata DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new chromeos_update_engine.UpdateMetadata.ApexMetadata();
+    }
+
+    public static chromeos_update_engine.UpdateMetadata.ApexMetadata getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<ApexMetadata>
+        PARSER = new com.google.protobuf.AbstractParser<ApexMetadata>() {
+      @java.lang.Override
+      public ApexMetadata parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ApexMetadata> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ApexMetadata> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.ApexMetadata getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DeltaArchiveManifestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:chromeos_update_engine.DeltaArchiveManifest)
+      com.google.protobuf.MessageOrBuilder {
 
     /**
      * <pre>
@@ -14097,123 +17581,6 @@ public final class UpdateMetadata {
 
     /**
      * <pre>
-     * Only present in major version = 1. Partition metadata used to validate the
-     * update. For major version = 2 see the |partitions| field.
-     * </pre>
-     *
-     * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-     * @return Whether the oldKernelInfo field is set.
-     */
-    boolean hasOldKernelInfo();
-    /**
-     * <pre>
-     * Only present in major version = 1. Partition metadata used to validate the
-     * update. For major version = 2 see the |partitions| field.
-     * </pre>
-     *
-     * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-     * @return The oldKernelInfo.
-     */
-    chromeos_update_engine.UpdateMetadata.PartitionInfo getOldKernelInfo();
-    /**
-     * <pre>
-     * Only present in major version = 1. Partition metadata used to validate the
-     * update. For major version = 2 see the |partitions| field.
-     * </pre>
-     *
-     * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-     */
-    chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder getOldKernelInfoOrBuilder();
-
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-     * @return Whether the newKernelInfo field is set.
-     */
-    boolean hasNewKernelInfo();
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-     * @return The newKernelInfo.
-     */
-    chromeos_update_engine.UpdateMetadata.PartitionInfo getNewKernelInfo();
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-     */
-    chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder getNewKernelInfoOrBuilder();
-
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-     * @return Whether the oldRootfsInfo field is set.
-     */
-    boolean hasOldRootfsInfo();
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-     * @return The oldRootfsInfo.
-     */
-    chromeos_update_engine.UpdateMetadata.PartitionInfo getOldRootfsInfo();
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-     */
-    chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder getOldRootfsInfoOrBuilder();
-
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-     * @return Whether the newRootfsInfo field is set.
-     */
-    boolean hasNewRootfsInfo();
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-     * @return The newRootfsInfo.
-     */
-    chromeos_update_engine.UpdateMetadata.PartitionInfo getNewRootfsInfo();
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-     */
-    chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder getNewRootfsInfoOrBuilder();
-
-    /**
-     * <pre>
-     * old_image_info will only be present for delta images.
-     * </pre>
-     *
-     * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-     * @return Whether the oldImageInfo field is set.
-     */
-    boolean hasOldImageInfo();
-    /**
-     * <pre>
-     * old_image_info will only be present for delta images.
-     * </pre>
-     *
-     * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-     * @return The oldImageInfo.
-     */
-    chromeos_update_engine.UpdateMetadata.ImageInfo getOldImageInfo();
-    /**
-     * <pre>
-     * old_image_info will only be present for delta images.
-     * </pre>
-     *
-     * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-     */
-    chromeos_update_engine.UpdateMetadata.ImageInfoOrBuilder getOldImageInfoOrBuilder();
-
-    /**
-     * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-     * @return Whether the newImageInfo field is set.
-     */
-    boolean hasNewImageInfo();
-    /**
-     * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-     * @return The newImageInfo.
-     */
-    chromeos_update_engine.UpdateMetadata.ImageInfo getNewImageInfo();
-    /**
-     * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-     */
-    chromeos_update_engine.UpdateMetadata.ImageInfoOrBuilder getNewImageInfoOrBuilder();
-
-    /**
-     * <pre>
      * The minor version, also referred as "delta version", of the payload.
      * Minor version 0 is full payload, everything else is delta payload.
      * </pre>
@@ -14245,7 +17612,7 @@ public final class UpdateMetadata {
      *
      * <code>repeated .chromeos_update_engine.PartitionUpdate partitions = 13;</code>
      */
-    java.util.List<chromeos_update_engine.UpdateMetadata.PartitionUpdate>
+    java.util.List<chromeos_update_engine.UpdateMetadata.PartitionUpdate> 
         getPartitionsList();
     /**
      * <pre>
@@ -14285,7 +17652,7 @@ public final class UpdateMetadata {
      *
      * <code>repeated .chromeos_update_engine.PartitionUpdate partitions = 13;</code>
      */
-    java.util.List<? extends chromeos_update_engine.UpdateMetadata.PartitionUpdateOrBuilder>
+    java.util.List<? extends chromeos_update_engine.UpdateMetadata.PartitionUpdateOrBuilder> 
         getPartitionsOrBuilderList();
     /**
      * <pre>
@@ -14368,6 +17735,87 @@ public final class UpdateMetadata {
      * @return The partialUpdate.
      */
     boolean getPartialUpdate();
+
+    /**
+     * <pre>
+     * Information on compressed APEX to figure out how much space is required for
+     * their decompression
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+     */
+    java.util.List<chromeos_update_engine.UpdateMetadata.ApexInfo> 
+        getApexInfoList();
+    /**
+     * <pre>
+     * Information on compressed APEX to figure out how much space is required for
+     * their decompression
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+     */
+    chromeos_update_engine.UpdateMetadata.ApexInfo getApexInfo(int index);
+    /**
+     * <pre>
+     * Information on compressed APEX to figure out how much space is required for
+     * their decompression
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+     */
+    int getApexInfoCount();
+    /**
+     * <pre>
+     * Information on compressed APEX to figure out how much space is required for
+     * their decompression
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+     */
+    java.util.List<? extends chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder> 
+        getApexInfoOrBuilderList();
+    /**
+     * <pre>
+     * Information on compressed APEX to figure out how much space is required for
+     * their decompression
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+     */
+    chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder getApexInfoOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * Security patch level of the device, usually in the format of
+     * yyyy-mm-dd
+     * </pre>
+     *
+     * <code>optional string security_patch_level = 18;</code>
+     * @return Whether the securityPatchLevel field is set.
+     */
+    boolean hasSecurityPatchLevel();
+    /**
+     * <pre>
+     * Security patch level of the device, usually in the format of
+     * yyyy-mm-dd
+     * </pre>
+     *
+     * <code>optional string security_patch_level = 18;</code>
+     * @return The securityPatchLevel.
+     */
+    java.lang.String getSecurityPatchLevel();
+    /**
+     * <pre>
+     * Security patch level of the device, usually in the format of
+     * yyyy-mm-dd
+     * </pre>
+     *
+     * <code>optional string security_patch_level = 18;</code>
+     * @return The bytes for securityPatchLevel.
+     */
+    com.google.protobuf.ByteString
+        getSecurityPatchLevelBytes();
   }
   /**
    * Protobuf type {@code chromeos_update_engine.DeltaArchiveManifest}
@@ -14382,10 +17830,10 @@ public final class UpdateMetadata {
       super(builder);
     }
     private DeltaArchiveManifest() {
-      installOperations_ = java.util.Collections.emptyList();
-      kernelInstallOperations_ = java.util.Collections.emptyList();
       blockSize_ = 4096;
       partitions_ = java.util.Collections.emptyList();
+      apexInfo_ = java.util.Collections.emptyList();
+      securityPatchLevel_ = "";
     }
 
     @java.lang.Override
@@ -14399,201 +17847,6 @@ public final class UpdateMetadata {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DeltaArchiveManifest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                installOperations_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.InstallOperation>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              installOperations_.add(
-                  input.readMessage(chromeos_update_engine.UpdateMetadata.InstallOperation.PARSER, extensionRegistry));
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                kernelInstallOperations_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.InstallOperation>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              kernelInstallOperations_.add(
-                  input.readMessage(chromeos_update_engine.UpdateMetadata.InstallOperation.PARSER, extensionRegistry));
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000001;
-              blockSize_ = input.readUInt32();
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000002;
-              signaturesOffset_ = input.readUInt64();
-              break;
-            }
-            case 40: {
-              bitField0_ |= 0x00000004;
-              signaturesSize_ = input.readUInt64();
-              break;
-            }
-            case 50: {
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000008) != 0)) {
-                subBuilder = oldKernelInfo_.toBuilder();
-              }
-              oldKernelInfo_ = input.readMessage(chromeos_update_engine.UpdateMetadata.PartitionInfo.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(oldKernelInfo_);
-                oldKernelInfo_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000008;
-              break;
-            }
-            case 58: {
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000010) != 0)) {
-                subBuilder = newKernelInfo_.toBuilder();
-              }
-              newKernelInfo_ = input.readMessage(chromeos_update_engine.UpdateMetadata.PartitionInfo.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(newKernelInfo_);
-                newKernelInfo_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000010;
-              break;
-            }
-            case 66: {
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000020) != 0)) {
-                subBuilder = oldRootfsInfo_.toBuilder();
-              }
-              oldRootfsInfo_ = input.readMessage(chromeos_update_engine.UpdateMetadata.PartitionInfo.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(oldRootfsInfo_);
-                oldRootfsInfo_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000020;
-              break;
-            }
-            case 74: {
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000040) != 0)) {
-                subBuilder = newRootfsInfo_.toBuilder();
-              }
-              newRootfsInfo_ = input.readMessage(chromeos_update_engine.UpdateMetadata.PartitionInfo.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(newRootfsInfo_);
-                newRootfsInfo_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000040;
-              break;
-            }
-            case 82: {
-              chromeos_update_engine.UpdateMetadata.ImageInfo.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000080) != 0)) {
-                subBuilder = oldImageInfo_.toBuilder();
-              }
-              oldImageInfo_ = input.readMessage(chromeos_update_engine.UpdateMetadata.ImageInfo.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(oldImageInfo_);
-                oldImageInfo_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000080;
-              break;
-            }
-            case 90: {
-              chromeos_update_engine.UpdateMetadata.ImageInfo.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000100) != 0)) {
-                subBuilder = newImageInfo_.toBuilder();
-              }
-              newImageInfo_ = input.readMessage(chromeos_update_engine.UpdateMetadata.ImageInfo.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(newImageInfo_);
-                newImageInfo_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000100;
-              break;
-            }
-            case 96: {
-              bitField0_ |= 0x00000200;
-              minorVersion_ = input.readUInt32();
-              break;
-            }
-            case 106: {
-              if (!((mutable_bitField0_ & 0x00001000) != 0)) {
-                partitions_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.PartitionUpdate>();
-                mutable_bitField0_ |= 0x00001000;
-              }
-              partitions_.add(
-                  input.readMessage(chromeos_update_engine.UpdateMetadata.PartitionUpdate.PARSER, extensionRegistry));
-              break;
-            }
-            case 112: {
-              bitField0_ |= 0x00000400;
-              maxTimestamp_ = input.readInt64();
-              break;
-            }
-            case 122: {
-              chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000800) != 0)) {
-                subBuilder = dynamicPartitionMetadata_.toBuilder();
-              }
-              dynamicPartitionMetadata_ = input.readMessage(chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(dynamicPartitionMetadata_);
-                dynamicPartitionMetadata_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000800;
-              break;
-            }
-            case 128: {
-              bitField0_ |= 0x00001000;
-              partialUpdate_ = input.readBool();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          installOperations_ = java.util.Collections.unmodifiableList(installOperations_);
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          kernelInstallOperations_ = java.util.Collections.unmodifiableList(kernelInstallOperations_);
-        }
-        if (((mutable_bitField0_ & 0x00001000) != 0)) {
-          partitions_ = java.util.Collections.unmodifiableList(partitions_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -14609,118 +17862,8 @@ public final class UpdateMetadata {
     }
 
     private int bitField0_;
-    public static final int INSTALL_OPERATIONS_FIELD_NUMBER = 1;
-    private java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation> installOperations_;
-    /**
-     * <pre>
-     * Only present in major version = 1. List of install operations for the
-     * kernel and rootfs partitions. For major version = 2 see the |partitions|
-     * field.
-     * </pre>
-     *
-     * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-     */
-    @java.lang.Override
-    public java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation> getInstallOperationsList() {
-      return installOperations_;
-    }
-    /**
-     * <pre>
-     * Only present in major version = 1. List of install operations for the
-     * kernel and rootfs partitions. For major version = 2 see the |partitions|
-     * field.
-     * </pre>
-     *
-     * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-     */
-    @java.lang.Override
-    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>
-        getInstallOperationsOrBuilderList() {
-      return installOperations_;
-    }
-    /**
-     * <pre>
-     * Only present in major version = 1. List of install operations for the
-     * kernel and rootfs partitions. For major version = 2 see the |partitions|
-     * field.
-     * </pre>
-     *
-     * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-     */
-    @java.lang.Override
-    public int getInstallOperationsCount() {
-      return installOperations_.size();
-    }
-    /**
-     * <pre>
-     * Only present in major version = 1. List of install operations for the
-     * kernel and rootfs partitions. For major version = 2 see the |partitions|
-     * field.
-     * </pre>
-     *
-     * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.InstallOperation getInstallOperations(int index) {
-      return installOperations_.get(index);
-    }
-    /**
-     * <pre>
-     * Only present in major version = 1. List of install operations for the
-     * kernel and rootfs partitions. For major version = 2 see the |partitions|
-     * field.
-     * </pre>
-     *
-     * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder getInstallOperationsOrBuilder(
-        int index) {
-      return installOperations_.get(index);
-    }
-
-    public static final int KERNEL_INSTALL_OPERATIONS_FIELD_NUMBER = 2;
-    private java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation> kernelInstallOperations_;
-    /**
-     * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-     */
-    @java.lang.Override
-    public java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation> getKernelInstallOperationsList() {
-      return kernelInstallOperations_;
-    }
-    /**
-     * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-     */
-    @java.lang.Override
-    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>
-        getKernelInstallOperationsOrBuilderList() {
-      return kernelInstallOperations_;
-    }
-    /**
-     * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-     */
-    @java.lang.Override
-    public int getKernelInstallOperationsCount() {
-      return kernelInstallOperations_.size();
-    }
-    /**
-     * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.InstallOperation getKernelInstallOperations(int index) {
-      return kernelInstallOperations_.get(index);
-    }
-    /**
-     * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder getKernelInstallOperationsOrBuilder(
-        int index) {
-      return kernelInstallOperations_.get(index);
-    }
-
     public static final int BLOCK_SIZE_FIELD_NUMBER = 3;
-    private int blockSize_;
+    private int blockSize_ = 4096;
     /**
      * <pre>
      * (At time of writing) usually 4096
@@ -14747,7 +17890,7 @@ public final class UpdateMetadata {
     }
 
     public static final int SIGNATURES_OFFSET_FIELD_NUMBER = 4;
-    private long signaturesOffset_;
+    private long signaturesOffset_ = 0L;
     /**
      * <pre>
      * If signatures are present, the offset into the blobs, generally
@@ -14782,7 +17925,7 @@ public final class UpdateMetadata {
     }
 
     public static final int SIGNATURES_SIZE_FIELD_NUMBER = 5;
-    private long signaturesSize_;
+    private long signaturesSize_ = 0L;
     /**
      * <code>optional uint64 signatures_size = 5;</code>
      * @return Whether the signaturesSize field is set.
@@ -14800,191 +17943,8 @@ public final class UpdateMetadata {
       return signaturesSize_;
     }
 
-    public static final int OLD_KERNEL_INFO_FIELD_NUMBER = 6;
-    private chromeos_update_engine.UpdateMetadata.PartitionInfo oldKernelInfo_;
-    /**
-     * <pre>
-     * Only present in major version = 1. Partition metadata used to validate the
-     * update. For major version = 2 see the |partitions| field.
-     * </pre>
-     *
-     * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-     * @return Whether the oldKernelInfo field is set.
-     */
-    @java.lang.Override
-    public boolean hasOldKernelInfo() {
-      return ((bitField0_ & 0x00000008) != 0);
-    }
-    /**
-     * <pre>
-     * Only present in major version = 1. Partition metadata used to validate the
-     * update. For major version = 2 see the |partitions| field.
-     * </pre>
-     *
-     * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-     * @return The oldKernelInfo.
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.PartitionInfo getOldKernelInfo() {
-      return oldKernelInfo_ == null ? chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : oldKernelInfo_;
-    }
-    /**
-     * <pre>
-     * Only present in major version = 1. Partition metadata used to validate the
-     * update. For major version = 2 see the |partitions| field.
-     * </pre>
-     *
-     * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder getOldKernelInfoOrBuilder() {
-      return oldKernelInfo_ == null ? chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : oldKernelInfo_;
-    }
-
-    public static final int NEW_KERNEL_INFO_FIELD_NUMBER = 7;
-    private chromeos_update_engine.UpdateMetadata.PartitionInfo newKernelInfo_;
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-     * @return Whether the newKernelInfo field is set.
-     */
-    @java.lang.Override
-    public boolean hasNewKernelInfo() {
-      return ((bitField0_ & 0x00000010) != 0);
-    }
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-     * @return The newKernelInfo.
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.PartitionInfo getNewKernelInfo() {
-      return newKernelInfo_ == null ? chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : newKernelInfo_;
-    }
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder getNewKernelInfoOrBuilder() {
-      return newKernelInfo_ == null ? chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : newKernelInfo_;
-    }
-
-    public static final int OLD_ROOTFS_INFO_FIELD_NUMBER = 8;
-    private chromeos_update_engine.UpdateMetadata.PartitionInfo oldRootfsInfo_;
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-     * @return Whether the oldRootfsInfo field is set.
-     */
-    @java.lang.Override
-    public boolean hasOldRootfsInfo() {
-      return ((bitField0_ & 0x00000020) != 0);
-    }
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-     * @return The oldRootfsInfo.
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.PartitionInfo getOldRootfsInfo() {
-      return oldRootfsInfo_ == null ? chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : oldRootfsInfo_;
-    }
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder getOldRootfsInfoOrBuilder() {
-      return oldRootfsInfo_ == null ? chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : oldRootfsInfo_;
-    }
-
-    public static final int NEW_ROOTFS_INFO_FIELD_NUMBER = 9;
-    private chromeos_update_engine.UpdateMetadata.PartitionInfo newRootfsInfo_;
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-     * @return Whether the newRootfsInfo field is set.
-     */
-    @java.lang.Override
-    public boolean hasNewRootfsInfo() {
-      return ((bitField0_ & 0x00000040) != 0);
-    }
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-     * @return The newRootfsInfo.
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.PartitionInfo getNewRootfsInfo() {
-      return newRootfsInfo_ == null ? chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : newRootfsInfo_;
-    }
-    /**
-     * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder getNewRootfsInfoOrBuilder() {
-      return newRootfsInfo_ == null ? chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : newRootfsInfo_;
-    }
-
-    public static final int OLD_IMAGE_INFO_FIELD_NUMBER = 10;
-    private chromeos_update_engine.UpdateMetadata.ImageInfo oldImageInfo_;
-    /**
-     * <pre>
-     * old_image_info will only be present for delta images.
-     * </pre>
-     *
-     * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-     * @return Whether the oldImageInfo field is set.
-     */
-    @java.lang.Override
-    public boolean hasOldImageInfo() {
-      return ((bitField0_ & 0x00000080) != 0);
-    }
-    /**
-     * <pre>
-     * old_image_info will only be present for delta images.
-     * </pre>
-     *
-     * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-     * @return The oldImageInfo.
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.ImageInfo getOldImageInfo() {
-      return oldImageInfo_ == null ? chromeos_update_engine.UpdateMetadata.ImageInfo.getDefaultInstance() : oldImageInfo_;
-    }
-    /**
-     * <pre>
-     * old_image_info will only be present for delta images.
-     * </pre>
-     *
-     * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.ImageInfoOrBuilder getOldImageInfoOrBuilder() {
-      return oldImageInfo_ == null ? chromeos_update_engine.UpdateMetadata.ImageInfo.getDefaultInstance() : oldImageInfo_;
-    }
-
-    public static final int NEW_IMAGE_INFO_FIELD_NUMBER = 11;
-    private chromeos_update_engine.UpdateMetadata.ImageInfo newImageInfo_;
-    /**
-     * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-     * @return Whether the newImageInfo field is set.
-     */
-    @java.lang.Override
-    public boolean hasNewImageInfo() {
-      return ((bitField0_ & 0x00000100) != 0);
-    }
-    /**
-     * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-     * @return The newImageInfo.
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.ImageInfo getNewImageInfo() {
-      return newImageInfo_ == null ? chromeos_update_engine.UpdateMetadata.ImageInfo.getDefaultInstance() : newImageInfo_;
-    }
-    /**
-     * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-     */
-    @java.lang.Override
-    public chromeos_update_engine.UpdateMetadata.ImageInfoOrBuilder getNewImageInfoOrBuilder() {
-      return newImageInfo_ == null ? chromeos_update_engine.UpdateMetadata.ImageInfo.getDefaultInstance() : newImageInfo_;
-    }
-
     public static final int MINOR_VERSION_FIELD_NUMBER = 12;
-    private int minorVersion_;
+    private int minorVersion_ = 0;
     /**
      * <pre>
      * The minor version, also referred as "delta version", of the payload.
@@ -14996,7 +17956,7 @@ public final class UpdateMetadata {
      */
     @java.lang.Override
     public boolean hasMinorVersion() {
-      return ((bitField0_ & 0x00000200) != 0);
+      return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <pre>
@@ -15013,6 +17973,7 @@ public final class UpdateMetadata {
     }
 
     public static final int PARTITIONS_FIELD_NUMBER = 13;
+    @SuppressWarnings("serial")
     private java.util.List<chromeos_update_engine.UpdateMetadata.PartitionUpdate> partitions_;
     /**
      * <pre>
@@ -15043,7 +18004,7 @@ public final class UpdateMetadata {
      * <code>repeated .chromeos_update_engine.PartitionUpdate partitions = 13;</code>
      */
     @java.lang.Override
-    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.PartitionUpdateOrBuilder>
+    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.PartitionUpdateOrBuilder> 
         getPartitionsOrBuilderList() {
       return partitions_;
     }
@@ -15098,7 +18059,7 @@ public final class UpdateMetadata {
     }
 
     public static final int MAX_TIMESTAMP_FIELD_NUMBER = 14;
-    private long maxTimestamp_;
+    private long maxTimestamp_ = 0L;
     /**
      * <pre>
      * The maximum timestamp of the OS allowed to apply this payload.
@@ -15110,7 +18071,7 @@ public final class UpdateMetadata {
      */
     @java.lang.Override
     public boolean hasMaxTimestamp() {
-      return ((bitField0_ & 0x00000400) != 0);
+      return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <pre>
@@ -15138,7 +18099,7 @@ public final class UpdateMetadata {
      */
     @java.lang.Override
     public boolean hasDynamicPartitionMetadata() {
-      return ((bitField0_ & 0x00000800) != 0);
+      return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <pre>
@@ -15165,7 +18126,7 @@ public final class UpdateMetadata {
     }
 
     public static final int PARTIAL_UPDATE_FIELD_NUMBER = 16;
-    private boolean partialUpdate_;
+    private boolean partialUpdate_ = false;
     /**
      * <pre>
      * If the payload only updates a subset of partitions on the device.
@@ -15176,7 +18137,7 @@ public final class UpdateMetadata {
      */
     @java.lang.Override
     public boolean hasPartialUpdate() {
-      return ((bitField0_ & 0x00001000) != 0);
+      return ((bitField0_ & 0x00000040) != 0);
     }
     /**
      * <pre>
@@ -15191,6 +18152,136 @@ public final class UpdateMetadata {
       return partialUpdate_;
     }
 
+    public static final int APEX_INFO_FIELD_NUMBER = 17;
+    @SuppressWarnings("serial")
+    private java.util.List<chromeos_update_engine.UpdateMetadata.ApexInfo> apexInfo_;
+    /**
+     * <pre>
+     * Information on compressed APEX to figure out how much space is required for
+     * their decompression
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+     */
+    @java.lang.Override
+    public java.util.List<chromeos_update_engine.UpdateMetadata.ApexInfo> getApexInfoList() {
+      return apexInfo_;
+    }
+    /**
+     * <pre>
+     * Information on compressed APEX to figure out how much space is required for
+     * their decompression
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder> 
+        getApexInfoOrBuilderList() {
+      return apexInfo_;
+    }
+    /**
+     * <pre>
+     * Information on compressed APEX to figure out how much space is required for
+     * their decompression
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+     */
+    @java.lang.Override
+    public int getApexInfoCount() {
+      return apexInfo_.size();
+    }
+    /**
+     * <pre>
+     * Information on compressed APEX to figure out how much space is required for
+     * their decompression
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+     */
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.ApexInfo getApexInfo(int index) {
+      return apexInfo_.get(index);
+    }
+    /**
+     * <pre>
+     * Information on compressed APEX to figure out how much space is required for
+     * their decompression
+     * </pre>
+     *
+     * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+     */
+    @java.lang.Override
+    public chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder getApexInfoOrBuilder(
+        int index) {
+      return apexInfo_.get(index);
+    }
+
+    public static final int SECURITY_PATCH_LEVEL_FIELD_NUMBER = 18;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object securityPatchLevel_ = "";
+    /**
+     * <pre>
+     * Security patch level of the device, usually in the format of
+     * yyyy-mm-dd
+     * </pre>
+     *
+     * <code>optional string security_patch_level = 18;</code>
+     * @return Whether the securityPatchLevel field is set.
+     */
+    @java.lang.Override
+    public boolean hasSecurityPatchLevel() {
+      return ((bitField0_ & 0x00000080) != 0);
+    }
+    /**
+     * <pre>
+     * Security patch level of the device, usually in the format of
+     * yyyy-mm-dd
+     * </pre>
+     *
+     * <code>optional string security_patch_level = 18;</code>
+     * @return The securityPatchLevel.
+     */
+    @java.lang.Override
+    public java.lang.String getSecurityPatchLevel() {
+      java.lang.Object ref = securityPatchLevel_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          securityPatchLevel_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Security patch level of the device, usually in the format of
+     * yyyy-mm-dd
+     * </pre>
+     *
+     * <code>optional string security_patch_level = 18;</code>
+     * @return The bytes for securityPatchLevel.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getSecurityPatchLevelBytes() {
+      java.lang.Object ref = securityPatchLevel_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        securityPatchLevel_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -15198,18 +18289,6 @@ public final class UpdateMetadata {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      for (int i = 0; i < getInstallOperationsCount(); i++) {
-        if (!getInstallOperations(i).isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-      }
-      for (int i = 0; i < getKernelInstallOperationsCount(); i++) {
-        if (!getKernelInstallOperations(i).isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-      }
       for (int i = 0; i < getPartitionsCount(); i++) {
         if (!getPartitions(i).isInitialized()) {
           memoizedIsInitialized = 0;
@@ -15229,12 +18308,6 @@ public final class UpdateMetadata {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      for (int i = 0; i < installOperations_.size(); i++) {
-        output.writeMessage(1, installOperations_.get(i));
-      }
-      for (int i = 0; i < kernelInstallOperations_.size(); i++) {
-        output.writeMessage(2, kernelInstallOperations_.get(i));
-      }
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeUInt32(3, blockSize_);
       }
@@ -15245,39 +18318,27 @@ public final class UpdateMetadata {
         output.writeUInt64(5, signaturesSize_);
       }
       if (((bitField0_ & 0x00000008) != 0)) {
-        output.writeMessage(6, getOldKernelInfo());
-      }
-      if (((bitField0_ & 0x00000010) != 0)) {
-        output.writeMessage(7, getNewKernelInfo());
-      }
-      if (((bitField0_ & 0x00000020) != 0)) {
-        output.writeMessage(8, getOldRootfsInfo());
-      }
-      if (((bitField0_ & 0x00000040) != 0)) {
-        output.writeMessage(9, getNewRootfsInfo());
-      }
-      if (((bitField0_ & 0x00000080) != 0)) {
-        output.writeMessage(10, getOldImageInfo());
-      }
-      if (((bitField0_ & 0x00000100) != 0)) {
-        output.writeMessage(11, getNewImageInfo());
-      }
-      if (((bitField0_ & 0x00000200) != 0)) {
         output.writeUInt32(12, minorVersion_);
       }
       for (int i = 0; i < partitions_.size(); i++) {
         output.writeMessage(13, partitions_.get(i));
       }
-      if (((bitField0_ & 0x00000400) != 0)) {
+      if (((bitField0_ & 0x00000010) != 0)) {
         output.writeInt64(14, maxTimestamp_);
       }
-      if (((bitField0_ & 0x00000800) != 0)) {
+      if (((bitField0_ & 0x00000020) != 0)) {
         output.writeMessage(15, getDynamicPartitionMetadata());
       }
-      if (((bitField0_ & 0x00001000) != 0)) {
+      if (((bitField0_ & 0x00000040) != 0)) {
         output.writeBool(16, partialUpdate_);
       }
-      unknownFields.writeTo(output);
+      for (int i = 0; i < apexInfo_.size(); i++) {
+        output.writeMessage(17, apexInfo_.get(i));
+      }
+      if (((bitField0_ & 0x00000080) != 0)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 18, securityPatchLevel_);
+      }
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -15286,14 +18347,6 @@ public final class UpdateMetadata {
       if (size != -1) return size;
 
       size = 0;
-      for (int i = 0; i < installOperations_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, installOperations_.get(i));
-      }
-      for (int i = 0; i < kernelInstallOperations_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, kernelInstallOperations_.get(i));
-      }
       if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(3, blockSize_);
@@ -15308,49 +18361,32 @@ public final class UpdateMetadata {
       }
       if (((bitField0_ & 0x00000008) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(6, getOldKernelInfo());
-      }
-      if (((bitField0_ & 0x00000010) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(7, getNewKernelInfo());
-      }
-      if (((bitField0_ & 0x00000020) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(8, getOldRootfsInfo());
-      }
-      if (((bitField0_ & 0x00000040) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(9, getNewRootfsInfo());
-      }
-      if (((bitField0_ & 0x00000080) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(10, getOldImageInfo());
-      }
-      if (((bitField0_ & 0x00000100) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(11, getNewImageInfo());
-      }
-      if (((bitField0_ & 0x00000200) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(12, minorVersion_);
       }
       for (int i = 0; i < partitions_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(13, partitions_.get(i));
       }
-      if (((bitField0_ & 0x00000400) != 0)) {
+      if (((bitField0_ & 0x00000010) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(14, maxTimestamp_);
       }
-      if (((bitField0_ & 0x00000800) != 0)) {
+      if (((bitField0_ & 0x00000020) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(15, getDynamicPartitionMetadata());
       }
-      if (((bitField0_ & 0x00001000) != 0)) {
+      if (((bitField0_ & 0x00000040) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(16, partialUpdate_);
       }
-      size += unknownFields.getSerializedSize();
+      for (int i = 0; i < apexInfo_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(17, apexInfo_.get(i));
+      }
+      if (((bitField0_ & 0x00000080) != 0)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(18, securityPatchLevel_);
+      }
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -15365,10 +18401,6 @@ public final class UpdateMetadata {
       }
       chromeos_update_engine.UpdateMetadata.DeltaArchiveManifest other = (chromeos_update_engine.UpdateMetadata.DeltaArchiveManifest) obj;
 
-      if (!getInstallOperationsList()
-          .equals(other.getInstallOperationsList())) return false;
-      if (!getKernelInstallOperationsList()
-          .equals(other.getKernelInstallOperationsList())) return false;
       if (hasBlockSize() != other.hasBlockSize()) return false;
       if (hasBlockSize()) {
         if (getBlockSize()
@@ -15383,36 +18415,6 @@ public final class UpdateMetadata {
       if (hasSignaturesSize()) {
         if (getSignaturesSize()
             != other.getSignaturesSize()) return false;
-      }
-      if (hasOldKernelInfo() != other.hasOldKernelInfo()) return false;
-      if (hasOldKernelInfo()) {
-        if (!getOldKernelInfo()
-            .equals(other.getOldKernelInfo())) return false;
-      }
-      if (hasNewKernelInfo() != other.hasNewKernelInfo()) return false;
-      if (hasNewKernelInfo()) {
-        if (!getNewKernelInfo()
-            .equals(other.getNewKernelInfo())) return false;
-      }
-      if (hasOldRootfsInfo() != other.hasOldRootfsInfo()) return false;
-      if (hasOldRootfsInfo()) {
-        if (!getOldRootfsInfo()
-            .equals(other.getOldRootfsInfo())) return false;
-      }
-      if (hasNewRootfsInfo() != other.hasNewRootfsInfo()) return false;
-      if (hasNewRootfsInfo()) {
-        if (!getNewRootfsInfo()
-            .equals(other.getNewRootfsInfo())) return false;
-      }
-      if (hasOldImageInfo() != other.hasOldImageInfo()) return false;
-      if (hasOldImageInfo()) {
-        if (!getOldImageInfo()
-            .equals(other.getOldImageInfo())) return false;
-      }
-      if (hasNewImageInfo() != other.hasNewImageInfo()) return false;
-      if (hasNewImageInfo()) {
-        if (!getNewImageInfo()
-            .equals(other.getNewImageInfo())) return false;
       }
       if (hasMinorVersion() != other.hasMinorVersion()) return false;
       if (hasMinorVersion()) {
@@ -15436,7 +18438,14 @@ public final class UpdateMetadata {
         if (getPartialUpdate()
             != other.getPartialUpdate()) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getApexInfoList()
+          .equals(other.getApexInfoList())) return false;
+      if (hasSecurityPatchLevel() != other.hasSecurityPatchLevel()) return false;
+      if (hasSecurityPatchLevel()) {
+        if (!getSecurityPatchLevel()
+            .equals(other.getSecurityPatchLevel())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -15447,14 +18456,6 @@ public final class UpdateMetadata {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (getInstallOperationsCount() > 0) {
-        hash = (37 * hash) + INSTALL_OPERATIONS_FIELD_NUMBER;
-        hash = (53 * hash) + getInstallOperationsList().hashCode();
-      }
-      if (getKernelInstallOperationsCount() > 0) {
-        hash = (37 * hash) + KERNEL_INSTALL_OPERATIONS_FIELD_NUMBER;
-        hash = (53 * hash) + getKernelInstallOperationsList().hashCode();
-      }
       if (hasBlockSize()) {
         hash = (37 * hash) + BLOCK_SIZE_FIELD_NUMBER;
         hash = (53 * hash) + getBlockSize();
@@ -15468,30 +18469,6 @@ public final class UpdateMetadata {
         hash = (37 * hash) + SIGNATURES_SIZE_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
             getSignaturesSize());
-      }
-      if (hasOldKernelInfo()) {
-        hash = (37 * hash) + OLD_KERNEL_INFO_FIELD_NUMBER;
-        hash = (53 * hash) + getOldKernelInfo().hashCode();
-      }
-      if (hasNewKernelInfo()) {
-        hash = (37 * hash) + NEW_KERNEL_INFO_FIELD_NUMBER;
-        hash = (53 * hash) + getNewKernelInfo().hashCode();
-      }
-      if (hasOldRootfsInfo()) {
-        hash = (37 * hash) + OLD_ROOTFS_INFO_FIELD_NUMBER;
-        hash = (53 * hash) + getOldRootfsInfo().hashCode();
-      }
-      if (hasNewRootfsInfo()) {
-        hash = (37 * hash) + NEW_ROOTFS_INFO_FIELD_NUMBER;
-        hash = (53 * hash) + getNewRootfsInfo().hashCode();
-      }
-      if (hasOldImageInfo()) {
-        hash = (37 * hash) + OLD_IMAGE_INFO_FIELD_NUMBER;
-        hash = (53 * hash) + getOldImageInfo().hashCode();
-      }
-      if (hasNewImageInfo()) {
-        hash = (37 * hash) + NEW_IMAGE_INFO_FIELD_NUMBER;
-        hash = (53 * hash) + getNewImageInfo().hashCode();
       }
       if (hasMinorVersion()) {
         hash = (37 * hash) + MINOR_VERSION_FIELD_NUMBER;
@@ -15515,7 +18492,15 @@ public final class UpdateMetadata {
         hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
             getPartialUpdate());
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      if (getApexInfoCount() > 0) {
+        hash = (37 * hash) + APEX_INFO_FIELD_NUMBER;
+        hash = (53 * hash) + getApexInfoList().hashCode();
+      }
+      if (hasSecurityPatchLevel()) {
+        hash = (37 * hash) + SECURITY_PATCH_LEVEL_FIELD_NUMBER;
+        hash = (53 * hash) + getSecurityPatchLevel().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -15643,93 +18628,41 @@ public final class UpdateMetadata {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
-          getInstallOperationsFieldBuilder();
-          getKernelInstallOperationsFieldBuilder();
-          getOldKernelInfoFieldBuilder();
-          getNewKernelInfoFieldBuilder();
-          getOldRootfsInfoFieldBuilder();
-          getNewRootfsInfoFieldBuilder();
-          getOldImageInfoFieldBuilder();
-          getNewImageInfoFieldBuilder();
           getPartitionsFieldBuilder();
           getDynamicPartitionMetadataFieldBuilder();
+          getApexInfoFieldBuilder();
         }
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        if (installOperationsBuilder_ == null) {
-          installOperations_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-        } else {
-          installOperationsBuilder_.clear();
-        }
-        if (kernelInstallOperationsBuilder_ == null) {
-          kernelInstallOperations_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
-        } else {
-          kernelInstallOperationsBuilder_.clear();
-        }
+        bitField0_ = 0;
         blockSize_ = 4096;
-        bitField0_ = (bitField0_ & ~0x00000004);
         signaturesOffset_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000008);
         signaturesSize_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000010);
-        if (oldKernelInfoBuilder_ == null) {
-          oldKernelInfo_ = null;
-        } else {
-          oldKernelInfoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000020);
-        if (newKernelInfoBuilder_ == null) {
-          newKernelInfo_ = null;
-        } else {
-          newKernelInfoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000040);
-        if (oldRootfsInfoBuilder_ == null) {
-          oldRootfsInfo_ = null;
-        } else {
-          oldRootfsInfoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000080);
-        if (newRootfsInfoBuilder_ == null) {
-          newRootfsInfo_ = null;
-        } else {
-          newRootfsInfoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000100);
-        if (oldImageInfoBuilder_ == null) {
-          oldImageInfo_ = null;
-        } else {
-          oldImageInfoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000200);
-        if (newImageInfoBuilder_ == null) {
-          newImageInfo_ = null;
-        } else {
-          newImageInfoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000400);
         minorVersion_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000800);
         if (partitionsBuilder_ == null) {
           partitions_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00001000);
         } else {
+          partitions_ = null;
           partitionsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000010);
         maxTimestamp_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00002000);
-        if (dynamicPartitionMetadataBuilder_ == null) {
-          dynamicPartitionMetadata_ = null;
-        } else {
-          dynamicPartitionMetadataBuilder_.clear();
+        dynamicPartitionMetadata_ = null;
+        if (dynamicPartitionMetadataBuilder_ != null) {
+          dynamicPartitionMetadataBuilder_.dispose();
+          dynamicPartitionMetadataBuilder_ = null;
         }
-        bitField0_ = (bitField0_ & ~0x00004000);
         partialUpdate_ = false;
-        bitField0_ = (bitField0_ & ~0x00008000);
+        if (apexInfoBuilder_ == null) {
+          apexInfo_ = java.util.Collections.emptyList();
+        } else {
+          apexInfo_ = null;
+          apexInfoBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000100);
+        securityPatchLevel_ = "";
         return this;
       }
 
@@ -15756,118 +18689,71 @@ public final class UpdateMetadata {
       @java.lang.Override
       public chromeos_update_engine.UpdateMetadata.DeltaArchiveManifest buildPartial() {
         chromeos_update_engine.UpdateMetadata.DeltaArchiveManifest result = new chromeos_update_engine.UpdateMetadata.DeltaArchiveManifest(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (installOperationsBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0)) {
-            installOperations_ = java.util.Collections.unmodifiableList(installOperations_);
-            bitField0_ = (bitField0_ & ~0x00000001);
-          }
-          result.installOperations_ = installOperations_;
-        } else {
-          result.installOperations_ = installOperationsBuilder_.build();
-        }
-        if (kernelInstallOperationsBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) != 0)) {
-            kernelInstallOperations_ = java.util.Collections.unmodifiableList(kernelInstallOperations_);
-            bitField0_ = (bitField0_ & ~0x00000002);
-          }
-          result.kernelInstallOperations_ = kernelInstallOperations_;
-        } else {
-          result.kernelInstallOperations_ = kernelInstallOperationsBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000004) != 0)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.blockSize_ = blockSize_;
-        if (((from_bitField0_ & 0x00000008) != 0)) {
-          result.signaturesOffset_ = signaturesOffset_;
-          to_bitField0_ |= 0x00000002;
-        }
-        if (((from_bitField0_ & 0x00000010) != 0)) {
-          result.signaturesSize_ = signaturesSize_;
-          to_bitField0_ |= 0x00000004;
-        }
-        if (((from_bitField0_ & 0x00000020) != 0)) {
-          if (oldKernelInfoBuilder_ == null) {
-            result.oldKernelInfo_ = oldKernelInfo_;
-          } else {
-            result.oldKernelInfo_ = oldKernelInfoBuilder_.build();
-          }
-          to_bitField0_ |= 0x00000008;
-        }
-        if (((from_bitField0_ & 0x00000040) != 0)) {
-          if (newKernelInfoBuilder_ == null) {
-            result.newKernelInfo_ = newKernelInfo_;
-          } else {
-            result.newKernelInfo_ = newKernelInfoBuilder_.build();
-          }
-          to_bitField0_ |= 0x00000010;
-        }
-        if (((from_bitField0_ & 0x00000080) != 0)) {
-          if (oldRootfsInfoBuilder_ == null) {
-            result.oldRootfsInfo_ = oldRootfsInfo_;
-          } else {
-            result.oldRootfsInfo_ = oldRootfsInfoBuilder_.build();
-          }
-          to_bitField0_ |= 0x00000020;
-        }
-        if (((from_bitField0_ & 0x00000100) != 0)) {
-          if (newRootfsInfoBuilder_ == null) {
-            result.newRootfsInfo_ = newRootfsInfo_;
-          } else {
-            result.newRootfsInfo_ = newRootfsInfoBuilder_.build();
-          }
-          to_bitField0_ |= 0x00000040;
-        }
-        if (((from_bitField0_ & 0x00000200) != 0)) {
-          if (oldImageInfoBuilder_ == null) {
-            result.oldImageInfo_ = oldImageInfo_;
-          } else {
-            result.oldImageInfo_ = oldImageInfoBuilder_.build();
-          }
-          to_bitField0_ |= 0x00000080;
-        }
-        if (((from_bitField0_ & 0x00000400) != 0)) {
-          if (newImageInfoBuilder_ == null) {
-            result.newImageInfo_ = newImageInfo_;
-          } else {
-            result.newImageInfo_ = newImageInfoBuilder_.build();
-          }
-          to_bitField0_ |= 0x00000100;
-        }
-        if (((from_bitField0_ & 0x00000800) != 0)) {
-          result.minorVersion_ = minorVersion_;
-          to_bitField0_ |= 0x00000200;
-        }
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(chromeos_update_engine.UpdateMetadata.DeltaArchiveManifest result) {
         if (partitionsBuilder_ == null) {
-          if (((bitField0_ & 0x00001000) != 0)) {
+          if (((bitField0_ & 0x00000010) != 0)) {
             partitions_ = java.util.Collections.unmodifiableList(partitions_);
-            bitField0_ = (bitField0_ & ~0x00001000);
+            bitField0_ = (bitField0_ & ~0x00000010);
           }
           result.partitions_ = partitions_;
         } else {
           result.partitions_ = partitionsBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00002000) != 0)) {
-          result.maxTimestamp_ = maxTimestamp_;
-          to_bitField0_ |= 0x00000400;
-        }
-        if (((from_bitField0_ & 0x00004000) != 0)) {
-          if (dynamicPartitionMetadataBuilder_ == null) {
-            result.dynamicPartitionMetadata_ = dynamicPartitionMetadata_;
-          } else {
-            result.dynamicPartitionMetadata_ = dynamicPartitionMetadataBuilder_.build();
+        if (apexInfoBuilder_ == null) {
+          if (((bitField0_ & 0x00000100) != 0)) {
+            apexInfo_ = java.util.Collections.unmodifiableList(apexInfo_);
+            bitField0_ = (bitField0_ & ~0x00000100);
           }
-          to_bitField0_ |= 0x00000800;
+          result.apexInfo_ = apexInfo_;
+        } else {
+          result.apexInfo_ = apexInfoBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00008000) != 0)) {
+      }
+
+      private void buildPartial0(chromeos_update_engine.UpdateMetadata.DeltaArchiveManifest result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.blockSize_ = blockSize_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.signaturesOffset_ = signaturesOffset_;
+          to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.signaturesSize_ = signaturesSize_;
+          to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.minorVersion_ = minorVersion_;
+          to_bitField0_ |= 0x00000008;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.maxTimestamp_ = maxTimestamp_;
+          to_bitField0_ |= 0x00000010;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.dynamicPartitionMetadata_ = dynamicPartitionMetadataBuilder_ == null
+              ? dynamicPartitionMetadata_
+              : dynamicPartitionMetadataBuilder_.build();
+          to_bitField0_ |= 0x00000020;
+        }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
           result.partialUpdate_ = partialUpdate_;
-          to_bitField0_ |= 0x00001000;
+          to_bitField0_ |= 0x00000040;
         }
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
+        if (((from_bitField0_ & 0x00000200) != 0)) {
+          result.securityPatchLevel_ = securityPatchLevel_;
+          to_bitField0_ |= 0x00000080;
+        }
+        result.bitField0_ |= to_bitField0_;
       }
 
       @java.lang.Override
@@ -15914,58 +18800,6 @@ public final class UpdateMetadata {
 
       public Builder mergeFrom(chromeos_update_engine.UpdateMetadata.DeltaArchiveManifest other) {
         if (other == chromeos_update_engine.UpdateMetadata.DeltaArchiveManifest.getDefaultInstance()) return this;
-        if (installOperationsBuilder_ == null) {
-          if (!other.installOperations_.isEmpty()) {
-            if (installOperations_.isEmpty()) {
-              installOperations_ = other.installOperations_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-            } else {
-              ensureInstallOperationsIsMutable();
-              installOperations_.addAll(other.installOperations_);
-            }
-            onChanged();
-          }
-        } else {
-          if (!other.installOperations_.isEmpty()) {
-            if (installOperationsBuilder_.isEmpty()) {
-              installOperationsBuilder_.dispose();
-              installOperationsBuilder_ = null;
-              installOperations_ = other.installOperations_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-              installOperationsBuilder_ =
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getInstallOperationsFieldBuilder() : null;
-            } else {
-              installOperationsBuilder_.addAllMessages(other.installOperations_);
-            }
-          }
-        }
-        if (kernelInstallOperationsBuilder_ == null) {
-          if (!other.kernelInstallOperations_.isEmpty()) {
-            if (kernelInstallOperations_.isEmpty()) {
-              kernelInstallOperations_ = other.kernelInstallOperations_;
-              bitField0_ = (bitField0_ & ~0x00000002);
-            } else {
-              ensureKernelInstallOperationsIsMutable();
-              kernelInstallOperations_.addAll(other.kernelInstallOperations_);
-            }
-            onChanged();
-          }
-        } else {
-          if (!other.kernelInstallOperations_.isEmpty()) {
-            if (kernelInstallOperationsBuilder_.isEmpty()) {
-              kernelInstallOperationsBuilder_.dispose();
-              kernelInstallOperationsBuilder_ = null;
-              kernelInstallOperations_ = other.kernelInstallOperations_;
-              bitField0_ = (bitField0_ & ~0x00000002);
-              kernelInstallOperationsBuilder_ =
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getKernelInstallOperationsFieldBuilder() : null;
-            } else {
-              kernelInstallOperationsBuilder_.addAllMessages(other.kernelInstallOperations_);
-            }
-          }
-        }
         if (other.hasBlockSize()) {
           setBlockSize(other.getBlockSize());
         }
@@ -15975,24 +18809,6 @@ public final class UpdateMetadata {
         if (other.hasSignaturesSize()) {
           setSignaturesSize(other.getSignaturesSize());
         }
-        if (other.hasOldKernelInfo()) {
-          mergeOldKernelInfo(other.getOldKernelInfo());
-        }
-        if (other.hasNewKernelInfo()) {
-          mergeNewKernelInfo(other.getNewKernelInfo());
-        }
-        if (other.hasOldRootfsInfo()) {
-          mergeOldRootfsInfo(other.getOldRootfsInfo());
-        }
-        if (other.hasNewRootfsInfo()) {
-          mergeNewRootfsInfo(other.getNewRootfsInfo());
-        }
-        if (other.hasOldImageInfo()) {
-          mergeOldImageInfo(other.getOldImageInfo());
-        }
-        if (other.hasNewImageInfo()) {
-          mergeNewImageInfo(other.getNewImageInfo());
-        }
         if (other.hasMinorVersion()) {
           setMinorVersion(other.getMinorVersion());
         }
@@ -16000,7 +18816,7 @@ public final class UpdateMetadata {
           if (!other.partitions_.isEmpty()) {
             if (partitions_.isEmpty()) {
               partitions_ = other.partitions_;
-              bitField0_ = (bitField0_ & ~0x00001000);
+              bitField0_ = (bitField0_ & ~0x00000010);
             } else {
               ensurePartitionsIsMutable();
               partitions_.addAll(other.partitions_);
@@ -16013,8 +18829,8 @@ public final class UpdateMetadata {
               partitionsBuilder_.dispose();
               partitionsBuilder_ = null;
               partitions_ = other.partitions_;
-              bitField0_ = (bitField0_ & ~0x00001000);
-              partitionsBuilder_ =
+              bitField0_ = (bitField0_ & ~0x00000010);
+              partitionsBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getPartitionsFieldBuilder() : null;
             } else {
@@ -16031,23 +18847,44 @@ public final class UpdateMetadata {
         if (other.hasPartialUpdate()) {
           setPartialUpdate(other.getPartialUpdate());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        if (apexInfoBuilder_ == null) {
+          if (!other.apexInfo_.isEmpty()) {
+            if (apexInfo_.isEmpty()) {
+              apexInfo_ = other.apexInfo_;
+              bitField0_ = (bitField0_ & ~0x00000100);
+            } else {
+              ensureApexInfoIsMutable();
+              apexInfo_.addAll(other.apexInfo_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.apexInfo_.isEmpty()) {
+            if (apexInfoBuilder_.isEmpty()) {
+              apexInfoBuilder_.dispose();
+              apexInfoBuilder_ = null;
+              apexInfo_ = other.apexInfo_;
+              bitField0_ = (bitField0_ & ~0x00000100);
+              apexInfoBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getApexInfoFieldBuilder() : null;
+            } else {
+              apexInfoBuilder_.addAllMessages(other.apexInfo_);
+            }
+          }
+        }
+        if (other.hasSecurityPatchLevel()) {
+          securityPatchLevel_ = other.securityPatchLevel_;
+          bitField0_ |= 0x00000200;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
 
       @java.lang.Override
       public final boolean isInitialized() {
-        for (int i = 0; i < getInstallOperationsCount(); i++) {
-          if (!getInstallOperations(i).isInitialized()) {
-            return false;
-          }
-        }
-        for (int i = 0; i < getKernelInstallOperationsCount(); i++) {
-          if (!getKernelInstallOperations(i).isInitialized()) {
-            return false;
-          }
-        }
         for (int i = 0; i < getPartitionsCount(); i++) {
           if (!getPartitions(i).isInitialized()) {
             return false;
@@ -16066,608 +18903,101 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        chromeos_update_engine.UpdateMetadata.DeltaArchiveManifest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 24: {
+                blockSize_ = input.readUInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 24
+              case 32: {
+                signaturesOffset_ = input.readUInt64();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 32
+              case 40: {
+                signaturesSize_ = input.readUInt64();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 40
+              case 96: {
+                minorVersion_ = input.readUInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 96
+              case 106: {
+                chromeos_update_engine.UpdateMetadata.PartitionUpdate m =
+                    input.readMessage(
+                        chromeos_update_engine.UpdateMetadata.PartitionUpdate.PARSER,
+                        extensionRegistry);
+                if (partitionsBuilder_ == null) {
+                  ensurePartitionsIsMutable();
+                  partitions_.add(m);
+                } else {
+                  partitionsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 106
+              case 112: {
+                maxTimestamp_ = input.readInt64();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 112
+              case 122: {
+                input.readMessage(
+                    getDynamicPartitionMetadataFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 122
+              case 128: {
+                partialUpdate_ = input.readBool();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 128
+              case 138: {
+                chromeos_update_engine.UpdateMetadata.ApexInfo m =
+                    input.readMessage(
+                        chromeos_update_engine.UpdateMetadata.ApexInfo.PARSER,
+                        extensionRegistry);
+                if (apexInfoBuilder_ == null) {
+                  ensureApexInfoIsMutable();
+                  apexInfo_.add(m);
+                } else {
+                  apexInfoBuilder_.addMessage(m);
+                }
+                break;
+              } // case 138
+              case 146: {
+                securityPatchLevel_ = input.readBytes();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 146
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (chromeos_update_engine.UpdateMetadata.DeltaArchiveManifest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
-
-      private java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation> installOperations_ =
-        java.util.Collections.emptyList();
-      private void ensureInstallOperationsIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
-          installOperations_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.InstallOperation>(installOperations_);
-          bitField0_ |= 0x00000001;
-         }
-      }
-
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.InstallOperation, chromeos_update_engine.UpdateMetadata.InstallOperation.Builder, chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder> installOperationsBuilder_;
-
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation> getInstallOperationsList() {
-        if (installOperationsBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(installOperations_);
-        } else {
-          return installOperationsBuilder_.getMessageList();
-        }
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public int getInstallOperationsCount() {
-        if (installOperationsBuilder_ == null) {
-          return installOperations_.size();
-        } else {
-          return installOperationsBuilder_.getCount();
-        }
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.InstallOperation getInstallOperations(int index) {
-        if (installOperationsBuilder_ == null) {
-          return installOperations_.get(index);
-        } else {
-          return installOperationsBuilder_.getMessage(index);
-        }
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public Builder setInstallOperations(
-          int index, chromeos_update_engine.UpdateMetadata.InstallOperation value) {
-        if (installOperationsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureInstallOperationsIsMutable();
-          installOperations_.set(index, value);
-          onChanged();
-        } else {
-          installOperationsBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public Builder setInstallOperations(
-          int index, chromeos_update_engine.UpdateMetadata.InstallOperation.Builder builderForValue) {
-        if (installOperationsBuilder_ == null) {
-          ensureInstallOperationsIsMutable();
-          installOperations_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          installOperationsBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public Builder addInstallOperations(chromeos_update_engine.UpdateMetadata.InstallOperation value) {
-        if (installOperationsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureInstallOperationsIsMutable();
-          installOperations_.add(value);
-          onChanged();
-        } else {
-          installOperationsBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public Builder addInstallOperations(
-          int index, chromeos_update_engine.UpdateMetadata.InstallOperation value) {
-        if (installOperationsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureInstallOperationsIsMutable();
-          installOperations_.add(index, value);
-          onChanged();
-        } else {
-          installOperationsBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public Builder addInstallOperations(
-          chromeos_update_engine.UpdateMetadata.InstallOperation.Builder builderForValue) {
-        if (installOperationsBuilder_ == null) {
-          ensureInstallOperationsIsMutable();
-          installOperations_.add(builderForValue.build());
-          onChanged();
-        } else {
-          installOperationsBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public Builder addInstallOperations(
-          int index, chromeos_update_engine.UpdateMetadata.InstallOperation.Builder builderForValue) {
-        if (installOperationsBuilder_ == null) {
-          ensureInstallOperationsIsMutable();
-          installOperations_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          installOperationsBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public Builder addAllInstallOperations(
-          java.lang.Iterable<? extends chromeos_update_engine.UpdateMetadata.InstallOperation> values) {
-        if (installOperationsBuilder_ == null) {
-          ensureInstallOperationsIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, installOperations_);
-          onChanged();
-        } else {
-          installOperationsBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public Builder clearInstallOperations() {
-        if (installOperationsBuilder_ == null) {
-          installOperations_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-          onChanged();
-        } else {
-          installOperationsBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public Builder removeInstallOperations(int index) {
-        if (installOperationsBuilder_ == null) {
-          ensureInstallOperationsIsMutable();
-          installOperations_.remove(index);
-          onChanged();
-        } else {
-          installOperationsBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.InstallOperation.Builder getInstallOperationsBuilder(
-          int index) {
-        return getInstallOperationsFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder getInstallOperationsOrBuilder(
-          int index) {
-        if (installOperationsBuilder_ == null) {
-          return installOperations_.get(index);  } else {
-          return installOperationsBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>
-           getInstallOperationsOrBuilderList() {
-        if (installOperationsBuilder_ != null) {
-          return installOperationsBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(installOperations_);
-        }
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.InstallOperation.Builder addInstallOperationsBuilder() {
-        return getInstallOperationsFieldBuilder().addBuilder(
-            chromeos_update_engine.UpdateMetadata.InstallOperation.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.InstallOperation.Builder addInstallOperationsBuilder(
-          int index) {
-        return getInstallOperationsFieldBuilder().addBuilder(
-            index, chromeos_update_engine.UpdateMetadata.InstallOperation.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. List of install operations for the
-       * kernel and rootfs partitions. For major version = 2 see the |partitions|
-       * field.
-       * </pre>
-       *
-       * <code>repeated .chromeos_update_engine.InstallOperation install_operations = 1;</code>
-       */
-      public java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation.Builder>
-           getInstallOperationsBuilderList() {
-        return getInstallOperationsFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.InstallOperation, chromeos_update_engine.UpdateMetadata.InstallOperation.Builder, chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>
-          getInstallOperationsFieldBuilder() {
-        if (installOperationsBuilder_ == null) {
-          installOperationsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              chromeos_update_engine.UpdateMetadata.InstallOperation, chromeos_update_engine.UpdateMetadata.InstallOperation.Builder, chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>(
-                  installOperations_,
-                  ((bitField0_ & 0x00000001) != 0),
-                  getParentForChildren(),
-                  isClean());
-          installOperations_ = null;
-        }
-        return installOperationsBuilder_;
-      }
-
-      private java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation> kernelInstallOperations_ =
-        java.util.Collections.emptyList();
-      private void ensureKernelInstallOperationsIsMutable() {
-        if (!((bitField0_ & 0x00000002) != 0)) {
-          kernelInstallOperations_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.InstallOperation>(kernelInstallOperations_);
-          bitField0_ |= 0x00000002;
-         }
-      }
-
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.InstallOperation, chromeos_update_engine.UpdateMetadata.InstallOperation.Builder, chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder> kernelInstallOperationsBuilder_;
-
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation> getKernelInstallOperationsList() {
-        if (kernelInstallOperationsBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(kernelInstallOperations_);
-        } else {
-          return kernelInstallOperationsBuilder_.getMessageList();
-        }
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public int getKernelInstallOperationsCount() {
-        if (kernelInstallOperationsBuilder_ == null) {
-          return kernelInstallOperations_.size();
-        } else {
-          return kernelInstallOperationsBuilder_.getCount();
-        }
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.InstallOperation getKernelInstallOperations(int index) {
-        if (kernelInstallOperationsBuilder_ == null) {
-          return kernelInstallOperations_.get(index);
-        } else {
-          return kernelInstallOperationsBuilder_.getMessage(index);
-        }
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public Builder setKernelInstallOperations(
-          int index, chromeos_update_engine.UpdateMetadata.InstallOperation value) {
-        if (kernelInstallOperationsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureKernelInstallOperationsIsMutable();
-          kernelInstallOperations_.set(index, value);
-          onChanged();
-        } else {
-          kernelInstallOperationsBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public Builder setKernelInstallOperations(
-          int index, chromeos_update_engine.UpdateMetadata.InstallOperation.Builder builderForValue) {
-        if (kernelInstallOperationsBuilder_ == null) {
-          ensureKernelInstallOperationsIsMutable();
-          kernelInstallOperations_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          kernelInstallOperationsBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public Builder addKernelInstallOperations(chromeos_update_engine.UpdateMetadata.InstallOperation value) {
-        if (kernelInstallOperationsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureKernelInstallOperationsIsMutable();
-          kernelInstallOperations_.add(value);
-          onChanged();
-        } else {
-          kernelInstallOperationsBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public Builder addKernelInstallOperations(
-          int index, chromeos_update_engine.UpdateMetadata.InstallOperation value) {
-        if (kernelInstallOperationsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureKernelInstallOperationsIsMutable();
-          kernelInstallOperations_.add(index, value);
-          onChanged();
-        } else {
-          kernelInstallOperationsBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public Builder addKernelInstallOperations(
-          chromeos_update_engine.UpdateMetadata.InstallOperation.Builder builderForValue) {
-        if (kernelInstallOperationsBuilder_ == null) {
-          ensureKernelInstallOperationsIsMutable();
-          kernelInstallOperations_.add(builderForValue.build());
-          onChanged();
-        } else {
-          kernelInstallOperationsBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public Builder addKernelInstallOperations(
-          int index, chromeos_update_engine.UpdateMetadata.InstallOperation.Builder builderForValue) {
-        if (kernelInstallOperationsBuilder_ == null) {
-          ensureKernelInstallOperationsIsMutable();
-          kernelInstallOperations_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          kernelInstallOperationsBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public Builder addAllKernelInstallOperations(
-          java.lang.Iterable<? extends chromeos_update_engine.UpdateMetadata.InstallOperation> values) {
-        if (kernelInstallOperationsBuilder_ == null) {
-          ensureKernelInstallOperationsIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, kernelInstallOperations_);
-          onChanged();
-        } else {
-          kernelInstallOperationsBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public Builder clearKernelInstallOperations() {
-        if (kernelInstallOperationsBuilder_ == null) {
-          kernelInstallOperations_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
-          onChanged();
-        } else {
-          kernelInstallOperationsBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public Builder removeKernelInstallOperations(int index) {
-        if (kernelInstallOperationsBuilder_ == null) {
-          ensureKernelInstallOperationsIsMutable();
-          kernelInstallOperations_.remove(index);
-          onChanged();
-        } else {
-          kernelInstallOperationsBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.InstallOperation.Builder getKernelInstallOperationsBuilder(
-          int index) {
-        return getKernelInstallOperationsFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder getKernelInstallOperationsOrBuilder(
-          int index) {
-        if (kernelInstallOperationsBuilder_ == null) {
-          return kernelInstallOperations_.get(index);  } else {
-          return kernelInstallOperationsBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>
-           getKernelInstallOperationsOrBuilderList() {
-        if (kernelInstallOperationsBuilder_ != null) {
-          return kernelInstallOperationsBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(kernelInstallOperations_);
-        }
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.InstallOperation.Builder addKernelInstallOperationsBuilder() {
-        return getKernelInstallOperationsFieldBuilder().addBuilder(
-            chromeos_update_engine.UpdateMetadata.InstallOperation.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.InstallOperation.Builder addKernelInstallOperationsBuilder(
-          int index) {
-        return getKernelInstallOperationsFieldBuilder().addBuilder(
-            index, chromeos_update_engine.UpdateMetadata.InstallOperation.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .chromeos_update_engine.InstallOperation kernel_install_operations = 2;</code>
-       */
-      public java.util.List<chromeos_update_engine.UpdateMetadata.InstallOperation.Builder>
-           getKernelInstallOperationsBuilderList() {
-        return getKernelInstallOperationsFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.InstallOperation, chromeos_update_engine.UpdateMetadata.InstallOperation.Builder, chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>
-          getKernelInstallOperationsFieldBuilder() {
-        if (kernelInstallOperationsBuilder_ == null) {
-          kernelInstallOperationsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              chromeos_update_engine.UpdateMetadata.InstallOperation, chromeos_update_engine.UpdateMetadata.InstallOperation.Builder, chromeos_update_engine.UpdateMetadata.InstallOperationOrBuilder>(
-                  kernelInstallOperations_,
-                  ((bitField0_ & 0x00000002) != 0),
-                  getParentForChildren(),
-                  isClean());
-          kernelInstallOperations_ = null;
-        }
-        return kernelInstallOperationsBuilder_;
-      }
 
       private int blockSize_ = 4096;
       /**
@@ -16680,7 +19010,7 @@ public final class UpdateMetadata {
        */
       @java.lang.Override
       public boolean hasBlockSize() {
-        return ((bitField0_ & 0x00000004) != 0);
+        return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <pre>
@@ -16704,8 +19034,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setBlockSize(int value) {
-        bitField0_ |= 0x00000004;
+        
         blockSize_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -16718,7 +19049,7 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder clearBlockSize() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000001);
         blockSize_ = 4096;
         onChanged();
         return this;
@@ -16739,7 +19070,7 @@ public final class UpdateMetadata {
        */
       @java.lang.Override
       public boolean hasSignaturesOffset() {
-        return ((bitField0_ & 0x00000008) != 0);
+        return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <pre>
@@ -16771,8 +19102,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setSignaturesOffset(long value) {
-        bitField0_ |= 0x00000008;
+        
         signaturesOffset_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -16789,7 +19121,7 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder clearSignaturesOffset() {
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000002);
         signaturesOffset_ = 0L;
         onChanged();
         return this;
@@ -16802,7 +19134,7 @@ public final class UpdateMetadata {
        */
       @java.lang.Override
       public boolean hasSignaturesSize() {
-        return ((bitField0_ & 0x00000010) != 0);
+        return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional uint64 signatures_size = 5;</code>
@@ -16818,8 +19150,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setSignaturesSize(long value) {
-        bitField0_ |= 0x00000010;
+        
         signaturesSize_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -16828,811 +19161,10 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder clearSignaturesSize() {
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000004);
         signaturesSize_ = 0L;
         onChanged();
         return this;
-      }
-
-      private chromeos_update_engine.UpdateMetadata.PartitionInfo oldKernelInfo_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder> oldKernelInfoBuilder_;
-      /**
-       * <pre>
-       * Only present in major version = 1. Partition metadata used to validate the
-       * update. For major version = 2 see the |partitions| field.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-       * @return Whether the oldKernelInfo field is set.
-       */
-      public boolean hasOldKernelInfo() {
-        return ((bitField0_ & 0x00000020) != 0);
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. Partition metadata used to validate the
-       * update. For major version = 2 see the |partitions| field.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-       * @return The oldKernelInfo.
-       */
-      public chromeos_update_engine.UpdateMetadata.PartitionInfo getOldKernelInfo() {
-        if (oldKernelInfoBuilder_ == null) {
-          return oldKernelInfo_ == null ? chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : oldKernelInfo_;
-        } else {
-          return oldKernelInfoBuilder_.getMessage();
-        }
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. Partition metadata used to validate the
-       * update. For major version = 2 see the |partitions| field.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-       */
-      public Builder setOldKernelInfo(chromeos_update_engine.UpdateMetadata.PartitionInfo value) {
-        if (oldKernelInfoBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          oldKernelInfo_ = value;
-          onChanged();
-        } else {
-          oldKernelInfoBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000020;
-        return this;
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. Partition metadata used to validate the
-       * update. For major version = 2 see the |partitions| field.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-       */
-      public Builder setOldKernelInfo(
-          chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder builderForValue) {
-        if (oldKernelInfoBuilder_ == null) {
-          oldKernelInfo_ = builderForValue.build();
-          onChanged();
-        } else {
-          oldKernelInfoBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000020;
-        return this;
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. Partition metadata used to validate the
-       * update. For major version = 2 see the |partitions| field.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-       */
-      public Builder mergeOldKernelInfo(chromeos_update_engine.UpdateMetadata.PartitionInfo value) {
-        if (oldKernelInfoBuilder_ == null) {
-          if (((bitField0_ & 0x00000020) != 0) &&
-              oldKernelInfo_ != null &&
-              oldKernelInfo_ != chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance()) {
-            oldKernelInfo_ =
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.newBuilder(oldKernelInfo_).mergeFrom(value).buildPartial();
-          } else {
-            oldKernelInfo_ = value;
-          }
-          onChanged();
-        } else {
-          oldKernelInfoBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000020;
-        return this;
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. Partition metadata used to validate the
-       * update. For major version = 2 see the |partitions| field.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-       */
-      public Builder clearOldKernelInfo() {
-        if (oldKernelInfoBuilder_ == null) {
-          oldKernelInfo_ = null;
-          onChanged();
-        } else {
-          oldKernelInfoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000020);
-        return this;
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. Partition metadata used to validate the
-       * update. For major version = 2 see the |partitions| field.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder getOldKernelInfoBuilder() {
-        bitField0_ |= 0x00000020;
-        onChanged();
-        return getOldKernelInfoFieldBuilder().getBuilder();
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. Partition metadata used to validate the
-       * update. For major version = 2 see the |partitions| field.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder getOldKernelInfoOrBuilder() {
-        if (oldKernelInfoBuilder_ != null) {
-          return oldKernelInfoBuilder_.getMessageOrBuilder();
-        } else {
-          return oldKernelInfo_ == null ?
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : oldKernelInfo_;
-        }
-      }
-      /**
-       * <pre>
-       * Only present in major version = 1. Partition metadata used to validate the
-       * update. For major version = 2 see the |partitions| field.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.PartitionInfo old_kernel_info = 6;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder>
-          getOldKernelInfoFieldBuilder() {
-        if (oldKernelInfoBuilder_ == null) {
-          oldKernelInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder>(
-                  getOldKernelInfo(),
-                  getParentForChildren(),
-                  isClean());
-          oldKernelInfo_ = null;
-        }
-        return oldKernelInfoBuilder_;
-      }
-
-      private chromeos_update_engine.UpdateMetadata.PartitionInfo newKernelInfo_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder> newKernelInfoBuilder_;
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-       * @return Whether the newKernelInfo field is set.
-       */
-      public boolean hasNewKernelInfo() {
-        return ((bitField0_ & 0x00000040) != 0);
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-       * @return The newKernelInfo.
-       */
-      public chromeos_update_engine.UpdateMetadata.PartitionInfo getNewKernelInfo() {
-        if (newKernelInfoBuilder_ == null) {
-          return newKernelInfo_ == null ? chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : newKernelInfo_;
-        } else {
-          return newKernelInfoBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-       */
-      public Builder setNewKernelInfo(chromeos_update_engine.UpdateMetadata.PartitionInfo value) {
-        if (newKernelInfoBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          newKernelInfo_ = value;
-          onChanged();
-        } else {
-          newKernelInfoBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000040;
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-       */
-      public Builder setNewKernelInfo(
-          chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder builderForValue) {
-        if (newKernelInfoBuilder_ == null) {
-          newKernelInfo_ = builderForValue.build();
-          onChanged();
-        } else {
-          newKernelInfoBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000040;
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-       */
-      public Builder mergeNewKernelInfo(chromeos_update_engine.UpdateMetadata.PartitionInfo value) {
-        if (newKernelInfoBuilder_ == null) {
-          if (((bitField0_ & 0x00000040) != 0) &&
-              newKernelInfo_ != null &&
-              newKernelInfo_ != chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance()) {
-            newKernelInfo_ =
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.newBuilder(newKernelInfo_).mergeFrom(value).buildPartial();
-          } else {
-            newKernelInfo_ = value;
-          }
-          onChanged();
-        } else {
-          newKernelInfoBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000040;
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-       */
-      public Builder clearNewKernelInfo() {
-        if (newKernelInfoBuilder_ == null) {
-          newKernelInfo_ = null;
-          onChanged();
-        } else {
-          newKernelInfoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000040);
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder getNewKernelInfoBuilder() {
-        bitField0_ |= 0x00000040;
-        onChanged();
-        return getNewKernelInfoFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder getNewKernelInfoOrBuilder() {
-        if (newKernelInfoBuilder_ != null) {
-          return newKernelInfoBuilder_.getMessageOrBuilder();
-        } else {
-          return newKernelInfo_ == null ?
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : newKernelInfo_;
-        }
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_kernel_info = 7;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder>
-          getNewKernelInfoFieldBuilder() {
-        if (newKernelInfoBuilder_ == null) {
-          newKernelInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder>(
-                  getNewKernelInfo(),
-                  getParentForChildren(),
-                  isClean());
-          newKernelInfo_ = null;
-        }
-        return newKernelInfoBuilder_;
-      }
-
-      private chromeos_update_engine.UpdateMetadata.PartitionInfo oldRootfsInfo_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder> oldRootfsInfoBuilder_;
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-       * @return Whether the oldRootfsInfo field is set.
-       */
-      public boolean hasOldRootfsInfo() {
-        return ((bitField0_ & 0x00000080) != 0);
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-       * @return The oldRootfsInfo.
-       */
-      public chromeos_update_engine.UpdateMetadata.PartitionInfo getOldRootfsInfo() {
-        if (oldRootfsInfoBuilder_ == null) {
-          return oldRootfsInfo_ == null ? chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : oldRootfsInfo_;
-        } else {
-          return oldRootfsInfoBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-       */
-      public Builder setOldRootfsInfo(chromeos_update_engine.UpdateMetadata.PartitionInfo value) {
-        if (oldRootfsInfoBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          oldRootfsInfo_ = value;
-          onChanged();
-        } else {
-          oldRootfsInfoBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000080;
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-       */
-      public Builder setOldRootfsInfo(
-          chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder builderForValue) {
-        if (oldRootfsInfoBuilder_ == null) {
-          oldRootfsInfo_ = builderForValue.build();
-          onChanged();
-        } else {
-          oldRootfsInfoBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000080;
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-       */
-      public Builder mergeOldRootfsInfo(chromeos_update_engine.UpdateMetadata.PartitionInfo value) {
-        if (oldRootfsInfoBuilder_ == null) {
-          if (((bitField0_ & 0x00000080) != 0) &&
-              oldRootfsInfo_ != null &&
-              oldRootfsInfo_ != chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance()) {
-            oldRootfsInfo_ =
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.newBuilder(oldRootfsInfo_).mergeFrom(value).buildPartial();
-          } else {
-            oldRootfsInfo_ = value;
-          }
-          onChanged();
-        } else {
-          oldRootfsInfoBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000080;
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-       */
-      public Builder clearOldRootfsInfo() {
-        if (oldRootfsInfoBuilder_ == null) {
-          oldRootfsInfo_ = null;
-          onChanged();
-        } else {
-          oldRootfsInfoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000080);
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder getOldRootfsInfoBuilder() {
-        bitField0_ |= 0x00000080;
-        onChanged();
-        return getOldRootfsInfoFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder getOldRootfsInfoOrBuilder() {
-        if (oldRootfsInfoBuilder_ != null) {
-          return oldRootfsInfoBuilder_.getMessageOrBuilder();
-        } else {
-          return oldRootfsInfo_ == null ?
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : oldRootfsInfo_;
-        }
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo old_rootfs_info = 8;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder>
-          getOldRootfsInfoFieldBuilder() {
-        if (oldRootfsInfoBuilder_ == null) {
-          oldRootfsInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder>(
-                  getOldRootfsInfo(),
-                  getParentForChildren(),
-                  isClean());
-          oldRootfsInfo_ = null;
-        }
-        return oldRootfsInfoBuilder_;
-      }
-
-      private chromeos_update_engine.UpdateMetadata.PartitionInfo newRootfsInfo_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder> newRootfsInfoBuilder_;
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-       * @return Whether the newRootfsInfo field is set.
-       */
-      public boolean hasNewRootfsInfo() {
-        return ((bitField0_ & 0x00000100) != 0);
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-       * @return The newRootfsInfo.
-       */
-      public chromeos_update_engine.UpdateMetadata.PartitionInfo getNewRootfsInfo() {
-        if (newRootfsInfoBuilder_ == null) {
-          return newRootfsInfo_ == null ? chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : newRootfsInfo_;
-        } else {
-          return newRootfsInfoBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-       */
-      public Builder setNewRootfsInfo(chromeos_update_engine.UpdateMetadata.PartitionInfo value) {
-        if (newRootfsInfoBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          newRootfsInfo_ = value;
-          onChanged();
-        } else {
-          newRootfsInfoBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000100;
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-       */
-      public Builder setNewRootfsInfo(
-          chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder builderForValue) {
-        if (newRootfsInfoBuilder_ == null) {
-          newRootfsInfo_ = builderForValue.build();
-          onChanged();
-        } else {
-          newRootfsInfoBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000100;
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-       */
-      public Builder mergeNewRootfsInfo(chromeos_update_engine.UpdateMetadata.PartitionInfo value) {
-        if (newRootfsInfoBuilder_ == null) {
-          if (((bitField0_ & 0x00000100) != 0) &&
-              newRootfsInfo_ != null &&
-              newRootfsInfo_ != chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance()) {
-            newRootfsInfo_ =
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.newBuilder(newRootfsInfo_).mergeFrom(value).buildPartial();
-          } else {
-            newRootfsInfo_ = value;
-          }
-          onChanged();
-        } else {
-          newRootfsInfoBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000100;
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-       */
-      public Builder clearNewRootfsInfo() {
-        if (newRootfsInfoBuilder_ == null) {
-          newRootfsInfo_ = null;
-          onChanged();
-        } else {
-          newRootfsInfoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000100);
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder getNewRootfsInfoBuilder() {
-        bitField0_ |= 0x00000100;
-        onChanged();
-        return getNewRootfsInfoFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder getNewRootfsInfoOrBuilder() {
-        if (newRootfsInfoBuilder_ != null) {
-          return newRootfsInfoBuilder_.getMessageOrBuilder();
-        } else {
-          return newRootfsInfo_ == null ?
-              chromeos_update_engine.UpdateMetadata.PartitionInfo.getDefaultInstance() : newRootfsInfo_;
-        }
-      }
-      /**
-       * <code>optional .chromeos_update_engine.PartitionInfo new_rootfs_info = 9;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder>
-          getNewRootfsInfoFieldBuilder() {
-        if (newRootfsInfoBuilder_ == null) {
-          newRootfsInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              chromeos_update_engine.UpdateMetadata.PartitionInfo, chromeos_update_engine.UpdateMetadata.PartitionInfo.Builder, chromeos_update_engine.UpdateMetadata.PartitionInfoOrBuilder>(
-                  getNewRootfsInfo(),
-                  getParentForChildren(),
-                  isClean());
-          newRootfsInfo_ = null;
-        }
-        return newRootfsInfoBuilder_;
-      }
-
-      private chromeos_update_engine.UpdateMetadata.ImageInfo oldImageInfo_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.ImageInfo, chromeos_update_engine.UpdateMetadata.ImageInfo.Builder, chromeos_update_engine.UpdateMetadata.ImageInfoOrBuilder> oldImageInfoBuilder_;
-      /**
-       * <pre>
-       * old_image_info will only be present for delta images.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-       * @return Whether the oldImageInfo field is set.
-       */
-      public boolean hasOldImageInfo() {
-        return ((bitField0_ & 0x00000200) != 0);
-      }
-      /**
-       * <pre>
-       * old_image_info will only be present for delta images.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-       * @return The oldImageInfo.
-       */
-      public chromeos_update_engine.UpdateMetadata.ImageInfo getOldImageInfo() {
-        if (oldImageInfoBuilder_ == null) {
-          return oldImageInfo_ == null ? chromeos_update_engine.UpdateMetadata.ImageInfo.getDefaultInstance() : oldImageInfo_;
-        } else {
-          return oldImageInfoBuilder_.getMessage();
-        }
-      }
-      /**
-       * <pre>
-       * old_image_info will only be present for delta images.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-       */
-      public Builder setOldImageInfo(chromeos_update_engine.UpdateMetadata.ImageInfo value) {
-        if (oldImageInfoBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          oldImageInfo_ = value;
-          onChanged();
-        } else {
-          oldImageInfoBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000200;
-        return this;
-      }
-      /**
-       * <pre>
-       * old_image_info will only be present for delta images.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-       */
-      public Builder setOldImageInfo(
-          chromeos_update_engine.UpdateMetadata.ImageInfo.Builder builderForValue) {
-        if (oldImageInfoBuilder_ == null) {
-          oldImageInfo_ = builderForValue.build();
-          onChanged();
-        } else {
-          oldImageInfoBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000200;
-        return this;
-      }
-      /**
-       * <pre>
-       * old_image_info will only be present for delta images.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-       */
-      public Builder mergeOldImageInfo(chromeos_update_engine.UpdateMetadata.ImageInfo value) {
-        if (oldImageInfoBuilder_ == null) {
-          if (((bitField0_ & 0x00000200) != 0) &&
-              oldImageInfo_ != null &&
-              oldImageInfo_ != chromeos_update_engine.UpdateMetadata.ImageInfo.getDefaultInstance()) {
-            oldImageInfo_ =
-              chromeos_update_engine.UpdateMetadata.ImageInfo.newBuilder(oldImageInfo_).mergeFrom(value).buildPartial();
-          } else {
-            oldImageInfo_ = value;
-          }
-          onChanged();
-        } else {
-          oldImageInfoBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000200;
-        return this;
-      }
-      /**
-       * <pre>
-       * old_image_info will only be present for delta images.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-       */
-      public Builder clearOldImageInfo() {
-        if (oldImageInfoBuilder_ == null) {
-          oldImageInfo_ = null;
-          onChanged();
-        } else {
-          oldImageInfoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000200);
-        return this;
-      }
-      /**
-       * <pre>
-       * old_image_info will only be present for delta images.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.ImageInfo.Builder getOldImageInfoBuilder() {
-        bitField0_ |= 0x00000200;
-        onChanged();
-        return getOldImageInfoFieldBuilder().getBuilder();
-      }
-      /**
-       * <pre>
-       * old_image_info will only be present for delta images.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.ImageInfoOrBuilder getOldImageInfoOrBuilder() {
-        if (oldImageInfoBuilder_ != null) {
-          return oldImageInfoBuilder_.getMessageOrBuilder();
-        } else {
-          return oldImageInfo_ == null ?
-              chromeos_update_engine.UpdateMetadata.ImageInfo.getDefaultInstance() : oldImageInfo_;
-        }
-      }
-      /**
-       * <pre>
-       * old_image_info will only be present for delta images.
-       * </pre>
-       *
-       * <code>optional .chromeos_update_engine.ImageInfo old_image_info = 10;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.ImageInfo, chromeos_update_engine.UpdateMetadata.ImageInfo.Builder, chromeos_update_engine.UpdateMetadata.ImageInfoOrBuilder>
-          getOldImageInfoFieldBuilder() {
-        if (oldImageInfoBuilder_ == null) {
-          oldImageInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              chromeos_update_engine.UpdateMetadata.ImageInfo, chromeos_update_engine.UpdateMetadata.ImageInfo.Builder, chromeos_update_engine.UpdateMetadata.ImageInfoOrBuilder>(
-                  getOldImageInfo(),
-                  getParentForChildren(),
-                  isClean());
-          oldImageInfo_ = null;
-        }
-        return oldImageInfoBuilder_;
-      }
-
-      private chromeos_update_engine.UpdateMetadata.ImageInfo newImageInfo_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.ImageInfo, chromeos_update_engine.UpdateMetadata.ImageInfo.Builder, chromeos_update_engine.UpdateMetadata.ImageInfoOrBuilder> newImageInfoBuilder_;
-      /**
-       * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-       * @return Whether the newImageInfo field is set.
-       */
-      public boolean hasNewImageInfo() {
-        return ((bitField0_ & 0x00000400) != 0);
-      }
-      /**
-       * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-       * @return The newImageInfo.
-       */
-      public chromeos_update_engine.UpdateMetadata.ImageInfo getNewImageInfo() {
-        if (newImageInfoBuilder_ == null) {
-          return newImageInfo_ == null ? chromeos_update_engine.UpdateMetadata.ImageInfo.getDefaultInstance() : newImageInfo_;
-        } else {
-          return newImageInfoBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-       */
-      public Builder setNewImageInfo(chromeos_update_engine.UpdateMetadata.ImageInfo value) {
-        if (newImageInfoBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          newImageInfo_ = value;
-          onChanged();
-        } else {
-          newImageInfoBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000400;
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-       */
-      public Builder setNewImageInfo(
-          chromeos_update_engine.UpdateMetadata.ImageInfo.Builder builderForValue) {
-        if (newImageInfoBuilder_ == null) {
-          newImageInfo_ = builderForValue.build();
-          onChanged();
-        } else {
-          newImageInfoBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000400;
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-       */
-      public Builder mergeNewImageInfo(chromeos_update_engine.UpdateMetadata.ImageInfo value) {
-        if (newImageInfoBuilder_ == null) {
-          if (((bitField0_ & 0x00000400) != 0) &&
-              newImageInfo_ != null &&
-              newImageInfo_ != chromeos_update_engine.UpdateMetadata.ImageInfo.getDefaultInstance()) {
-            newImageInfo_ =
-              chromeos_update_engine.UpdateMetadata.ImageInfo.newBuilder(newImageInfo_).mergeFrom(value).buildPartial();
-          } else {
-            newImageInfo_ = value;
-          }
-          onChanged();
-        } else {
-          newImageInfoBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000400;
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-       */
-      public Builder clearNewImageInfo() {
-        if (newImageInfoBuilder_ == null) {
-          newImageInfo_ = null;
-          onChanged();
-        } else {
-          newImageInfoBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000400);
-        return this;
-      }
-      /**
-       * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.ImageInfo.Builder getNewImageInfoBuilder() {
-        bitField0_ |= 0x00000400;
-        onChanged();
-        return getNewImageInfoFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-       */
-      public chromeos_update_engine.UpdateMetadata.ImageInfoOrBuilder getNewImageInfoOrBuilder() {
-        if (newImageInfoBuilder_ != null) {
-          return newImageInfoBuilder_.getMessageOrBuilder();
-        } else {
-          return newImageInfo_ == null ?
-              chromeos_update_engine.UpdateMetadata.ImageInfo.getDefaultInstance() : newImageInfo_;
-        }
-      }
-      /**
-       * <code>optional .chromeos_update_engine.ImageInfo new_image_info = 11;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.ImageInfo, chromeos_update_engine.UpdateMetadata.ImageInfo.Builder, chromeos_update_engine.UpdateMetadata.ImageInfoOrBuilder>
-          getNewImageInfoFieldBuilder() {
-        if (newImageInfoBuilder_ == null) {
-          newImageInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              chromeos_update_engine.UpdateMetadata.ImageInfo, chromeos_update_engine.UpdateMetadata.ImageInfo.Builder, chromeos_update_engine.UpdateMetadata.ImageInfoOrBuilder>(
-                  getNewImageInfo(),
-                  getParentForChildren(),
-                  isClean());
-          newImageInfo_ = null;
-        }
-        return newImageInfoBuilder_;
       }
 
       private int minorVersion_ ;
@@ -17647,7 +19179,7 @@ public final class UpdateMetadata {
        */
       @java.lang.Override
       public boolean hasMinorVersion() {
-        return ((bitField0_ & 0x00000800) != 0);
+        return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <pre>
@@ -17673,8 +19205,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setMinorVersion(int value) {
-        bitField0_ |= 0x00000800;
+        
         minorVersion_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -17688,7 +19221,7 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder clearMinorVersion() {
-        bitField0_ = (bitField0_ & ~0x00000800);
+        bitField0_ = (bitField0_ & ~0x00000008);
         minorVersion_ = 0;
         onChanged();
         return this;
@@ -17697,9 +19230,9 @@ public final class UpdateMetadata {
       private java.util.List<chromeos_update_engine.UpdateMetadata.PartitionUpdate> partitions_ =
         java.util.Collections.emptyList();
       private void ensurePartitionsIsMutable() {
-        if (!((bitField0_ & 0x00001000) != 0)) {
+        if (!((bitField0_ & 0x00000010) != 0)) {
           partitions_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.PartitionUpdate>(partitions_);
-          bitField0_ |= 0x00001000;
+          bitField0_ |= 0x00000010;
          }
       }
 
@@ -17948,7 +19481,7 @@ public final class UpdateMetadata {
       public Builder clearPartitions() {
         if (partitionsBuilder_ == null) {
           partitions_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00001000);
+          bitField0_ = (bitField0_ & ~0x00000010);
           onChanged();
         } else {
           partitionsBuilder_.clear();
@@ -18024,7 +19557,7 @@ public final class UpdateMetadata {
        *
        * <code>repeated .chromeos_update_engine.PartitionUpdate partitions = 13;</code>
        */
-      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.PartitionUpdateOrBuilder>
+      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.PartitionUpdateOrBuilder> 
            getPartitionsOrBuilderList() {
         if (partitionsBuilder_ != null) {
           return partitionsBuilder_.getMessageOrBuilderList();
@@ -18077,18 +19610,18 @@ public final class UpdateMetadata {
        *
        * <code>repeated .chromeos_update_engine.PartitionUpdate partitions = 13;</code>
        */
-      public java.util.List<chromeos_update_engine.UpdateMetadata.PartitionUpdate.Builder>
+      public java.util.List<chromeos_update_engine.UpdateMetadata.PartitionUpdate.Builder> 
            getPartitionsBuilderList() {
         return getPartitionsFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.PartitionUpdate, chromeos_update_engine.UpdateMetadata.PartitionUpdate.Builder, chromeos_update_engine.UpdateMetadata.PartitionUpdateOrBuilder>
+          chromeos_update_engine.UpdateMetadata.PartitionUpdate, chromeos_update_engine.UpdateMetadata.PartitionUpdate.Builder, chromeos_update_engine.UpdateMetadata.PartitionUpdateOrBuilder> 
           getPartitionsFieldBuilder() {
         if (partitionsBuilder_ == null) {
           partitionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               chromeos_update_engine.UpdateMetadata.PartitionUpdate, chromeos_update_engine.UpdateMetadata.PartitionUpdate.Builder, chromeos_update_engine.UpdateMetadata.PartitionUpdateOrBuilder>(
                   partitions_,
-                  ((bitField0_ & 0x00001000) != 0),
+                  ((bitField0_ & 0x00000010) != 0),
                   getParentForChildren(),
                   isClean());
           partitions_ = null;
@@ -18108,7 +19641,7 @@ public final class UpdateMetadata {
        */
       @java.lang.Override
       public boolean hasMaxTimestamp() {
-        return ((bitField0_ & 0x00002000) != 0);
+        return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <pre>
@@ -18134,8 +19667,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setMaxTimestamp(long value) {
-        bitField0_ |= 0x00002000;
+        
         maxTimestamp_ = value;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -18149,7 +19683,7 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder clearMaxTimestamp() {
-        bitField0_ = (bitField0_ & ~0x00002000);
+        bitField0_ = (bitField0_ & ~0x00000020);
         maxTimestamp_ = 0L;
         onChanged();
         return this;
@@ -18167,7 +19701,7 @@ public final class UpdateMetadata {
        * @return Whether the dynamicPartitionMetadata field is set.
        */
       public boolean hasDynamicPartitionMetadata() {
-        return ((bitField0_ & 0x00004000) != 0);
+        return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <pre>
@@ -18197,11 +19731,11 @@ public final class UpdateMetadata {
             throw new NullPointerException();
           }
           dynamicPartitionMetadata_ = value;
-          onChanged();
         } else {
           dynamicPartitionMetadataBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00004000;
+        bitField0_ |= 0x00000040;
+        onChanged();
         return this;
       }
       /**
@@ -18215,11 +19749,11 @@ public final class UpdateMetadata {
           chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata.Builder builderForValue) {
         if (dynamicPartitionMetadataBuilder_ == null) {
           dynamicPartitionMetadata_ = builderForValue.build();
-          onChanged();
         } else {
           dynamicPartitionMetadataBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00004000;
+        bitField0_ |= 0x00000040;
+        onChanged();
         return this;
       }
       /**
@@ -18231,19 +19765,18 @@ public final class UpdateMetadata {
        */
       public Builder mergeDynamicPartitionMetadata(chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata value) {
         if (dynamicPartitionMetadataBuilder_ == null) {
-          if (((bitField0_ & 0x00004000) != 0) &&
-              dynamicPartitionMetadata_ != null &&
-              dynamicPartitionMetadata_ != chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata.getDefaultInstance()) {
-            dynamicPartitionMetadata_ =
-              chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata.newBuilder(dynamicPartitionMetadata_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000040) != 0) &&
+            dynamicPartitionMetadata_ != null &&
+            dynamicPartitionMetadata_ != chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata.getDefaultInstance()) {
+            getDynamicPartitionMetadataBuilder().mergeFrom(value);
           } else {
             dynamicPartitionMetadata_ = value;
           }
-          onChanged();
         } else {
           dynamicPartitionMetadataBuilder_.mergeFrom(value);
         }
-        bitField0_ |= 0x00004000;
+        bitField0_ |= 0x00000040;
+        onChanged();
         return this;
       }
       /**
@@ -18254,13 +19787,13 @@ public final class UpdateMetadata {
        * <code>optional .chromeos_update_engine.DynamicPartitionMetadata dynamic_partition_metadata = 15;</code>
        */
       public Builder clearDynamicPartitionMetadata() {
-        if (dynamicPartitionMetadataBuilder_ == null) {
-          dynamicPartitionMetadata_ = null;
-          onChanged();
-        } else {
-          dynamicPartitionMetadataBuilder_.clear();
+        bitField0_ = (bitField0_ & ~0x00000040);
+        dynamicPartitionMetadata_ = null;
+        if (dynamicPartitionMetadataBuilder_ != null) {
+          dynamicPartitionMetadataBuilder_.dispose();
+          dynamicPartitionMetadataBuilder_ = null;
         }
-        bitField0_ = (bitField0_ & ~0x00004000);
+        onChanged();
         return this;
       }
       /**
@@ -18271,7 +19804,7 @@ public final class UpdateMetadata {
        * <code>optional .chromeos_update_engine.DynamicPartitionMetadata dynamic_partition_metadata = 15;</code>
        */
       public chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata.Builder getDynamicPartitionMetadataBuilder() {
-        bitField0_ |= 0x00004000;
+        bitField0_ |= 0x00000040;
         onChanged();
         return getDynamicPartitionMetadataFieldBuilder().getBuilder();
       }
@@ -18298,7 +19831,7 @@ public final class UpdateMetadata {
        * <code>optional .chromeos_update_engine.DynamicPartitionMetadata dynamic_partition_metadata = 15;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata, chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata.Builder, chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadataOrBuilder>
+          chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata, chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadata.Builder, chromeos_update_engine.UpdateMetadata.DynamicPartitionMetadataOrBuilder> 
           getDynamicPartitionMetadataFieldBuilder() {
         if (dynamicPartitionMetadataBuilder_ == null) {
           dynamicPartitionMetadataBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -18322,7 +19855,7 @@ public final class UpdateMetadata {
        */
       @java.lang.Override
       public boolean hasPartialUpdate() {
-        return ((bitField0_ & 0x00008000) != 0);
+        return ((bitField0_ & 0x00000080) != 0);
       }
       /**
        * <pre>
@@ -18346,8 +19879,9 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder setPartialUpdate(boolean value) {
-        bitField0_ |= 0x00008000;
+        
         partialUpdate_ = value;
+        bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
@@ -18360,8 +19894,448 @@ public final class UpdateMetadata {
        * @return This builder for chaining.
        */
       public Builder clearPartialUpdate() {
-        bitField0_ = (bitField0_ & ~0x00008000);
+        bitField0_ = (bitField0_ & ~0x00000080);
         partialUpdate_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<chromeos_update_engine.UpdateMetadata.ApexInfo> apexInfo_ =
+        java.util.Collections.emptyList();
+      private void ensureApexInfoIsMutable() {
+        if (!((bitField0_ & 0x00000100) != 0)) {
+          apexInfo_ = new java.util.ArrayList<chromeos_update_engine.UpdateMetadata.ApexInfo>(apexInfo_);
+          bitField0_ |= 0x00000100;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          chromeos_update_engine.UpdateMetadata.ApexInfo, chromeos_update_engine.UpdateMetadata.ApexInfo.Builder, chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder> apexInfoBuilder_;
+
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public java.util.List<chromeos_update_engine.UpdateMetadata.ApexInfo> getApexInfoList() {
+        if (apexInfoBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(apexInfo_);
+        } else {
+          return apexInfoBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public int getApexInfoCount() {
+        if (apexInfoBuilder_ == null) {
+          return apexInfo_.size();
+        } else {
+          return apexInfoBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.ApexInfo getApexInfo(int index) {
+        if (apexInfoBuilder_ == null) {
+          return apexInfo_.get(index);
+        } else {
+          return apexInfoBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public Builder setApexInfo(
+          int index, chromeos_update_engine.UpdateMetadata.ApexInfo value) {
+        if (apexInfoBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureApexInfoIsMutable();
+          apexInfo_.set(index, value);
+          onChanged();
+        } else {
+          apexInfoBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public Builder setApexInfo(
+          int index, chromeos_update_engine.UpdateMetadata.ApexInfo.Builder builderForValue) {
+        if (apexInfoBuilder_ == null) {
+          ensureApexInfoIsMutable();
+          apexInfo_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          apexInfoBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public Builder addApexInfo(chromeos_update_engine.UpdateMetadata.ApexInfo value) {
+        if (apexInfoBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureApexInfoIsMutable();
+          apexInfo_.add(value);
+          onChanged();
+        } else {
+          apexInfoBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public Builder addApexInfo(
+          int index, chromeos_update_engine.UpdateMetadata.ApexInfo value) {
+        if (apexInfoBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureApexInfoIsMutable();
+          apexInfo_.add(index, value);
+          onChanged();
+        } else {
+          apexInfoBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public Builder addApexInfo(
+          chromeos_update_engine.UpdateMetadata.ApexInfo.Builder builderForValue) {
+        if (apexInfoBuilder_ == null) {
+          ensureApexInfoIsMutable();
+          apexInfo_.add(builderForValue.build());
+          onChanged();
+        } else {
+          apexInfoBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public Builder addApexInfo(
+          int index, chromeos_update_engine.UpdateMetadata.ApexInfo.Builder builderForValue) {
+        if (apexInfoBuilder_ == null) {
+          ensureApexInfoIsMutable();
+          apexInfo_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          apexInfoBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public Builder addAllApexInfo(
+          java.lang.Iterable<? extends chromeos_update_engine.UpdateMetadata.ApexInfo> values) {
+        if (apexInfoBuilder_ == null) {
+          ensureApexInfoIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, apexInfo_);
+          onChanged();
+        } else {
+          apexInfoBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public Builder clearApexInfo() {
+        if (apexInfoBuilder_ == null) {
+          apexInfo_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000100);
+          onChanged();
+        } else {
+          apexInfoBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public Builder removeApexInfo(int index) {
+        if (apexInfoBuilder_ == null) {
+          ensureApexInfoIsMutable();
+          apexInfo_.remove(index);
+          onChanged();
+        } else {
+          apexInfoBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.ApexInfo.Builder getApexInfoBuilder(
+          int index) {
+        return getApexInfoFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder getApexInfoOrBuilder(
+          int index) {
+        if (apexInfoBuilder_ == null) {
+          return apexInfo_.get(index);  } else {
+          return apexInfoBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public java.util.List<? extends chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder> 
+           getApexInfoOrBuilderList() {
+        if (apexInfoBuilder_ != null) {
+          return apexInfoBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(apexInfo_);
+        }
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.ApexInfo.Builder addApexInfoBuilder() {
+        return getApexInfoFieldBuilder().addBuilder(
+            chromeos_update_engine.UpdateMetadata.ApexInfo.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public chromeos_update_engine.UpdateMetadata.ApexInfo.Builder addApexInfoBuilder(
+          int index) {
+        return getApexInfoFieldBuilder().addBuilder(
+            index, chromeos_update_engine.UpdateMetadata.ApexInfo.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Information on compressed APEX to figure out how much space is required for
+       * their decompression
+       * </pre>
+       *
+       * <code>repeated .chromeos_update_engine.ApexInfo apex_info = 17;</code>
+       */
+      public java.util.List<chromeos_update_engine.UpdateMetadata.ApexInfo.Builder> 
+           getApexInfoBuilderList() {
+        return getApexInfoFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          chromeos_update_engine.UpdateMetadata.ApexInfo, chromeos_update_engine.UpdateMetadata.ApexInfo.Builder, chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder> 
+          getApexInfoFieldBuilder() {
+        if (apexInfoBuilder_ == null) {
+          apexInfoBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              chromeos_update_engine.UpdateMetadata.ApexInfo, chromeos_update_engine.UpdateMetadata.ApexInfo.Builder, chromeos_update_engine.UpdateMetadata.ApexInfoOrBuilder>(
+                  apexInfo_,
+                  ((bitField0_ & 0x00000100) != 0),
+                  getParentForChildren(),
+                  isClean());
+          apexInfo_ = null;
+        }
+        return apexInfoBuilder_;
+      }
+
+      private java.lang.Object securityPatchLevel_ = "";
+      /**
+       * <pre>
+       * Security patch level of the device, usually in the format of
+       * yyyy-mm-dd
+       * </pre>
+       *
+       * <code>optional string security_patch_level = 18;</code>
+       * @return Whether the securityPatchLevel field is set.
+       */
+      public boolean hasSecurityPatchLevel() {
+        return ((bitField0_ & 0x00000200) != 0);
+      }
+      /**
+       * <pre>
+       * Security patch level of the device, usually in the format of
+       * yyyy-mm-dd
+       * </pre>
+       *
+       * <code>optional string security_patch_level = 18;</code>
+       * @return The securityPatchLevel.
+       */
+      public java.lang.String getSecurityPatchLevel() {
+        java.lang.Object ref = securityPatchLevel_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            securityPatchLevel_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Security patch level of the device, usually in the format of
+       * yyyy-mm-dd
+       * </pre>
+       *
+       * <code>optional string security_patch_level = 18;</code>
+       * @return The bytes for securityPatchLevel.
+       */
+      public com.google.protobuf.ByteString
+          getSecurityPatchLevelBytes() {
+        java.lang.Object ref = securityPatchLevel_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          securityPatchLevel_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Security patch level of the device, usually in the format of
+       * yyyy-mm-dd
+       * </pre>
+       *
+       * <code>optional string security_patch_level = 18;</code>
+       * @param value The securityPatchLevel to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSecurityPatchLevel(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        securityPatchLevel_ = value;
+        bitField0_ |= 0x00000200;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Security patch level of the device, usually in the format of
+       * yyyy-mm-dd
+       * </pre>
+       *
+       * <code>optional string security_patch_level = 18;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSecurityPatchLevel() {
+        securityPatchLevel_ = getDefaultInstance().getSecurityPatchLevel();
+        bitField0_ = (bitField0_ & ~0x00000200);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Security patch level of the device, usually in the format of
+       * yyyy-mm-dd
+       * </pre>
+       *
+       * <code>optional string security_patch_level = 18;</code>
+       * @param value The bytes for securityPatchLevel to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSecurityPatchLevelBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        securityPatchLevel_ = value;
+        bitField0_ |= 0x00000200;
         onChanged();
         return this;
       }
@@ -18398,7 +20372,18 @@ public final class UpdateMetadata {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DeltaArchiveManifest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -18420,52 +20405,67 @@ public final class UpdateMetadata {
 
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_chromeos_update_engine_Extent_descriptor;
-  private static final
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_chromeos_update_engine_Extent_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_chromeos_update_engine_Signatures_descriptor;
-  private static final
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_chromeos_update_engine_Signatures_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_chromeos_update_engine_Signatures_Signature_descriptor;
-  private static final
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_chromeos_update_engine_Signatures_Signature_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_chromeos_update_engine_PartitionInfo_descriptor;
-  private static final
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_chromeos_update_engine_PartitionInfo_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_chromeos_update_engine_ImageInfo_descriptor;
-  private static final
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_chromeos_update_engine_ImageInfo_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_chromeos_update_engine_InstallOperation_descriptor;
-  private static final
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_chromeos_update_engine_InstallOperation_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_chromeos_update_engine_CowMergeOperation_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_chromeos_update_engine_CowMergeOperation_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_chromeos_update_engine_PartitionUpdate_descriptor;
-  private static final
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_chromeos_update_engine_PartitionUpdate_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_chromeos_update_engine_DynamicPartitionGroup_descriptor;
-  private static final
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_chromeos_update_engine_DynamicPartitionGroup_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_chromeos_update_engine_VABCFeatureSet_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_chromeos_update_engine_VABCFeatureSet_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_chromeos_update_engine_DynamicPartitionMetadata_descriptor;
-  private static final
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_chromeos_update_engine_DynamicPartitionMetadata_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_chromeos_update_engine_ApexInfo_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_chromeos_update_engine_ApexInfo_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_chromeos_update_engine_ApexMetadata_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_chromeos_update_engine_ApexMetadata_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_chromeos_update_engine_DeltaArchiveManifest_descriptor;
-  private static final
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_chromeos_update_engine_DeltaArchiveManifest_fieldAccessorTable;
 
@@ -18484,67 +20484,74 @@ public final class UpdateMetadata {
       "ignatures.Signature\032O\n\tSignature\022\023\n\007vers" +
       "ion\030\001 \001(\rB\002\030\001\022\014\n\004data\030\002 \001(\014\022\037\n\027unpadded_" +
       "signature_size\030\003 \001(\007\"+\n\rPartitionInfo\022\014\n" +
-      "\004size\030\001 \001(\004\022\014\n\004hash\030\002 \001(\014\"w\n\tImageInfo\022\r" +
-      "\n\005board\030\001 \001(\t\022\013\n\003key\030\002 \001(\t\022\017\n\007channel\030\003 " +
-      "\001(\t\022\017\n\007version\030\004 \001(\t\022\025\n\rbuild_channel\030\005 " +
-      "\001(\t\022\025\n\rbuild_version\030\006 \001(\t\"\356\003\n\020InstallOp" +
-      "eration\022;\n\004type\030\001 \002(\0162-.chromeos_update_" +
-      "engine.InstallOperation.Type\022\023\n\013data_off" +
-      "set\030\002 \001(\004\022\023\n\013data_length\030\003 \001(\004\0223\n\013src_ex" +
-      "tents\030\004 \003(\0132\036.chromeos_update_engine.Ext" +
-      "ent\022\022\n\nsrc_length\030\005 \001(\004\0223\n\013dst_extents\030\006" +
-      " \003(\0132\036.chromeos_update_engine.Extent\022\022\n\n" +
-      "dst_length\030\007 \001(\004\022\030\n\020data_sha256_hash\030\010 \001" +
-      "(\014\022\027\n\017src_sha256_hash\030\t \001(\014\"\255\001\n\004Type\022\013\n\007" +
-      "REPLACE\020\000\022\016\n\nREPLACE_BZ\020\001\022\014\n\004MOVE\020\002\032\002\010\001\022" +
-      "\016\n\006BSDIFF\020\003\032\002\010\001\022\017\n\013SOURCE_COPY\020\004\022\021\n\rSOUR" +
-      "CE_BSDIFF\020\005\022\016\n\nREPLACE_XZ\020\010\022\010\n\004ZERO\020\006\022\013\n" +
-      "\007DISCARD\020\007\022\021\n\rBROTLI_BSDIFF\020\n\022\014\n\010PUFFDIF" +
-      "F\020\t\"\327\005\n\017PartitionUpdate\022\026\n\016partition_nam" +
-      "e\030\001 \002(\t\022\027\n\017run_postinstall\030\002 \001(\010\022\030\n\020post" +
-      "install_path\030\003 \001(\t\022\027\n\017filesystem_type\030\004 " +
-      "\001(\t\022M\n\027new_partition_signature\030\005 \003(\0132,.c" +
-      "hromeos_update_engine.Signatures.Signatu" +
-      "re\022A\n\022old_partition_info\030\006 \001(\0132%.chromeo" +
-      "s_update_engine.PartitionInfo\022A\n\022new_par" +
-      "tition_info\030\007 \001(\0132%.chromeos_update_engi" +
-      "ne.PartitionInfo\022<\n\noperations\030\010 \003(\0132(.c" +
-      "hromeos_update_engine.InstallOperation\022\034" +
-      "\n\024postinstall_optional\030\t \001(\010\022=\n\025hash_tre" +
-      "e_data_extent\030\n \001(\0132\036.chromeos_update_en" +
-      "gine.Extent\0228\n\020hash_tree_extent\030\013 \001(\0132\036." +
-      "chromeos_update_engine.Extent\022\033\n\023hash_tr" +
-      "ee_algorithm\030\014 \001(\t\022\026\n\016hash_tree_salt\030\r \001" +
-      "(\014\0227\n\017fec_data_extent\030\016 \001(\0132\036.chromeos_u" +
-      "pdate_engine.Extent\0222\n\nfec_extent\030\017 \001(\0132" +
-      "\036.chromeos_update_engine.Extent\022\024\n\tfec_r" +
-      "oots\030\020 \001(\r:\0012\"L\n\025DynamicPartitionGroup\022\014" +
-      "\n\004name\030\001 \002(\t\022\014\n\004size\030\002 \001(\004\022\027\n\017partition_" +
-      "names\030\003 \003(\t\"s\n\030DynamicPartitionMetadata\022" +
-      "=\n\006groups\030\001 \003(\0132-.chromeos_update_engine" +
-      ".DynamicPartitionGroup\022\030\n\020snapshot_enabl" +
-      "ed\030\002 \001(\010\"\311\006\n\024DeltaArchiveManifest\022D\n\022ins" +
-      "tall_operations\030\001 \003(\0132(.chromeos_update_" +
-      "engine.InstallOperation\022K\n\031kernel_instal" +
-      "l_operations\030\002 \003(\0132(.chromeos_update_eng" +
-      "ine.InstallOperation\022\030\n\nblock_size\030\003 \001(\r" +
-      ":\0044096\022\031\n\021signatures_offset\030\004 \001(\004\022\027\n\017sig" +
-      "natures_size\030\005 \001(\004\022>\n\017old_kernel_info\030\006 " +
-      "\001(\0132%.chromeos_update_engine.PartitionIn" +
-      "fo\022>\n\017new_kernel_info\030\007 \001(\0132%.chromeos_u" +
-      "pdate_engine.PartitionInfo\022>\n\017old_rootfs" +
-      "_info\030\010 \001(\0132%.chromeos_update_engine.Par" +
-      "titionInfo\022>\n\017new_rootfs_info\030\t \001(\0132%.ch" +
-      "romeos_update_engine.PartitionInfo\0229\n\016ol" +
-      "d_image_info\030\n \001(\0132!.chromeos_update_eng" +
-      "ine.ImageInfo\0229\n\016new_image_info\030\013 \001(\0132!." +
-      "chromeos_update_engine.ImageInfo\022\030\n\rmino" +
-      "r_version\030\014 \001(\r:\0010\022;\n\npartitions\030\r \003(\0132\'" +
-      ".chromeos_update_engine.PartitionUpdate\022" +
-      "\025\n\rmax_timestamp\030\016 \001(\003\022T\n\032dynamic_partit" +
-      "ion_metadata\030\017 \001(\01320.chromeos_update_eng" +
-      "ine.DynamicPartitionMetadata\022\026\n\016partial_" +
-      "update\030\020 \001(\010B\002H\003"
+      "\004size\030\001 \001(\004\022\014\n\004hash\030\002 \001(\014\"\246\004\n\020InstallOpe" +
+      "ration\022;\n\004type\030\001 \002(\0162-.chromeos_update_e" +
+      "ngine.InstallOperation.Type\022\023\n\013data_offs" +
+      "et\030\002 \001(\004\022\023\n\013data_length\030\003 \001(\004\0223\n\013src_ext" +
+      "ents\030\004 \003(\0132\036.chromeos_update_engine.Exte" +
+      "nt\022\022\n\nsrc_length\030\005 \001(\004\0223\n\013dst_extents\030\006 " +
+      "\003(\0132\036.chromeos_update_engine.Extent\022\022\n\nd" +
+      "st_length\030\007 \001(\004\022\030\n\020data_sha256_hash\030\010 \001(" +
+      "\014\022\027\n\017src_sha256_hash\030\t \001(\014\"\345\001\n\004Type\022\013\n\007R" +
+      "EPLACE\020\000\022\016\n\nREPLACE_BZ\020\001\022\014\n\004MOVE\020\002\032\002\010\001\022\016" +
+      "\n\006BSDIFF\020\003\032\002\010\001\022\017\n\013SOURCE_COPY\020\004\022\021\n\rSOURC" +
+      "E_BSDIFF\020\005\022\016\n\nREPLACE_XZ\020\010\022\010\n\004ZERO\020\006\022\013\n\007" +
+      "DISCARD\020\007\022\021\n\rBROTLI_BSDIFF\020\n\022\014\n\010PUFFDIFF" +
+      "\020\t\022\014\n\010ZUCCHINI\020\013\022\022\n\016LZ4DIFF_BSDIFF\020\014\022\024\n\020" +
+      "LZ4DIFF_PUFFDIFF\020\r\"\201\002\n\021CowMergeOperation" +
+      "\022<\n\004type\030\001 \001(\0162..chromeos_update_engine." +
+      "CowMergeOperation.Type\0222\n\nsrc_extent\030\002 \001" +
+      "(\0132\036.chromeos_update_engine.Extent\0222\n\nds" +
+      "t_extent\030\003 \001(\0132\036.chromeos_update_engine." +
+      "Extent\022\022\n\nsrc_offset\030\004 \001(\r\"2\n\004Type\022\014\n\010CO" +
+      "W_COPY\020\000\022\013\n\007COW_XOR\020\001\022\017\n\013COW_REPLACE\020\002\"\310" +
+      "\006\n\017PartitionUpdate\022\026\n\016partition_name\030\001 \002" +
+      "(\t\022\027\n\017run_postinstall\030\002 \001(\010\022\030\n\020postinsta" +
+      "ll_path\030\003 \001(\t\022\027\n\017filesystem_type\030\004 \001(\t\022M" +
+      "\n\027new_partition_signature\030\005 \003(\0132,.chrome" +
+      "os_update_engine.Signatures.Signature\022A\n" +
+      "\022old_partition_info\030\006 \001(\0132%.chromeos_upd" +
+      "ate_engine.PartitionInfo\022A\n\022new_partitio" +
+      "n_info\030\007 \001(\0132%.chromeos_update_engine.Pa" +
+      "rtitionInfo\022<\n\noperations\030\010 \003(\0132(.chrome" +
+      "os_update_engine.InstallOperation\022\034\n\024pos" +
+      "tinstall_optional\030\t \001(\010\022=\n\025hash_tree_dat" +
+      "a_extent\030\n \001(\0132\036.chromeos_update_engine." +
+      "Extent\0228\n\020hash_tree_extent\030\013 \001(\0132\036.chrom" +
+      "eos_update_engine.Extent\022\033\n\023hash_tree_al" +
+      "gorithm\030\014 \001(\t\022\026\n\016hash_tree_salt\030\r \001(\014\0227\n" +
+      "\017fec_data_extent\030\016 \001(\0132\036.chromeos_update" +
+      "_engine.Extent\0222\n\nfec_extent\030\017 \001(\0132\036.chr" +
+      "omeos_update_engine.Extent\022\024\n\tfec_roots\030" +
+      "\020 \001(\r:\0012\022\017\n\007version\030\021 \001(\t\022C\n\020merge_opera" +
+      "tions\030\022 \003(\0132).chromeos_update_engine.Cow" +
+      "MergeOperation\022\031\n\021estimate_cow_size\030\023 \001(" +
+      "\004\"L\n\025DynamicPartitionGroup\022\014\n\004name\030\001 \002(\t" +
+      "\022\014\n\004size\030\002 \001(\004\022\027\n\017partition_names\030\003 \003(\t\"" +
+      "8\n\016VABCFeatureSet\022\020\n\010threaded\030\001 \001(\010\022\024\n\014b" +
+      "atch_writes\030\002 \001(\010\"\200\002\n\030DynamicPartitionMe" +
+      "tadata\022=\n\006groups\030\001 \003(\0132-.chromeos_update" +
+      "_engine.DynamicPartitionGroup\022\030\n\020snapsho" +
+      "t_enabled\030\002 \001(\010\022\024\n\014vabc_enabled\030\003 \001(\010\022\036\n" +
+      "\026vabc_compression_param\030\004 \001(\t\022\023\n\013cow_ver" +
+      "sion\030\005 \001(\r\022@\n\020vabc_feature_set\030\006 \001(\0132&.c" +
+      "hromeos_update_engine.VABCFeatureSet\"c\n\010" +
+      "ApexInfo\022\024\n\014package_name\030\001 \001(\t\022\017\n\007versio" +
+      "n\030\002 \001(\003\022\025\n\ris_compressed\030\003 \001(\010\022\031\n\021decomp" +
+      "ressed_size\030\004 \001(\003\"C\n\014ApexMetadata\0223\n\tape" +
+      "x_info\030\001 \003(\0132 .chromeos_update_engine.Ap" +
+      "exInfo\"\303\003\n\024DeltaArchiveManifest\022\030\n\nblock" +
+      "_size\030\003 \001(\r:\0044096\022\031\n\021signatures_offset\030\004" +
+      " \001(\004\022\027\n\017signatures_size\030\005 \001(\004\022\030\n\rminor_v" +
+      "ersion\030\014 \001(\r:\0010\022;\n\npartitions\030\r \003(\0132\'.ch" +
+      "romeos_update_engine.PartitionUpdate\022\025\n\r" +
+      "max_timestamp\030\016 \001(\003\022T\n\032dynamic_partition" +
+      "_metadata\030\017 \001(\01320.chromeos_update_engine" +
+      ".DynamicPartitionMetadata\022\026\n\016partial_upd" +
+      "ate\030\020 \001(\010\0223\n\tapex_info\030\021 \003(\0132 .chromeos_" +
+      "update_engine.ApexInfo\022\034\n\024security_patch" +
+      "_level\030\022 \001(\tJ\004\010\001\020\002J\004\010\002\020\003J\004\010\006\020\007J\004\010\007\020\010J\004\010\010" +
+      "\020\tJ\004\010\t\020\nJ\004\010\n\020\013J\004\010\013\020\014"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -18574,42 +20581,60 @@ public final class UpdateMetadata {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_chromeos_update_engine_PartitionInfo_descriptor,
         new java.lang.String[] { "Size", "Hash", });
-    internal_static_chromeos_update_engine_ImageInfo_descriptor =
-      getDescriptor().getMessageTypes().get(3);
-    internal_static_chromeos_update_engine_ImageInfo_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_chromeos_update_engine_ImageInfo_descriptor,
-        new java.lang.String[] { "Board", "Key", "Channel", "Version", "BuildChannel", "BuildVersion", });
     internal_static_chromeos_update_engine_InstallOperation_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(3);
     internal_static_chromeos_update_engine_InstallOperation_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_chromeos_update_engine_InstallOperation_descriptor,
         new java.lang.String[] { "Type", "DataOffset", "DataLength", "SrcExtents", "SrcLength", "DstExtents", "DstLength", "DataSha256Hash", "SrcSha256Hash", });
+    internal_static_chromeos_update_engine_CowMergeOperation_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_chromeos_update_engine_CowMergeOperation_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_chromeos_update_engine_CowMergeOperation_descriptor,
+        new java.lang.String[] { "Type", "SrcExtent", "DstExtent", "SrcOffset", });
     internal_static_chromeos_update_engine_PartitionUpdate_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_chromeos_update_engine_PartitionUpdate_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_chromeos_update_engine_PartitionUpdate_descriptor,
-        new java.lang.String[] { "PartitionName", "RunPostinstall", "PostinstallPath", "FilesystemType", "NewPartitionSignature", "OldPartitionInfo", "NewPartitionInfo", "Operations", "PostinstallOptional", "HashTreeDataExtent", "HashTreeExtent", "HashTreeAlgorithm", "HashTreeSalt", "FecDataExtent", "FecExtent", "FecRoots", });
+        new java.lang.String[] { "PartitionName", "RunPostinstall", "PostinstallPath", "FilesystemType", "NewPartitionSignature", "OldPartitionInfo", "NewPartitionInfo", "Operations", "PostinstallOptional", "HashTreeDataExtent", "HashTreeExtent", "HashTreeAlgorithm", "HashTreeSalt", "FecDataExtent", "FecExtent", "FecRoots", "Version", "MergeOperations", "EstimateCowSize", });
     internal_static_chromeos_update_engine_DynamicPartitionGroup_descriptor =
       getDescriptor().getMessageTypes().get(6);
     internal_static_chromeos_update_engine_DynamicPartitionGroup_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_chromeos_update_engine_DynamicPartitionGroup_descriptor,
         new java.lang.String[] { "Name", "Size", "PartitionNames", });
-    internal_static_chromeos_update_engine_DynamicPartitionMetadata_descriptor =
+    internal_static_chromeos_update_engine_VABCFeatureSet_descriptor =
       getDescriptor().getMessageTypes().get(7);
+    internal_static_chromeos_update_engine_VABCFeatureSet_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_chromeos_update_engine_VABCFeatureSet_descriptor,
+        new java.lang.String[] { "Threaded", "BatchWrites", });
+    internal_static_chromeos_update_engine_DynamicPartitionMetadata_descriptor =
+      getDescriptor().getMessageTypes().get(8);
     internal_static_chromeos_update_engine_DynamicPartitionMetadata_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_chromeos_update_engine_DynamicPartitionMetadata_descriptor,
-        new java.lang.String[] { "Groups", "SnapshotEnabled", });
+        new java.lang.String[] { "Groups", "SnapshotEnabled", "VabcEnabled", "VabcCompressionParam", "CowVersion", "VabcFeatureSet", });
+    internal_static_chromeos_update_engine_ApexInfo_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_chromeos_update_engine_ApexInfo_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_chromeos_update_engine_ApexInfo_descriptor,
+        new java.lang.String[] { "PackageName", "Version", "IsCompressed", "DecompressedSize", });
+    internal_static_chromeos_update_engine_ApexMetadata_descriptor =
+      getDescriptor().getMessageTypes().get(10);
+    internal_static_chromeos_update_engine_ApexMetadata_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_chromeos_update_engine_ApexMetadata_descriptor,
+        new java.lang.String[] { "ApexInfo", });
     internal_static_chromeos_update_engine_DeltaArchiveManifest_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_chromeos_update_engine_DeltaArchiveManifest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_chromeos_update_engine_DeltaArchiveManifest_descriptor,
-        new java.lang.String[] { "InstallOperations", "KernelInstallOperations", "BlockSize", "SignaturesOffset", "SignaturesSize", "OldKernelInfo", "NewKernelInfo", "OldRootfsInfo", "NewRootfsInfo", "OldImageInfo", "NewImageInfo", "MinorVersion", "Partitions", "MaxTimestamp", "DynamicPartitionMetadata", "PartialUpdate", });
+        new java.lang.String[] { "BlockSize", "SignaturesOffset", "SignaturesSize", "MinorVersion", "Partitions", "MaxTimestamp", "DynamicPartitionMetadata", "PartialUpdate", "ApexInfo", "SecurityPatchLevel", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
