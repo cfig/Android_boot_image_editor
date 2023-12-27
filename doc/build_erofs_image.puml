@@ -1,0 +1,14 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+#lightblue:directory \nsystem_dlkm/;
+-> mkfs.erofs;
+#lightgreen :system_dlkm.img;
+:calculate image size|
+-> avbtool;
+#lightgreen:(avb enabled)\nsystem_dlkm.img;
+
+stop
+
+@enduml

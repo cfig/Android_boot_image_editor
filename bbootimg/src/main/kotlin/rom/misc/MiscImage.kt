@@ -1,4 +1,4 @@
-package miscimg
+package rom.misc
 
 import cc.cfig.io.Struct
 import cfig.helper.Helper

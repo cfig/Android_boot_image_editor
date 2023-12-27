@@ -185,6 +185,11 @@ def main():
     verifySingleDir(resDir2, "issue_123_dtb")
     # Issue 125: cmdline trim
     verifySingleDir(resDir3, "issue_125_trim_cmdline")
+    # Issue 133: repack ext4
+    if platform.system() == "Linux":
+        verifySingleDir(resDir3, "issue_133_repack_ext4")
+    else:
+        log.info("sparse image is not supported on OS other than Linux, skip testing")
 
     log.info(successLogo)
 

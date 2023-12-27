@@ -21,10 +21,11 @@ import avb.blob.AuxBlob
 import avb.blob.Footer
 import avb.blob.Header
 import avb.desc.HashDescriptor
+import avb.desc.HashTreeDescriptor
 import cfig.helper.CryptoHelper
+import cfig.helper.Dumpling
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.paddingWith
-import cfig.helper.Dumpling
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.codec.binary.Hex
@@ -198,38 +199,77 @@ class Avb {
             return true
         }
 
-        fun updateVbmeta(fileName: String) {
+        fun updateVbmeta(fileName: String, desc: Any = HashDescriptor::class) {
             if (File("vbmeta.img").exists()) {
                 log.info("Updating vbmeta.img side by side ...")
-                val partitionName =
-                    ObjectMapper().readValue(File(getJsonFileName(fileName)), AVBInfo::class.java).let {
-                        it.auxBlob!!.hashDescriptors.get(0).partition_name
-                    }
-                //read hashDescriptor from image
+                val readBackInfo = ObjectMapper().readValue(File(getJsonFileName(fileName)), AVBInfo::class.java)
                 val newHashDesc = AVBInfo.parseFrom(Dumpling("$fileName.signed"))
-                check(newHashDesc.auxBlob!!.hashDescriptors.size == 1)
-                var seq = -1 //means not found
-                //main vbmeta
-                ObjectMapper().readValue(File(getJsonFileName("vbmeta.img")), AVBInfo::class.java).apply {
-                    val itr = this.auxBlob!!.hashDescriptors.iterator()
-                    while (itr.hasNext()) {
-                        val itrValue = itr.next()
-                        if (itrValue.partition_name == partitionName) {
-                            log.info("Found $partitionName in vbmeta, update it")
-                            seq = itrValue.sequence
-                            itr.remove()
-                            break
+
+                when (desc) {
+                    HashDescriptor::class -> {
+                        val partitionName = readBackInfo.auxBlob!!.hashDescriptors.get(0).partition_name
+                        log.warn("partitionName=$partitionName")
+                        //read hashDescriptor from image
+                        check(newHashDesc.auxBlob!!.hashDescriptors.size == 1)
+                        var seq = -1 //means not found
+                        //main vbmeta
+                        ObjectMapper().readValue(File(getJsonFileName("vbmeta.img")), AVBInfo::class.java).apply {
+                            val itr = this.auxBlob!!.hashDescriptors.iterator()
+                            while (itr.hasNext()) {
+                                val itrValue = itr.next()
+                                if (itrValue.partition_name == partitionName) {
+                                    log.info("Found $partitionName in vbmeta, update it")
+                                    seq = itrValue.sequence
+                                    itr.remove()
+                                    break
+                                }
+                            }
+                            if (-1 == seq) {
+                                log.warn("main vbmeta doesn't have $partitionName hashDescriptor, won't update vbmeta.img")
+                            } else {
+                                //add hashDescriptor back to main vbmeta
+                                val hd = newHashDesc.auxBlob!!.hashDescriptors.get(0).apply { this.sequence = seq }
+                                this.auxBlob!!.hashDescriptors.add(hd)
+                                log.info("Writing padded vbmeta to file: vbmeta.img.signed")
+                                Files.write(Paths.get("vbmeta.img.signed"), encodePadded(), StandardOpenOption.CREATE)
+                                log.info("Updating vbmeta.img side by side (partition=$partitionName, seq=$seq) done")
+                            }
                         }
                     }
-                    if (-1 == seq) {
-                        log.warn("main vbmeta doesn't have $partitionName hashDescriptor, won't update vbmeta.img")
-                    } else {
-                        //add hashDescriptor back to main vbmeta
-                        val hd = newHashDesc.auxBlob!!.hashDescriptors.get(0).apply { this.sequence = seq }
-                        this.auxBlob!!.hashDescriptors.add(hd)
-                        log.info("Writing padded vbmeta to file: vbmeta.img.signed")
-                        Files.write(Paths.get("vbmeta.img.signed"), encodePadded(), StandardOpenOption.CREATE)
-                        log.info("Updating vbmeta.img side by side (partition=$partitionName, seq=$seq) done")
+                    HashTreeDescriptor::class -> {
+                        val partitionName = readBackInfo.auxBlob!!.hashTreeDescriptors.get(0).partition_name
+                        log.warn("partitionName=$partitionName")
+                        //read hashTreeDescriptor from image
+                        check(newHashDesc.auxBlob!!.hashTreeDescriptors.size == 1)
+                        var seq = -1 //means not found
+                        //main vbmeta
+                        ObjectMapper().readValue(File(getJsonFileName("vbmeta.img")), AVBInfo::class.java).apply {
+                            val itr = this.auxBlob!!.hashTreeDescriptors.iterator()
+                            while (itr.hasNext()) {
+                                val itrValue = itr.next()
+                                if (itrValue.partition_name == partitionName) {
+                                    log.info("Found $partitionName (HashTreeDescriptor) in vbmeta, update it")
+                                    log.info("Original: " + itrValue.toString())
+                                    seq = itrValue.sequence
+                                    itr.remove()
+                                    break
+                                }
+                            }
+                            if (-1 == seq) {
+                                log.warn("main vbmeta doesn't have $partitionName hashTreeDescriptor, won't update vbmeta.img")
+                            } else {
+                                //add hashTreeDescriptor back to main vbmeta
+                                val hd = newHashDesc.auxBlob!!.hashTreeDescriptors.get(0).apply { this.sequence = seq }
+                                log.info("Updated: " + hd.toString())
+                                this.auxBlob!!.hashTreeDescriptors.add(hd)
+                                log.info("Writing padded vbmeta to file: vbmeta.img.signed")
+                                Files.write(Paths.get("vbmeta.img.signed"), encodePadded(), StandardOpenOption.CREATE)
+                                log.info("Updating vbmeta.img side by side (partition=$partitionName, seq=$seq) done")
+                            }
+                        }
+                    }
+                    else -> {
+                        throw IllegalArgumentException("unknown descriptor type: $desc")
                     }
                 }
             } else {

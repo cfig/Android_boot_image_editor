@@ -14,7 +14,7 @@
 
 package cfig.init
 
-import miscimg.MiscImage
+import rom.misc.MiscImage
 import org.slf4j.LoggerFactory
 import java.util.*
 

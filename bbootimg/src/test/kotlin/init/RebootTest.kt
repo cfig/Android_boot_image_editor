@@ -14,7 +14,7 @@
 
 package init
 
-import miscimg.MiscImage
+import rom.misc.MiscImage
 import org.junit.Test
 import org.junit.After
 import java.util.*

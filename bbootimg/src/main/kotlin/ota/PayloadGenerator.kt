@@ -25,6 +25,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.*
+import kotlin.io.path.Path
 import kotlin.system.exitProcess
 
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -116,7 +117,7 @@ class PayloadGenerator {
                     if (fileHeader[0] as UInt == 0x3aff26ed.toUInt()) {
                         log.debug("$part is sparse, convert to raw image")
                         "simg2img $workDir/$part.img $workDir/tmp.img".check_call()
-                        File("$workDir/tmp.img").renameTo(File("$workDir/$part.img"))
+                        Files.move(Path("$workDir/tmp.img"), Path("$workDir/$part.img"))
                     }
                 }
             }

@@ -15,7 +15,7 @@
 package cfig.packable
 
 import cfig.helper.Helper
-import miscimg.MiscImage
+import rom.misc.MiscImage
 import cfig.helper.Helper.Companion.deleteIfExists
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory

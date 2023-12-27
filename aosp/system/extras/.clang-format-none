@@ -1,0 +1,7 @@
+# This clang-format configuration may be included in subdirectories to disable
+# any warning.
+
+DisableFormat: true
+
+# This extra settings is required because of https://reviews.llvm.org/D67843.
+SortIncludes: false

@@ -14,7 +14,7 @@
 
 package cfig.packable
 
-import cfig.utils.SparseImgParser
+import rom.sparse.SparseImgParser
 import org.slf4j.LoggerFactory
 import packable.DeviceTreeParser
 import java.io.File

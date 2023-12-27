@@ -1,0 +1,63 @@
+// Copyright 2017 The Android Open Source Project
+
+package {
+    default_applicable_licenses: ["system_extras_f2fs_utils_license"],
+}
+
+// Added automatically by a large-scale-change
+// See: http://go/android-license-faq
+license {
+    name: "system_extras_f2fs_utils_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+    ],
+    license_text: [
+        "NOTICE",
+    ],
+}
+
+cc_library_shared {
+    name: "libf2fs_sparseblock",
+    cflags: ["-Werror"],
+
+    srcs: ["f2fs_sparseblock.c"],
+
+    shared_libs: [
+        "liblog",
+        "libcutils",
+    ],
+
+    include_dirs: [
+        "external/f2fs-tools/include",
+        "bionic/libc",
+    ],
+
+    export_include_dirs: ["."],
+}
+
+cc_binary {
+    name: "f2fs_sparseblock",
+    cflags: ["-Werror"],
+
+    srcs: ["f2fs_sparseblock.c"],
+
+    shared_libs: [
+        "liblog",
+        "libcutils",
+    ],
+
+    include_dirs: [
+        "external/f2fs-tools/include",
+        "bionic/libc",
+    ],
+}
+
+sh_binary_host {
+    name: "mkf2fsuserimg",
+    src: "mkf2fsuserimg.sh",
+    required: [
+        "make_f2fs",
+        "sload_f2fs",
+    ],
+}

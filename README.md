@@ -7,7 +7,7 @@ A tool for reverse engineering Android ROM images.
 ##  Requirements
 Make sure you have [JDK11+](https://www.oracle.com/java/technologies/downloads/#java17) and [Python3](https://www.python.org/downloads/).
 
-* Linux / WSL: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python3 python-is-python3 p7zip-full android-sdk-libsparse-utils`
+* Linux / WSL: `sudo apt install git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python3 python-is-python3 p7zip-full android-sdk-libsparse-utils erofs-utils`
 
 * Mac: `brew install lz4 xz dtc`
 
@@ -272,6 +272,46 @@ Then flash vbmeta.img.signed to your device.
 * edit build/unzip_boot/boot.json
 - change `ramdisk.size` to 1
 - change `ramdisk.file` from "build/unzip_boot/ramdisk.img" to "build/unzip_boot/ramdisk.img.lz4"
+
+</details>
+
+<details>
+
+  <summary>work with payload.bin</summary>
+
+- extract everything
+
+Usage:
+```
+    gradle unpack
+```
+
+- extract only 1 specified partition
+Usage:
+```
+    gradle unpack -Dpart=<part_name>
+```
+Example:
+```
+    gradle unpack -Dpart=boot
+    gradle unpack -Dpart=system
+```
+
+Note:
+    "build/payload/" will be deleted before each "unpack" task
+
+</details>
+
+
+<details>
+
+  <summary>work with apex images</summary>
+
+AOSP already has tools like apexer, deapexer, sign_apex.py, these should suffice the needs on .apex and .capex.
+Refer to Issue https://github.com/cfig/Android_boot_image_editor/issues/120
+
+- For those who may be interested in apex generation flow, there is a graph here
+![image](doc/apexer_generate_flow.png)
 
 </details>
 
