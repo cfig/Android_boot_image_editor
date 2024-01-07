@@ -44,7 +44,7 @@ data class BootV2(
     var ramdisk: RamdiskArgs = RamdiskArgs(),
     var secondBootloader: CommArgs? = null,
     var recoveryDtbo: CommArgsLong? = null,
-    var dtb: CommArgsLong? = null,
+    var dtb: DtbArgsLong? = null,
 ) {
     data class MiscInfo(
         var output: String = "",
@@ -83,6 +83,14 @@ data class BootV2(
         var position: Long = 0,
         var size: Int = 0,
         var loadOffset: Long = 0,
+    )
+
+    data class DtbArgsLong(
+        var file: String? = null,
+        var position: Long = 0,
+        var size: Int = 0,
+        var loadOffset: Long = 0,
+        var dtbList: MutableList<DTC.DtbEntry> = mutableListOf(),
     )
 
     companion object {
@@ -148,7 +156,7 @@ data class BootV2(
                     ret.recoveryDtbo!!.position = ret.getRecoveryDtboPosition()
                 }
                 if (bh2.dtbLength > 0) {
-                    ret.dtb = CommArgsLong()
+                    ret.dtb = DtbArgsLong()
                     ret.dtb!!.size = bh2.dtbLength
                     ret.dtb!!.loadOffset = bh2.dtbOffset //Q
                     ret.dtb!!.file = "${workDir}dtb"
@@ -243,6 +251,13 @@ data class BootV2(
         //dtb
         this.dtb?.let { _ ->
             Common.dumpDtb(Helper.Slice(info.output, dtb!!.position.toInt(), dtb!!.size, dtb!!.file!!))
+            this.dtb!!.dtbList = DTC.parseMultiple(dtb!!.file!!)
+            log.info("dtb sz = " + this.dtb!!.dtbList.size)
+            //dump info again
+            mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + info.json), this)
+
+            //dump dtb items
+            DTC.extractMultiple(dtb!!.file!!, this.dtb!!.dtbList)
         }
 
         return this
@@ -340,12 +355,13 @@ data class BootV2(
             //dtb
             this.dtb?.let { theDtb ->
                 if (theDtb.size > 0) {
+                    val dtbCount = this.dtb!!.dtbList.size
                     it.addRule()
                     it.addRow("dtb", theDtb.file)
                     prints.add(Pair("dtb", theDtb.file.toString()))
                     if (File(theDtb.file + ".${dtsSuffix}").exists()) {
-                        it.addRow("\\-- decompiled dts", theDtb.file + ".${dtsSuffix}")
-                        prints.add(Pair("\\-- decompiled dts", theDtb.file + ".${dtsSuffix}"))
+                        it.addRow("\\-- decompiled dts [$dtbCount]", theDtb.file + ".*.${dtsSuffix}")
+                        prints.add(Pair("\\-- decompiled dts [$dtbCount]", theDtb.file + ".*.${dtsSuffix}"))
                     }
                 }
             }
@@ -441,7 +457,7 @@ data class BootV2(
         //refresh dtb size
         dtb?.let { theDtb ->
             if (File(theDtb.file!! + ".${dtsSuffix}").exists()) {
-                check(DTC().compile(theDtb.file!! + ".${dtsSuffix}", theDtb.file!!)) { "fail to compile dts" }
+                DTC.packMultiple(theDtb.file!!, theDtb.dtbList)
             }
             theDtb.size = File(theDtb.file!!).length().toInt()
         }

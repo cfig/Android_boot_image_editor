@@ -31,7 +31,7 @@ jobs:
           java-version: 17
 
       - name: apt
-        run: sudo apt install device-tree-compiler p7zip-full android-sdk-libsparse-utils
+        run: sudo apt install device-tree-compiler p7zip-full android-sdk-libsparse-utils erofs-utils
 
       # Runs a single command using the runners shell
       - name: Unit Test

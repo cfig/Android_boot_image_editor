@@ -39,7 +39,7 @@ import cfig.bootimg.Common as C
 data class VendorBoot(
     var info: MiscInfo = MiscInfo(),
     var ramdisk: RamdiskArgs = RamdiskArgs(),
-    var dtb: CommArgs = CommArgs(),
+    var dtb: DtbArgs = DtbArgs(),
     var ramdisk_table: Vrt = Vrt(),
     var bootconfig: CommArgs = CommArgs(),
 ) {
@@ -48,6 +48,14 @@ data class VendorBoot(
         var position: Long = 0,
         var size: Int = 0,
         var loadAddr: Long = 0,
+    )
+
+    data class DtbArgs(
+        var file: String = "",
+        var position: Long = 0,
+        var size: Int = 0,
+        var loadAddr: Long = 0,
+        var dtbList: MutableList<DTC.DtbEntry> = mutableListOf(),
     )
 
     data class RamdiskArgs(
@@ -251,7 +259,7 @@ data class VendorBoot(
         }
         //update dtb
         if (File(this.dtb.file + ".${dtsSuffix}").exists()) {
-            check(DTC().compile(this.dtb.file + ".${dtsSuffix}", this.dtb.file)) { "fail to compile dts" }
+            DTC.packMultiple(this.dtb.file, this.dtb.dtbList)
         }
         this.dtb.size = File(this.dtb.file).length().toInt()
         //header
@@ -359,7 +367,13 @@ data class VendorBoot(
             this.ramdisk.xzFlags = checkType
         }
         //dtb
-        C.dumpDtb(Helper.Slice(info.output, dtb.position.toInt(), dtb.size, dtb.file))
+        run {
+            C.dumpDtb(Helper.Slice(info.output, dtb.position.toInt(), dtb.size, dtb.file))
+            if (dtb.size > 0) {
+                dtb.dtbList = DTC.parseMultiple(dtb.file)
+                DTC.extractMultiple(dtb.file, dtb.dtbList)
+            }
+        }
         //vrt
         this.ramdisk_table.ramdidks.forEachIndexed { index, it ->
             log.info("dumping vendor ramdisk ${index + 1}/${this.ramdisk_table.ramdidks.size} ...")
@@ -425,8 +439,8 @@ data class VendorBoot(
                 it.addRow("dtb", this.dtb.file)
                 prints.add(Pair("dtb", this.dtb.file))
                 if (File(this.dtb.file + ".${dtsSuffix}").exists()) {
-                    it.addRow("\\-- decompiled dts", dtb.file + ".${dtsSuffix}")
-                    prints.add(Pair("\\-- decompiled dts", dtb.file + ".${dtsSuffix}"))
+                    it.addRow("\\-- decompiled dts [${dtb.dtbList.size}]", dtb.file + "*.${dtsSuffix}")
+                    prints.add(Pair("\\-- decompiled dts [${dtb.dtbList.size}]", dtb.file + "*.${dtsSuffix}"))
                 }
             } else {
                 it.addRow("dtb", "-")

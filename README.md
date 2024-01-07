@@ -315,6 +315,20 @@ Refer to Issue https://github.com/cfig/Android_boot_image_editor/issues/120
 
 </details>
 
+<details>
+  <summary>How to work with vendor_dlkm.img</summary>
+
+```bash
+cp <your_vendor_dlkm.img> vendor_dlkm.img
+cp <your_vbmeta_image> vbmeta.img
+./gradlew unpack
+# replace your .ko
+./gradlew pack
+```
+Then flash `vbmeta.img.signed` and `vendor_dlkm.img.signed` to the device.
+
+</details>
+
 ## boot.img layout
 Read [boot layout](doc/layout.md) of Android boot.img and vendor\_boot.img.
 Read [misc layout](doc/misc_image_layout.md) of misc\.img
