@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cfig.utils
+package rom.fdt
 
 import cc.cfig.io.Struct
 import cfig.helper.Dumpling
 import cfig.helper.Helper
+import cfig.utils.EnvironmentVerifier
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.LoggerFactory
@@ -34,7 +35,7 @@ class DTC {
     )
 
     data class FdtHeader(
-        var magic: Int = 0,
+        var magic: Long = 0L,
         val totalsize: Int = 0,
         val offDtStruct: Int = 0,
         val offDtStrings: Int = 0,
@@ -47,7 +48,7 @@ class DTC {
     ) {
         companion object {
             private const val MAGIC = 0xd00dfeedu
-            const val FORMAT_STRING = ">10i"
+            const val FORMAT_STRING = ">I9i"
             const val SIZE = 40
 
             init {
@@ -58,7 +59,7 @@ class DTC {
             fun parse(iS: InputStream): FdtHeader {
                 val info = Struct(FORMAT_STRING).unpack(iS)
                 val ret = FdtHeader(
-                    info[0] as Int,
+                    (info[0] as UInt).toLong(),
                     info[1] as Int,
                     info[2] as Int,
                     info[3] as Int,
@@ -150,9 +151,9 @@ class DTC {
             }
             val remainder = File(fileName).length() - ret.sumOf { it.header.totalsize }.toLong()
             if (remainder == 0L) {
-                log.info("Successfully parsed ${ret.size} FDT headers")
+                log.info("Successfully parsed ${ret.size} FDT headers from $fileName")
             } else {
-                log.warn("Successfully parsed ${ret.size} FDT headers, remainder: $remainder bytes")
+                log.warn("Successfully parsed ${ret.size} FDT headers from $fileName, remainder: $remainder bytes")
             }
             return ret
         }

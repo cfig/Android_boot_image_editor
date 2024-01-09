@@ -17,7 +17,7 @@ package cfig.bootimg
 import cc.cfig.io.Struct
 import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.cpio.AndroidCpio
-import cfig.utils.DTC
+import rom.fdt.DTC
 import cfig.helper.Helper
 import cfig.helper.ZipHelper
 import cfig.utils.KernelExtractor
@@ -179,10 +179,10 @@ class Common {
             return ret
         }
 
-        fun dumpDtb(s: Helper.Slice) {
+        fun dumpDtb(s: Helper.Slice, decompile: Boolean = true) {
             Helper.extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
             //extract DTB
-            if (EnvironmentVerifier().hasDtc) {
+            if (EnvironmentVerifier().hasDtc && decompile) {
                 DTC().decompile(s.dumpFile, s.dumpFile + "." + Helper.prop("config.dts_suffix"))
             }
         }

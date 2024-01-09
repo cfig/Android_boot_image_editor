@@ -18,13 +18,14 @@ import avb.AVBInfo
 import cfig.Avb
 import cfig.helper.Dumpling
 import cfig.helper.Helper
-import cfig.helper.Helper.Companion.deleteIfExists
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
+import kotlin.io.path.Path
+import kotlin.io.path.deleteIfExists
 
 class VBMetaParser : IPackable {
     override val loopNo: Int
@@ -66,7 +67,7 @@ class VBMetaParser : IPackable {
     fun clear(fileName: String) {
         super.clear()
         listOf("", ".signed").forEach {
-            "$fileName$it".deleteIfExists()
+            Path("$fileName$it").deleteIfExists()
         }
     }
 

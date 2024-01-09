@@ -4,11 +4,12 @@ import cfig.bootimg.Common
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.check_call
 import cfig.helper.Helper.Companion.check_output
-import cfig.helper.Helper.Companion.deleteIfExists
 import cfig.packable.IPackable
-import cfig.utils.DTC
 import org.slf4j.LoggerFactory
+import rom.fdt.DTC
 import java.io.File
+import kotlin.io.path.Path
+import kotlin.io.path.deleteIfExists
 
 class DeviceTreeParser : IPackable {
     override fun capabilities(): List<String> {
@@ -74,7 +75,7 @@ class DeviceTreeParser : IPackable {
     fun clear(fileName: String) {
         super.clear()
         listOf("", ".new").forEach {
-            "$fileName$it".deleteIfExists()
+            Path("$fileName$it").deleteIfExists()
         }
     }
 

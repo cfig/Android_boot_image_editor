@@ -2,7 +2,6 @@ package cfig.lazybox.sysinfo
 
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.check_call
-import cfig.helper.Helper.Companion.deleteIfExists
 import cfig.helper.ZipHelper
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -10,6 +9,7 @@ import java.io.FileOutputStream
 import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeText
 
@@ -63,7 +63,7 @@ makeTar("%s", "%s")
     fun run() {
         "adb wait-for-device".check_call()
         "adb root".check_call()
-        "sysinfo.tar".deleteIfExists()
+        Path("sysinfo.tar").deleteIfExists()
         val prefix = "sysinfo"
         File("sysinfo").let {
             if (it.exists()) {

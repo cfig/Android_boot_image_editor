@@ -20,12 +20,13 @@ import cfig.bootimg.v2.BootV2
 import cfig.bootimg.v2.BootV2Dialects
 import cfig.bootimg.v3.BootV3
 import cfig.helper.Helper
-import cfig.helper.Helper.Companion.deleteIfExists
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
+import kotlin.io.path.Path
+import kotlin.io.path.deleteIfExists
 
 class BootImgParser : IPackable {
     override val loopNo: Int
@@ -142,7 +143,7 @@ class BootImgParser : IPackable {
     fun clear(fileName: String) {
         super.clear()
         listOf("", ".clear", ".google", ".clear", ".signed", ".signed2").forEach {
-            "$fileName$it".deleteIfExists()
+            Path("$fileName$it").deleteIfExists()
         }
         VBMetaParser().clear("vbmeta.img")
     }

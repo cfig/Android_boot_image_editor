@@ -16,14 +16,15 @@ package cfig.packable
 
 import avb.AVBInfo
 import cfig.Avb
-import cfig.helper.Helper
 import cfig.helper.Dumpling
+import cfig.helper.Helper
 import cfig.helper.Helper.Companion.check_call
 import cfig.helper.Helper.Companion.check_output
-import cfig.helper.Helper.Companion.deleteIfExists
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
+import kotlin.io.path.Path
+import kotlin.io.path.deleteIfExists
 
 interface IPackable {
     val loopNo: Int
@@ -79,7 +80,9 @@ interface IPackable {
             File(workDir).deleteRecursively()
         }
         File(workDir).mkdirs()
-        "uiderrors".deleteIfExists()
+        // java.nio.file.Files.deleteIfExists() will throw exception on Windows platform, so use java.io.File
+        // Caused by: java.nio.file.FileSystemException: uiderrors: The process cannot access the file because it is being used by another process
+        File("uiderrors").deleteOnExit()
     }
 
     companion object {

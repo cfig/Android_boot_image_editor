@@ -179,13 +179,6 @@ class Helper {
             log.info("Dumping data to $dumpFile done")
         }
 
-        fun String.deleteIfExists() {
-            if (File(this).exists()) {
-                log.info("deleting $this")
-                File(this).delete()
-            }
-        }
-
         fun String.check_call(inWorkdir: String? = null): Boolean {
             val ret: Boolean
             try {

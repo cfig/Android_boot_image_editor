@@ -24,7 +24,7 @@ import cfig.helper.Dumpling
 import cfig.helper.Helper
 import cfig.helper.ZipHelper
 import cfig.packable.VBMetaParser
-import cfig.utils.DTC
+import rom.fdt.DTC
 import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.freva.asciitable.HorizontalAlign
@@ -250,7 +250,7 @@ data class BootV2(
         }
         //dtb
         this.dtb?.let { _ ->
-            Common.dumpDtb(Helper.Slice(info.output, dtb!!.position.toInt(), dtb!!.size, dtb!!.file!!))
+            Common.dumpDtb(Helper.Slice(info.output, dtb!!.position.toInt(), dtb!!.size, dtb!!.file!!), false)
             this.dtb!!.dtbList = DTC.parseMultiple(dtb!!.file!!)
             log.info("dtb sz = " + this.dtb!!.dtbList.size)
             //dump info again
@@ -359,7 +359,7 @@ data class BootV2(
                     it.addRule()
                     it.addRow("dtb", theDtb.file)
                     prints.add(Pair("dtb", theDtb.file.toString()))
-                    if (File(theDtb.file + ".${dtsSuffix}").exists()) {
+                    if (File(theDtb.file + ".0.${dtsSuffix}").exists()) {
                         it.addRow("\\-- decompiled dts [$dtbCount]", theDtb.file + ".*.${dtsSuffix}")
                         prints.add(Pair("\\-- decompiled dts [$dtbCount]", theDtb.file + ".*.${dtsSuffix}"))
                     }
@@ -456,7 +456,7 @@ data class BootV2(
         }
         //refresh dtb size
         dtb?.let { theDtb ->
-            if (File(theDtb.file!! + ".${dtsSuffix}").exists()) {
+            if (File(theDtb.file!! + ".0.${dtsSuffix}").exists()) {
                 DTC.packMultiple(theDtb.file!!, theDtb.dtbList)
             }
             theDtb.size = File(theDtb.file!!).length().toInt()

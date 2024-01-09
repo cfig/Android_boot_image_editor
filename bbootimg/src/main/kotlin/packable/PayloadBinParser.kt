@@ -15,8 +15,9 @@
 package cfig.packable
 
 import cc.cfig.droid.ota.Payload
-import cfig.helper.Helper.Companion.deleteIfExists
 import org.slf4j.LoggerFactory
+import kotlin.io.path.Path
+import kotlin.io.path.deleteIfExists
 
 class PayloadBinParser : IPackable {
     override val loopNo: Int = 0
@@ -47,7 +48,7 @@ class PayloadBinParser : IPackable {
 
     fun clear(fileName: String) {
         super.clear()
-        fileName.deleteIfExists()
+        Path(fileName).deleteIfExists()
     }
 
     override fun flash(fileName: String, deviceName: String) {

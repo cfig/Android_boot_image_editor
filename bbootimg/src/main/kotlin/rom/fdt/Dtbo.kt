@@ -1,4 +1,4 @@
-package utils
+package rom.fdt
 
 import avb.AVBInfo
 import cc.cfig.io.Struct
@@ -8,7 +8,6 @@ import cfig.bootimg.Signer
 import cfig.helper.Dumpling
 import cfig.helper.Helper
 import cfig.packable.VBMetaParser
-import cfig.utils.DTC
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
 import org.slf4j.LoggerFactory
@@ -59,8 +58,8 @@ class Dtbo(
             }
             totalSize = info[1] as Int
             headerSize = info[2] as Int
-            if (headerSize != DtboHeader.SIZE) {
-                log.warn("headerSize $headerSize != ${DtboHeader.SIZE}")
+            if (headerSize != SIZE) {
+                log.warn("headerSize $headerSize != $SIZE")
             }
             entrySize = info[3] as Int
             if (entrySize != DeviceTreeTableEntry.SIZE) {
@@ -186,7 +185,7 @@ class Dtbo(
                 .toInt()
             // Part II - a
             for (index in 0 until dtEntries.size) {
-                DTC().compile("${outDir}dt/dt.${index}.${dtsSuffix}", "${outDir}dt/dt.${index}")
+                DTC().compile("${outDir}dt/dt.${index}.$dtsSuffix", "${outDir}dt/dt.${index}")
             }
             // Part II - b
             var offset = DtboHeader.SIZE + (header.entryCount * DeviceTreeTableEntry.SIZE)
@@ -221,7 +220,7 @@ class Dtbo(
             it.addRow("image info", outDir + info.output.removeSuffix(".img") + ".json")
             it.addRule()
             it.addRow("device-tree blob   (${this.header.entryCount} blobs)", "${outDir}dt/dt.*")
-            it.addRow("\\-- device-tree source ", "${outDir}dt/dt.*.${dtsSuffix}")
+            it.addRow("\\-- device-tree source ", "${outDir}dt/dt.*.$dtsSuffix")
             it.addRule()
             it.addRow("AVB info", Avb.getJsonFileName(info.output))
             it.addRule()

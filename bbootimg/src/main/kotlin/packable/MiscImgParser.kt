@@ -15,12 +15,13 @@
 package cfig.packable
 
 import cfig.helper.Helper
-import rom.misc.MiscImage
-import cfig.helper.Helper.Companion.deleteIfExists
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
+import rom.misc.MiscImage
 import java.io.File
 import java.io.RandomAccessFile
+import kotlin.io.path.Path
+import kotlin.io.path.deleteIfExists
 
 class MiscImgParser : IPackable {
     override val loopNo: Int
@@ -78,7 +79,7 @@ class MiscImgParser : IPackable {
     fun clear(fileName: String) {
         super.clear()
         listOf("", ".new").forEach {
-            "$fileName$it".deleteIfExists()
+            Path("$fileName$it").deleteIfExists()
         }
     }
 

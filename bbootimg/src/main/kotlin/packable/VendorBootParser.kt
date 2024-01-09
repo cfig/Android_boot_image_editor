@@ -15,10 +15,11 @@
 package cfig.packable
 
 import cfig.bootimg.v3.VendorBoot
-import cfig.helper.Helper.Companion.deleteIfExists
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import java.io.File
+import kotlin.io.path.Path
+import kotlin.io.path.deleteIfExists
 
 class VendorBootParser : IPackable {
     override val loopNo: Int = 0
@@ -59,7 +60,7 @@ class VendorBootParser : IPackable {
     fun clear(fileName: String) {
         super.clear()
         listOf("", ".clear", ".google", ".clear", ".signed", ".signed2").forEach {
-            "$fileName$it".deleteIfExists()
+            Path("$fileName$it").deleteIfExists()
         }
         VBMetaParser().clear("vbmeta.img")
     }

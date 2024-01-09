@@ -190,6 +190,8 @@ def main():
         verifySingleDir(resDir3, "issue_133_repack_ext4")
     else:
         log.info("sparse image is not supported on OS other than Linux, skip testing")
+    # Issue 134: multiple DTs
+    verifySingleDir(resDir3, "issue_134_multiple_DTs")
 
     log.info(successLogo)
 

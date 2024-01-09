@@ -14,20 +14,16 @@
 
 package rom.sparse
 
-import avb.AVBInfo
 import avb.blob.Footer
-import cfig.Avb
-import cfig.bootimg.Common.Companion.deleleIfExists
-import cfig.helper.Dumpling
 import cfig.helper.Helper
-import cfig.helper.Helper.Companion.deleteIfExists
 import cfig.packable.IPackable
 import cfig.packable.VBMetaParser
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.vandermeer.asciitable.AsciiTable
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
+import kotlin.io.path.Path
+import kotlin.io.path.deleteIfExists
 
 class SparseImgParser : IPackable {
     override val loopNo: Int
@@ -87,7 +83,7 @@ class SparseImgParser : IPackable {
     fun clear(fileName: String) {
         super.clear()
         listOf("", ".clear", ".signed").forEach {
-            "$fileName$it".deleteIfExists()
+            Path("$fileName$it").deleteIfExists()
         }
         VBMetaParser().clear("vbmeta.img")
     }

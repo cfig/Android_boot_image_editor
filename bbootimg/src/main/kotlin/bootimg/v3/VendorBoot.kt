@@ -24,7 +24,7 @@ import cfig.helper.Dumpling
 import cfig.helper.Helper
 import cfig.helper.ZipHelper
 import cfig.packable.VBMetaParser
-import cfig.utils.DTC
+import rom.fdt.DTC
 import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
@@ -258,7 +258,7 @@ data class VendorBoot(
             }
         }
         //update dtb
-        if (File(this.dtb.file + ".${dtsSuffix}").exists()) {
+        if (File(this.dtb.file + ".0.${dtsSuffix}").exists()) {
             DTC.packMultiple(this.dtb.file, this.dtb.dtbList)
         }
         this.dtb.size = File(this.dtb.file).length().toInt()
@@ -368,7 +368,7 @@ data class VendorBoot(
         }
         //dtb
         run {
-            C.dumpDtb(Helper.Slice(info.output, dtb.position.toInt(), dtb.size, dtb.file))
+            C.dumpDtb(Helper.Slice(info.output, dtb.position.toInt(), dtb.size, dtb.file), false)
             if (dtb.size > 0) {
                 dtb.dtbList = DTC.parseMultiple(dtb.file)
                 DTC.extractMultiple(dtb.file, dtb.dtbList)
@@ -438,7 +438,7 @@ data class VendorBoot(
             if (this.dtb.size > 0) {
                 it.addRow("dtb", this.dtb.file)
                 prints.add(Pair("dtb", this.dtb.file))
-                if (File(this.dtb.file + ".${dtsSuffix}").exists()) {
+                if (File(this.dtb.file + ".0.${dtsSuffix}").exists()) {
                     it.addRow("\\-- decompiled dts [${dtb.dtbList.size}]", dtb.file + "*.${dtsSuffix}")
                     prints.add(Pair("\\-- decompiled dts [${dtb.dtbList.size}]", dtb.file + "*.${dtsSuffix}"))
                 }

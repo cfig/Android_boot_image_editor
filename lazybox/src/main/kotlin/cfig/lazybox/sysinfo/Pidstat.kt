@@ -1,6 +1,5 @@
 package cfig.lazybox.sysinfo
 
-import cfig.helper.Helper.Companion.deleteIfExists
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -8,6 +7,7 @@ import java.nio.file.Files
 import java.nio.file.attribute.FileAttribute
 import java.nio.file.attribute.PosixFilePermissions
 import kotlin.io.path.Path
+import kotlin.io.path.deleteIfExists
 
 class Pidstat {
     data class Cfg(
@@ -63,13 +63,13 @@ class Pidstat {
                     val permissions: FileAttribute<*> = PosixFilePermissions.asFileAttribute(ownerWritable)
 
                     String.format(outFile, 1).let {
-                        it.deleteIfExists()
+                        Path(it).deleteIfExists()
                         Files.createFile(Path(it), permissions)
                         File(it).writeText("#!/bin/bash\nset -x\n$cmd1\n")
                         log.info("$it is ready")
                     }
                     String.format(outFile, 2).let {
-                        it.deleteIfExists()
+                        Path(it).deleteIfExists()
                         if (run2) {
                             Files.createFile(Path(it), permissions)
                             File(it).writeText("#!/bin/bash\necho $cmd2\n$cmd2\n")

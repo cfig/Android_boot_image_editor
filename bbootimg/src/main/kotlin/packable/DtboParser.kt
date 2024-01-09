@@ -15,17 +15,18 @@
 package cfig.packable
 
 import cfig.helper.Helper
-import cfig.helper.Helper.Companion.deleteIfExists
-import cfig.utils.DTC
 import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.LoggerFactory
-import utils.Dtbo
+import rom.fdt.DTC
+import rom.fdt.Dtbo
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
+import kotlin.io.path.Path
+import kotlin.io.path.deleteIfExists
 
 class DtboParser(val workDir: File) : IPackable {
     override val loopNo: Int
@@ -78,7 +79,7 @@ class DtboParser(val workDir: File) : IPackable {
     fun clear(fileName: String) {
         super.clear()
         listOf("", ".clear", ".google", ".clear", ".signed", ".signed2").forEach {
-            "$fileName$it".deleteIfExists()
+            Path("$fileName$it").deleteIfExists()
         }
         VBMetaParser().clear("vbmeta.img")
     }
