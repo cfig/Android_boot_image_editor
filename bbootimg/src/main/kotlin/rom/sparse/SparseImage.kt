@@ -44,7 +44,7 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
                     partName,
                     workDir,
                     workDir + File(info.output).nameWithoutExtension,
-                    "${info.output}.signed"
+                    workDir + "${info.output}.signed"
                 )
             }
 
@@ -117,7 +117,7 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
 
     fun unwrap(): SparseImage {
         if (info.outerFsType == "sparse") {
-            img2simg(workDir + File(info.pulp).name + ".signed", File(info.output).name + ".signed")
+            img2simg(workDir + File(info.output).name + ".signed", File(info.output).name + ".signed")
         } else {
             val s = info.pulp + ".signed"
             val t = info.output + ".signed"

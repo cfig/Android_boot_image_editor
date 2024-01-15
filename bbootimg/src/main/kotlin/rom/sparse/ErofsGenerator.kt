@@ -18,12 +18,14 @@ class ErofsGenerator(inPartitionName: String) : BaseGenerator(inPartitionName, A
     ) {
         log.warn("pack: $mount_point, $productOut, $srcDir")
 
+        // update signing args
         val newArgs =
             StringBuilder("--hash_algorithm " + ai.auxBlob!!.hashTreeDescriptors.get(0).hash_algorithm)
         ai.auxBlob!!.propertyDescriptors.forEach {
             newArgs.append(" ")
             newArgs.append("--prop ${it.key}:${it.value}")
         }
+        salt = Helper.toHexString(ai.auxBlob!!.hashTreeDescriptors.get(0)!!.salt)
         log.info("newArgs: $newArgs")
         signingArgs = newArgs.toString()
 
@@ -46,22 +48,23 @@ class ErofsGenerator(inPartitionName: String) : BaseGenerator(inPartitionName, A
 
         val ret2 = Helper.powerRun("du -b -k -s $image_file", null)
         var partition_size = String(ret2.get(0)).split("\\s".toRegex()).get(0).toLong() * 1024
-        log.info("partition_size(raw): $partition_size")
+        log.info("[calc 1/5] partition_size(raw): $partition_size")
+        partition_size = calculateSizeAndReserved(partition_size)
+        log.info("[calc 2/5] partition_size(calc reserve): $partition_size")
         partition_size = Helper.round_to_multiple(partition_size, 4096)
-        log.info("partition_size(round 4k): $partition_size")
-        val verityImageBuilder = ErofsGenerator(mount_point)
+        log.info("[calc 3/5] partition_size(round 4k): $partition_size")
 
-        partition_size = verityImageBuilder.calculateSizeAndReserved(partition_size)
-        log.info("partition_size(calc reserve): $partition_size")
-        partition_size = verityImageBuilder.calculateDynamicPartitionSize(partition_size)
-        log.info("partition_size(calc dynamic): $partition_size")
+        partition_size = super.calculateDynamicPartitionSize(partition_size)
+        log.info("[calc 4/5] partition_size(calc dynamic): $partition_size")
         log.info("Allocating $partition_size for $partitionName")
-        partition_size = verityImageBuilder.calculateMaxImageSize(partition_size)
-        log.info("partition_size(calc max): $partition_size")
+        val partitionSize = partition_size
+        partition_size = super.calculateMaxImageSize(partition_size)
+        log.info("[calc 5/5] partition_size(calc max): $partition_size")
 
-        val image_size = File(image_file).length()
-
-        verityImageBuilder.addFooter(image_file)
+        val imageSize = File(image_file).length()
+        log.info("info_dict: imageSize = $imageSize")
+        log.info("info_dict: partitionSize = $partitionSize")
+        super.addFooter(image_file)
     }
 
     override fun calculateSizeAndReserved(size: Long): Long {

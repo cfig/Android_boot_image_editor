@@ -208,7 +208,7 @@ class Avb {
                 when (desc) {
                     HashDescriptor::class -> {
                         val partitionName = readBackInfo.auxBlob!!.hashDescriptors.get(0).partition_name
-                        log.warn("partitionName=$partitionName")
+                        log.info("partitionName=$partitionName")
                         //read hashDescriptor from image
                         check(newHashDesc.auxBlob!!.hashDescriptors.size == 1)
                         var seq = -1 //means not found
@@ -238,7 +238,7 @@ class Avb {
                     }
                     HashTreeDescriptor::class -> {
                         val partitionName = readBackInfo.auxBlob!!.hashTreeDescriptors.get(0).partition_name
-                        log.warn("partitionName=$partitionName")
+                        log.info("partitionName=$partitionName")
                         //read hashTreeDescriptor from image
                         check(newHashDesc.auxBlob!!.hashTreeDescriptors.size == 1)
                         var seq = -1 //means not found

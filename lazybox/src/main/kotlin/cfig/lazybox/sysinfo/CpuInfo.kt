@@ -38,7 +38,7 @@ class CpuInfo(
             return CpuInfo(rawCores, policies, onDemand, conservative, sched)
         }
 
-        val getAdbCmdResult: (String, Boolean) -> String? =  { cmd, check ->
+        val getAdbCmdResult: (String, Boolean) -> String? = { cmd, check ->
             Helper.powerRun2("adb shell $cmd", null).let {
                 if (it[0] as Boolean) {
                     String(it[1] as ByteArray).trim()
@@ -59,12 +59,22 @@ class CpuInfo(
     }
 
     data class SchedutilGovernor(
-        var rate_limit_us: Long = 0,
+        var capacity_margin: String? = null,
+        var down_rate_limit_us: String? = null,
+        var iowait_boost_max: String? = null,
+        var rate_limit_us: String? = null,
+        var up_rate_limit_us: String? = null,
     ) {
         companion object {
             fun construct(): SchedutilGovernor {
                 val prefix = "/sys/devices/system/cpu/cpufreq/schedutil"
-                return SchedutilGovernor(Helper.adbCmd("cat $prefix/rate_limit_us").toLong())
+                return SchedutilGovernor(
+                    capacity_margin = getAdbCmdResult("cat $prefix/capacity_margin", false),
+                    down_rate_limit_us = getAdbCmdResult("cat $prefix/down_rate_limit_us", false),
+                    iowait_boost_max = getAdbCmdResult("cat $prefix/iowait_boost_max", false),
+                    rate_limit_us = getAdbCmdResult("cat $prefix/rate_limit_us", false),
+                    up_rate_limit_us = getAdbCmdResult("cat $prefix/up_rate_limit_us", false)
+                )
             }
         }
     }
