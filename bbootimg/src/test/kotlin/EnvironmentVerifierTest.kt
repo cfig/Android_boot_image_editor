@@ -14,26 +14,40 @@
 
 import cfig.utils.EnvironmentVerifier
 import org.junit.Test
+import org.slf4j.LoggerFactory
 
 class EnvironmentVerifierTest {
     private val envv = EnvironmentVerifier()
+    private val log = LoggerFactory.getLogger(EnvironmentVerifier::class.java)
 
     @Test
     fun getHasDtc() {
         val hasDtc = envv.hasDtc
-        println("hasDtc = $hasDtc")
+        log.info("hasDtc = $hasDtc")
 
     }
 
     @Test
     fun getHasXz() {
         val hasXz = envv.hasXz
-        println("hasXz = $hasXz")
+        log.info("hasXz = $hasXz")
     }
 
     @Test
     fun getGzip() {
         val h = envv.hasGzip
-        println("hasGzip = $h")
+        log.info("hasGzip = $h")
+    }
+
+    @Test
+    fun getXzcat() {
+        val h = envv.hasXzcat
+        log.info("hasXzcat = $h")
+    }
+
+    @Test
+    fun getBzcat() {
+        val h = envv.hasBzcat
+        log.info("hasBzcat = $h")
     }
 }

@@ -18,6 +18,7 @@ import cc.cfig.io.Struct
 import cfig.helper.CryptoHelper.Hasher
 import cfig.helper.Dumpling
 import cfig.helper.Helper
+import cfig.utils.EnvironmentVerifier
 import chromeos_update_engine.UpdateMetadata
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -45,6 +46,7 @@ class Payload {
     companion object {
         private val log = LoggerFactory.getLogger(Payload::class.java)
         val workDir = Helper.prop("payloadDir")
+        val envv = EnvironmentVerifier()
 
         fun parse(inFileName: String): Payload {
             val ret = Payload()
@@ -172,6 +174,8 @@ class Payload {
     }
 
     private fun decompress(inBytes: ByteArray, opType: UpdateMetadata.InstallOperation.Type): ByteArray {
+        check(envv.hasXzcat) { "xzcat not found" }
+        check(envv.hasBzcat) { "bzcat not found" }
         val baosO = ByteArrayOutputStream()
         val baosE = ByteArrayOutputStream()
         val bais = ByteArrayInputStream(inBytes)

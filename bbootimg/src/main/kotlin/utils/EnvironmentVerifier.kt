@@ -54,6 +54,34 @@ class EnvironmentVerifier {
             return true
         }
 
+    val hasXzcat: Boolean
+        get(): Boolean {
+            var ret = false
+            try {
+                val process = Runtime.getRuntime().exec(arrayOf("xzcat", "-V"), null, null)
+                log.debug("xzcat available")
+                val exitCode = process.waitFor()
+                ret = (exitCode == 0 && process.exitValue() == 0)
+            } catch (e: Exception) {
+                log.warn("xzcat unavailable")
+            }
+            return ret
+        }
+
+    val hasBzcat: Boolean
+        get(): Boolean {
+            var ret = false
+            try {
+                val process = Runtime.getRuntime().exec(arrayOf("bzcat", "-V"), null, null)
+                log.debug("bzcat available")
+                val exitCode = process.waitFor()
+                ret = (exitCode == 0 && process.exitValue() == 0)
+            } catch (e: Exception) {
+                log.warn("bzcat unavailable")
+            }
+            return ret
+        }
+
     val has7z: Boolean
         get(): Boolean {
             try {
