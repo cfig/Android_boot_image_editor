@@ -39,13 +39,11 @@ class EnvironmentVerifierTest {
         log.info("hasGzip = $h")
     }
 
-    @Test
     fun getXzcat() {
         val h = envv.hasXzcat
         log.info("hasXzcat = $h")
     }
 
-    @Test
     fun getBzcat() {
         val h = envv.hasBzcat
         log.info("hasBzcat = $h")

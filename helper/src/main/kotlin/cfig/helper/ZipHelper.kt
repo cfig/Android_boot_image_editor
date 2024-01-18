@@ -131,6 +131,12 @@ class ZipHelper {
 
                         else -> {
                             val entryOut = File(outDir + "/" + entry.name)
+                            entryOut.parentFile?.let {
+                                if (!it.exists()) {
+                                    log.info("create parent dir: " + it.path)
+                                    it.mkdirs()
+                                }
+                            }
                             log.debug("Unzipping[f]: ${entry.name}")
                             FileOutputStream(entryOut).use {
                                 zis.copyTo(it)

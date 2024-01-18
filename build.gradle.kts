@@ -50,7 +50,7 @@ tasks {
         enableAssertions = true
         args("pack")
     }
-    packTask.dependsOn("bbootimg:jar", "aosp:boot_signer:build")
+    packTask.dependsOn("bbootimg:jar", "aosp:apksigner:jar", "aosp:boot_signer:build")
 
     val flashTask by register("flash", JavaExec::class) {
         group = GROUP_ANDROID

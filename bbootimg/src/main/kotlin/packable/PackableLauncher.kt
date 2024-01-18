@@ -30,9 +30,15 @@ fun main(args: Array<String>) {
     val log = LoggerFactory.getLogger(PackableLauncher::class.java)
     val packablePool = mutableMapOf<List<String>, KClass<IPackable>>()
     listOf(
-        DtboParser(), VBMetaParser(), BootImgParser(), SparseImgParser(), VendorBootParser(), PayloadBinParser(),
+        BootImgParser(),
+        DeviceTreeParser(),
+        DtboParser(),
         MiscImgParser(),
-        DeviceTreeParser()
+        OTAzipParser(),
+        PayloadBinParser(),
+        SparseImgParser(),
+        VBMetaParser(),
+        VendorBootParser(),
     ).forEach {
         @Suppress("UNCHECKED_CAST")
         packablePool.put(it.capabilities(), it::class as KClass<IPackable>)
@@ -74,6 +80,7 @@ fun main(args: Array<String>) {
             }
             exitProcess(1)
         }
+
         listOf(true, false) -> {/* 2 */
             log.info("available ${targetHandler!!.simpleName} subcommands are:")
             targetHandler!!.declaredFunctions.forEach {
@@ -81,10 +88,12 @@ fun main(args: Array<String>) {
             }
             exitProcess(1)
         }
+
         listOf(false, true) -> {/* 3 */
             log.warn("No handler is activated, DO NOTHING!")
             exitProcess(2)
         }
+
         listOf(false, false) -> {/* 4 */
             log.debug("continue ...")
         }
@@ -106,9 +115,11 @@ fun main(args: Array<String>) {
             1 -> {
                 functions[0].call(it.createInstance())
             }
+
             2 -> {
                 functions[0].call(it.createInstance(), targetFile!!)
             }
+
             3 -> {
                 if (args.size != 2) {
                     log.info("invoke: ${it.qualifiedName}, $targetFile, " + targetFile!!.removeSuffix(".img"))
@@ -118,6 +129,7 @@ fun main(args: Array<String>) {
                     functions[0].call(it.createInstance(), targetFile!!, args[1])
                 }
             }
+
             else -> {
                 functions[0].parameters.forEach { kp ->
                     println("Param: " + kp.index + " " + kp.type + " " + kp.name)
