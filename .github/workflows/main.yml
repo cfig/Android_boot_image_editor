@@ -90,7 +90,7 @@ jobs:
         run: python -c "import sys; print(sys.version)"
 
       - name: choco
-        run: choco install openssl dtc-msys2
+        run: choco install openssl dtc-msys2 zip vim
 
       - name: Unit Test
         run: ./gradlew.bat check && ./gradlew.bat clean || true
