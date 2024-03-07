@@ -3,7 +3,7 @@
 # yuyezhong@gmail.com, 2020-12-20 00:19
 #
 define gw
-#!/usr/bin/bash\n
+#!/usr/bin/env sh\n
 if [ "x$$1" = "xassemble" ]; then\n
     echo "already assembled"\n
     exit\n
@@ -16,13 +16,14 @@ if [ "x$$1" = "xclean" ]; then\n
 echo "no cleaning is needed"\n
 exit 0\n
 fi\n
-if [[ "$$2" == "-Dpart="* ]]; then\n
-  set -x\n
-  java $$2 -jar bbootimg/bbootimg.jar $$1\n
+\n
+if [ "$$(echo "$$2" | grep -E '^\-Dpart=')" ]; then\n
+ set -x\n
+ java "$$2" -jar bbootimg/bbootimg.jar "$$1"\n
 else\n
-  set -x\n
-  java -jar bbootimg/bbootimg.jar $$*\n
-fi
+ set -x\n
+ java -jar bbootimg/bbootimg.jar "$$@"\n
+fi\n
 
 endef
 
