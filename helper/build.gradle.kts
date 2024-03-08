@@ -34,12 +34,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     implementation("cc.cfig:io:0.2")
-    implementation("com.google.guava:guava:31.1-jre")
-    implementation("ch.qos.logback:logback-classic:1.2.11")
+    implementation("com.google.guava:guava:33.0.0-jre")
+    implementation("ch.qos.logback:logback-classic:1.4.14")
     implementation("org.apache.commons:commons-exec:1.3")
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
     implementation("org.bouncycastle:bcpkix-jdk15on:1.70") //org.bouncycastle.pkcs
-    implementation("org.apache.commons:commons-compress:1.21")
+    implementation("org.apache.commons:commons-compress:1.26.0")
     implementation("org.tukaani:xz:1.9")
     implementation("com.github.freva:ascii-table:1.2.0")
     implementation("com.nimbusds:nimbus-jose-jwt:9.31")
@@ -50,7 +50,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
     testImplementation("com.fasterxml.jackson.core:jackson-annotations:2.13.3")
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")
 }
 
 java {

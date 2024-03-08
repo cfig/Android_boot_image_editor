@@ -4,7 +4,6 @@
  * This generated file contains a sample Kotlin application project to get you started.
  * For more details on building Java & JVM projects, please refer to https://docs.gradle.org/8.3/userguide/building_java_projects.html in the Gradle documentation.
  */
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.9.22"
@@ -19,9 +18,10 @@ dependencies {
     implementation("org.apache.commons:commons-exec:1.3")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.14.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.0")
-    implementation("org.slf4j:slf4j-api:2.0.9")
-    implementation("org.apache.commons:commons-compress:1.21")
     implementation(project(mapOf("path" to ":helper")))
+    implementation("org.slf4j:slf4j-api:2.0.9")
+    implementation("org.apache.commons:commons-compress:1.26.0")
+    implementation("com.github.freva:ascii-table:1.8.0")
     // Use the Kotlin JUnit 5 integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     // Use the JUnit 5 integration.

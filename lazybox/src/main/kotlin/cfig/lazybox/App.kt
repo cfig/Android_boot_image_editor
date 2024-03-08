@@ -21,9 +21,10 @@ fun main(args: Array<String>) {
         println("\nCommand Usage:")
         println("bootchart: generate Android bootchart")
         println("pidstat  : given a pid, profile its CPU usage")
+        println("tracecmd : analyze trace-cmd report")
         exitProcess(0)
     }
-    if (args.get(0) == "cpuinfo") {
+    if (args[0] == "cpuinfo") {
         val ret = CpuInfo.construct()
         File("cpuinfo.json").writeText(
             ObjectMapper()
@@ -32,16 +33,28 @@ fun main(args: Array<String>) {
         )
         log.info("cpuinfo.json is ready")
     }
-    if (args.get(0) == "sysinfo") {
+    if (args[0] == "sysinfo") {
         SysInfo().run()
     }
-    if (args.get(0) == "sysstat") {
+    if (args[0] == "sysstat") {
         println("adb shell /data/vendor/sadc -F -L -S ALL 2 20 /data/vendor")
     }
-    if (args.get(0) == "pidstat") {
+    if (args[0] == "pidstat") {
         Pidstat.run()
     }
-    if (args.get(0) == "bootchart") {
+    if (args[0] == "bootchart") {
         BootChart.run()
+    }
+    if (args[0] == "tracecmd") {
+        if (args.size == 2) {
+            val traceCmdReport = args[1]
+            if (File(traceCmdReport).exists()) {
+                TraceCmdParser().mainFunction(traceCmdReport)
+            } else {
+                log.error("File not found: ${args[1]}")
+            }
+        } else {
+            log.error("Usage: tracecmd <report_file>")
+        }
     }
 }
