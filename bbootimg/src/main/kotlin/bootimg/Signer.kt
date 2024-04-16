@@ -80,14 +80,14 @@ class Signer {
             val bootSigner = Helper.prop("bootSigner")
             log.info("Signing with verified-boot 1.0 style")
             val sig = Common.VeritySignature(
-                    verity_pk8 = Helper.prop("verity_pk8"),
-                    verity_pem = Helper.prop("verity_pem"),
-                    jarPath = Helper.prop("bootSigner")
+                    verity_pk8 = Helper.prop("verity_pk8")!!,
+                    verity_pem = Helper.prop("verity_pem")!!,
+                    jarPath = Helper.prop("bootSigner")!!
             )
             val bootSignCmd = "java -jar $bootSigner " +
                     "${sig.path} $src " +
                     "${sig.verity_pk8} ${sig.verity_pem} " +
-                    "$tgt"
+                    tgt
             log.info(bootSignCmd)
             DefaultExecutor().execute(CommandLine.parse(bootSignCmd))
         }

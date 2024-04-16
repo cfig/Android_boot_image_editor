@@ -204,7 +204,7 @@ data class BootV3(
 
     fun sign(fileName: String): BootV3 {
         if (File(Avb.getJsonFileName(info.output)).exists()) {
-            Signer.signAVB(fileName, this.info.imageSize, String.format(Helper.prop("avbtool"), "v1.2"))
+            Signer.signAVB(fileName, this.info.imageSize, String.format(Helper.prop("avbtool")!!, "v1.2"))
         } else {
             log.warn("no AVB info found, assume it's clear image")
         }
@@ -475,7 +475,7 @@ data class BootV3(
                 val alg = Algorithms.get(origSig.header!!.algorithm_type)!!
                 ret.addArgument("--gki_signing_algorithm").addArgument(alg.name)
                 ret.addArgument("--gki_signing_key").addArgument(alg.defaultKey)
-                ret.addArgument("--gki_signing_avbtool_path").addArgument(String.format(Helper.prop("avbtool"), "v1.2"))
+                ret.addArgument("--gki_signing_avbtool_path").addArgument(String.format(Helper.prop("avbtool")!!, "v1.2"))
             }
             ret.addArgument(" --id ")
             ret.addArgument(" --output ")

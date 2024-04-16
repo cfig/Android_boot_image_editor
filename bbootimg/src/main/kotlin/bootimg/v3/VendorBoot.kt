@@ -316,7 +316,7 @@ data class VendorBoot(
     }
 
     fun sign(): VendorBoot {
-        val avbtool = String.format(Helper.prop("avbtool"), "v1.2")
+        val avbtool = String.format(Helper.prop("avbtool")!!, "v1.2")
         File(Avb.getJsonFileName(info.output)).let {
             if (it.exists()) {
                 Signer.signAVB(info.output, this.info.imageSize, avbtool)

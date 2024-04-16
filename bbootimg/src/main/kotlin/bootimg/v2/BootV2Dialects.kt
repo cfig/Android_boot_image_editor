@@ -105,7 +105,7 @@ data class BootV2Dialects(
                     theInfo.osPatchLevel = bh2.osPatchLevel
                     if (Avb.hasAvbFooter(fileName)) {
                         theInfo.verify = "VB2.0"
-                        if (Avb.verifyAVBIntegrity(fileName, String.format(Helper.prop("avbtool"), "v1.2"))) {
+                        if (Avb.verifyAVBIntegrity(fileName, String.format(Helper.prop("avbtool")!!, "v1.2"))) {
                             theInfo.verify += " PASS"
                         } else {
                             theInfo.verify += " FAIL"
@@ -528,7 +528,7 @@ data class BootV2Dialects(
 
     fun sign(): BootV2Dialects {
         //unify with v1.1/v1.2 avbtool
-        val avbtool = String.format(Helper.prop("avbtool"), "v1.2")
+        val avbtool = String.format(Helper.prop("avbtool")!!, "v1.2")
         if (info.verify.startsWith("VB2.0")) {
             Signer.signAVB(info.output, this.info.imageSize, avbtool)
             log.info("Adding hash_footer with verified-boot 2.0 style")

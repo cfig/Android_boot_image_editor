@@ -43,7 +43,7 @@ class Helper {
             load(Helper::class.java.classLoader.getResourceAsStream("general.cfg"))
         }
 
-        fun prop(k: String): String {
+        fun prop(k: String): String? {
             return gcfg.getProperty(k)
         }
 

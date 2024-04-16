@@ -234,7 +234,7 @@ class Common {
 
         //using mkbootfs
         fun packRootfs(rootDir: String, ramdiskGz: String, osMajor: Int = 10) {
-            val mkbootfs = String.format(Locale.getDefault(), Helper.prop("mkbootfsBin"), osMajor)
+            val mkbootfs = String.format(Locale.getDefault(), Helper.prop("mkbootfsBin")!!, osMajor)
             log.info("Packing rootfs $rootDir ...")
             val outputStream = ByteArrayOutputStream()
             DefaultExecutor().let { exec ->

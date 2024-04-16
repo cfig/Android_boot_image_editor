@@ -241,7 +241,7 @@ class Dtbo(
     }
 
     fun sign(): Dtbo {
-        val avbtool = String.format(Helper.prop("avbtool"), "v1.2")
+        val avbtool = String.format(Helper.prop("avbtool")!!, "v1.2")
         Signer.signAVB(info.output, info.imageSize.toLong(), avbtool)
         return this
     }

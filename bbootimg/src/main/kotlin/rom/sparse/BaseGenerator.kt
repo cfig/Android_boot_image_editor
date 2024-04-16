@@ -14,7 +14,7 @@ open class BaseGenerator(
     var keyPath: String = ""
     var algorithm: String = ""
     var salt: String = ""
-    val avbtool = String.format(Helper.prop("avbtool"), "v1.2")
+    val avbtool = String.format(Helper.prop("avbtool")!!, "v1.2")
     var signingArgs = "--hash_algorithm sha256 " +
             "--prop com.android.build.the_partition_name.os_version:14 " +
             "--prop com.android.build.the_partition_name.fingerprint:anonymous/device/device:14/UD1A.230803.041/buildid:userdebug/test-keys"

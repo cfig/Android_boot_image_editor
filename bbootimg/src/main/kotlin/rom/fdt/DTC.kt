@@ -27,6 +27,7 @@ import java.io.InputStream
 
 class DTC {
     private val log = LoggerFactory.getLogger(DTC::class.java)
+    private val dtcBin = Helper.prop("dtcBin") ?: "dtc"
 
     data class DtbEntry(
         var seqNo: Int = 0,
@@ -84,7 +85,7 @@ class DTC {
         //dtb-> dts
         DefaultExecutor().let {
             try {
-                val cmd = CommandLine.parse("dtc -q -I dtb -O dts").apply {
+                val cmd = CommandLine.parse("$dtcBin -q -I dtb -O dts").apply {
                     addArguments(dtbFile)
                     addArguments("-o $outFile")
                 }
@@ -98,7 +99,7 @@ class DTC {
         //dts -> yaml
         DefaultExecutor().let {
             try {
-                val cmd = CommandLine.parse("dtc -q -I dts -O yaml").apply {
+                val cmd = CommandLine.parse("$dtcBin -q -I dts -O yaml").apply {
                     addArguments(outFile)
                     addArguments("-o $outFile.yaml")
                 }
@@ -114,7 +115,7 @@ class DTC {
 
     fun compile(dtsFile: String, outFile: String): Boolean {
         log.info("compiling DTS: $dtsFile")
-        val cmd = CommandLine.parse("dtc -q -I dts -O dtb").let {
+        val cmd = CommandLine.parse("$dtcBin -q -I dts -O dtb").let {
             it.addArguments(dtsFile)
             it.addArguments("-o $outFile")
         }

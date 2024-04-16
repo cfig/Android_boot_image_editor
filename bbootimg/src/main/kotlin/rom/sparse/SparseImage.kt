@@ -139,7 +139,7 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
     companion object {
         private val SPARSE_MAGIC: UInt = 0x3aff26edu
         private val log = LoggerFactory.getLogger(SparseImage::class.java)
-        private val workDir = Helper.prop("workDir")
+        private val workDir = Helper.prop("workDir")!!
         private val simg2imgBin = "simg2img"
         private val img2simgBin = "img2simg"
 

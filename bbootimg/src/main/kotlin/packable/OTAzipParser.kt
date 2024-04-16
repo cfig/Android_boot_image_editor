@@ -80,6 +80,6 @@ class OTAzipParser : IPackable {
 
     companion object {
         private val log = LoggerFactory.getLogger(OTAzipParser::class.java)
-        private val workDir = Helper.prop("workDir")
+        private val workDir = Helper.prop("workDir")!!
     }
 }
