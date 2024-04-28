@@ -32,6 +32,7 @@ known_list = [
     "system_ext.img",
     "system.img",
     "system_other.img",
+    "userdata.img",
     "vbmeta.img",
     "vbmeta_system.img",
     "vbmeta_vendor.img",
@@ -87,6 +88,7 @@ def prepare(zipFile):
             item = os.path.join(tmp1, item1, item2)
             log.info(">> %s" % item)
             if (item2.endswith(".zip")):
+                # show the zip file
                 log.info("+ %s" % item)
                 if not imgZip:
                     imgZip = item
@@ -108,7 +110,7 @@ def prepare(zipFile):
                 log.info("- %s" % item1)
                 list2.append(item1)
             else:
-                raise
+                raise Exception("Unknown image: %s" % item1)
     purgeFolder(tmp1)
     return (list1, list2)
 

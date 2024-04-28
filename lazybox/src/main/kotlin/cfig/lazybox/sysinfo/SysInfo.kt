@@ -5,10 +5,12 @@ import cfig.helper.Helper.Companion.check_call
 import cfig.helper.ZipHelper
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.*
 import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeText
@@ -75,6 +77,24 @@ makeTar("%s", "%s")
         FileOutputStream("$prefix/0_prop").use {
             runAndWrite("adb shell getprop", it, true)
         }
+        val theSlot: String = FileInputStream("$prefix/0_prop").use { inputStream ->
+            Properties().apply {
+                load(inputStream)
+            }.getProperty("[ro.boot.slot_suffix]")?.let { slot ->
+                when (slot) {
+                    "[_a]" -> "_a"
+                    "[_b]" -> "_b"
+                    else -> {
+                        log.warn("Unknown slot_suffix: $slot")
+                        ""
+                    }
+                }
+            } ?: run {
+                log.warn("slot_suffix not found")
+                ""
+            }
+        }
+
         FileOutputStream("$prefix/1_partitions").use { file ->
             runAndWrite("adb shell cat /proc/partitions", file, false) //HMOS
             runAndWrite("adb shell ls -l /dev/block/by-name", file, false)
@@ -83,6 +103,7 @@ makeTar("%s", "%s")
         FileOutputStream("$prefix/2_mount").use { file ->
             runAndWrite("adb shell mount", file, true)
         }
+
         FileOutputStream("$prefix/3_kernel_cmdline").use { file ->
             file.write("[version]\n".toByteArray())
             runAndWrite("adb shell cat /proc/version", file, true)
@@ -106,6 +127,10 @@ makeTar("%s", "%s")
         }
         "adb pull /proc/device-tree".check_call(prefix)
         Files.move(Paths.get("$prefix/device-tree"), Paths.get("$prefix/device_tree"))
+
+        if (theSlot.isNotBlank()) {
+            "adb pull /dev/block/by-name/vbmeta$theSlot".check_call(prefix)
+        }
         makeTar("sysinfo.tar.xz", "sysinfo")
         File("sysinfo").deleteRecursively()
     }
