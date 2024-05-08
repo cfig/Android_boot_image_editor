@@ -460,7 +460,7 @@ data class BootV3(
             }
             if (info.cmdline.isNotBlank()) {
                 ret.addArgument(" --cmdline ")
-                ret.addArgument(info.cmdline, false)
+                ret.addArgument(info.cmdline.trim(), false)
             }
             if (info.osVersion.isNotBlank()) {
                 ret.addArgument(" --os_version")
