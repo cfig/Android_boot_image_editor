@@ -125,6 +125,15 @@ makeTar("%s", "%s")
             File("config.gz").deleteOnExit()
             File("config").deleteOnExit()
         }
+
+        FileOutputStream("$prefix/4_setting").use { fos ->
+            fos.write("[global]\n".toByteArray())
+            runAndWrite("adb shell settings list global", fos, false)
+            fos.write("\n[system]\n".toByteArray())
+            runAndWrite("adb shell settings list system", fos, false)
+            fos.write("\n[secure]\n".toByteArray())
+            runAndWrite("adb shell settings list secure", fos, false)
+        }
         "adb pull /proc/device-tree".check_call(prefix)
         Files.move(Paths.get("$prefix/device-tree"), Paths.get("$prefix/device_tree"))
 
