@@ -174,7 +174,8 @@ class Avb {
 
         fun getJsonFileName(image_file: String): String {
             val jsonFile = File(image_file).name.removeSuffix(".img") + ".avb.json"
-            return Helper.prop("workDir") + jsonFile
+            log.warn("XXXX: json file =  " + Helper.joinPath(Helper.prop("workDir")!!, jsonFile))
+            return Helper.joinPath(Helper.prop("workDir")!!, jsonFile)
         }
 
         fun hasAvbFooter(fileName: String): Boolean {

@@ -32,8 +32,8 @@ class KernelExtractor {
 
     fun run(fileName: String, workDir: File? = null): List<String> {
         val ret: MutableList<String> = mutableListOf()
-        val kernelVersionFile = Helper.prop("kernelVersionFile")!!
-        val kernelConfigFile = Helper.prop("kernelConfigFile")!!
+        val kernelVersionFile = File(Helper.prop("workDir")!! , Helper.prop("kernelVersionStem")!!).toString()
+        val kernelConfigFile = File(Helper.prop("workDir")!! , Helper.prop("kernelConfigStem")!!).toString()
         val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""
         val cmd = CommandLine.parse(cmdPrefix + Helper.prop("kernelExtracter")).let {
             it.addArgument("--input")

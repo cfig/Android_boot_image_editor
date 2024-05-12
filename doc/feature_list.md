@@ -21,9 +21,10 @@ should be compatible with "/usr/bin/env sh"
 ## TODO: command line usage
 unpack
 ```
-abe unpack boot.img
+abe unpack boot.img out
 ```
 pack
 ```
-abe pack
+abe pack out boot.img
 ```
+

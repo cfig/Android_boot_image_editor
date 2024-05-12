@@ -123,7 +123,7 @@ class Ext4Generator(inPartitionName: String = "NA") : BaseGenerator(partitionNam
             addArguments("-e")
             addArguments("-p out/target/product/shiba/system")
             addArgument("-s")
-            addArguments("-S ${workDir}file_contexts.bin")
+            addArguments("-S " + File(workDir, "file_contexts.bin").path)
             addArguments("-f " + Helper.prop("workDir") + "/$mount_point")
             addArguments("-a /$mount_point")
             addArgument(outFile)

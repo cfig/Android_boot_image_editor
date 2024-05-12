@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory
 import java.io.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission
 import java.security.MessageDigest
 import java.util.*
@@ -45,6 +46,15 @@ class Helper {
 
         fun prop(k: String): String? {
             return gcfg.getProperty(k)
+        }
+
+        fun setProp(k: String, v: String) {
+            gcfg.setProperty(k, v)
+        }
+
+        fun joinPath(vararg args: String): String {
+            val joinedPath = Paths.get("", *args)
+            return joinedPath.normalize().toString()
         }
 
         fun joinWithNulls(vararg source: ByteArray?): ByteArray {

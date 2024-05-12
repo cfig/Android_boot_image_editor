@@ -358,7 +358,7 @@ data class VendorBoot(
         //ramdisk
         //@formatter:off
         val fmt = C.dumpRamdisk(
-            Helper.Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file), "${workDir}root",
+            Helper.Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file), File(workDir, "root").path,
             this.ramdisk_table.ramdidks.isEmpty())
         //@formatter:on
         this.ramdisk.file = this.ramdisk.file + ".$fmt"
@@ -423,16 +423,16 @@ data class VendorBoot(
                 this.ramdisk_table.ramdidks.forEachIndexed { index, entry ->
                     //fancy ascii
                     it.addRow("-- ${entry.type} ramdisk[${index + 1}/${this.ramdisk_table.ramdidks.size}]", entry.file)
-                    it.addRow("------- extracted rootfs", "${workDir}root.${index + 1}")
+                    it.addRow("------- extracted rootfs", File(workDir, "root.${index + 1}").path)
                     //basic ascii
                     //@formatter:off
                     prints.add(Pair(" -- ${entry.type} ramdisk[${index + 1}/${this.ramdisk_table.ramdidks.size}]", entry.file))
                     //@formatter:on
-                    prints.add(Pair(" ------- extracted rootfs", "${workDir}root.${index + 1}"))
+                    prints.add(Pair(" ------- extracted rootfs", File(workDir, "root.${index + 1}").path))
                 }
             } else {
-                it.addRow("\\-- extracted ramdisk rootfs", "${workDir}root")
-                prints.add(Pair("\\-- extracted ramdisk rootfs", "${workDir}root"))
+                it.addRow("\\-- extracted ramdisk rootfs", File(workDir, "root").path)
+                prints.add(Pair("\\-- extracted ramdisk rootfs", File(workDir, "root").path))
             }
             it.addRule()
             if (this.dtb.size > 0) {

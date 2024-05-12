@@ -49,14 +49,15 @@ data class BootV3(
         private val log = LoggerFactory.getLogger(BootV3::class.java)
         private val errLog = LoggerFactory.getLogger("uiderrors")
         private val mapper = ObjectMapper()
-        private val workDir = Helper.prop("workDir")
+        private val workDir = Helper.prop("workDir")!!
 
         fun parse(fileName: String): BootV3 {
             val ret = BootV3()
             FileInputStream(fileName).use { fis ->
                 val header = BootHeaderV3(fis)
                 //info
-                ret.info.output = File(fileName).name
+                ret.info.input = File(fileName).canonicalPath
+                ret.info.role = File(fileName).name
                 ret.info.json = File(fileName).name.removeSuffix(".img") + ".json"
                 ret.info.cmdline = header.cmdline.trim()
                 ret.info.headerSize = header.headerSize
@@ -66,17 +67,17 @@ data class BootV3(
                 ret.info.pageSize = BootHeaderV3.pageSize
                 ret.info.signatureSize = header.signatureSize
                 //kernel
-                ret.kernel.file = workDir + "kernel"
+                ret.kernel.file = Helper.joinPath(workDir, "kernel")
                 ret.kernel.size = header.kernelSize
                 ret.kernel.position = BootHeaderV3.pageSize
                 //ramdisk
-                ret.ramdisk.file = workDir + "ramdisk.img"
+                ret.ramdisk.file = Helper.joinPath(workDir, "ramdisk.img")
                 ret.ramdisk.size = header.ramdiskSize
                 ret.ramdisk.position = ret.kernel.position + header.kernelSize +
                         getPaddingSize(header.kernelSize, BootHeaderV3.pageSize)
                 //boot signature
                 if (header.signatureSize > 0) {
-                    ret.bootSignature.file = workDir + "bootsig"
+                    ret.bootSignature.file = Helper.joinPath(workDir, "bootsig")
                     ret.bootSignature.size = header.signatureSize
                     ret.bootSignature.position = ret.ramdisk.position + ret.ramdisk.size +
                             getPaddingSize(header.ramdiskSize, BootHeaderV3.pageSize)
@@ -88,7 +89,8 @@ data class BootV3(
     }
 
     data class MiscInfo(
-        var output: String = "",
+        var input: String = "",
+        var role: String = "",
         var json: String = "",
         var headerVersion: Int = 0,
         var headerSize: Int = 0,
@@ -106,7 +108,7 @@ data class BootV3(
         var size: Int = 0,
     )
 
-    data class RamdiskArgs (
+    data class RamdiskArgs(
         var file: String = "",
         var position: Int = 0,
         var size: Int = 0,
@@ -118,22 +120,30 @@ data class BootV3(
             this.kernel.size = File(this.kernel.file).length().toInt()
         }
         if (this.ramdisk.size > 0) {
-            if (File(this.ramdisk.file).exists() && !File(workDir + "root").exists()) {
+            if (File(this.ramdisk.file).exists() && !File(workDir, "root").exists()) {
                 //do nothing if we have ramdisk.img.gz but no /root
                 log.warn("Use prebuilt ramdisk file: ${this.ramdisk.file}")
             } else {
                 File(this.ramdisk.file).deleleIfExists()
                 File(this.ramdisk.file.replaceFirst("[.][^.]+$", "")).deleleIfExists()
                 //TODO: remove cpio in C/C++
-                //C.packRootfs("$workDir/root", this.ramdisk.file, C.parseOsMajor(info.osVersion))
+                //C.packRootfs(Helper.joinPath($workDir, "root"), this.ramdisk.file, C.parseOsMajor(info.osVersion))
                 // enable advance JAVA cpio
-                C.packRootfs("$workDir/root", this.ramdisk.file, this.ramdisk.xzFlags)
+                C.packRootfs(Helper.joinPath(workDir, "root"), this.ramdisk.file, this.ramdisk.xzFlags)
             }
             this.ramdisk.size = File(this.ramdisk.file).length().toInt()
         }
 
         //header
-        FileOutputStream(this.info.output + ".clear", false).use { fos ->
+        val intermediateDir = Helper.joinPath(workDir, "intermediate")
+        File(intermediateDir).let {
+            if (!it.exists()) {
+                it.mkdir()
+            }
+        }
+        Helper.setProp("intermediateDir", intermediateDir)
+        val clearFile = Helper.joinPath(intermediateDir, this.info.role + ".clear")
+        FileOutputStream(clearFile, false).use { fos ->
             //trim bootSig if it's not parsable
             //https://github.com/cfig/Android_boot_image_editor/issues/88
             File(Avb.getJsonFileName(this.bootSignature.file)).let { bootSigJson ->
@@ -163,7 +173,7 @@ data class BootV3(
             C.writePaddedFile(bf, this.ramdisk.file, this.info.pageSize)
         }
         //write V3 data
-        FileOutputStream("${this.info.output}.clear", true).use { fos ->
+        FileOutputStream(clearFile, true).use { fos ->
             fos.write(bf.array(), 0, bf.position())
         }
 
@@ -178,12 +188,12 @@ data class BootV3(
                 //replace new pub key
                 readBackBootSig.auxBlob!!.pubkey!!.pubkey = AuxBlob.encodePubKey(alg)
                 //update hash and sig
-                readBackBootSig.auxBlob!!.hashDescriptors.get(0).update(this.info.output + ".clear")
+                readBackBootSig.auxBlob!!.hashDescriptors.get(0).update(this.info.role + ".clear")
                 bootSigBytes = readBackBootSig.encodePadded()
             }
             if (this.info.signatureSize > 0) {
                 //write V4 data
-                FileOutputStream("${this.info.output}.clear", true).use { fos ->
+                FileOutputStream(clearFile, true).use { fos ->
                     fos.write(bootSigBytes)
                 }
             } else {
@@ -192,21 +202,39 @@ data class BootV3(
         }
 
         //google way
-        this.toCommandLine().addArgument(this.info.output + ".google").let {
+        val googleClearFile = Helper.joinPath(intermediateDir, this.info.role + ".google")
+        this.toCommandLine().addArgument(googleClearFile).let {
             log.info(it.toString())
             DefaultExecutor().execute(it)
         }
 
-        Helper.assertFileEquals(this.info.output + ".clear", this.info.output + ".google")
-        File(this.info.output + ".google").delete()
+        Helper.assertFileEquals(clearFile, googleClearFile)
+        File(googleClearFile).delete()
         return this
     }
 
     fun sign(fileName: String): BootV3 {
-        if (File(Avb.getJsonFileName(info.output)).exists()) {
-            Signer.signAVB(fileName, this.info.imageSize, String.format(Helper.prop("avbtool")!!, "v1.2"))
+        log.warn("XXXX: sign $fileName")
+        if (File(Avb.getJsonFileName(info.role)).exists()) {
+            Signer.signAVB(
+                Helper.joinPath(Helper.prop("intermediateDir")!!, info.role),
+                this.info.imageSize,
+                String.format(Helper.prop("avbtool")!!, "v1.2")
+            )
         } else {
             log.warn("no AVB info found, assume it's clear image")
+        }
+        if (fileName != info.role) {
+            File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".signed")).copyTo(File(fileName), true)
+            log.info("Signed image saved as $fileName")
+        } else {
+            File(
+                Helper.joinPath(
+                    Helper.prop("intermediateDir")!!,
+                    info.role + ".signed"
+                )
+            ).copyTo(File(info.role + ".signed"), true)
+            log.info("Signed image saved as ${info.role}.signed")
         }
         return this
     }
@@ -227,35 +255,37 @@ data class BootV3(
     fun extractImages(): BootV3 {
         val workDir = Helper.prop("workDir")
         //info
-        mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
+        mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir, this.info.json), this)
         //kernel
         if (kernel.size > 0) {
-            C.dumpKernel(Helper.Slice(info.output, kernel.position, kernel.size, kernel.file))
+            C.dumpKernel(Helper.Slice(info.input, kernel.position, kernel.size, kernel.file))
         } else {
-            log.warn("${this.info.output} has no kernel")
+            log.warn("${this.info.role} has no kernel")
         }
         //ramdisk
         if (ramdisk.size > 0) {
             val fmt = C.dumpRamdisk(
-                Helper.Slice(info.output, ramdisk.position, ramdisk.size, ramdisk.file), "${workDir}root"
+                Helper.Slice(info.role, ramdisk.position, ramdisk.size, ramdisk.file), File(workDir, "root").toString()
             )
             this.ramdisk.file = this.ramdisk.file + ".$fmt"
             if (fmt == "xz") {
-                val checkType = ZipHelper.xzStreamFlagCheckTypeToString(ZipHelper.parseStreamFlagCheckType(this.ramdisk.file))
+                val checkType =
+                    ZipHelper.xzStreamFlagCheckTypeToString(ZipHelper.parseStreamFlagCheckType(this.ramdisk.file))
                 this.ramdisk.xzFlags = checkType
             }
         }
         //bootsig
 
         //dump info again
-        mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
+        mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir, this.info.json), this)
         return this
     }
 
     fun extractVBMeta(): BootV3 {
         // vbmeta in image
         try {
-            val ai = AVBInfo.parseFrom(Dumpling(info.output)).dumpDefault(info.output)
+            log.warn("XXXX: info.output ${info.input}")
+            val ai = AVBInfo.parseFrom(Dumpling(info.input)).dumpDefault(info.role)
             if (File("vbmeta.img").exists()) {
                 log.warn("Found vbmeta.img, parsing ...")
                 VBMetaParser().unpack("vbmeta.img")
@@ -268,7 +298,7 @@ data class BootV3(
         //GKI 1.0 bootsig
         if (info.signatureSize > 0) {
             log.info("GKI 1.0 signature")
-            Dumpling(info.output).readFully(Pair(this.bootSignature.position.toLong(), this.bootSignature.size))
+            Dumpling(info.role).readFully(Pair(this.bootSignature.position.toLong(), this.bootSignature.size))
                 .let { bootsigData ->
                     File(this.bootSignature.file).writeBytes(bootsigData)
                     if (bootsigData.any { it.toInt() != 0 }) {
@@ -286,17 +316,17 @@ data class BootV3(
         }
 
         //GKI 2.0 bootsig
-        if (!File(Avb.getJsonFileName(info.output)).exists()) {
-            log.info("no AVB info found in ${info.output}")
+        if (!File(Avb.getJsonFileName(info.role)).exists()) {
+            log.info("no AVB info found in ${info.role}")
             return this
         }
         log.info("probing 16KB boot signature ...")
         val mainBlob = ObjectMapper().readValue(
-            File(Avb.getJsonFileName(info.output)),
+            File(Avb.getJsonFileName(info.role)),
             AVBInfo::class.java
         )
         val bootSig16kData =
-            Dumpling(Dumpling(info.output).readFully(Pair(mainBlob.footer!!.originalImageSize - 16 * 1024, 16 * 1024)))
+            Dumpling(Dumpling(info.input).readFully(Pair(mainBlob.footer!!.originalImageSize - 16 * 1024, 16 * 1024)))
         try {
             val blob1 = AVBInfo.parseFrom(bootSig16kData)
                 .also { check(it.auxBlob!!.hashDescriptors[0].partition_name == "boot") }
@@ -306,8 +336,8 @@ data class BootV3(
                     .also { check(it.auxBlob!!.hashDescriptors[0].partition_name == "generic_kernel") }
                     .also { it.dumpDefault("sig.kernel") }
             val gkiAvbData = bootSig16kData.readFully(blob1.encode().size until bootSig16kData.getLength())
-            File("${workDir}kernel.img").let { gki ->
-                File("${workDir}kernel").copyTo(gki)
+            File(workDir, "kernel.img").let { gki ->
+                File(workDir, "kernel").copyTo(gki)
                 System.setProperty("more", workDir)
                 Avb.verify(blob2, Dumpling(gkiAvbData))
                 gki.delete()
@@ -331,19 +361,26 @@ data class BootV3(
         }
         val tab = AsciiTable().let {
             it.addRule()
-            it.addRow("image info", workDir + info.output.removeSuffix(".img") + ".json")
-            prints.add(Pair("image info", workDir + info.output.removeSuffix(".img") + ".json"))
+            it.addRow("image info", Helper.joinPath(workDir!!, info.role.removeSuffix(".img") + ".json"))
+            prints.add(Pair("image info", Helper.joinPath(workDir, info.role.removeSuffix(".img") + ".json")))
             it.addRule()
             if (this.kernel.size > 0) {
                 it.addRow("kernel", this.kernel.file)
                 prints.add(Pair("kernel", this.kernel.file))
-                File(Helper.prop("kernelVersionFile")).let { kernelVersionFile ->
+                File(Helper.joinPath(workDir, Helper.prop("kernelVersionStem")!!)).let { kernelVersionFile ->
+                    log.warn("XXXX: kernelVersionFile ${kernelVersionFile.path}")
                     if (kernelVersionFile.exists()) {
                         it.addRow("\\-- version " + kernelVersionFile.readLines().toString(), kernelVersionFile.path)
-                        prints.add(Pair("\\-- version " + kernelVersionFile.readLines().toString(), kernelVersionFile.path))
+                        prints.add(
+                            Pair(
+                                "\\-- version " + kernelVersionFile.readLines().toString(),
+                                kernelVersionFile.path
+                            )
+                        )
                     }
                 }
-                File(Helper.prop("kernelConfigFile")).let { kernelConfigFile ->
+                File(Helper.joinPath(workDir, Helper.prop("kernelConfigStem")!!)).let { kernelConfigFile ->
+                    log.warn("XXXX: kernelConfigFile ${kernelConfigFile.path}")
                     if (kernelConfigFile.exists()) {
                         it.addRow("\\-- config", kernelConfigFile.path)
                         prints.add(Pair("\\-- config", kernelConfigFile.path))
@@ -354,11 +391,11 @@ data class BootV3(
             if (this.ramdisk.size > 0) {
                 //fancy
                 it.addRow("ramdisk", this.ramdisk.file)
-                it.addRow("\\-- extracted ramdisk rootfs", "${workDir}root")
+                it.addRow("\\-- extracted ramdisk rootfs", Helper.joinPath(workDir, "root"))
                 it.addRule()
                 //basic
                 prints.add(Pair("ramdisk", this.ramdisk.file))
-                prints.add(Pair("\\-- extracted ramdisk rootfs", "${workDir}root"))
+                prints.add(Pair("\\-- extracted ramdisk rootfs", Helper.joinPath(workDir, "root")))
             }
             if (this.info.signatureSize > 0) {
                 it.addRow("GKI signature 1.0", this.bootSignature.file)
@@ -368,7 +405,12 @@ data class BootV3(
                     prints.add(Pair("\\-- decoded boot signature", if (jsFile.exists()) jsFile.path else "N/A"))
                     if (jsFile.exists()) {
                         it.addRow("\\------ signing key", Avb.inspectKey(mapper.readValue(jsFile, AVBInfo::class.java)))
-                        prints.add(Pair("\\------ signing key", Avb.inspectKey(mapper.readValue(jsFile, AVBInfo::class.java))))
+                        prints.add(
+                            Pair(
+                                "\\------ signing key",
+                                Avb.inspectKey(mapper.readValue(jsFile, AVBInfo::class.java))
+                            )
+                        )
                     }
                 }
                 it.addRule()
@@ -383,7 +425,12 @@ data class BootV3(
                     //basic
                     prints.add(Pair("GKI signature 2.0", this.bootSignature.file))
                     prints.add(Pair("\\-- boot", jsonFile.path))
-                    prints.add(Pair("\\------ signing key", Avb.inspectKey(mapper.readValue(jsonFile, AVBInfo::class.java))))
+                    prints.add(
+                        Pair(
+                            "\\------ signing key",
+                            Avb.inspectKey(mapper.readValue(jsonFile, AVBInfo::class.java))
+                        )
+                    )
                 }
             }
             File(Avb.getJsonFileName("sig.kernel")).let { jsonFile ->
@@ -399,7 +446,7 @@ data class BootV3(
             }
 
             //AVB info
-            Avb.getJsonFileName(info.output).let { jsonFile ->
+            Avb.getJsonFileName(info.role).let { jsonFile ->
                 it.addRow("AVB info", if (File(jsonFile).exists()) jsonFile else "NONE")
                 prints.add(Pair("AVB info", if (File(jsonFile).exists()) jsonFile else "NONE"))
                 if (File(jsonFile).exists()) {
@@ -428,20 +475,20 @@ data class BootV3(
             log.info("\n" + Common.table2String(prints))
         } else {
             log.info(
-                "\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}",
+                "\n\t\t\tUnpack Summary of ${info.role}\n{}\n{}{}",
                 tableHeader.render(), tab.render(), tabVBMeta
             )
         }
         return this
     }
 
-    fun printPackSummary(): BootV3 {
-        Common.printPackSummary(info.output)
+    fun printPackSummary(fileName: String): BootV3 {
+        Common.printPackSummary(fileName)
         return this
     }
 
     fun updateVbmeta(): BootV3 {
-        Avb.updateVbmeta(info.output)
+        Avb.updateVbmeta(info.role)
         return this
     }
 
@@ -475,7 +522,8 @@ data class BootV3(
                 val alg = Algorithms.get(origSig.header!!.algorithm_type)!!
                 ret.addArgument("--gki_signing_algorithm").addArgument(alg.name)
                 ret.addArgument("--gki_signing_key").addArgument(alg.defaultKey)
-                ret.addArgument("--gki_signing_avbtool_path").addArgument(String.format(Helper.prop("avbtool")!!, "v1.2"))
+                ret.addArgument("--gki_signing_avbtool_path")
+                    .addArgument(String.format(Helper.prop("avbtool")!!, "v1.2"))
             }
             ret.addArgument(" --id ")
             ret.addArgument(" --output ")

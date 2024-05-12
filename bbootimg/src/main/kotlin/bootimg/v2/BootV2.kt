@@ -128,7 +128,7 @@ data class BootV2(
                     }
                 }
                 ret.kernel.let { theKernel ->
-                    theKernel.file = "${workDir}kernel"
+                    theKernel.file = File(workDir, "kernel").path
                     theKernel.size = bh2.kernelLength
                     theKernel.loadOffset = bh2.kernelOffset
                     theKernel.position = ret.getKernelPosition()
@@ -138,28 +138,28 @@ data class BootV2(
                     theRamdisk.loadOffset = bh2.ramdiskOffset
                     theRamdisk.position = ret.getRamdiskPosition()
                     if (bh2.ramdiskLength > 0) {
-                        theRamdisk.file = "${workDir}ramdisk.img"
+                        theRamdisk.file = File(workDir, "ramdisk.img").path
                     }
                 }
                 if (bh2.secondBootloaderLength > 0) {
                     ret.secondBootloader = CommArgs()
                     ret.secondBootloader!!.size = bh2.secondBootloaderLength
                     ret.secondBootloader!!.loadOffset = bh2.secondBootloaderOffset
-                    ret.secondBootloader!!.file = "${workDir}second"
+                    ret.secondBootloader!!.file = File(workDir, "second").path
                     ret.secondBootloader!!.position = ret.getSecondBootloaderPosition()
                 }
                 if (bh2.recoveryDtboLength > 0) {
                     ret.recoveryDtbo = CommArgsLong()
                     ret.recoveryDtbo!!.size = bh2.recoveryDtboLength
                     ret.recoveryDtbo!!.loadOffset = bh2.recoveryDtboOffset //Q
-                    ret.recoveryDtbo!!.file = "${workDir}recoveryDtbo"
+                    ret.recoveryDtbo!!.file = File(workDir, "recoveryDtbo").path
                     ret.recoveryDtbo!!.position = ret.getRecoveryDtboPosition()
                 }
                 if (bh2.dtbLength > 0) {
                     ret.dtb = DtbArgsLong()
                     ret.dtb!!.size = bh2.dtbLength
                     ret.dtb!!.loadOffset = bh2.dtbOffset //Q
-                    ret.dtb!!.file = "${workDir}dtb"
+                    ret.dtb!!.file = File(workDir, "dtb").path
                     ret.dtb!!.position = ret.getDtbPosition()
                 }
             }
@@ -220,7 +220,7 @@ data class BootV2(
         //ramdisk
         if (this.ramdisk.size > 0) {
             val fmt = C.dumpRamdisk(
-                Helper.Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file!!), "${workDir}root"
+                Helper.Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file!!), File(workDir, "root").path
             )
             this.ramdisk.file = this.ramdisk.file!! + ".$fmt"
             if (fmt == "xz") {
@@ -333,8 +333,8 @@ data class BootV2(
                 it.addRule()
                 it.addRow("ramdisk", this.ramdisk.file)
                 prints.add(Pair("ramdisk", this.ramdisk.file.toString()))
-                it.addRow("\\-- extracted ramdisk rootfs", "${workDir}root")
-                prints.add(Pair("\\-- extracted ramdisk rootfs", "${workDir}root"))
+                it.addRow("\\-- extracted ramdisk rootfs", File(workDir, "root").path)
+                prints.add(Pair("\\-- extracted ramdisk rootfs", File(workDir, "root").path))
             }
             //second
             this.secondBootloader?.let { theSecondBootloader ->
@@ -440,7 +440,7 @@ data class BootV2(
                 File(this.ramdisk.file!!).deleleIfExists()
                 File(this.ramdisk.file!!.removeSuffix(".gz")).deleleIfExists()
                 //Common.packRootfs("${workDir}/root", this.ramdisk.file!!, Common.parseOsMajor(info.osVersion.toString()))
-                Common.packRootfs("${workDir}/root", this.ramdisk.file!!, this.ramdisk.xzFlags)
+                Common.packRootfs(File(workDir, "root").path, this.ramdisk.file!!, this.ramdisk.xzFlags)
             }
             this.ramdisk.size = File(this.ramdisk.file!!).length().toInt()
         }

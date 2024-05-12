@@ -157,11 +157,11 @@ class Payload {
                 ManifestInfo.DynamicPartGroup(name = it.name, size = it.size, partName = it.partitionNamesList)
             })
         ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File("$workDir/header.json"), this.header)
-        log.info("  header  info dumped to ${workDir}header.json")
+        log.info("  header  info dumped to " + File(workDir, "header.json").path)
         ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File("$workDir/manifest.json"), mi)
-        log.info(" manifest info dumped to ${workDir}manifest.json")
+        log.info(" manifest info dumped to " + File(workDir, "manifest.json").path)
 
-        val signatureFile = "${workDir}signatures.txt"
+        val signatureFile = File(workDir, "signatures.txt").path
         FileOutputStream(signatureFile, false).use { fos ->
             fos.writer().use { fWriter ->
                 fWriter.write("<Metadata> signatures: offset=" + this.header.manifestLen + ", size=" + this.header.metaSigLen + "\n")

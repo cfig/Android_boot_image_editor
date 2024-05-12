@@ -30,7 +30,7 @@ class ErofsGenerator(inPartitionName: String) : BaseGenerator(inPartitionName, A
         signingArgs = newArgs.toString()
 
         val mkfsBin = "aosp/plugged/bin/mkfs.erofs"
-        val fc = "${workDir}file_contexts"
+        val fc = File(workDir, "file_contexts").path
         val cmd = CommandLine.parse(mkfsBin).apply {
             addArguments("-z lz4hc,9")
             addArguments("--mount-point $mount_point")

@@ -33,8 +33,8 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
                     readBackAi,
                     partName,
                     workDir,
-                    workDir + File(info.output).nameWithoutExtension,
-                    workDir + File(info.pulp).name + ".signed"
+                    File(workDir, File(info.output).nameWithoutExtension).path,
+                    File(workDir, File(info.pulp).name + ".signed").path
                 )
             }
 
@@ -43,8 +43,8 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
                     readBackAi,
                     partName,
                     workDir,
-                    workDir + File(info.output).nameWithoutExtension,
-                    workDir + "${info.output}.signed"
+                    File(workDir, File(info.output).nameWithoutExtension).path,
+                    File(workDir, "${info.output}.signed").path
                 )
             }
 
@@ -66,26 +66,26 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
             addRow("What", "Where")
             addRule()
             addRow("image (${info.outerFsType})", fileName)
-            ("${workDir}$stem.ext4").let { ext4 ->
+            File(workDir, "$stem.ext4").path.let { ext4 ->
                 if (File(ext4).exists()) {
                     addRule()
                     addRow("converted image (ext4)", ext4)
                 }
             }
-            ("${workDir}$stem.erofs").let {
+            File(workDir, "$stem.erofs").path.let {
                 if (File(it).exists()) {
                     addRule()
                     addRow("converted image (erofs)", it)
                     tail.addRule()
-                    tail.addRow("sudo mount $it -o loop -t erofs ${workDir}mount")
+                    tail.addRow("sudo mount $it -o loop -t erofs " + File(workDir, "mount").path)
                     tail.addRule()
                 } else if (info.innerFsType == "erofs") {
                     tail.addRule()
-                    tail.addRow("sudo mount $fileName -o loop -t erofs ${workDir}mount")
+                    tail.addRow("sudo mount $fileName -o loop -t erofs " + File(workDir, "mount").path)
                     tail.addRule()
                 }
             }
-            ("${workDir}$stem").let {
+            File(workDir, "$stem").path.let {
                 if (File(it).exists()) {
                     addRule()
                     if (File(it).isFile) {
@@ -95,7 +95,7 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
                     }
                 }
             }
-            ("${workDir}$stem.log").let {
+            File(workDir, "$stem.log").path.let {
                 if (File(it).exists()) {
                     addRule()
                     addRow("log", it)
@@ -103,7 +103,7 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
             }
             if (info.innerFsType == "erofs") {
                 addRule()
-                addRow("mount point", "${workDir}mount")
+                addRow("mount point", File(workDir, "mount").path)
             }
             addRule()
         }
@@ -117,7 +117,7 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
 
     fun unwrap(): SparseImage {
         if (info.outerFsType == "sparse") {
-            img2simg(workDir + File(info.output).name + ".signed", File(info.output).name + ".signed")
+            img2simg(File(workDir, (File(info.output).name + ".signed")).path, File(info.output).name + ".signed")
         } else {
             val s = info.pulp + ".signed"
             val t = info.output + ".signed"

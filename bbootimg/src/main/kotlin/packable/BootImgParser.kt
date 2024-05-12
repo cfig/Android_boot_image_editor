@@ -27,6 +27,7 @@ import java.io.File
 import java.io.FileInputStream
 import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
+import kotlin.system.exitProcess
 
 class BootImgParser : IPackable {
     override val loopNo: Int
@@ -34,11 +35,25 @@ class BootImgParser : IPackable {
 
     override fun capabilities(): List<String> {
         //ramdisk.img : Issue #122
-        return listOf("^boot(-debug)?\\.img$", "^recovery\\.img$", "^recovery-two-step\\.img$", "^init_boot\\.img$", "^ramdisk\\.img$")
+        return listOf(
+            "^boot(-debug)?\\.img$",
+            "^recovery\\.img$",
+            "^recovery-two-step\\.img$",
+            "^init_boot\\.img$",
+            "^ramdisk\\.img$"
+        )
     }
 
     override fun unpack(fileName: String) {
+        unpackInternal(fileName, fileName, outDir)
+    }
+
+    fun unpackInternal(targetFile: String, fileName: String, unpackDir: String) {
+        log.warn("Unpacking $fileName")
+        log.warn("fileName: $fileName, unpackDir: $unpackDir")
+        Helper.setProp("workDir", unpackDir)
         clear()
+        File("$outDir/role").writeText(File(File(fileName).canonicalPath).name)
         val hv = probeHeaderVersion(fileName)
         log.info("header version $hv")
         when (hv) {
@@ -50,6 +65,7 @@ class BootImgParser : IPackable {
                     .printUnpackSummary()
                 log.debug(b2.toString())
             }
+
             in 3..4 -> {
                 val b3 = BootV3
                     .parse(fileName)
@@ -58,6 +74,7 @@ class BootImgParser : IPackable {
                     .printUnpackSummary()
                 log.debug(b3.toString())
             }
+
             else -> {
                 val b2 = BootV2Dialects
                     .parse(fileName)
@@ -69,8 +86,10 @@ class BootImgParser : IPackable {
         }
     }
 
-    override fun pack(fileName: String) {
-        val cfgFile = outDir + fileName.removeSuffix(".img") + ".json"
+    fun packInternal(targetFile: String, workspace: String, fileName: String) {
+        log.warn("XXXX: targetFile: $targetFile, fileName: $fileName, workspace: $workspace")
+        Helper.setProp("workDir", workspace)
+        val cfgFile = Helper.joinPath(outDir, targetFile.removeSuffix(".img") + ".json")
         log.info("Loading config from $cfgFile")
         if (!File(cfgFile).exists()) {
             val tab = AsciiTable().let {
@@ -82,21 +101,47 @@ class BootImgParser : IPackable {
             log.info("\n{}", tab.render())
             return
         }
-        when (val hv = probeHeaderVersion(fileName)) {
-            0, 1, 2 ->
+
+        val worker =
+            try {
                 ObjectMapper().readValue(File(cfgFile), BootV2::class.java)
+            } catch (e: com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException) {
+                try {
+                    ObjectMapper().readValue(File(cfgFile), BootV3::class.java)
+                } catch (e: com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException) {
+                    null
+                }
+            }
+        if (worker == null) {
+            log.warn("XXXX: worker is null")
+            exitProcess(2)
+        }
+        when (worker) {
+            is BootV2 -> {
+                worker
                     .pack()
                     .sign()
                     .updateVbmeta()
                     .printPackSummary()
-            3, 4 ->
-                ObjectMapper().readValue(File(cfgFile), BootV3::class.java)
+            }
+
+            is BootV3 -> {
+                worker
                     .pack()
                     .sign(fileName)
                     .updateVbmeta()
-                    .printPackSummary()
-            else -> throw IllegalArgumentException("do not support header version $hv")
+                    .printPackSummary(fileName)
+            }
+
+            else -> {
+                log.error("unsupported boot image format")
+                exitProcess(2)
+            }
         }
+    }
+
+    override fun pack(fileName: String) {
+        packInternal(fileName, outDir, fileName)
     }
 
     override fun flash(fileName: String, deviceName: String) {
@@ -122,7 +167,7 @@ class BootImgParser : IPackable {
     }
 
     override fun `@verify`(fileName: String) {
-        File(Helper.prop("workDir")).let {
+        File(Helper.prop("workDir")!!).let {
             if (!it.exists()) {
                 it.mkdirs()
             }

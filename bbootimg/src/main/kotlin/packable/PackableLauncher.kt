@@ -18,6 +18,7 @@ import rom.sparse.SparseImgParser
 import org.slf4j.LoggerFactory
 import packable.DeviceTreeParser
 import java.io.File
+import java.util.*
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -48,22 +49,48 @@ fun main(args: Array<String>) {
     }
     var targetFile: String? = null
     var targetHandler: KClass<IPackable>? = null
+
+    log.info("XXXX: args: " + args.asList().toString())
+
     run found@{
         for (currentLoopNo in 0..1) { //currently we have only 2 loops
-            File(".").listFiles()!!.forEach { file ->
+            if (args.size > 1) { // manual mode
+                targetFile = if (File(args[1]).isFile) {
+                    File(args[1]).canonicalPath
+                } else if (File(args[1]  + "/role").isFile) {
+                    File(args[1] + "/role").readText().trim()
+                } else {
+                    log.error("Not sure of what to do: " + args.asList().toString())
+                    exitProcess(1)
+                }
+                log.warn("manual mode: args= ${args[1]}, $targetFile")
                 packablePool
                     .filter { it.value.createInstance().loopNo == currentLoopNo }
                     .forEach { p ->
                         for (item in p.key) {
-                            if (Pattern.compile(item).matcher(file.name).matches()) {
-                                log.debug("Found: " + file.name + ", " + item)
-                                targetFile = file.name
+                            if (Pattern.compile(item).matcher(File(targetFile).name).matches()) {
+                                log.info("Found: $targetFile, $item")
                                 targetHandler = p.value
                                 return@found
                             }
                         }
                     }
-            }//end-of-file-traversing
+            } else { // lazy mode
+                File(".").listFiles()!!.forEach { file ->
+                    packablePool
+                        .filter { it.value.createInstance().loopNo == currentLoopNo }
+                        .forEach { p ->
+                            for (item in p.key) {
+                                if (Pattern.compile(item).matcher(file.name).matches()) {
+                                    log.debug("Found: " + file.name + ", " + item)
+                                    targetFile = file.name
+                                    targetHandler = p.value
+                                    return@found
+                                }
+                            }
+                        }
+                }//end-of-file-traversing
+            }
         }//end-of-range-loop
     }//end-of-found@
 
@@ -71,8 +98,9 @@ fun main(args: Array<String>) {
     // /* 2 */ no-args & handler   : help for Handler
     // /* 3 */ args    & no-handler: do nothing
     // /* 4 */ args    & handler   : work
-    when (listOf(args.isEmpty(), targetHandler == null)) {
-        listOf(true, true) -> { /* 1 */
+    when (listOf(args.isNotEmpty(), targetHandler != null)) {
+        listOf(false, false) -> { /* 1 */
+            log.warn("args: ${args.size}, targetHandler: $targetHandler")
             log.info("help:")
             log.info("available IPackable subcommands are:")
             IPackable::class.declaredFunctions.forEach {
@@ -81,7 +109,8 @@ fun main(args: Array<String>) {
             exitProcess(1)
         }
 
-        listOf(true, false) -> {/* 2 */
+        listOf(false, true) -> {/* 2 */
+            log.warn("args: ${args.size}, targetHandler: $targetHandler")
             log.info("available ${targetHandler!!.simpleName} subcommands are:")
             targetHandler!!.declaredFunctions.forEach {
                 log.info("\t" + it.name)
@@ -89,13 +118,15 @@ fun main(args: Array<String>) {
             exitProcess(1)
         }
 
-        listOf(false, true) -> {/* 3 */
+        listOf(true, false) -> {/* 3 */
+            log.warn("args: ${args.size}, targetHandler: $targetHandler")
             log.warn("No handler is activated, DO NOTHING!")
             exitProcess(2)
         }
 
-        listOf(false, false) -> {/* 4 */
-            log.debug("continue ...")
+        listOf(true, true) -> {/* 4 */
+            log.warn("args: ${args.size}, targetHandler: $targetHandler")
+            log.info("continue ...")
         }
     }
 
@@ -111,12 +142,20 @@ fun main(args: Array<String>) {
             exitProcess(3)
         }
         log.warn("'${args[0]}' sequence initialized")
+
+        log.warn("XXXX: args.size: ${args.size}")
+        val convertedArgs = args.copyOf().apply { set(0, targetFile!!) }
+        functions[0].call(it.createInstance(), *convertedArgs)
+
+/*
         val reflectRet = when (functions[0].parameters.size) {
             1 -> {
+                log.warn("1: call null")
                 functions[0].call(it.createInstance())
             }
 
             2 -> {
+                log.warn("2: call $targetFile")
                 functions[0].call(it.createInstance(), targetFile!!)
             }
 
@@ -141,6 +180,7 @@ fun main(args: Array<String>) {
         if (functions[0].returnType.toString() != Unit.toString()) {
             log.info("ret: $reflectRet")
         }
+*/
         log.warn("'${args[0]}' sequence completed")
     }
 }

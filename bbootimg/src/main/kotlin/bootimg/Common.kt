@@ -120,6 +120,7 @@ class Common {
 
         fun dumpKernel(s: Helper.Slice) {
             Helper.extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
+            log.warn("s.srcFile: ${s.srcFile}, s.dumpFile: ${s.dumpFile}, s.offset: ${s.offset}, s.length: ${s.length}")
             parseKernelInfo(s.dumpFile)
         }
 

@@ -22,6 +22,8 @@ fun main(args: Array<String>) {
         println("bootchart: generate Android bootchart")
         println("pidstat  : given a pid, profile its CPU usage")
         println("tracecmd : analyze trace-cmd report")
+        println("cpuinfo  : get cpu info from /sys/devices/system/cpu/")
+        println("sysinfo  : get overall system info from Android")
         exitProcess(0)
     }
     if (args[0] == "cpuinfo") {
