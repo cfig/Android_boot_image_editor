@@ -49,11 +49,10 @@ class BootImgParser : IPackable {
     }
 
     fun unpackInternal(targetFile: String, fileName: String, unpackDir: String) {
-        log.warn("Unpacking $fileName")
-        log.warn("fileName: $fileName, unpackDir: $unpackDir")
+        log.info("unpackInternal(fileName: $fileName, unpackDir: $unpackDir)")
         Helper.setProp("workDir", unpackDir)
         clear()
-        File("$outDir/role").writeText(File(File(fileName).canonicalPath).name)
+        File("$outDir/role").writeText(File(File(targetFile).canonicalPath).name)
         val hv = probeHeaderVersion(fileName)
         log.info("header version $hv")
         when (hv) {
@@ -87,7 +86,7 @@ class BootImgParser : IPackable {
     }
 
     fun packInternal(targetFile: String, workspace: String, fileName: String) {
-        log.warn("XXXX: targetFile: $targetFile, fileName: $fileName, workspace: $workspace")
+        log.info("packInternal(targetFile: $targetFile, fileName: $fileName, workspace: $workspace)")
         Helper.setProp("workDir", workspace)
         val cfgFile = Helper.joinPath(outDir, targetFile.removeSuffix(".img") + ".json")
         log.info("Loading config from $cfgFile")
@@ -113,7 +112,7 @@ class BootImgParser : IPackable {
                 }
             }
         if (worker == null) {
-            log.warn("XXXX: worker is null")
+            log.error("no worker available")
             exitProcess(2)
         }
         when (worker) {
@@ -130,7 +129,7 @@ class BootImgParser : IPackable {
                     .pack()
                     .sign(fileName)
                     .updateVbmeta()
-                    .printPackSummary(fileName)
+                    .printPackSummary(worker.info.role)
             }
 
             else -> {

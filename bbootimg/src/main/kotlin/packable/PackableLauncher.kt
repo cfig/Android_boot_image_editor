@@ -14,11 +14,10 @@
 
 package cfig.packable
 
-import rom.sparse.SparseImgParser
 import org.slf4j.LoggerFactory
 import packable.DeviceTreeParser
+import rom.sparse.SparseImgParser
 import java.io.File
-import java.util.*
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -98,9 +97,9 @@ fun main(args: Array<String>) {
     // /* 2 */ no-args & handler   : help for Handler
     // /* 3 */ args    & no-handler: do nothing
     // /* 4 */ args    & handler   : work
+    log.warn("args: ${args.size}, targetHandler: $targetHandler")
     when (listOf(args.isNotEmpty(), targetHandler != null)) {
         listOf(false, false) -> { /* 1 */
-            log.warn("args: ${args.size}, targetHandler: $targetHandler")
             log.info("help:")
             log.info("available IPackable subcommands are:")
             IPackable::class.declaredFunctions.forEach {
@@ -110,7 +109,6 @@ fun main(args: Array<String>) {
         }
 
         listOf(false, true) -> {/* 2 */
-            log.warn("args: ${args.size}, targetHandler: $targetHandler")
             log.info("available ${targetHandler!!.simpleName} subcommands are:")
             targetHandler!!.declaredFunctions.forEach {
                 log.info("\t" + it.name)
@@ -119,13 +117,11 @@ fun main(args: Array<String>) {
         }
 
         listOf(true, false) -> {/* 3 */
-            log.warn("args: ${args.size}, targetHandler: $targetHandler")
             log.warn("No handler is activated, DO NOTHING!")
             exitProcess(2)
         }
 
         listOf(true, true) -> {/* 4 */
-            log.warn("args: ${args.size}, targetHandler: $targetHandler")
             log.info("continue ...")
         }
     }

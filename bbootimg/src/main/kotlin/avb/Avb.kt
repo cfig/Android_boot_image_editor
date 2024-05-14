@@ -174,7 +174,6 @@ class Avb {
 
         fun getJsonFileName(image_file: String): String {
             val jsonFile = File(image_file).name.removeSuffix(".img") + ".avb.json"
-            log.warn("XXXX: json file =  " + Helper.joinPath(Helper.prop("workDir")!!, jsonFile))
             return Helper.joinPath(Helper.prop("workDir")!!, jsonFile)
         }
 
@@ -201,10 +200,17 @@ class Avb {
         }
 
         fun updateVbmeta(fileName: String, desc: Any = HashDescriptor::class) {
-            if (File("vbmeta.img").exists()) {
+            val vbmetaCompanion = getJsonFileName("vbmeta.img")
+            if (File(vbmetaCompanion).exists()) {
                 log.info("Updating vbmeta.img side by side ...")
                 val readBackInfo = ObjectMapper().readValue(File(getJsonFileName(fileName)), AVBInfo::class.java)
-                val newHashDesc = AVBInfo.parseFrom(Dumpling("$fileName.signed"))
+                val intermediateDir = Helper.joinPath(Helper.prop("workDir")!!, "intermediate")
+                val newHashDesc = if (File(intermediateDir).exists()) {
+                    AVBInfo.parseFrom(Dumpling(Helper.joinPath(intermediateDir, "$fileName.signed")))
+                } else {
+                    //FIXME: before BootV2 supports abe mode
+                    AVBInfo.parseFrom(Dumpling("$fileName.signed"))
+                }
 
                 when (desc) {
                     HashDescriptor::class -> {

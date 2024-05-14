@@ -135,6 +135,7 @@ class Common {
                     )
                     ZipHelper.zcat(s.dumpFile + ".gz", s.dumpFile)
                 }
+
                 ZipHelper.isXz(s.dumpFile) -> {
                     log.info("ramdisk is compressed xz")
                     Files.move(
@@ -144,15 +145,17 @@ class Common {
                     ZipHelper.xzcat(s.dumpFile + ".xz", s.dumpFile)
                     ret = "xz"
                 }
+
                 ZipHelper.isLzma(s.dumpFile) -> {
                     log.info("ramdisk is compressed lzma")
                     Files.move(
-                            Paths.get(s.dumpFile), Paths.get(s.dumpFile + ".lzma"),
-                            java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                        Paths.get(s.dumpFile), Paths.get(s.dumpFile + ".lzma"),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
                     )
                     ZipHelper.lzcat(s.dumpFile + ".lzma", s.dumpFile)
                     ret = "lzma"
                 }
+
                 ZipHelper.isLz4(s.dumpFile) -> {
                     log.info("ramdisk is compressed lz4")
                     Files.move(
@@ -162,6 +165,7 @@ class Common {
                     ZipHelper.lz4cat(s.dumpFile + ".lz4", s.dumpFile)
                     ret = "lz4"
                 }
+
                 ZipHelper.isAndroidCpio(s.dumpFile) -> {
                     log.info("ramdisk is uncompressed cpio")
                     Files.copy(
@@ -170,6 +174,7 @@ class Common {
                     )
                     ret = "cpio"
                 }
+
                 else -> {
                     throw IllegalArgumentException("ramdisk is in unknown format")
                 }
@@ -248,9 +253,11 @@ class Common {
                 ramdiskGz.endsWith(".gz") -> {
                     ZipHelper.minigzip(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
                 }
+
                 ramdiskGz.endsWith(".lz4") -> {
                     ZipHelper.lz4(ramdiskGz, ByteArrayInputStream(outputStream.toByteArray()))
                 }
+
                 else -> {
                     throw IllegalArgumentException("$ramdiskGz is not supported")
                 }
@@ -268,26 +275,31 @@ class Common {
                     AndroidCpio().pack(root, f, "${f}_filelist.txt")
                     FileInputStream(f).use { ZipHelper.minigzip(ramdiskGz, it) }
                 }
+
                 ramdiskGz.endsWith(".lz4") -> {
                     val f = ramdiskGz.removeSuffix(".lz4")
                     AndroidCpio().pack(root, f, "${f}_filelist.txt")
                     FileInputStream(f).use { ZipHelper.lz4(ramdiskGz, it) }
                 }
+
                 ramdiskGz.endsWith(".lzma") -> {
                     val f = ramdiskGz.removeSuffix(".lzma")
                     AndroidCpio().pack(root, f, "${f}_filelist.txt")
                     FileInputStream(f).use { ZipHelper.lzma(ramdiskGz, it) }
                 }
+
                 ramdiskGz.endsWith(".xz") -> {
                     val f = ramdiskGz.removeSuffix(".xz")
                     AndroidCpio().pack(root, f, "${f}_filelist.txt")
                     FileInputStream(f).use { ZipHelper.xz(ramdiskGz, it, compressorArgs!!) }
                 }
+
                 ramdiskGz.endsWith(".cpio") -> {
                     val f = ramdiskGz.removeSuffix(".cpio")
                     AndroidCpio().pack(root, f, "${f}_filelist.txt")
                     File(f).copyTo(File(ramdiskGz), true)
                 }
+
                 else -> {
                     throw IllegalArgumentException("$ramdiskGz is not supported")
                 }
@@ -381,9 +393,11 @@ class Common {
                         log.warn("Os Major exceeds current max $MAX_ANDROID_VER")
                         MAX_ANDROID_VER
                     }
+
                     ret < 10 -> {
                         10
                     }
+
                     else -> {
                         ret
                     }
@@ -405,7 +419,8 @@ class Common {
                     com.github.freva.asciitable.Column().header("Where")
                         .headerAlign(HorizontalAlign.CENTER)
                         .dataAlign(HorizontalAlign.LEFT)
-                        .with { it.second }))
+                        .with { it.second })
+            )
         }
 
         fun printPackSummary(imageName: String) {
@@ -422,6 +437,35 @@ class Common {
                     it.addRow("re-packed $imageName", "$imageName.clear")
                     prints.add(Pair("re-packed $imageName", "$imageName.clear"))
                 }
+                it.addRule()
+                it
+            }
+            if (File("vbmeta.img").exists()) {
+                if (File("vbmeta.img.signed").exists()) {
+                    tab.addRow("re-packed vbmeta", "vbmeta.img.signed")
+                    prints.add(Pair("re-packed vbmeta", "vbmeta.img.signed"))
+                } else {
+                    tab.addRow("re-packed vbmeta", "-")
+                    prints.add(Pair("re-packed vbmeta", "-"))
+                }
+                tab.addRule()
+            }
+            if (EnvironmentVerifier().isWindows) {
+                log.info("\n" + Common.table2String(prints))
+            } else {
+                log.info("\n\t\t\tPack Summary of ${imageName}\n{}\n{}", tableHeader.render(), tab.render())
+            }
+        }
+
+        fun printPackSummaryInternal(imageName: String) {
+            val prints: MutableList<Pair<String, String>> = mutableListOf()
+            val tableHeader = de.vandermeer.asciitable.AsciiTable().apply {
+                addRule(); addRow("What", "Where"); addRule()
+            }
+            val tab = de.vandermeer.asciitable.AsciiTable().let {
+                it.addRule()
+                it.addRow("re-packed $imageName", Helper.prop("out.file"))
+                prints.add(Pair("re-packed $imageName", Helper.prop("out.file")!!))
                 it.addRule()
                 it
             }

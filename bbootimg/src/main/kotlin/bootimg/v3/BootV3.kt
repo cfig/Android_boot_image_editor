@@ -214,27 +214,50 @@ data class BootV3(
     }
 
     fun sign(fileName: String): BootV3 {
-        log.warn("XXXX: sign $fileName")
+        var bSigningNeeded = false
         if (File(Avb.getJsonFileName(info.role)).exists()) {
+            bSigningNeeded = true
             Signer.signAVB(
                 Helper.joinPath(Helper.prop("intermediateDir")!!, info.role),
                 this.info.imageSize,
                 String.format(Helper.prop("avbtool")!!, "v1.2")
             )
         } else {
+            bSigningNeeded = false
             log.warn("no AVB info found, assume it's clear image")
         }
+
         if (fileName != info.role) {
-            File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".signed")).copyTo(File(fileName), true)
-            log.info("Signed image saved as $fileName")
+            Helper.setProp("out.file", fileName)
+            if (bSigningNeeded) {
+                //@formatter:off
+                File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".signed"))
+                    .copyTo(File(fileName), true)
+                //@formatter:on
+                log.info("Signed image saved as $fileName")
+            } else {
+                //@formatter:off
+                File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".clear"))
+                    .copyTo(File(fileName), true)
+                //@formatter:on
+                log.info("Unsigned image saved as $fileName")
+            }
         } else {
-            File(
-                Helper.joinPath(
-                    Helper.prop("intermediateDir")!!,
-                    info.role + ".signed"
-                )
-            ).copyTo(File(info.role + ".signed"), true)
-            log.info("Signed image saved as ${info.role}.signed")
+            if (bSigningNeeded) {
+                Helper.setProp("out.file", info.role + ".signed")
+                //@formatter:off
+                File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".signed"))
+                    .copyTo(File(info.role + ".signed"), true)
+                //@formatter:on
+                log.info("Signed image saved as ${info.role}.signed")
+            } else {
+                Helper.setProp("out.file", info.role + ".clear")
+                //@formatter:off
+                File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".clear"))
+                    .copyTo(File(info.role + ".clear"), true)
+                //@formatter:on
+                log.info("Unsigned image saved as ${info.role}.clear")
+            }
         }
         return this
     }
@@ -284,11 +307,12 @@ data class BootV3(
     fun extractVBMeta(): BootV3 {
         // vbmeta in image
         try {
-            log.warn("XXXX: info.output ${info.input}")
+            val vbmetaCompanion = Helper.joinPath(File(info.input).parentFile.normalize().path, "vbmeta.img")
+            log.info("XXXX: $vbmetaCompanion")
             val ai = AVBInfo.parseFrom(Dumpling(info.input)).dumpDefault(info.role)
-            if (File("vbmeta.img").exists()) {
+            if (File(vbmetaCompanion).exists()) {
                 log.warn("Found vbmeta.img, parsing ...")
-                VBMetaParser().unpack("vbmeta.img")
+                VBMetaParser().unpack(vbmetaCompanion)
             }
         } catch (e: IllegalArgumentException) {
             log.warn(e.message)
@@ -368,7 +392,6 @@ data class BootV3(
                 it.addRow("kernel", this.kernel.file)
                 prints.add(Pair("kernel", this.kernel.file))
                 File(Helper.joinPath(workDir, Helper.prop("kernelVersionStem")!!)).let { kernelVersionFile ->
-                    log.warn("XXXX: kernelVersionFile ${kernelVersionFile.path}")
                     if (kernelVersionFile.exists()) {
                         it.addRow("\\-- version " + kernelVersionFile.readLines().toString(), kernelVersionFile.path)
                         prints.add(
@@ -380,7 +403,6 @@ data class BootV3(
                     }
                 }
                 File(Helper.joinPath(workDir, Helper.prop("kernelConfigStem")!!)).let { kernelConfigFile ->
-                    log.warn("XXXX: kernelConfigFile ${kernelConfigFile.path}")
                     if (kernelConfigFile.exists()) {
                         it.addRow("\\-- config", kernelConfigFile.path)
                         prints.add(Pair("\\-- config", kernelConfigFile.path))
@@ -460,14 +482,19 @@ data class BootV3(
             it
         }
         val tabVBMeta = AsciiTable().let {
-            if (File("vbmeta.img").exists()) {
+            val vbmetaCompanion = Helper.joinPath(File(info.input).parentFile.normalize().path, "vbmeta.img")
+            log.warn("XXXX: vbmetaCompanion: $vbmetaCompanion")
+            if (File(vbmetaCompanion).exists()) {
+                log.warn("XXXX: Found vbmeta.img, parsing ...")
+                //basic
+                prints.add(Pair("vbmeta.img", Avb.getJsonFileName("vbmeta.img")))
+                //table
                 it.addRule()
                 it.addRow("vbmeta.img", Avb.getJsonFileName("vbmeta.img"))
                 it.addRule()
                 "\n" + it.render()
-                //basic
-                prints.add(Pair("vbmeta.img", Avb.getJsonFileName("vbmeta.img")))
             } else {
+                log.warn("XXXX: no vbmeta.img found")
                 ""
             }
         }
@@ -483,7 +510,7 @@ data class BootV3(
     }
 
     fun printPackSummary(fileName: String): BootV3 {
-        Common.printPackSummary(fileName)
+        Common.printPackSummaryInternal(fileName)
         return this
     }
 
