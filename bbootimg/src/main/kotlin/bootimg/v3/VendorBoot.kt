@@ -67,7 +67,8 @@ data class VendorBoot(
     )
 
     data class MiscInfo(
-        var output: String = "",
+        var input: String = "",
+        var role: String = "",
         var json: String = "",
         var headerVersion: Int = 0,
         var product: String = "",
@@ -182,7 +183,8 @@ data class VendorBoot(
             val ret = VendorBoot()
             FileInputStream(fileName).use { fis ->
                 val header = VendorBootHeader(fis)
-                ret.info.output = File(fileName).name
+                ret.info.input = File(fileName).canonicalPath
+                ret.info.role = File(fileName).name
                 ret.info.json = File(fileName).name.removeSuffix(".img") + ".json"
                 ret.info.headerSize = header.headerSize
                 ret.info.product = header.product
@@ -192,14 +194,14 @@ data class VendorBoot(
                 ret.info.pageSize = header.pageSize
                 ret.info.headerVersion = header.headerVersion
                 //ramdisk
-                ret.ramdisk.file = workDir + "ramdisk.img"
+                ret.ramdisk.file = Helper.joinPath(workDir!!, "ramdisk.img")
                 ret.ramdisk.size = header.vndRamdiskTotalSize
                 ret.ramdisk.loadAddr = header.ramdiskLoadAddr
                 ret.ramdisk.position = Helper.round_to_multiple(
                     VendorBootHeader.VENDOR_BOOT_IMAGE_HEADER_V3_SIZE, header.pageSize
                 ).toLong()
                 //dtb
-                ret.dtb.file = workDir + "dtb"
+                ret.dtb.file = Helper.joinPath(workDir, "dtb")
                 ret.dtb.size = header.dtbSize
                 ret.dtb.loadAddr = header.dtbLoadAddr
                 ret.dtb.position = ret.ramdisk.position + Helper.round_to_multiple(ret.ramdisk.size, header.pageSize)
@@ -209,10 +211,10 @@ data class VendorBoot(
                     ret.ramdisk_table.eachEntrySize = header.vrtEntrySize
                     ret.ramdisk_table.position =
                         ret.dtb.position + Helper.round_to_multiple(ret.dtb.size, header.pageSize)
-                    FileInputStream(ret.info.output).use {
+                    FileInputStream(ret.info.input).use {
                         it.skip(ret.ramdisk_table.position)
                         for (item in 0 until header.vrtEntryNum) {
-                            ret.ramdisk_table.ramdidks.add(VrtEntry(it, workDir + "ramdisk.${item + 1}"))
+                            ret.ramdisk_table.ramdidks.add(VrtEntry(it, Helper.joinPath(workDir, "ramdisk.${item + 1}")))
                         }
                     }
                     ret.ramdisk_table.ramdidks.forEach {
@@ -221,7 +223,7 @@ data class VendorBoot(
                 }
                 //bootconfig
                 if (header.bootconfigSize > 0) {
-                    ret.bootconfig.file = workDir + "bootconfig"
+                    ret.bootconfig.file = Helper.joinPath(workDir, "bootconfig")
                     ret.bootconfig.size = header.bootconfigSize
                     ret.bootconfig.position =
                         ret.ramdisk_table.position + Helper.round_to_multiple(ret.ramdisk_table.size, header.pageSize)
@@ -235,7 +237,7 @@ data class VendorBoot(
     fun pack(): VendorBoot {
         when (this.info.headerVersion) {
             3 -> {
-                if (File(workDir + this.ramdisk.file).exists() && !File(workDir + "root").exists()) {
+                if (File(workDir, this.ramdisk.file).exists() && !File(workDir, "root").exists()) {
                     //do nothing if we have ramdisk.img.gz but no /root
                     log.warn("Use prebuilt ramdisk file: ${this.ramdisk.file}")
                 } else {
@@ -251,8 +253,8 @@ data class VendorBoot(
             else -> {
                 this.ramdisk_table.ramdidks.forEachIndexed { index, it ->
                     File(it.file).deleleIfExists()
-                    log.info(workDir + "root.${index + 1} -> " + it.file)
-                    C.packRootfs(workDir + "root.${index + 1}", it.file, this.ramdisk.xzFlags)
+                    log.info(Helper.joinPath(workDir!!, "/root.${index + 1}") + " -> " + it.file)
+                    C.packRootfs(Helper.joinPath(workDir, "root.${index + 1}"), it.file, this.ramdisk.xzFlags)
                 }
                 this.ramdisk.size = this.ramdisk_table.ramdidks.sumOf { File(it.file).length() }.toInt()
             }
@@ -263,7 +265,7 @@ data class VendorBoot(
         }
         this.dtb.size = File(this.dtb.file).length().toInt()
         //header
-        FileOutputStream(this.info.output + ".clear", false).use { fos ->
+        FileOutputStream(this.info.role + ".clear", false).use { fos ->
             val encodedHeader = this.toHeader().encode()
             fos.write(encodedHeader)
             fos.write(ByteArray(Helper.round_to_multiple(encodedHeader.size, this.info.pageSize) - encodedHeader.size))
@@ -301,34 +303,34 @@ data class VendorBoot(
             }
         }
         //write
-        FileOutputStream("${this.info.output}.clear", true).use { fos ->
+        FileOutputStream("${this.info.role}.clear", true).use { fos ->
             fos.write(bf.array(), 0, bf.position())
         }
 
         //google way
-        this.toCommandLine().addArgument(this.info.output + ".google").let {
+        this.toCommandLine().addArgument(this.info.role + ".google").let {
             log.info(it.toString())
             DefaultExecutor().execute(it)
         }
 
-        Helper.assertFileEquals(this.info.output + ".clear", this.info.output + ".google")
+        Helper.assertFileEquals(this.info.role + ".clear", this.info.role + ".google")
         return this
     }
 
     fun sign(): VendorBoot {
         val avbtool = String.format(Helper.prop("avbtool")!!, "v1.2")
-        File(Avb.getJsonFileName(info.output)).let {
+        File(Avb.getJsonFileName(info.role)).let {
             if (it.exists()) {
-                Signer.signAVB(info.output, this.info.imageSize, avbtool)
+                Signer.signAVB(info.role, this.info.imageSize, avbtool)
             } else {
-                log.warn("skip signing of ${info.output}")
+                log.warn("skip signing of ${info.role}")
             }
         }
         return this
     }
 
     fun updateVbmeta(): VendorBoot {
-        Avb.updateVbmeta(info.output)
+        Avb.updateVbmeta(info.role)
         return this
     }
 
@@ -354,11 +356,11 @@ data class VendorBoot(
 
     fun extractImages(): VendorBoot {
         //header
-        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
+        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir, this.info.json), this)
         //ramdisk
         //@formatter:off
         val fmt = C.dumpRamdisk(
-            Helper.Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file), File(workDir, "root").path,
+            Helper.Slice(info.input, ramdisk.position.toInt(), ramdisk.size, ramdisk.file), File(workDir, "root").path,
             this.ramdisk_table.ramdidks.isEmpty())
         //@formatter:on
         this.ramdisk.file = this.ramdisk.file + ".$fmt"
@@ -368,7 +370,7 @@ data class VendorBoot(
         }
         //dtb
         run {
-            C.dumpDtb(Helper.Slice(info.output, dtb.position.toInt(), dtb.size, dtb.file), false)
+            C.dumpDtb(Helper.Slice(info.input, dtb.position.toInt(), dtb.size, dtb.file), false)
             if (dtb.size > 0) {
                 dtb.dtbList = DTC.parseMultiple(dtb.file)
                 DTC.extractMultiple(dtb.file, dtb.dtbList)
@@ -378,23 +380,23 @@ data class VendorBoot(
         this.ramdisk_table.ramdidks.forEachIndexed { index, it ->
             log.info("dumping vendor ramdisk ${index + 1}/${this.ramdisk_table.ramdidks.size} ...")
             val s = Helper.Slice(ramdisk.file, it.offset, it.size, it.file)
-            C.dumpRamdisk(s, workDir + "root.${index + 1}")
+            C.dumpRamdisk(s, File(workDir, "root.${index + 1}").toString())
             it.file = it.file + ".$fmt"
         }
         //bootconfig
         if (bootconfig.size > 0) {
-            Helper.Slice(info.output, bootconfig.position.toInt(), bootconfig.size, bootconfig.file).let { s ->
+            Helper.Slice(info.input, bootconfig.position.toInt(), bootconfig.size, bootconfig.file).let { s ->
                 Helper.extractFile(s.srcFile, s.dumpFile, s.offset.toLong(), s.length)
             }
         }
         //dump info again
-        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
+        ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(File(workDir, this.info.json).toString()), this)
         return this
     }
 
     fun extractVBMeta(): VendorBoot {
         try {
-            AVBInfo.parseFrom(Dumpling(info.output)).dumpDefault(info.output)
+            AVBInfo.parseFrom(Dumpling(info.input)).dumpDefault(info.role)
         } catch (e: Exception) {
             log.error("extraceVBMeta(): $e")
         }
@@ -414,8 +416,9 @@ data class VendorBoot(
         }
         val tab = AsciiTable().let {
             it.addRule()
-            it.addRow("image info", workDir + info.output.removeSuffix(".img") + ".json")
-            prints.add(Pair("image info", workDir + info.output.removeSuffix(".img") + ".json"))
+            val imageInfoJsonFile = Helper.joinPath(workDir!!, info.role.removeSuffix(".img"), ".json")
+            it.addRow("image info", imageInfoJsonFile)
+            prints.add(Pair("image info", imageInfoJsonFile))
             it.addRule()
             it.addRow("ramdisk", this.ramdisk.file)
             prints.add(Pair("ramdisk", this.ramdisk.file))
@@ -452,7 +455,7 @@ data class VendorBoot(
                 prints.add(Pair("bootconfig", this.bootconfig.file))
             }
             it.addRule()
-            Avb.getJsonFileName(info.output).let { jsonFile ->
+            Avb.getJsonFileName(info.role).let { jsonFile ->
                 if (File(jsonFile).exists()) {
                     it.addRow("AVB info", jsonFile)
                     prints.add(Pair("AVB info", jsonFile))
@@ -483,14 +486,14 @@ data class VendorBoot(
             log.info("\n" + Common.table2String(prints))
         } else {
             //@formatter:off
-            log.info("\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}", tableHeader.render(), tab.render(), tabVBMeta)
+            log.info("\n\t\t\tUnpack Summary of ${info.role}\n{}\n{}{}", tableHeader.render(), tab.render(), tabVBMeta)
             //@formatter:on
         }
         return this
     }
 
     fun printPackSummary(): VendorBoot {
-        Common.printPackSummary(info.output)
+        Common.printPackSummary(info.role)
         return this
     }
 

@@ -32,7 +32,6 @@ known_list = [
     "system_ext.img",
     "system.img",
     "system_other.img",
-    "userdata.img",
     "vbmeta.img",
     "vbmeta_system.img",
     "vbmeta_vendor.img",
@@ -43,20 +42,21 @@ known_list = [
     ]
 
 unknown_list = [
-    "cmnlib.img", #Pixel3
     "abl.img", #Pixel3
     "aop.img",  #Pixel3
     "cmnlib64.img", #Pixel3
+    "cmnlib.img", #Pixel3
     "devcfg.img", #Pixel3
     "hyp.img", #Pixel3
     "keymaster.img", #Pixel3
     "modem.img", #Pixel3
-    "qupfw.img", #Pixel3
-    "tz.img", #Pixel3
-    "xbl.img", #Pixel3
-    "xbl_config.img", #Pixel3
     "pvmfw.img",  #Pixel7
-    "super_empty.img"
+    "qupfw.img", #Pixel3
+    "super_empty.img",
+    "tz.img", #Pixel3
+    "userdata.img",
+    "xbl_config.img", #Pixel3
+    "xbl.img", #Pixel3
     ]
 
 tmp2 = "tmp2"

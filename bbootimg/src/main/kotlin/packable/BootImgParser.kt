@@ -143,7 +143,7 @@ class BootImgParser : IPackable {
         packInternal(fileName, outDir, fileName)
     }
 
-    override fun flash(fileName: String, deviceName: String) {
+    fun flash(fileName: String) {
         val stem = fileName.substring(0, fileName.indexOf("."))
         super.flash("$fileName.signed", stem)
 
@@ -175,8 +175,8 @@ class BootImgParser : IPackable {
         super.`@verify`(fileName)
     }
 
-    override fun pull(fileName: String, deviceName: String) {
-        super.pull(fileName, deviceName)
+    fun pull(fileName: String) {
+        super.pull(fileName, File(fileName).nameWithoutExtension)
         try {
             super.pull("vbmeta.img", "vbmeta")
         } catch (e: Exception) {

@@ -15,6 +15,7 @@
 package cfig.packable
 
 import cfig.bootimg.v3.VendorBoot
+import cfig.helper.Helper
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -38,6 +39,18 @@ class VendorBootParser : IPackable {
         log.debug(vb.toString())
     }
 
+    fun unpackInternal(targetFile: String, fileName: String, unpackDir: String) {
+        log.info("unpackInternal(fileName: $fileName, unpackDir: $unpackDir)")
+        Helper.setProp("workDir", unpackDir)
+        clear()
+        val vb = VendorBoot
+            .parse(fileName)
+            .extractImages()
+            .extractVBMeta()
+            .printUnpackSummary()
+        log.debug(vb.toString())
+    }
+
     override fun pack(fileName: String) {
         val cfgFile = "$outDir/${fileName.removeSuffix(".img")}.json"
         log.info("Loading config from $cfgFile")
@@ -52,8 +65,8 @@ class VendorBootParser : IPackable {
         super.`@verify`(fileName)
     }
 
-    override fun pull(fileName: String, deviceName: String) {
-        super.pull(fileName, deviceName)
+    fun pull(fileName: String) {
+        super.pull(fileName, File(fileName).nameWithoutExtension)
         super.pull("vbmeta.img", "vbmeta")
     }
 
@@ -65,7 +78,7 @@ class VendorBootParser : IPackable {
         VBMetaParser().clear("vbmeta.img")
     }
 
-    override fun flash(fileName: String, deviceName: String) {
+    fun flash(fileName: String) {
         val stem = fileName.substring(0, fileName.indexOf("."))
         super.flash("$fileName.signed", stem)
 

@@ -362,8 +362,3 @@ https://developers.google.cn/android/images<br/>
 
 </details>
 
-This project is developed with products by Jetbrains.
-
-<a href="https://jb.gg/OpenSource">
-  <img src="https://user-images.githubusercontent.com/1133314/116802621-c076be80-ab46-11eb-8a14-9454a933de7d.png" alt="drawing" width="80">
-</a>

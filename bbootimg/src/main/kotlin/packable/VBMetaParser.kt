@@ -60,8 +60,8 @@ class VBMetaParser : IPackable {
         super.`@verify`(fileName)
     }
 
-    override fun pull(fileName: String, deviceName: String) {
-        super.pull(fileName, deviceName)
+    fun pull(fileName: String) {
+        super.pull(fileName, File(fileName).nameWithoutExtension)
     }
 
     fun clear(fileName: String) {
