@@ -288,7 +288,7 @@ data class BootV3(
         //ramdisk
         if (ramdisk.size > 0) {
             val fmt = C.dumpRamdisk(
-                Helper.Slice(info.role, ramdisk.position, ramdisk.size, ramdisk.file), File(workDir, "root").toString()
+                Helper.Slice(info.input, ramdisk.position, ramdisk.size, ramdisk.file), File(workDir, "root").toString()
             )
             this.ramdisk.file = this.ramdisk.file + ".$fmt"
             if (fmt == "xz") {

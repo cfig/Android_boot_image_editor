@@ -43,7 +43,7 @@ class DeviceTreeParser : IPackable {
         log.info("\n\t\t\tPack Summary of {}\n{}\n", fileName, Common.table2String(prints))
     }
 
-    override fun pull(fileName: String, deviceName: String) {
+    fun pull(fileName: String) {
         //prepare
         super.clear()
         File(workDir).mkdir()

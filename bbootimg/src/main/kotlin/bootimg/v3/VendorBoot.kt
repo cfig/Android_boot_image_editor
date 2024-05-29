@@ -246,14 +246,14 @@ data class VendorBoot(
                     //Fixed: remove cpio in C/C++
                     //C.packRootfs("$workDir/root", this.ramdisk.file, parseOsMajor())
                     //enable advance JAVA cpio
-                    C.packRootfs("$workDir/root", this.ramdisk.file, this.ramdisk.xzFlags)
+                    C.packRootfs(Helper.joinPath("$workDir", "root"), this.ramdisk.file, this.ramdisk.xzFlags)
                 }
                 this.ramdisk.size = File(this.ramdisk.file).length().toInt()
             }
             else -> {
                 this.ramdisk_table.ramdidks.forEachIndexed { index, it ->
                     File(it.file).deleleIfExists()
-                    log.info(Helper.joinPath(workDir!!, "/root.${index + 1}") + " -> " + it.file)
+                    log.info(Helper.joinPath(workDir!!, "root.${index + 1}") + " -> " + it.file)
                     C.packRootfs(Helper.joinPath(workDir, "root.${index + 1}"), it.file, this.ramdisk.xzFlags)
                 }
                 this.ramdisk.size = this.ramdisk_table.ramdidks.sumOf { File(it.file).length() }.toInt()
@@ -416,7 +416,7 @@ data class VendorBoot(
         }
         val tab = AsciiTable().let {
             it.addRule()
-            val imageInfoJsonFile = Helper.joinPath(workDir!!, info.role.removeSuffix(".img"), ".json")
+            val imageInfoJsonFile = Helper.joinPath(workDir!!, info.role.removeSuffix(".img") + ".json")
             it.addRow("image info", imageInfoJsonFile)
             prints.add(Pair("image info", imageInfoJsonFile))
             it.addRule()
