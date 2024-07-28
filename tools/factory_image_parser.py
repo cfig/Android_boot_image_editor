@@ -57,6 +57,16 @@ unknown_list = [
     "userdata.img",
     "xbl_config.img", #Pixel3
     "xbl.img", #Pixel3
+    "bl1.img", #Pixel8a
+    "bl2.img", #Pixel8a
+    "bl31.img", #Pixel8a
+    "gcf.img", #Pixel8a
+    "gsa.img", #Pixel8a
+    "gsa_bl1.img", #Pixel8a
+    "ldfw.img", #Pixel8a
+    "ldfw.img", #Pixel8a
+    "pbl.img", #Pixel8a
+    "tzsw.img", #Pixel8a
     ]
 
 tmp2 = "tmp2"
