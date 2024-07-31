@@ -37,7 +37,7 @@ class TraceCmdParser {
                 val timestampString = parts[2].split(':')[0]
                 val timestamp = timestampString.toDouble()
                 val eventType = parts[3].removeSuffix(":")
-                var info = line.trim().substring(line.trim().indexOf(parts[4]))
+                val info = line.trim().substring(line.trim().indexOf(parts[4]))
                 log.debug(info)
                 info.split(" ").forEachIndexed { index, s ->
                     log.debug("info#$index: $s")

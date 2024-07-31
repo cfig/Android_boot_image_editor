@@ -59,4 +59,10 @@ fun main(args: Array<String>) {
             log.error("Usage: tracecmd <report_file>")
         }
     }
+    if (args[0] == "split") {
+        if (args.size != 3) {
+            log.error("Usage: split <workdir> <part_name>")
+        }
+        CompileCommand().run(args[1], args[2])
+    }
 }
