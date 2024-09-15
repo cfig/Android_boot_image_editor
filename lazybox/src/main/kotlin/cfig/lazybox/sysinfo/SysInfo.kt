@@ -14,6 +14,7 @@ import java.util.*
 import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeText
+import java.io.ByteArrayOutputStream
 
 class SysInfo {
     private fun runAndWrite(cmd: String, outStream: OutputStream, check: Boolean) {
@@ -138,7 +139,13 @@ makeTar("%s", "%s")
         Files.move(Paths.get("$prefix/device-tree"), Paths.get("$prefix/device_tree"))
 
         if (theSlot.isNotBlank()) {
-            "adb pull /dev/block/by-name/vbmeta$theSlot".check_call(prefix)
+            val uid = ByteArrayOutputStream().use {
+                runAndWrite("adb shell id -u", it, false)
+                it
+            }.toString(Charsets.UTF_8).trim()
+            if (uid != "2000") {
+                "adb pull /dev/block/by-name/vbmeta$theSlot".check_call(prefix)
+            }
         }
         makeTar("sysinfo.tar.xz", "sysinfo")
         File("sysinfo").deleteRecursively()

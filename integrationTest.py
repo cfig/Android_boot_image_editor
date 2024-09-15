@@ -40,8 +40,8 @@ def deleteIfExists(inFile):
     #        log.warning("Exception in cleaning up %s" % inFile)
     #        time.sleep(3)
 
-def cleanUp():
-    log.info("clean up ...")
+def cleanUp(msg = None):
+    log.info("cleanUp(%s) ..." % msg)
     shutil.rmtree("build/unzip_boot", ignore_errors = True)
     [deleteIfExists(item) for item in [
         "boot.img", "boot.img.clear", "boot.img.google", "boot.img.signed", "boot.img.signed2",
@@ -56,7 +56,7 @@ def cleanUp():
         "vendor_boot-debug.img", "vendor_boot-debug.img.clear", "vendor_boot-debug.img.google" ]]
 
 def verifySingleJson(jsonFile, func = None):
-    log.info("executing %s ..." % jsonFile)
+    log.info("verifySingleJson(%s)..." % jsonFile)
     imgDir = os.path.dirname(jsonFile)
     verifyItems = json.load(open(jsonFile))
     for k, v in verifyItems["copy"].items():
@@ -73,16 +73,21 @@ def verifySingleJson(jsonFile, func = None):
         gradleWrapper = "gradlew.bat"
     else:
         gradleWrapper = "./gradlew"
+    log.info("verifySingleJson::unpack")
     subprocess.check_call(gradleWrapper + " unpack", shell = True)
     if func:
+        log.info("verifySingleJson::func")
         func()
+    log.info("verifySingleJson::pack")
     subprocess.check_call(gradleWrapper + " pack", shell = True)
+    log.info("verifySingleJson::pack done")
     for k, v in verifyItems["hash"].items():
         log.info("%s : %s" % (k, v))
         unittest.TestCase().assertIn(hashFile(k), v.split())
     try:
         subprocess.check_call(gradleWrapper + " clear", shell = True)
     except Exception as e:
+        log.info("verifySingleJson: clear failed, ignore")
         pass
 
 def verifySingleDir(inResourceDir, inImageDir):
@@ -91,19 +96,19 @@ def verifySingleDir(inResourceDir, inImageDir):
     log.info("Enter %s ..." % os.path.join(resDir, imgDir))
     jsonFiles = glob.glob(os.path.join(resDir, imgDir) + "/*.json")
     for jsonFile in jsonFiles:
-        cleanUp()
+        cleanUp("json_start")
         verifySingleJson(jsonFile)
-        cleanUp()
+        cleanUp("json_end")
     pyFiles = glob.glob(os.path.join(resDir, imgDir) + "/*.py")
     for pyFile in pyFiles:
-        cleanUp()
+        cleanUp("py_start")
         log.warning("calling %s" % pyFile)
         if sys.platform == "win32":
             theCmd = "python " + pyFile
         else:
             theCmd = pyFile
         subprocess.check_call(theCmd, shell = True)
-        cleanUp()
+        cleanUp("py_end")
     log.info("Leave %s" % os.path.join(resDir, imgDir))
 
 def decompressXZ(inFile, outFile):
