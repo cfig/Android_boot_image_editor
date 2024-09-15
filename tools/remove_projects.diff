@@ -1,0 +1,54 @@
+diff --git a/build.gradle.kts b/build.gradle.kts
+index fae7552..a871a89 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -59,15 +59,15 @@ tasks {
+     flashTask.dependsOn("bbootimg:jar")
+ 
+     //sparse image dependencies
+-    packTask.dependsOn("aosp:mkbootfs:mkbootfsExecutable")
+-    unpackTask.dependsOn("aosp:mkbootfs:mkbootfsExecutable")
+-    if (System.getProperty("os.name").contains("Mac")) {
+-        unpackTask.dependsOn("aosp:libsparse:simg2img:installReleaseMacos")
+-        packTask.dependsOn("aosp:libsparse:img2simg:installReleaseMacos")
+-    } else {
+-        unpackTask.dependsOn("aosp:libsparse:simg2img:installReleaseLinux")
+-        packTask.dependsOn("aosp:libsparse:img2simg:installReleaseLinux")
+-    }
++    //packTask.dependsOn("aosp:mkbootfs:mkbootfsExecutable")
++    //unpackTask.dependsOn("aosp:mkbootfs:mkbootfsExecutable")
++    //if (System.getProperty("os.name").contains("Mac")) {
++    //    unpackTask.dependsOn("aosp:libsparse:simg2img:installReleaseMacos")
++    //    packTask.dependsOn("aosp:libsparse:img2simg:installReleaseMacos")
++    //} else {
++    //    unpackTask.dependsOn("aosp:libsparse:simg2img:installReleaseLinux")
++    //    packTask.dependsOn("aosp:libsparse:img2simg:installReleaseLinux")
++    //}
+ }
+ 
+ fun parseGradleVersion(version: String): Int {
+diff --git a/settings.gradle.kts b/settings.gradle.kts
+index 1485b37..fd953dc 100644
+--- a/settings.gradle.kts
++++ b/settings.gradle.kts
+@@ -1,11 +1,11 @@
+ include("bbootimg")
+ include("aosp:boot_signer")
+-include("aosp:mkbootfs")
+-include("aosp:libsparse:base")
+-include("aosp:libsparse:sparse")
+-include("aosp:libsparse:img2simg")
+-include("aosp:libsparse:simg2img")
+-include("aosp:libsparse:simg2simg")
+-include("aosp:libsparse:append2simg")
+-include("aosp:libavb")
+-include("avbImpl")
++//include("aosp:mkbootfs")
++//include("aosp:libsparse:base")
++//include("aosp:libsparse:sparse")
++//include("aosp:libsparse:img2simg")
++//include("aosp:libsparse:simg2img")
++//include("aosp:libsparse:simg2simg")
++//include("aosp:libsparse:append2simg")
++//include("aosp:libavb")
++//include("avbImpl")

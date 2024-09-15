@@ -1,0 +1,20 @@
+diff --git a/avb/avbtool b/avb/avbtool
+index 8732024..5f62948 100755
+--- a/avb/avbtool
++++ b/avb/avbtool
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python2.7
+ 
+ # Copyright 2016, The Android Open Source Project
+ #
+@@ -2159,7 +2159,8 @@ class Avb(object):
+         expected_chain_partitions_map[partition_name] = (rollback_index_location, pk_blob)
+ 
+     image_dir = os.path.dirname(image_filename)
+-    image_ext = os.path.splitext(image_filename)[1]
++    #image_ext = os.path.splitext(image_filename)[1]
++    image_ext = image_filename[image_filename.index('.'):]
+ 
+     key_blob = None
+     if key_path:

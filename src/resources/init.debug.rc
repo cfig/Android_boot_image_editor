@@ -1,0 +1,35 @@
+service console /system/bin/sh
+    console
+    user root
+    group root shell log readproc
+    seclabel u:r:shell:s0
+
+on property:persist.logd.logpersistd=logcatd
+    # all exec/services are called with umask(077), so no gain beyond 0700
+    mkdir /data/misc/logd 0700 logd log
+    # logd for write to /data/misc/logd, log group for read from pstore (-L)
+    # exec - logd log -- /system/bin/logcat -L -b all -v threadtime -v usec -v printable -D -f /data/misc/logd/logcat -r 1024 -n 256
+    start logcatd
+
+service logcatd /system/bin/logcat -b all -v threadtime -v usec -v printable -D -f /data/misc/logd/logcat -r 1024 -n 256
+    class late_start
+    disabled
+    # logd for write to /data/misc/logd, log group for read from log daemon
+    user logd
+    group log
+    writepid /dev/cpuset/system-background/tasks
+    seclabel u:r:recovery:s0
+
+service logd /system/bin/logd
+    socket logd stream 0666 logd logd
+    socket logdr seqpacket 0666 logd logd
+    socket logdw dgram 0222 logd logd
+    group root system readproc
+    writepid /dev/cpuset/system-background/tasks
+    seclabel u:r:recovery:s0
+
+service logd-reinit /system/bin/logd --reinit
+    oneshot
+    disabled
+    writepid /dev/cpuset/system-background/tasks
+    seclabel u:r:recovery:s0

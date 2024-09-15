@@ -1,0 +1,47 @@
+// Copyright (C) 2022 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+python_test_host {
+    name: "certify_bootimg_test",
+    defaults: ["mkbootimg_defaults"],
+    main: "certify_bootimg_test.py",
+    srcs: [
+        "certify_bootimg_test.py",
+    ],
+    data: [
+        ":avbtool",
+        ":certify_bootimg",
+        ":mkbootimg",
+        ":unpack_bootimg",
+        "testdata/*",
+    ],
+    test_options: {
+        unit_test: true,
+    },
+}
+
+python_binary_host {
+    name: "generate_gki_certificate",
+    defaults: ["mkbootimg_defaults"],
+    srcs: [
+        "generate_gki_certificate.py",
+    ],
+    required: [
+        "avbtool",
+    ],
+}

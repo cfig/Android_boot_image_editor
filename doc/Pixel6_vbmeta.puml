@@ -1,0 +1,41 @@
+@startmindmap
+'https://plantuml.com/mindmap-diagram
+
+caption oriole vbmeta structure
+title Pixel 6 vbmeta
+
+* <&flag>main vbmeta
+**[#Orange] <&pulse>boot
+***[#lightgreen]  <&star>boot
+**[#Orange] <&pulse>vbmeta_system
+***[#lightblue]  <&people>system
+***[#lightblue]  <&people>system_ext
+***[#lightblue]  <&people>product
+**[#Orange]  <&pulse>vbmeta_vendor
+***[#lightblue]  <&people>vendor
+**[#lightblue]  <&people>vendor_dlkm
+**[#lightgreen]  <&star>vendor_boot
+**[#lightgreen]  <&star>dtbo
+**[#lightgreen]  <&star>abl
+**[#lightgreen]  <&star>bl1
+**[#lightgreen]  <&star>bl2
+**[#lightgreen]  <&star>bl31
+**[#lightgreen]  <&star>gsa
+**[#lightgreen]  <&star>ldfw
+**[#lightgreen]  <&star>pbl
+**[#lightgreen]  <&star>tzsw
+
+header
+Pixel 6 - oriole
+endheader
+
+center footer oriole
+
+legend right
+|BG Color| Type |
+|<#FFA500>| Chain Partition|
+|<#90EE90>| Hash Descriptor|
+|<#ADD8E6>| HashTree Descriptor|
+endlegend
+
+@endmindmap

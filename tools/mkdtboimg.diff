@@ -1,0 +1,10 @@
+diff --git a/external/mkdtboimg.py b/external/mkdtboimg.py
+index 03f0fd1..4b2de3d 100755
+--- a/external/mkdtboimg.py
++++ b/external/mkdtboimg.py
+@@ -1,4 +1,4 @@
+-#! /usr/bin/env python
++#! /usr/bin/env python2
+ # Copyright 2017, The Android Open Source Project
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");

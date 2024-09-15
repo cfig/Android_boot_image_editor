@@ -1,0 +1,22 @@
+language: java
+os:
+  - linux
+  - osx
+dist: focal
+osx_image: xcode12.2
+addons:
+  apt:
+    packages:
+      - xz-utils
+      - libblkid-dev
+      - liblz4-tool
+      - device-tree-compiler
+      - python3
+      - python-all
+before_install:
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update          ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install lz4 dtc gradle; fi
+script:
+  - ./gradlew check
+  - ./gradlew clean
+  - ./integrationTest.py

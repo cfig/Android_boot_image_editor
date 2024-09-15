@@ -1,0 +1,17 @@
+@startuml
+'comment
+
+autonumber
+
+participant "system/core/reboot/reboot.c" as reboot_c
+participant "init/reboot.cpp" as init_reboot
+participant "init/reboot_utils.cpp" as init_reboot_utils
+entity "kernel/reboot.c" as kernel
+
+reboot_c -> init_reboot : property_set()\nargs="sys.powerctl",\n "reboot,recovery"
+note left: reboot recovery
+init_reboot -> init_reboot_utils: HandlePowerctlMessage()\nargs="reboot,recovery"
+init_reboot_utils -> kernel: RebootSystem(cmd, rebootTarget)
+init_reboot_utils -> kernel: syscall(__NR_reboot,\n  LINUX_REBOOT_MAGIC1,\n  LINUX_REBOOT_MAGIC2,\n  LINUX_REBOOT_CMD_RESTART2,\n  rebootTarget.c_str())
+note right: void kernel_restart(rebootTarget)
+@enduml

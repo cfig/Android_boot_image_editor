@@ -1,0 +1,27 @@
+@startuml
+'comment
+
+autonumber
+
+box "Framework"
+participant "EthernetTracker.java" as EthernetTracker
+participant "NetworkManagementService.java" as NetworkManagementService
+end box
+
+EthernetTracker -> EthernetTracker: maybeTrackInterface(eth0)
+EthernetTracker -> EthernetTracker: addInterface(eth0)
+EthernetTracker -> NetworkManagementService: INetworkManagementService\n::setInterfaceUp(eth0)
+
+box "Netd"
+participant "NetdNativeService.cpp" as NetdNativeService
+NetworkManagementService -> NetworkManagementService: setInterfaceConfig(iface, ifcg)
+NetworkManagementService -> NetworkManagementService: INetd.interfaceSetCfg(cfgParcel)
+NetworkManagementService --[#green]> NetdNativeService: NetdNativeService\n::interfaceSetCfg()
+participant "InterfaceController.cpp" as InterfaceController
+end box
+
+entity "kernel" as kernel
+
+NetdNativeService -> InterfaceController: InterfaceController\n::setCfg(cfg)
+InterfaceController -[#green]> kernel: ioctl()
+@enduml

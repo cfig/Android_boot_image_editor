@@ -1,0 +1,45 @@
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+filegroup {
+    name: "q-gsi_avbpubkey",
+    srcs: [
+        "q-gsi.avbpubkey",
+    ],
+}
+
+filegroup {
+    name: "r-gsi_avbpubkey",
+    srcs: [
+        "r-gsi.avbpubkey",
+    ],
+}
+
+filegroup {
+    name: "s-gsi_avbpubkey",
+    srcs: [
+        "s-gsi.avbpubkey",
+    ],
+}
+
+filegroup {
+    name: "t-gsi_avbpubkey",
+    srcs: [
+        "t-gsi.avbpubkey",
+    ],
+}
+
+filegroup {
+    name: "qcar-gsi_avbpubkey",
+    srcs: [
+        "qcar-gsi.avbpubkey",
+    ],
+}
+
+filegroup {
+    name: "kernel_version_matrix.textproto",
+    srcs: [
+        "kernel_version_matrix.textproto"
+    ],
+}

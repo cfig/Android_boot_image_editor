@@ -1,0 +1,20 @@
+@startuml
+state fastboot
+
+normal -right-> recovery: 1
+recovery -down-> fastbootd: 2
+fastbootd -left-> fastboot: 3
+fastboot -up-> normal: 4
+
+'self
+normal -[dashed]> normal: a
+recovery -[dashed]> recovery: b
+fastboot -[dashed]> fastboot: c
+fastbootd -[dashed]> fastbootd: d
+
+'normal
+normal -> fastbootd: 5
+
+'recovery
+recovery -[#blue]> fastboot: 6
+@enduml

@@ -1,0 +1,44 @@
+#!/bin/zsh
+
+baseDir=${0:a:h}
+export baseDir
+set -e
+
+# Parse command line arguments
+if [[ $# -eq 0 ]]; then
+    echo "Usage: $0 <operation> [<file> <dir>]"
+    exit 1
+fi
+
+operation=$1
+
+# Determine which operation to perform
+case $operation in
+    "unpack")
+        if [[ $# -eq 3 ]]; then
+            file=`realpath $2`
+            dir=`realpath $3`
+            cd ${baseDir}/../
+            gradle unpack --args="unpackInternal $file $dir"
+        else
+            cd ${baseDir}/../
+            gradle unpack
+        fi
+        ;;
+    "pack")
+        if [[ $# -eq 3 ]]; then
+            dir=`realpath $2`
+            file=`realpath $3`
+            cd ${baseDir}/../
+            gradle pack --args="packInternal $dir $file"
+        else
+            cd ${baseDir}/../
+            gradle pack
+        fi
+        ;;
+    *)
+        echo "Invalid operation: $operation. Please choose 'unpack' or 'pack'."
+        exit 1
+        ;;
+esac
+

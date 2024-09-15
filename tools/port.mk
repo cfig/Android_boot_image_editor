@@ -1,0 +1,71 @@
+ROOTDIR := staging
+LOG_H := $(ROOTDIR)/src/mkbootfs/headers/log/log.h
+
+define build_gradle_content
+YXBwbHkgcGx1Z2luOiAnY3BwJyAKYXBwbHkgcGx1Z2luOiAnYycgCgptb2RlbCB7CiAgICBidWls
+ZFR5cGVzIHsKICAgICAgICByZWxlYXNlCiAgICB9ICAgCgogICAgY29tcG9uZW50cyB7CiAgICAg
+ICAgbWtib290ZnMoTmF0aXZlRXhlY3V0YWJsZVNwZWMpIHsKICAgICAgICAgICAgYmluYXJpZXMu
+YWxsIHsKICAgICAgICAgICAgICAgIGNwcENvbXBpbGVyLmRlZmluZSAiX19BTkRST0lEX1ZOREtf
+XyIKICAgICAgICAgICAgICAgIC8vY3BwQ29tcGlsZXIuZGVmaW5lICdDRklHX05PX0ZJWF9TVEFU
+JwogICAgICAgICAgICAgICAgY3BwQ29tcGlsZXIuYXJncyA8PCAnLXN0ZD1nbnUrKzExJyA8PCAi
+LVduby13cml0ZS1zdHJpbmdzIgogICAgICAgICAgICB9ICAgCiAgICAgICAgfSAgIAogICAgfSAg
+IAp9Cg==
+endef
+
+define log_h_content
+I2lmbmRlZiBfQ0ZJR19MT0dfSAojZGVmaW5lIF9DRklHX0xPR19ICgojZGVmaW5lIEFMT0dFIHBy
+aW50ZgoKI2VuZGlmCg==
+endef
+
+define mkbootfs_patch_content
+ZGlmZiAtLWdpdCBhL3NyYy9ta2Jvb3Rmcy9jcHAvbWtib290ZnMuYyBiL3NyYy9ta2Jvb3Rmcy9j
+cHAvbWtib290ZnMuYwppbmRleCBlNTI3NjJlLi5lYmEzNjU3IDEwMDY0NAotLS0gYS9zcmMvbWti
+b290ZnMvY3BwL21rYm9vdGZzLmMKKysrIGIvc3JjL21rYm9vdGZzL2NwcC9ta2Jvb3Rmcy5jCkBA
+IC0xMyw2ICsxMywxMCBAQAogI2luY2x1ZGUgPGZjbnRsLmg+CiAKICNpbmNsdWRlIDxwcml2YXRl
+L2FuZHJvaWRfZmlsZXN5c3RlbV9jb25maWcuaD4KKy8vWFhYCisjaW5jbHVkZSA8Y3N0ZGludD4K
+KyNpbmNsdWRlIDxwcml2YXRlL2ZzX2NvbmZpZy5oPgorLy9YWFgKIAogLyogTk9URVMKICoqCkBA
+IC0xMDAsNyArMTA0LDExIEBAIHN0YXRpYyB2b2lkIF9lamVjdChzdHJ1Y3Qgc3RhdCAqcywgY2hh
+ciAqb3V0LCBpbnQgb2xlbiwgY2hhciAqZGF0YSwgdW5zaWduZWQgZGF0CiAgICAgICAgIHB1dGNo
+YXIoMCk7CiAgICAgfQogCisjaWZkZWYgQ0ZJR19OT19GSVhfU1RBVAorI3dhcm5pbmcgQ0ZJR19O
+T19GSVhfU1RBVCBkZWZpbmVkLCB3aWxsIG5vdCBmaXhfc3RhdCgpIGRlZmluZWQgaW4gQW5kcm9p
+ZAorI2Vsc2UKICAgICBmaXhfc3RhdChvdXQsIHMpOworI2VuZGlmCiAvLyAgICBmcHJpbnRmKHN0
+ZGVyciwgIl9lamVjdCAlczogbW9kZT0wJW9cbiIsIG91dCwgcy0+c3RfbW9kZSk7CiAKICAgICBw
+cmludGYoIiUwNnglMDh4JTA4eCUwOHglMDh4JTA4eCUwOHgiCkBAIC0xNzIsNyArMTgwLDcgQEAg
+c3RhdGljIHZvaWQgX2FyY2hpdmVfZGlyKGNoYXIgKmluLCBjaGFyICpvdXQsIGludCBpbGVuLCBp
+bnQgb2xlbikKIAogICAgIGludCBzaXplID0gMzI7CiAgICAgaW50IGVudHJpZXMgPSAwOwotICAg
+IGNoYXIqKiBuYW1lcyA9IG1hbGxvYyhzaXplICogc2l6ZW9mKGNoYXIqKSk7CisgICAgY2hhcioq
+IG5hbWVzID0gKGNoYXIqKikgbWFsbG9jKHNpemUgKiBzaXplb2YoY2hhciopKTsKICAgICBpZiAo
+bmFtZXMgPT0gTlVMTCkgewogICAgICAgZnByaW50ZihzdGRlcnIsICJmYWlsZWQgdG8gYWxsb2Nh
+dGUgZGlyIG5hbWVzIGFycmF5IChzaXplICVkKVxuIiwgc2l6ZSk7CiAgICAgICBleGl0KDEpOwpA
+QCAtMTg3LDcgKzE5NSw3IEBAIHN0YXRpYyB2b2lkIF9hcmNoaXZlX2RpcihjaGFyICppbiwgY2hh
+ciAqb3V0LCBpbnQgaWxlbiwgaW50IG9sZW4pCiAKICAgICAgICAgaWYgKGVudHJpZXMgPj0gc2l6
+ZSkgewogICAgICAgICAgIHNpemUgKj0gMjsKLSAgICAgICAgICBuYW1lcyA9IHJlYWxsb2MobmFt
+ZXMsIHNpemUgKiBzaXplb2YoY2hhciopKTsKKyAgICAgICAgICBuYW1lcyA9IChjaGFyKiopIHJl
+YWxsb2MobmFtZXMsIHNpemUgKiBzaXplb2YoY2hhciopKTsKICAgICAgICAgICBpZiAobmFtZXMg
+PT0gTlVMTCkgewogICAgICAgICAgICAgZnByaW50ZihzdGRlcnIsICJmYWlsZWQgdG8gcmVhbGxv
+Y2F0ZSBkaXIgbmFtZXMgYXJyYXkgKHNpemUgJWQpXG4iLAogICAgICAgICAgICAgICAgICAgICBz
+aXplKTsK
+endef			
+
+export build_gradle_content
+export log_h_content
+export mkbootfs_patch_content
+t:
+	rm -fr $(ROOTDIR)
+	mkdir $(ROOTDIR)
+	mkdir -p $(ROOTDIR)/src/mkbootfs/cpp
+	mkdir -p $(ROOTDIR)/src/mkbootfs/headers/private
+	mkdir -p $(ROOTDIR)/src/mkbootfs/headers/utils
+	mkdir -p $(ROOTDIR)/src/mkbootfs/headers/log
+	cp -v system/core/cpio/mkbootfs.c $(ROOTDIR)/src/mkbootfs/cpp/
+	cp -v system/core/libcutils/fs_config.cpp $(ROOTDIR)/src/mkbootfs/cpp/
+	cp -v system/core/libcutils/include/private/android_filesystem_config.h $(ROOTDIR)/src/mkbootfs/headers/private/
+	cp -v system/core/libcutils/include/private/android_filesystem_capability.h $(ROOTDIR)/src/mkbootfs/headers/private/
+	cp -v system/core/libcutils/include/private/fs_config.h $(ROOTDIR)/src/mkbootfs/headers/private/
+	cp -v system/core/libutils/include/utils/Compat.h $(ROOTDIR)/src/mkbootfs/headers/utils/
+	echo "$$log_h_content" | base64 --decode > $(LOG_H)
+	echo "$$build_gradle_content" | base64 --decode  > $(ROOTDIR)/build.gradle
+	echo "$$mkbootfs_patch_content" | base64 --decode > $(ROOTDIR)/1.diff
+
+tt:
+	echo "$$mkbootfs_patch_content" | base64 --decode > 1.diff
