@@ -11,17 +11,24 @@ if [[ $# -eq 0 ]]; then
 fi
 
 operation=$1
+echo arg num: $#
+echo "args: $0 $1 $2"
 
 # Determine which operation to perform
 case $operation in
     "unpack")
-        if [[ $# -eq 3 ]]; then
+        if [[ $# -eq 2 ]]; then
+            file=`realpath $2`
+            dir=`realpath out`
+            cd ${baseDir}/../../../
+            gradle unpack --args="unpackInternal $file $dir"
+        elif [[ $# -eq 3 ]]; then
             file=`realpath $2`
             dir=`realpath $3`
-            cd ${baseDir}/../
+            cd ${baseDir}/../../../
             gradle unpack --args="unpackInternal $file $dir"
         else
-            cd ${baseDir}/../
+            cd ${baseDir}/../../../
             gradle unpack
         fi
         ;;
@@ -29,10 +36,10 @@ case $operation in
         if [[ $# -eq 3 ]]; then
             dir=`realpath $2`
             file=`realpath $3`
-            cd ${baseDir}/../
+            cd ${baseDir}/../../../
             gradle pack --args="packInternal $dir $file"
         else
-            cd ${baseDir}/../
+            cd ${baseDir}/../../../
             gradle pack
         fi
         ;;

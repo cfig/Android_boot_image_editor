@@ -26,6 +26,8 @@ data class MiscImage(
                     ret.virtualAB = VirtualABMessage(fis)
                 } catch (e: IllegalArgumentException) {
                     log.info(e.toString())
+                } catch (e: IllegalStateException) {
+                    log.info(e.toString())
                 }
             }
             FileInputStream(fileName).use { fis ->

@@ -38,7 +38,9 @@ known_list = [
     "vendor_boot.img",
     "vendor_dlkm.img",
     "vendor.img",
-    "vendor_kernel_boot.img"
+    "vendor_kernel_boot.img",
+    "odm.img",
+    "recovery.img",
     ]
 
 unknown_list = [
@@ -67,6 +69,10 @@ unknown_list = [
     "ldfw.img", #Pixel8a
     "pbl.img", #Pixel8a
     "tzsw.img", #Pixel8a
+    "logo.img", #ADT-3
+    "super_empty_all.img", #ADT-3
+    "bootloader.img", #many
+    "dt.img",
     ]
 
 tmp2 = "tmp2"

@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory
 import rom.misc.MiscImage
 import java.io.File
 import java.io.RandomAccessFile
+import kotlin.io.nameWithoutExtension
 import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
 
@@ -63,7 +64,7 @@ class MiscImgParser : IPackable {
         log.info("${out.name} is ready")
     }
 
-    override fun flash(fileName: String, deviceName: String) {
+    fun flash(fileName: String) {
         val stem = fileName.substring(0, fileName.indexOf("."))
         super.flash("$fileName.new", stem)
     }
@@ -72,8 +73,8 @@ class MiscImgParser : IPackable {
         super.`@verify`(fileName)
     }
 
-    override fun pull(fileName: String, deviceName: String) {
-        super.pull(fileName, deviceName)
+    fun pull(fileName: String) {
+        super.pull(fileName, File(fileName).nameWithoutExtension)
     }
 
     fun clear(fileName: String) {

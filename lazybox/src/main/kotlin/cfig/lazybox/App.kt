@@ -24,6 +24,8 @@ fun main(args: Array<String>) {
         println("tracecmd : analyze trace-cmd report")
         println("cpuinfo  : get cpu info from /sys/devices/system/cpu/")
         println("sysinfo  : get overall system info from Android")
+        println("\nIncubating usage:")
+        println("apps     : get apk file list from Android")
         exitProcess(0)
     }
     if (args[0] == "cpuinfo") {
@@ -64,5 +66,11 @@ fun main(args: Array<String>) {
             log.error("Usage: split <workdir> <part_name>")
         }
         CompileCommand().run(args[1], args[2])
+    }
+    if (args[0] == "apps") {
+        AppList.retrieveList()
+    }
+    if (args[0] == "x") {
+        AMS.computeRankAndBucket(AMS.getProcRank(), AMS.getStandbyBucket2())
     }
 }

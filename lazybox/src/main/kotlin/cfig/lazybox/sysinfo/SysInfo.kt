@@ -17,21 +17,6 @@ import kotlin.io.path.writeText
 import java.io.ByteArrayOutputStream
 
 class SysInfo {
-    private fun runAndWrite(cmd: String, outStream: OutputStream, check: Boolean) {
-        Helper.powerRun2(cmd, null).let {
-            if (it[0] as Boolean) {
-                outStream.write(it[1] as ByteArray)
-            } else {
-                if (check) {
-                    log.warn(String(it[1] as ByteArray))
-                    throw RuntimeException(String(it[2] as ByteArray))
-                } else {
-                    log.warn(String(it[1] as ByteArray))
-                    log.warn(String(it[2] as ByteArray))
-                }
-            }
-        }
-    }
 
     fun makeTar(tarFile: String, srcDir: String, fmt: String) {
         val pyScript =
@@ -153,5 +138,22 @@ makeTar("%s", "%s")
 
     companion object {
         private val log = LoggerFactory.getLogger(SysInfo::class.java)
+
+        fun runAndWrite(cmd: String, outStream: OutputStream, check: Boolean) {
+            Helper.powerRun2(cmd, null).let {
+                if (it[0] as Boolean) {
+                    outStream.write(it[1] as ByteArray)
+                } else {
+                    if (check) {
+                        log.warn(String(it[1] as ByteArray))
+                        log.warn(String(it[2] as ByteArray))
+                        throw RuntimeException(String(it[2] as ByteArray))
+                    } else {
+                        outStream.write(it[1] as ByteArray)
+                        outStream.write(it[2] as ByteArray)
+                    }
+                }
+            }
+        }
     }
 }

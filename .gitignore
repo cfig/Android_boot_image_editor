@@ -17,3 +17,10 @@ helper/build/
 lazybox/build/
 avbImpl/build/
 bbootimg/build/
+aosp/libsparse/sparse/build/
+aosp/libsparse/simg2simg/build/
+aosp/apksigner/bin/
+aosp/boot_signer/bin/
+bbootimg/bin/
+helper/bin/
+build/
