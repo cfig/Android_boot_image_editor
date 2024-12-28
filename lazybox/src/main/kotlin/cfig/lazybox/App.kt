@@ -68,7 +68,7 @@ fun main(args: Array<String>) {
         CompileCommand().run(args[1], args[2])
     }
     if (args[0] == "apps") {
-        AppList.retrieveList()
+        //AppList.retrieveList()
     }
     if (args[0] == "x") {
         AMS.computeRankAndBucket(AMS.getProcRank(), AMS.getStandbyBucket2())
