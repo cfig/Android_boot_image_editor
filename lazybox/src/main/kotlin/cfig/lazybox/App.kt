@@ -70,7 +70,13 @@ fun main(args: Array<String>) {
     if (args[0] == "apps") {
         //AppList.retrieveList()
     }
+    if (args[0] == "rel") {
+        ImageRelease.run()
+    }
     if (args[0] == "x") {
         AMS.computeRankAndBucket(AMS.getProcRank(), AMS.getStandbyBucket2())
+    }
+    if (args[0] == "mount") {
+        MountAnalyzer().run()
     }
 }
