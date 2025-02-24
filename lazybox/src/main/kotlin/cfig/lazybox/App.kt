@@ -79,4 +79,8 @@ fun main(args: Array<String>) {
     if (args[0] == "mount") {
         MountAnalyzer().run()
     }
+    if (args[0] == "booting") {
+        //BootingParser.run()
+        BootingParser.run2()
+    }
 }

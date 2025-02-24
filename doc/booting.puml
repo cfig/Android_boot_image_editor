@@ -1,0 +1,15 @@
+@startuml
+participant init
+participant Service
+participant "Service Started" as C
+participant "Command" as D
+
+init -> Service: +ueventd
+Service -> C: ueventd started
+
+init -> Service: +apexd-bootstrap
+Service -> C: apexd-bootstrap started
+
+init -> D !!: 'mkdir /acct/uid'
+init -> D: update_linker_config
+@enduml

@@ -14,13 +14,16 @@ operation=$1
 echo arg num: $#
 echo "args: $0 $1 $2"
 
+source_code_dir=/home/yu/work/boot
 # Determine which operation to perform
+set -x
 case $operation in
     "unpack")
+        cd ${source_code_dir}
+        pwd
         if [[ $# -eq 2 ]]; then
             file=`realpath $2`
             dir=`realpath out`
-            cd ${baseDir}/../../../
             gradle unpack --args="unpackInternal $file $dir"
         elif [[ $# -eq 3 ]]; then
             file=`realpath $2`
@@ -33,13 +36,16 @@ case $operation in
         fi
         ;;
     "pack")
+        pwd
         if [[ $# -eq 3 ]]; then
             dir=`realpath $2`
             file=`realpath $3`
-            cd ${baseDir}/../../../
+            #cd ${baseDir}/../../../
+            cd ${source_code_dir}
             gradle pack --args="packInternal $dir $file"
         else
-            cd ${baseDir}/../../../
+            #cd ${baseDir}/../../../
+            cd ${source_code_dir}
             gradle pack
         fi
         ;;
