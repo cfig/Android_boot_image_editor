@@ -30,8 +30,58 @@ class Signer {
     companion object {
         private val log = LoggerFactory.getLogger(Signer::class.java)
 
+        fun signAVB2(inFile: String, //"$output.clear"
+                     outFile: String, //"$output.signed"
+                     aiFile: String, //AVBInfo
+                     imageSize: Long,
+                     avbtool: String) {
+            log.info("Adding hash_footer with verified-boot 2.0 style: $inFile -> $outFile")
+            val ai = ObjectMapper().readValue(File(aiFile), AVBInfo::class.java)
+            val alg = Algorithms.get(ai.header!!.algorithm_type)
+            val bootDesc = ai.auxBlob!!.hashDescriptors[0]
+            val newAvbInfo = ObjectMapper().readValue(File(aiFile), AVBInfo::class.java)
+
+            //our signer
+            File(inFile).copyTo(File(outFile), overwrite = true)
+            Avb().addHashFooter(outFile,
+                imageSize,
+                partition_name = bootDesc.partition_name,
+                newAvbInfo = newAvbInfo)
+            //original signer
+            val cmdPrefix = if (EnvironmentVerifier().isWindows) "python " else ""
+            CommandLine.parse("$cmdPrefix$avbtool add_hash_footer").apply {
+                addArguments("--image ${outFile}2") //boot.img.signed2
+                addArguments("--flags ${ai.header!!.flags}")
+                addArguments("--partition_size ${imageSize}")
+                addArguments("--salt ${Helper.toHexString(bootDesc.salt)}")
+                addArguments("--partition_name ${bootDesc.partition_name}")
+                addArguments("--hash_algorithm ${bootDesc.hash_algorithm}")
+                addArguments("--algorithm ${alg!!.name}")
+                addArguments("--rollback_index ${ai.header!!.rollback_index}")
+                if (alg.defaultKey.isNotBlank()) {
+                    addArguments("--key ${alg.defaultKey}")
+                }
+                newAvbInfo.auxBlob?.let { newAuxblob ->
+                    newAuxblob.propertyDescriptors.forEach { newProp ->
+                        addArguments(arrayOf("--prop", "${newProp.key}:${newProp.value}"))
+                    }
+                }
+                addArgument("--internal_release_string")
+                addArgument(ai.header!!.release_string, false)
+                log.info(this.toString())
+
+                File(inFile).copyTo(File("${outFile}2"), overwrite = true)
+                DefaultExecutor().execute(this)
+            }
+            Helper.assertFileEquals(outFile, "${outFile}2")
+            File("${outFile}2").delete()
+            //TODO: decide what to verify
+            //Parser.verifyAVBIntegrity(cfg.info.output + ".signed", avbtool)
+            //Parser.verifyAVBIntegrity(cfg.info.output + ".signed2", avbtool)
+        }
+
         fun signAVB(output: String, imageSize: Long, avbtool: String) {
-            log.info("Adding hash_footer with verified-boot 2.0 style")
+            log.info("Adding hash_footer with verified-boot 2.0 style: $output")
             val ai = ObjectMapper().readValue(File(getJsonFileName(output)), AVBInfo::class.java)
             val alg = Algorithms.get(ai.header!!.algorithm_type)
             val bootDesc = ai.auxBlob!!.hashDescriptors[0]

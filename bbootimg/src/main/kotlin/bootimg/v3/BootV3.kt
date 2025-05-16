@@ -22,6 +22,7 @@ import cfig.bootimg.Common
 import cfig.utils.EnvironmentVerifier
 import cfig.bootimg.Common.Companion.deleleIfExists
 import cfig.bootimg.Common.Companion.getPaddingSize
+import cfig.bootimg.Common.Companion.shortenPath
 import cfig.bootimg.Signer
 import cfig.helper.Helper
 import cfig.helper.Dumpling
@@ -228,22 +229,26 @@ data class BootV3(
         }
 
         if (fileName != info.role) {
-            Helper.setProp("out.file", fileName)
             if (bSigningNeeded) {
+                log.info("x1")
+                Helper.setProp("out.file", "$fileName.signed")
                 //@formatter:off
                 File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".signed"))
-                    .copyTo(File(fileName), true)
+                    .copyTo(File(Helper.prop("out.file")!!), true)
                 //@formatter:on
-                log.info("Signed image saved as $fileName")
+                log.info("Signed image saved as " + Helper.prop("out.file"))
             } else {
+                log.info("x2")
+                Helper.setProp("out.file", fileName)
                 //@formatter:off
                 File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".clear"))
-                    .copyTo(File(fileName), true)
+                    .copyTo(File(Helper.prop("out.file")!!), true)
                 //@formatter:on
-                log.info("Unsigned image saved as $fileName")
+                log.info("Unsigned image saved as " + Helper.prop("out.file"))
             }
         } else {
             if (bSigningNeeded) {
+                log.info("x3")
                 Helper.setProp("out.file", info.role + ".signed")
                 //@formatter:off
                 File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".signed"))
@@ -251,6 +256,7 @@ data class BootV3(
                 //@formatter:on
                 log.info("Signed image saved as ${info.role}.signed")
             } else {
+                log.info("x4")
                 Helper.setProp("out.file", info.role + ".clear")
                 //@formatter:off
                 File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".clear"))
@@ -385,27 +391,27 @@ data class BootV3(
         }
         val tab = AsciiTable().let {
             it.addRule()
-            it.addRow("image info", Helper.joinPath(workDir!!, info.role.removeSuffix(".img") + ".json"))
-            prints.add(Pair("image info", Helper.joinPath(workDir, info.role.removeSuffix(".img") + ".json")))
+            it.addRow("image info", shortenPath(Helper.joinPath(workDir!!, info.role.removeSuffix(".img") + ".json")))
+            prints.add(Pair("image info", shortenPath(Helper.joinPath(workDir, info.role.removeSuffix(".img") + ".json"))))
             it.addRule()
             if (this.kernel.size > 0) {
-                it.addRow("kernel", this.kernel.file)
-                prints.add(Pair("kernel", this.kernel.file))
+                it.addRow("kernel", shortenPath(this.kernel.file))
+                prints.add(Pair("kernel", shortenPath(this.kernel.file)))
                 File(Helper.joinPath(workDir, Helper.prop("kernelVersionStem")!!)).let { kernelVersionFile ->
                     if (kernelVersionFile.exists()) {
-                        it.addRow("\\-- version " + kernelVersionFile.readLines().toString(), kernelVersionFile.path)
+                        it.addRow("\\-- version " + kernelVersionFile.readLines().toString(), shortenPath( kernelVersionFile.path))
                         prints.add(
                             Pair(
                                 "\\-- version " + kernelVersionFile.readLines().toString(),
-                                kernelVersionFile.path
+                                shortenPath(kernelVersionFile.path)
                             )
                         )
                     }
                 }
                 File(Helper.joinPath(workDir, Helper.prop("kernelConfigStem")!!)).let { kernelConfigFile ->
                     if (kernelConfigFile.exists()) {
-                        it.addRow("\\-- config", kernelConfigFile.path)
-                        prints.add(Pair("\\-- config", kernelConfigFile.path))
+                        it.addRow("\\-- config", shortenPath(kernelConfigFile.path))
+                        prints.add(Pair("\\-- config", shortenPath(kernelConfigFile.path)))
                     }
                 }
                 it.addRule()
@@ -442,11 +448,11 @@ data class BootV3(
             File(Avb.getJsonFileName("sig.boot")).let { jsonFile ->
                 if (jsonFile.exists()) {
                     it.addRow("GKI signature 2.0", this.bootSignature.file)
-                    it.addRow("\\-- boot", jsonFile.path)
+                    it.addRow("\\-- boot", shortenPath(jsonFile.path))
                     it.addRow("\\------ signing key", Avb.inspectKey(mapper.readValue(jsonFile, AVBInfo::class.java)))
                     //basic
                     prints.add(Pair("GKI signature 2.0", this.bootSignature.file))
-                    prints.add(Pair("\\-- boot", jsonFile.path))
+                    prints.add(Pair("\\-- boot", shortenPath(jsonFile.path)))
                     prints.add(
                         Pair(
                             "\\------ signing key",
@@ -458,19 +464,19 @@ data class BootV3(
             File(Avb.getJsonFileName("sig.kernel")).let { jsonFile ->
                 if (jsonFile.exists()) {
                     val readBackAvb = mapper.readValue(jsonFile, AVBInfo::class.java)
-                    it.addRow("\\-- kernel", jsonFile.path)
+                    it.addRow("\\-- kernel", shortenPath(jsonFile.path))
                     it.addRow("\\------ signing key", Avb.inspectKey(readBackAvb))
                     it.addRule()
                     //basic
-                    prints.add(Pair("\\-- kernel", jsonFile.path))
+                    prints.add(Pair("\\-- kernel", shortenPath(jsonFile.path)))
                     prints.add(Pair("\\------ signing key", Avb.inspectKey(readBackAvb)))
                 }
             }
 
             //AVB info
             Avb.getJsonFileName(info.role).let { jsonFile ->
-                it.addRow("AVB info", if (File(jsonFile).exists()) jsonFile else "NONE")
-                prints.add(Pair("AVB info", if (File(jsonFile).exists()) jsonFile else "NONE"))
+                it.addRow("AVB info", if (File(jsonFile).exists()) shortenPath(jsonFile) else "NONE")
+                prints.add(Pair("AVB info", if (File(jsonFile).exists()) shortenPath(jsonFile) else "NONE"))
                 if (File(jsonFile).exists()) {
                     mapper.readValue(File(jsonFile), AVBInfo::class.java).let { ai ->
                         it.addRow("\\------ signing key", Avb.inspectKey(ai))
@@ -487,10 +493,10 @@ data class BootV3(
             if (File(vbmetaCompanion).exists()) {
                 log.warn("XXXX: Found vbmeta.img, parsing ...")
                 //basic
-                prints.add(Pair("vbmeta.img", Avb.getJsonFileName("vbmeta.img")))
+                prints.add(Pair("vbmeta.img", shortenPath(Avb.getJsonFileName("vbmeta.img"))))
                 //table
                 it.addRule()
-                it.addRow("vbmeta.img", Avb.getJsonFileName("vbmeta.img"))
+                it.addRow("vbmeta.img", shortenPath(Avb.getJsonFileName("vbmeta.img")))
                 it.addRule()
                 "\n" + it.render()
             } else {

@@ -20,6 +20,7 @@ import cfig.bootimg.cpio.AndroidCpio
 import rom.fdt.DTC
 import cfig.helper.Helper
 import cfig.helper.ZipHelper
+import cfig.packable.BootImgParser
 import cfig.utils.KernelExtractor
 import com.github.freva.asciitable.HorizontalAlign
 import org.apache.commons.exec.CommandLine
@@ -32,6 +33,8 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 import java.lang.NumberFormatException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -51,6 +54,12 @@ class Common {
     companion object {
         private val log = LoggerFactory.getLogger(Common::class.java)
         private const val MAX_ANDROID_VER = 11
+
+        val loadProperties: (String) -> Properties = { fileName ->
+            Properties().apply {
+                File(fileName).inputStream().use { load(it) }
+            }
+        }
 
         @Throws(IllegalArgumentException::class)
         fun packOsVersion(x: String?): Int {
@@ -423,19 +432,24 @@ class Common {
             )
         }
 
-        fun printPackSummary(imageName: String) {
+        fun printPackSummary(imageName: String, outFile: String? = null) {
             val prints: MutableList<Pair<String, String>> = mutableListOf()
             val tableHeader = de.vandermeer.asciitable.AsciiTable().apply {
                 addRule(); addRow("What", "Where"); addRule()
             }
             val tab = de.vandermeer.asciitable.AsciiTable().let {
                 it.addRule()
-                if (File("$imageName.signed").exists()) {
-                    it.addRow("re-packed $imageName", "$imageName.signed")
-                    prints.add(Pair("re-packed $imageName", "$imageName.signed"))
+                if (outFile != null) {
+                    it.addRow("re-packed $imageName", outFile)
+                    prints.add(Pair("re-packed $imageName", outFile))
                 } else {
-                    it.addRow("re-packed $imageName", "$imageName.clear")
-                    prints.add(Pair("re-packed $imageName", "$imageName.clear"))
+                    if (File("$imageName.signed").exists()) {
+                        it.addRow("re-packed $imageName", "$imageName.signed")
+                        prints.add(Pair("re-packed $imageName", "$imageName.signed"))
+                    } else {
+                        it.addRow("re-packed $imageName", "$imageName.clear")
+                        prints.add(Pair("re-packed $imageName", "$imageName.clear"))
+                    }
                 }
                 it.addRule()
                 it
@@ -454,6 +468,31 @@ class Common {
                 log.info("\n" + Common.table2String(prints))
             } else {
                 log.info("\n\t\t\tPack Summary of ${imageName}\n{}\n{}", tableHeader.render(), tab.render())
+            }
+        }
+
+        /*
+            be_caller_dir: set in "be" script, to support out of tree invocation
+         */
+        fun shortenPath(fullPath: String, inCurrentPath: String = System.getProperty("user.dir")): String {
+            val currentPath = System.getenv("be_caller_dir") ?: inCurrentPath
+            val full = Paths.get(fullPath).normalize().toAbsolutePath()
+            val base = Paths.get(currentPath).normalize().toAbsolutePath()
+            return try {
+                base.relativize(full).toString()
+            } catch (e: IllegalArgumentException) {
+                full.toString()
+            }
+        }
+
+        fun String.toShortenPath(inCurrentPath: String = System.getProperty("user.dir")): String {
+            val currentPath = System.getenv("be_caller_dir") ?: inCurrentPath
+            val full = Paths.get(this).normalize().toAbsolutePath()
+            val base = Paths.get(currentPath).normalize().toAbsolutePath()
+            return try {
+                base.relativize(full).toString()
+            } catch (e: IllegalArgumentException) {
+                full.toString()
             }
         }
 
@@ -484,6 +523,25 @@ class Common {
             } else {
                 log.info("\n\t\t\tPack Summary of ${imageName}\n{}\n{}", tableHeader.render(), tab.render())
             }
+        }
+
+        fun createWorkspaceIni(fileName: String) {
+            //create workspace file
+            val workspaceFile = File(Helper.prop("workDir"), "workspace.ini").canonicalPath
+            try {
+                FileOutputStream(workspaceFile).use { output ->
+                    Properties().also {
+                        it.setProperty("file", fileName)
+                        it.setProperty("workDir", Helper.prop("workDir"))
+                        it.setProperty("role", File(fileName).name)
+                        it.store(output, "unpackInternal configuration")
+                    }
+                    log.info("workspace file created: $workspaceFile")
+                }
+            } catch (e: IOException) {
+                log.error("error writing workspace file: ${e.message}")
+            }
+            //create workspace file done
         }
     }
 }

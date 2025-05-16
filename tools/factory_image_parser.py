@@ -73,6 +73,12 @@ unknown_list = [
     "super_empty_all.img", #ADT-3
     "bootloader.img", #many
     "dt.img",
+    "fastboot.img", #anon
+    "fastlogo.img", #anon
+    "bl.img", #anon
+    "tzl.img", #anon
+    "preboot.img", #anon
+    "tzk.img", #anon
     ]
 
 tmp2 = "tmp2"
