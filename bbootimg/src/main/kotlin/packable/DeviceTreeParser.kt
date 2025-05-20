@@ -1,6 +1,7 @@
 package packable
 
 import cfig.bootimg.Common
+import cfig.bootimg.v3.VendorBoot
 import cfig.helper.Helper
 import cfig.helper.Helper.Companion.check_call
 import cfig.helper.Helper.Companion.check_output
@@ -15,13 +16,24 @@ class DeviceTreeParser : IPackable {
     override fun capabilities(): List<String> {
         return listOf("^.*\\.dtb$")
     }
+
     override val loopNo: Int
         get() = 1
 
     override fun unpack(fileName: String) {
-        super.clear()
-        log.info("unpacking $fileName")
-        val outFile = workDir + fileName.removeSuffix(".dtb") + "." + Helper.prop("config.dts_suffix")
+        unpackInternal(fileName, Helper.prop("workDir")!!)
+    }
+
+    fun unpackInternal(fileName: String, unpackDir: String) {
+        //set workdir
+        log.info("unpackInternal(fileName: $fileName, unpackDir: $unpackDir)")
+        Helper.setProp("workDir", unpackDir)
+        clear()
+        //create workspace file
+        Common.createWorkspaceIni(fileName)
+        //create workspace file done
+
+        val outFile = File(workDir, File(fileName).nameWithoutExtension + "." + Helper.prop("config.dts_suffix")).path
         DTC().decompile(fileName, outFile)
 
         //print summary
@@ -32,15 +44,26 @@ class DeviceTreeParser : IPackable {
     }
 
     override fun pack(fileName: String) {
-        log.info("packing $fileName")
-        val outFile = workDir + fileName.removeSuffix(".dtb") + "." + Helper.prop("config.dts_suffix")
-        check(DTC().compile(outFile, "$fileName.new")) { "fail to compile dts" }
+        packInternal(Helper.prop("workDir")!!, fileName)
+    }
+
+    fun packInternal(workspace: String, outFileName: String) {
+        log.info("packInternal($workspace, $outFileName)")
+        Helper.setProp("workDir", workspace)
+        //workspace+cfg
+        val iniRole = Common.loadProperties(File(workspace, "workspace.ini").canonicalPath).getProperty("role")
+        val dtsSrc = File(workDir, File(iniRole).nameWithoutExtension + "." + Helper.prop("config.dts_suffix")).path
+
+        val origFile = File(workDir, File(outFileName).name + ".orig").path
+        log.info("COPY $outFileName -> $origFile")
+        File(outFileName).copyTo(File(origFile), overwrite = true)
+        check(DTC().compile(dtsSrc, outFileName)) { "fail to compile dts" }
 
         //print summary
         val prints: MutableList<Pair<String, String>> = mutableListOf()
-        prints.add(Pair("DTS", outFile))
-        prints.add(Pair("updated DTB", "$fileName.new"))
-        log.info("\n\t\t\tPack Summary of {}\n{}\n", fileName, Common.table2String(prints))
+        prints.add(Pair("DTS", dtsSrc))
+        prints.add(Pair("updated DTB", outFileName))
+        log.info("\n\t\t\tPack Summary of {}\n{}\n", outFileName, Common.table2String(prints))
     }
 
     fun pull(fileName: String) {

@@ -14,10 +14,12 @@
 
 package cfig.packable
 
+import cfig.helper.Helper
 import org.slf4j.LoggerFactory
 import packable.DeviceTreeParser
 import rom.sparse.SparseImgParser
 import java.io.File
+import java.util.Properties
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -28,6 +30,12 @@ class PackableLauncher
 
 fun main(args: Array<String>) {
     val log = LoggerFactory.getLogger(PackableLauncher::class.java)
+    val devLog = LoggerFactory.getLogger("XXXX")
+    val loadProperties: (String) -> Properties = { fileName ->
+        Properties().apply {
+            File(fileName).inputStream().use { load(it) }
+        }
+    }
     val packablePool = mutableMapOf<List<String>, KClass<IPackable>>()
     listOf(
         BootImgParser(),
@@ -44,25 +52,43 @@ fun main(args: Array<String>) {
         packablePool.put(it.capabilities(), it::class as KClass<IPackable>)
     }
     packablePool.forEach {
-        log.debug("" + it.key + "/" + it.value)
+        log.info("" + it.key + "/" + it.value)
     }
     var targetFile: String? = null
     var targetHandler: KClass<IPackable>? = null
+    var targetDir: String? = null
 
-    log.info("XXXX: args: " + args.asList().toString())
+    devLog.info("args: " + args.asList().toString())
+    args.forEachIndexed { index, s ->
+        devLog.info("  arg: #$index - $s")
+    }
 
     run found@{
         for (currentLoopNo in 0..1) { //currently we have only 2 loops
+            devLog.info("loop #" + currentLoopNo)
             if (args.size > 1) { // manual mode
-                targetFile = if (File(args[1]).isFile) {
+                devLog.info("manual mode")
+                targetFile = if (File(args[1]).isFile) { //unpack
                     File(args[1]).canonicalPath
-                } else if (File(args[1]  + "/role").isFile) {
-                    File(args[1] + "/role").readText().trim()
-                } else {
-                    log.error("Not sure of what to do: " + args.asList().toString())
+                } else if (File(args[1]).isDirectory and File(args[1], "workspace.ini").isFile) { //pack
+                    loadProperties(File(args[1], "workspace.ini").canonicalPath).getProperty("role")
+                } else { //wrong
+                    log.error("Not a file: " + args[1])
                     exitProcess(1)
                 }
-                log.warn("manual mode: args= ${args[1]}, $targetFile")
+                devLog.warn("manual mode: file=$targetFile")
+                targetDir = when (args.size) {
+                    2 -> if (File(args[1]).isDirectory and File(args[1], "workspace.ini").isFile) { //arg = outDir
+                        File(args[1]).canonicalPath
+                    } else  {
+                        Helper.prop("workDir") // arg  = outDir
+                    }
+                    3 -> File(args[2]).canonicalPath // arg = file
+                    else -> {
+                        throw IllegalArgumentException("too many args")
+                    }
+                }
+                devLog.warn("manual mode: file=$targetFile, dir=$targetDir")
                 packablePool
                     .filter { it.value.createInstance().loopNo == currentLoopNo }
                     .forEach { p ->
@@ -75,14 +101,15 @@ fun main(args: Array<String>) {
                         }
                     }
             } else { // lazy mode
+                devLog.info("lazy mode (in current dir)")
                 File(".").listFiles()!!.forEach { file ->
                     packablePool
                         .filter { it.value.createInstance().loopNo == currentLoopNo }
                         .forEach { p ->
                             for (item in p.key) {
                                 if (Pattern.compile(item).matcher(file.name).matches()) {
-                                    log.debug("Found: " + file.name + ", " + item)
-                                    targetFile = file.name
+                                    log.info("Found: " + file.name + ", " + item)
+                                    targetFile = File(file.name).canonicalPath
                                     targetHandler = p.value
                                     return@found
                                 }
@@ -140,43 +167,26 @@ fun main(args: Array<String>) {
         log.warn("'${args[0]}' sequence initialized")
 
         log.warn("XXXX: args.size: ${args.size}")
-        val convertedArgs = args.copyOf().apply { set(0, targetFile!!) }
+        val c = (if (args.size == 1) { //lazy mode
+            args.drop(1).toMutableList().apply {
+                add(targetFile!!)
+                //add(System.getProperty("user.dir"))
+            }
+        } else {
+            args.drop(1)
+        }).toTypedArray()
+        val convertedArgs = c
+        println("clazz = " + it.simpleName)
+        println("func = " + functions[0])
+        println("orig args:")
+        args.forEachIndexed { index, s ->
+            println("$index: $s")
+        }
+        println("Converted args:")
+        convertedArgs.forEachIndexed { index, s ->
+            println("$index: $s")
+        }
         functions[0].call(it.createInstance(), *convertedArgs)
-
-/*
-        val reflectRet = when (functions[0].parameters.size) {
-            1 -> {
-                log.warn("1: call null")
-                functions[0].call(it.createInstance())
-            }
-
-            2 -> {
-                log.warn("2: call $targetFile")
-                functions[0].call(it.createInstance(), targetFile!!)
-            }
-
-            3 -> {
-                if (args.size != 2) {
-                    log.info("invoke: ${it.qualifiedName}, $targetFile, " + targetFile!!.removeSuffix(".img"))
-                    functions[0].call(it.createInstance(), targetFile!!, targetFile!!.removeSuffix(".img"))
-                } else {
-                    log.info("invoke: ${it.qualifiedName}, $targetFile, " + args[1])
-                    functions[0].call(it.createInstance(), targetFile!!, args[1])
-                }
-            }
-
-            else -> {
-                functions[0].parameters.forEach { kp ->
-                    println("Param: " + kp.index + " " + kp.type + " " + kp.name)
-                }
-                log.error("I am confused by so many parameters")
-                exitProcess(4)
-            }
-        }
-        if (functions[0].returnType.toString() != Unit.toString()) {
-            log.info("ret: $reflectRet")
-        }
-*/
         log.warn("'${args[0]}' sequence completed")
     }
 }

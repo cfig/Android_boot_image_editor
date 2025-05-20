@@ -15,6 +15,7 @@
 package rom.sparse
 
 import avb.blob.Footer
+import cfig.bootimg.Common
 import cfig.helper.Helper
 import cfig.packable.IPackable
 import cfig.packable.VBMetaParser
@@ -38,15 +39,45 @@ class SparseImgParser : IPackable {
     }
 
     override fun unpack(fileName: String) {
+        log.info("unpack(fileName: $fileName)")
+        unpackInternal(fileName, Helper.prop("workDir")!!)
+    }
+
+    fun unpackInternal(fileName: String, unpackDir: String) {
+        //set workdir
+        log.info("unpackInternal(fileName: $fileName, unpackDir: $unpackDir)")
+        Helper.setProp("workDir", unpackDir)
         clear()
+        //create workspace file
+        Common.createWorkspaceIni(fileName)
+        //create workspace file done
         SparseImage
             .parse(fileName)
             .printSummary(fileName)
     }
 
+
     override fun pack(fileName: String) {
         //TODO("not implemented: refer to https://github.com/cfig/Android_boot_image_editor/issues/133")
-        val cfgFile = outDir + fileName.removeSuffix(".img") + ".json"
+        packInternal(Helper.prop("workDir")!!, fileName)
+    }
+
+    fun packInternal(workspace: String, outFileName: String) {
+        log.info("packInternal($workspace, $outFileName)")
+        Helper.setProp("workDir", workspace)
+        //intermediate
+        Helper.joinPath(workspace, "intermediate").also { intermediateDir ->
+            File(intermediateDir).let {
+                if (!it.exists()) {
+                    it.mkdir()
+                }
+            }
+            Helper.setProp("intermediateDir", intermediateDir)
+        }
+        //workspace+cfg
+        val iniRole = Common.loadProperties(File(workspace, "workspace.ini").canonicalPath).getProperty("role")
+        val cfgFile = File(workspace, iniRole.removeSuffix(".img") + ".json").canonicalPath
+        log.info("Loading config from $cfgFile")
         val readBackSi = ObjectMapper().readValue(File(cfgFile), SparseImage::class.java)
         readBackSi
             .pack()

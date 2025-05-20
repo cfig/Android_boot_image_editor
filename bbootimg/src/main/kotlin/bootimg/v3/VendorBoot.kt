@@ -19,18 +19,19 @@ import cc.cfig.io.Struct
 import cfig.Avb
 import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
+import cfig.bootimg.Common.Companion.toShortenPath
 import cfig.bootimg.Signer
 import cfig.helper.Dumpling
 import cfig.helper.Helper
 import cfig.helper.ZipHelper
 import cfig.packable.VBMetaParser
-import rom.fdt.DTC
 import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vandermeer.asciitable.AsciiTable
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.LoggerFactory
+import rom.fdt.DTC
 import java.io.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -265,7 +266,9 @@ data class VendorBoot(
         }
         this.dtb.size = File(this.dtb.file).length().toInt()
         //header
-        FileOutputStream(this.info.role + ".clear", false).use { fos ->
+        val clearFile = Helper.joinPath(Helper.prop("intermediateDir")!!, this.info.role + ".clear")
+        val googleFile = Helper.joinPath(Helper.prop("intermediateDir")!!, this.info.role + ".google")
+        FileOutputStream(clearFile, false).use { fos ->
             val encodedHeader = this.toHeader().encode()
             fos.write(encodedHeader)
             fos.write(ByteArray(Helper.round_to_multiple(encodedHeader.size, this.info.pageSize) - encodedHeader.size))
@@ -303,17 +306,17 @@ data class VendorBoot(
             }
         }
         //write
-        FileOutputStream("${this.info.role}.clear", true).use { fos ->
+        FileOutputStream(clearFile, true).use { fos ->
             fos.write(bf.array(), 0, bf.position())
         }
 
         //google way
-        this.toCommandLine().addArgument(this.info.role + ".google").let {
+        this.toCommandLine().addArgument(googleFile).let {
             log.info(it.toString())
             DefaultExecutor().execute(it)
         }
 
-        Helper.assertFileEquals(this.info.role + ".clear", this.info.role + ".google")
+        Helper.assertFileEquals(clearFile, googleFile)
         return this
     }
 
@@ -321,11 +324,28 @@ data class VendorBoot(
         val avbtool = String.format(Helper.prop("avbtool")!!, "v1.2")
         File(Avb.getJsonFileName(info.role)).let {
             if (it.exists()) {
-                Signer.signAVB(info.role, this.info.imageSize, avbtool)
+                //Signer.signAVB(info.role, this.info.imageSize, avbtool)
+                val clearFile = Helper.joinPath(Helper.prop("intermediateDir")!!, this.info.role + ".clear")
+                val signedFile = Helper.joinPath(Helper.prop("intermediateDir")!!, this.info.role + ".signed")
+                Signer.signAVB2(clearFile,
+                    signedFile,
+                    Avb.getJsonFileName(info.role),
+                    this.info.imageSize,
+                    avbtool
+                )
             } else {
                 log.warn("skip signing of ${info.role}")
             }
         }
+        return this
+    }
+
+    fun postCopy(outFile: String): VendorBoot {
+        val dir = Helper.prop("intermediateDir")!!
+        val signedFile = Helper.joinPath(dir, "${info.role}.signed").takeIf { File(it).exists() }
+            ?: Helper.joinPath(dir, "${info.role}.clear")
+        log.info("COPY $signedFile -> $outFile")
+        File(signedFile).copyTo(File(outFile), overwrite = true)
         return this
     }
 
@@ -416,31 +436,31 @@ data class VendorBoot(
         }
         val tab = AsciiTable().let {
             it.addRule()
-            val imageInfoJsonFile = Helper.joinPath(workDir!!, info.role.removeSuffix(".img") + ".json")
+            val imageInfoJsonFile = Helper.joinPath(workDir!!, info.role.removeSuffix(".img") + ".json").toShortenPath()
             it.addRow("image info", imageInfoJsonFile)
             prints.add(Pair("image info", imageInfoJsonFile))
             it.addRule()
-            it.addRow("ramdisk", this.ramdisk.file)
-            prints.add(Pair("ramdisk", this.ramdisk.file))
+            it.addRow("ramdisk", this.ramdisk.file.toShortenPath())
+            prints.add(Pair("ramdisk", this.ramdisk.file.toShortenPath()))
             if (this.ramdisk_table.size > 0) {
                 this.ramdisk_table.ramdidks.forEachIndexed { index, entry ->
                     //fancy ascii
-                    it.addRow("-- ${entry.type} ramdisk[${index + 1}/${this.ramdisk_table.ramdidks.size}]", entry.file)
-                    it.addRow("------- extracted rootfs", File(workDir, "root.${index + 1}").path)
+                    it.addRow("-- ${entry.type} ramdisk[${index + 1}/${this.ramdisk_table.ramdidks.size}]", entry.file.toShortenPath())
+                    it.addRow("------- extracted rootfs", File(workDir, "root.${index + 1}").path.toShortenPath())
                     //basic ascii
                     //@formatter:off
-                    prints.add(Pair(" -- ${entry.type} ramdisk[${index + 1}/${this.ramdisk_table.ramdidks.size}]", entry.file))
+                    prints.add(Pair(" -- ${entry.type} ramdisk[${index + 1}/${this.ramdisk_table.ramdidks.size}]", entry.file.toShortenPath()))
                     //@formatter:on
-                    prints.add(Pair(" ------- extracted rootfs", File(workDir, "root.${index + 1}").path))
+                    prints.add(Pair(" ------- extracted rootfs", File(workDir, "root.${index + 1}").path.toShortenPath()))
                 }
             } else {
-                it.addRow("\\-- extracted ramdisk rootfs", File(workDir, "root").path)
-                prints.add(Pair("\\-- extracted ramdisk rootfs", File(workDir, "root").path))
+                it.addRow("\\-- extracted ramdisk rootfs", File(workDir, "root").path.toShortenPath())
+                prints.add(Pair("\\-- extracted ramdisk rootfs", File(workDir, "root").path.toShortenPath()))
             }
             it.addRule()
             if (this.dtb.size > 0) {
-                it.addRow("dtb", this.dtb.file)
-                prints.add(Pair("dtb", this.dtb.file))
+                it.addRow("dtb", this.dtb.file.toShortenPath())
+                prints.add(Pair("dtb", this.dtb.file.toShortenPath()))
                 if (File(this.dtb.file + ".0.${dtsSuffix}").exists()) {
                     it.addRow("\\-- decompiled dts [${dtb.dtbList.size}]", dtb.file + "*.${dtsSuffix}")
                     prints.add(Pair("\\-- decompiled dts [${dtb.dtbList.size}]", dtb.file + "*.${dtsSuffix}"))
@@ -451,14 +471,14 @@ data class VendorBoot(
             }
             if (this.bootconfig.size > 0) {
                 it.addRule()
-                it.addRow("bootconfig", this.bootconfig.file)
-                prints.add(Pair("bootconfig", this.bootconfig.file))
+                it.addRow("bootconfig", this.bootconfig.file.toShortenPath())
+                prints.add(Pair("bootconfig", this.bootconfig.file.toShortenPath()))
             }
             it.addRule()
             Avb.getJsonFileName(info.role).let { jsonFile ->
                 if (File(jsonFile).exists()) {
-                    it.addRow("AVB info", jsonFile)
-                    prints.add(Pair("AVB info", jsonFile))
+                    it.addRow("AVB info", jsonFile.toShortenPath())
+                    prints.add(Pair("AVB info", jsonFile.toShortenPath()))
                     mapper.readValue(File(jsonFile), AVBInfo::class.java).let { ai ->
                         it.addRow("\\-- signing key", Avb.inspectKey(ai))
                         prints.add(Pair(" \\-- signing key", Avb.inspectKey(ai)))
@@ -474,8 +494,8 @@ data class VendorBoot(
         val tabVBMeta = AsciiTable().let {
             if (File("vbmeta.img").exists()) {
                 it.addRule()
-                it.addRow("vbmeta.img", Avb.getJsonFileName("vbmeta.img"))
-                prints.add(Pair("vbmeta.img", Avb.getJsonFileName("vbmeta.img")))
+                it.addRow("vbmeta.img", Avb.getJsonFileName("vbmeta.img").toShortenPath())
+                prints.add(Pair("vbmeta.img", Avb.getJsonFileName("vbmeta.img").toShortenPath()))
                 it.addRule()
                 "\n" + it.render()
             } else {
@@ -492,8 +512,8 @@ data class VendorBoot(
         return this
     }
 
-    fun printPackSummary(): VendorBoot {
-        Common.printPackSummary(info.role)
+    fun printPackSummary(outFileName: String): VendorBoot {
+        Common.printPackSummary(info.role, outFileName)
         return this
     }
 

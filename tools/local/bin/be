@@ -2,10 +2,12 @@
 
 baseDir=${0:a:h}
 export baseDir
+be_caller_dir=${PWD}
+export be_caller_dir
 set -e
 
 # Parse command line arguments
-if [[ $# -eq 0 ]]; then
+if [[ $# -lt 2 ]]; then
     echo "Usage: $0 <operation> [<file> <dir>]"
     exit 1
 fi
@@ -13,34 +15,48 @@ fi
 operation=$1
 echo arg num: $#
 echo "args: $0 $1 $2"
+echo "baseDir: $baseDir"
+echo "callerDir: $be_caller_dir"
 
+source_code_dir=/home/yu/work/boot
 # Determine which operation to perform
+set -x
 case $operation in
     "unpack")
         if [[ $# -eq 2 ]]; then
             file=`realpath $2`
             dir=`realpath out`
-            cd ${baseDir}/../../../
+            cd ${source_code_dir}
+            pwd
             gradle unpack --args="unpackInternal $file $dir"
         elif [[ $# -eq 3 ]]; then
             file=`realpath $2`
             dir=`realpath $3`
-            cd ${baseDir}/../../../
+            cd ${source_code_dir}
             gradle unpack --args="unpackInternal $file $dir"
         else
+            echo "Invalid args"
             cd ${baseDir}/../../../
             gradle unpack
         fi
         ;;
     "pack")
-        if [[ $# -eq 3 ]]; then
+        pwd
+        if [[ $# -eq 2 ]]; then
+            dir=`realpath $2`
+            cd ${source_code_dir}
+            file=${be_caller_dir}/$(grep -m1 '^role=' $dir/workspace.ini | cut -d'=' -f2-)
+            gradle pack --args="packInternal $dir $file"
+        elif [[ $# -eq 3 ]]; then
             dir=`realpath $2`
             file=`realpath $3`
-            cd ${baseDir}/../../../
+            cd ${source_code_dir}
             gradle pack --args="packInternal $dir $file"
         else
-            cd ${baseDir}/../../../
-            gradle pack
+            ##cd ${baseDir}/../../../
+            #cd ${source_code_dir}
+            #gradle pack
+            echo "Invalid args"
         fi
         ;;
     *)

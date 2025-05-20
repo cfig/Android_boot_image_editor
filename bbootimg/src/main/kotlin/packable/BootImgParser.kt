@@ -15,6 +15,7 @@
 package cfig.packable
 
 import avb.blob.Footer
+import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.probeHeaderVersion
 import cfig.bootimg.v2.BootV2
 import cfig.bootimg.v2.BootV2Dialects
@@ -45,14 +46,20 @@ class BootImgParser : IPackable {
     }
 
     override fun unpack(fileName: String) {
-        unpackInternal(fileName, fileName, outDir)
+        unpackInternal(fileName, outDir)
     }
 
-    fun unpackInternal(targetFile: String, fileName: String, unpackDir: String) {
-        log.info("unpackInternal(fileName: $fileName, unpackDir: $unpackDir)")
-        Helper.setProp("workDir", unpackDir)
+    // called via reflection
+    fun unpackInternal(inFileName: String, unpackDir: String) {
+        log.info("unpackInternal(fileName: $inFileName, unpackDir: $unpackDir)")
+        val fileName = File(inFileName).canonicalPath
+        Helper.setProp("workDir", File(unpackDir).canonicalPath)
+        log.info("workspace set to $unpackDir")
         clear()
-        File("$outDir/role").writeText(File(File(targetFile).canonicalPath).name)
+        //create workspace file
+        Common.createWorkspaceIni(fileName)
+        //create workspace file done
+
         val hv = probeHeaderVersion(fileName)
         log.info("header version $hv")
         when (hv) {
@@ -85,7 +92,64 @@ class BootImgParser : IPackable {
         }
     }
 
-    fun packInternal(targetFile: String, workspace: String, fileName: String) {
+    // called via reflection
+    fun packInternal(workspace: String, outFileName: String) {
+        log.info("packInternal($workspace, $outFileName)")
+        Helper.setProp("workDir", workspace)
+        val targetFile = outFileName
+        val iniRole = Common.loadProperties(File(workspace, "workspace.ini").canonicalPath).getProperty("role")
+        val cfgFile = File(workspace, iniRole.removeSuffix(".img") + ".json").canonicalPath
+        log.info("Loading config from $cfgFile")
+        if (!File(cfgFile).exists()) {
+            val tab = AsciiTable().let {
+                it.addRule()
+                it.addRow("'$cfgFile' doesn't exist, did you forget to 'unpack' ?")
+                it.addRule()
+                it
+            }
+            log.info("\n{}", tab.render())
+            return
+        }
+
+        val worker =
+            try {
+                ObjectMapper().readValue(File(cfgFile), BootV2::class.java)
+            } catch (e: com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException) {
+                try {
+                    ObjectMapper().readValue(File(cfgFile), BootV3::class.java)
+                } catch (e: com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException) {
+                    null
+                }
+            }
+        if (worker == null) {
+            log.error("no worker available")
+            exitProcess(2)
+        }
+        when (worker) {
+            is BootV2 -> {
+                worker
+                    .pack()
+                    .sign()
+                    .updateVbmeta()
+                    .printPackSummary()
+            }
+
+            is BootV3 -> {
+                worker
+                    .pack()
+                    .sign(targetFile)
+                    .updateVbmeta()
+                    .printPackSummary(worker.info.role)
+            }
+
+            else -> {
+                log.error("unsupported boot image format")
+                exitProcess(2)
+            }
+        }
+    }
+
+    fun packInternalLegacy(targetFile: String, workspace: String, fileName: String) {
         log.info("packInternal(targetFile: $targetFile, fileName: $fileName, workspace: $workspace)")
         Helper.setProp("workDir", workspace)
         val cfgFile = Helper.joinPath(outDir, targetFile.removeSuffix(".img") + ".json")
@@ -140,7 +204,8 @@ class BootImgParser : IPackable {
     }
 
     override fun pack(fileName: String) {
-        packInternal(fileName, outDir, fileName)
+        val targetFile = Common.loadProperties(File(outDir, "workspace.ini").canonicalPath).getProperty("role")
+        packInternal(outDir, targetFile)
     }
 
     fun flash(fileName: String) {

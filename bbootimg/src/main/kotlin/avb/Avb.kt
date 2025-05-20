@@ -206,7 +206,7 @@ class Avb {
                 val readBackInfo = ObjectMapper().readValue(File(getJsonFileName(fileName)), AVBInfo::class.java)
                 val intermediateDir = Helper.joinPath(Helper.prop("workDir")!!, "intermediate")
                 val newHashDesc = if (File(intermediateDir).exists()) {
-                    AVBInfo.parseFrom(Dumpling(Helper.joinPath(intermediateDir, "$fileName.signed")))
+                    AVBInfo.parseFrom(Dumpling(Helper.joinPath(intermediateDir, File("$fileName.signed").name)))
                 } else {
                     //FIXME: before BootV2 supports abe mode
                     AVBInfo.parseFrom(Dumpling("$fileName.signed"))

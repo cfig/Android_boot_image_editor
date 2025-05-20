@@ -16,6 +16,7 @@ package cfig.packable
 
 import avb.AVBInfo
 import cfig.Avb
+import cfig.bootimg.Common
 import cfig.helper.Dumpling
 import cfig.helper.Helper
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -35,20 +36,43 @@ class VBMetaParser : IPackable {
         return listOf("^vbmeta\\.img$", "^vbmeta\\_[a-z]+.img$")
     }
 
+    // lazy mode
     override fun unpack(fileName: String) {
-        File(Helper.prop("workDir")).let {
+        unpackInternal(fileName, Helper.prop("workDir")!!)
+    }
+
+    // manual mode
+    fun unpackInternal(inFileName: String, unpackDir: String) {
+        //common
+        log.info("unpackInternal(fileName: $inFileName, unpackDir: $unpackDir)")
+        val fileName = File(inFileName).canonicalPath
+        Helper.setProp("workDir", File(unpackDir).canonicalPath)
+        //prepare workdir
+        File(Helper.prop("workDir")!!).let {
             if (!it.exists()) {
                 it.mkdirs()
             }
         }
+        //workspace.ini
+        log.info("workspace set to $unpackDir")
+        Common.createWorkspaceIni(fileName, prefix = "vbmeta")
+
         val ai = AVBInfo.parseFrom(Dumpling(fileName)).dumpDefault(fileName)
         log.info("Signing Key: " + Avb.inspectKey(ai))
     }
 
     override fun pack(fileName: String) {
-        val blob = ObjectMapper().readValue(File(Avb.getJsonFileName(fileName)), AVBInfo::class.java).encodePadded()
-        log.info("Writing padded vbmeta to file: $fileName.signed")
-        Files.write(Paths.get("$fileName.signed"), blob, StandardOpenOption.CREATE)
+        packInternal(outDir, fileName)
+    }
+
+    // called via reflection
+    fun packInternal(workspace: String, outFileName: String) {
+        log.info("packInternal(workspace: $workspace, $outFileName)")
+        Helper.setProp("workDir", workspace)
+        val iniRole = Common.loadProperties(File(workspace, "workspace.ini").canonicalPath).getProperty("vbmeta.role")
+        val blob = ObjectMapper().readValue(File(Avb.getJsonFileName(iniRole)), AVBInfo::class.java).encodePadded()
+        log.info("Writing padded vbmeta to file: $outFileName.signed")
+        Files.write(Paths.get("$outFileName.signed"), blob, StandardOpenOption.CREATE)
     }
 
     override fun flash(fileName: String, deviceName: String) {

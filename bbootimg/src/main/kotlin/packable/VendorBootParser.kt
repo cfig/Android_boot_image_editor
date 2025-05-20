@@ -14,6 +14,7 @@
 
 package cfig.packable
 
+import cfig.bootimg.Common
 import cfig.bootimg.v3.VendorBoot
 import cfig.helper.Helper
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -30,19 +31,18 @@ class VendorBootParser : IPackable {
     }
 
     override fun unpack(fileName: String) {
-        clear()
-        val vb = VendorBoot
-            .parse(fileName)
-            .extractImages()
-            .extractVBMeta()
-            .printUnpackSummary()
-        log.debug(vb.toString())
+        log.info("unpack(fileName: $fileName)")
+        unpackInternal(fileName, Helper.prop("workDir")!!)
     }
 
-    fun unpackInternal(targetFile: String, fileName: String, unpackDir: String) {
+    fun unpackInternal(fileName: String, unpackDir: String) {
+        //set workdir
         log.info("unpackInternal(fileName: $fileName, unpackDir: $unpackDir)")
         Helper.setProp("workDir", unpackDir)
         clear()
+        //create workspace file
+        Common.createWorkspaceIni(fileName)
+        //create workspace file done
         val vb = VendorBoot
             .parse(fileName)
             .extractImages()
@@ -52,13 +52,32 @@ class VendorBootParser : IPackable {
     }
 
     override fun pack(fileName: String) {
-        val cfgFile = "$outDir/${fileName.removeSuffix(".img")}.json"
+        log.info("packInternal($fileName)")
+        packInternal(Helper.prop("workDir")!!, fileName)
+    }
+
+    fun packInternal(workspace: String, outFileName: String) {
+        log.info("packInternal($workspace, $outFileName)")
+        Helper.setProp("workDir", workspace)
+        //intermediate
+        Helper.joinPath(workspace, "intermediate").also { intermediateDir ->
+            File(intermediateDir).let {
+                if (!it.exists()) {
+                    it.mkdir()
+                }
+            }
+            Helper.setProp("intermediateDir", intermediateDir)
+        }
+        //workspace+cfg
+        val iniRole = Common.loadProperties(File(workspace, "workspace.ini").canonicalPath).getProperty("role")
+        val cfgFile = File(workspace, iniRole.removeSuffix(".img") + ".json").canonicalPath
         log.info("Loading config from $cfgFile")
         ObjectMapper().readValue(File(cfgFile), VendorBoot::class.java)
             .pack()
             .sign()
+            .postCopy(outFileName)
             .updateVbmeta()
-            .printPackSummary()
+            .printPackSummary(outFileName)
     }
 
     override fun `@verify`(fileName: String) {

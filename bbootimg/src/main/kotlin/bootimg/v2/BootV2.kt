@@ -16,15 +16,14 @@ package cfig.bootimg.v2
 
 import avb.AVBInfo
 import cfig.Avb
-import cfig.bootimg.Common as C
 import cfig.bootimg.Common
 import cfig.bootimg.Common.Companion.deleleIfExists
+import cfig.bootimg.Common.Companion.shortenPath
 import cfig.bootimg.Signer
 import cfig.helper.Dumpling
 import cfig.helper.Helper
 import cfig.helper.ZipHelper
 import cfig.packable.VBMetaParser
-import rom.fdt.DTC
 import cfig.utils.EnvironmentVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.freva.asciitable.HorizontalAlign
@@ -32,11 +31,13 @@ import de.vandermeer.asciitable.AsciiTable
 import org.apache.commons.exec.CommandLine
 import org.apache.commons.exec.DefaultExecutor
 import org.slf4j.LoggerFactory
+import rom.fdt.DTC
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import cfig.bootimg.Common as C
 
 data class BootV2(
     var info: MiscInfo = MiscInfo(),
@@ -95,7 +96,9 @@ data class BootV2(
 
     companion object {
         private val log = LoggerFactory.getLogger(BootV2::class.java)
-        private val workDir = Helper.prop("workDir")
+        private val workDir: () -> String = {
+            Helper.prop("workDir")!!
+        }
         private val mapper = ObjectMapper()
         private val dtsSuffix = Helper.prop("config.dts_suffix")
 
@@ -128,7 +131,7 @@ data class BootV2(
                     }
                 }
                 ret.kernel.let { theKernel ->
-                    theKernel.file = File(workDir, "kernel").path
+                    theKernel.file = File(workDir(), "kernel").path
                     theKernel.size = bh2.kernelLength
                     theKernel.loadOffset = bh2.kernelOffset
                     theKernel.position = ret.getKernelPosition()
@@ -138,28 +141,28 @@ data class BootV2(
                     theRamdisk.loadOffset = bh2.ramdiskOffset
                     theRamdisk.position = ret.getRamdiskPosition()
                     if (bh2.ramdiskLength > 0) {
-                        theRamdisk.file = File(workDir, "ramdisk.img").path
+                        theRamdisk.file = File(workDir(), "ramdisk.img").path
                     }
                 }
                 if (bh2.secondBootloaderLength > 0) {
                     ret.secondBootloader = CommArgs()
                     ret.secondBootloader!!.size = bh2.secondBootloaderLength
                     ret.secondBootloader!!.loadOffset = bh2.secondBootloaderOffset
-                    ret.secondBootloader!!.file = File(workDir, "second").path
+                    ret.secondBootloader!!.file = File(workDir(), "second").path
                     ret.secondBootloader!!.position = ret.getSecondBootloaderPosition()
                 }
                 if (bh2.recoveryDtboLength > 0) {
                     ret.recoveryDtbo = CommArgsLong()
                     ret.recoveryDtbo!!.size = bh2.recoveryDtboLength
                     ret.recoveryDtbo!!.loadOffset = bh2.recoveryDtboOffset //Q
-                    ret.recoveryDtbo!!.file = File(workDir, "recoveryDtbo").path
+                    ret.recoveryDtbo!!.file = File(workDir(), "recoveryDtbo").path
                     ret.recoveryDtbo!!.position = ret.getRecoveryDtboPosition()
                 }
                 if (bh2.dtbLength > 0) {
                     ret.dtb = DtbArgsLong()
                     ret.dtb!!.size = bh2.dtbLength
                     ret.dtb!!.loadOffset = bh2.dtbOffset //Q
-                    ret.dtb!!.file = File(workDir, "dtb").path
+                    ret.dtb!!.file = File(workDir(), "dtb").path
                     ret.dtb!!.position = ret.getDtbPosition()
                 }
             }
@@ -206,7 +209,7 @@ data class BootV2(
 
     fun extractImages(): BootV2 {
         //info
-        mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + info.json), this)
+        mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir(), info.json), this)
         //kernel
         if (kernel.size > 0) {
             Common.dumpKernel(Helper.Slice(info.output, kernel.position.toInt(), kernel.size, kernel.file!!))
@@ -220,15 +223,17 @@ data class BootV2(
         //ramdisk
         if (this.ramdisk.size > 0) {
             val fmt = C.dumpRamdisk(
-                Helper.Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file!!), File(workDir, "root").path
+                Helper.Slice(info.output, ramdisk.position.toInt(), ramdisk.size, ramdisk.file!!),
+                File(workDir(), "root").path
             )
             this.ramdisk.file = this.ramdisk.file!! + ".$fmt"
             if (fmt == "xz") {
-                val checkType = ZipHelper.xzStreamFlagCheckTypeToString(ZipHelper.parseStreamFlagCheckType(this.ramdisk.file!!))
+                val checkType =
+                    ZipHelper.xzStreamFlagCheckTypeToString(ZipHelper.parseStreamFlagCheckType(this.ramdisk.file!!))
                 this.ramdisk.xzFlags = checkType
             }
             //dump info again
-            mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + this.info.json), this)
+            mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir(), this.info.json), this)
         }
         //second bootloader
         secondBootloader?.let {
@@ -254,7 +259,7 @@ data class BootV2(
             this.dtb!!.dtbList = DTC.parseMultiple(dtb!!.file!!)
             log.info("dtb sz = " + this.dtb!!.dtbList.size)
             //dump info again
-            mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir + info.json), this)
+            mapper.writerWithDefaultPrettyPrinter().writeValue(File(workDir(), info.json), this)
 
             //dump dtb items
             DTC.extractMultiple(dtb!!.file!!, this.dtb!!.dtbList)
@@ -285,8 +290,8 @@ data class BootV2(
         }
         val tab = AsciiTable().let {
             it.addRule()
-            it.addRow("image info", workDir + info.output.removeSuffix(".img") + ".json")
-            prints.add(Pair("image info", workDir + info.output.removeSuffix(".img") + ".json"))
+            it.addRow("image info", shortenPath( File(Helper.prop("workDir"), info.output.removeSuffix(".img") + ".json").path))
+            prints.add(Pair("image info", shortenPath(File(workDir(), info.output.removeSuffix(".img") + ".json").path)))
             if (this.info.verify.startsWith("VB2.0")) {
                 it.addRule()
                 val verifyStatus = if (this.info.verify.contains("PASS")) {
@@ -295,8 +300,8 @@ data class BootV2(
                     "verify fail"
                 }
                 Avb.getJsonFileName(info.output).let { jsonFile ->
-                    it.addRow("AVB info [$verifyStatus]", jsonFile)
-                    prints.add(Pair("AVB info [$verifyStatus]", jsonFile))
+                    it.addRow("AVB info [$verifyStatus]", shortenPath(jsonFile))
+                    prints.add(Pair("AVB info [$verifyStatus]", shortenPath(jsonFile)))
                     if (File(jsonFile).exists()) {
                         mapper.readValue(File(jsonFile), AVBInfo::class.java).let { ai ->
                             val inspectRet = Avb.inspectKey(ai)
@@ -311,11 +316,11 @@ data class BootV2(
             //kernel
             it.addRule()
             if (this.kernel.size > 0) {
-                it.addRow("kernel", this.kernel.file)
+                it.addRow("kernel", shortenPath(this.kernel.file!!))
             } else { //only for ramdisk.img, Issue #122
                 it.addRow("kernel", "NONE")
             }
-            prints.add(Pair("kernel", this.kernel.file.toString()))
+            prints.add(Pair("kernel", shortenPath(this.kernel.file.toString())))
             File(Helper.prop("kernelVersionFile")).let { kernelVersionFile ->
                 if (kernelVersionFile.exists()) {
                     it.addRow("\\-- version " + kernelVersionFile.readLines().toString(), kernelVersionFile.path)
@@ -331,10 +336,10 @@ data class BootV2(
             //ramdisk
             if (this.ramdisk.size > 0) {
                 it.addRule()
-                it.addRow("ramdisk", this.ramdisk.file)
-                prints.add(Pair("ramdisk", this.ramdisk.file.toString()))
-                it.addRow("\\-- extracted ramdisk rootfs", File(workDir, "root").path)
-                prints.add(Pair("\\-- extracted ramdisk rootfs", File(workDir, "root").path))
+                it.addRow("ramdisk", shortenPath(this.ramdisk.file!!))
+                prints.add(Pair("ramdisk", shortenPath(this.ramdisk.file.toString())))
+                it.addRow("\\-- extracted ramdisk rootfs", shortenPath(File(workDir(), "root").path))
+                prints.add(Pair("\\-- extracted ramdisk rootfs", shortenPath(File(workDir(), "root").path)))
             }
             //second
             this.secondBootloader?.let { theSecondBootloader ->
@@ -357,11 +362,11 @@ data class BootV2(
                 if (theDtb.size > 0) {
                     val dtbCount = this.dtb!!.dtbList.size
                     it.addRule()
-                    it.addRow("dtb", theDtb.file)
-                    prints.add(Pair("dtb", theDtb.file.toString()))
+                    it.addRow("dtb", theDtb.file?.let { fullPath -> shortenPath(fullPath) })
+                    prints.add(Pair("dtb", shortenPath(theDtb.file.toString())))
                     if (File(theDtb.file + ".0.${dtsSuffix}").exists()) {
-                        it.addRow("\\-- decompiled dts [$dtbCount]", theDtb.file + ".*.${dtsSuffix}")
-                        prints.add(Pair("\\-- decompiled dts [$dtbCount]", theDtb.file + ".*.${dtsSuffix}"))
+                        it.addRow("\\-- decompiled dts [$dtbCount]", shortenPath(theDtb.file!!) + ".*.${dtsSuffix}")
+                        prints.add(Pair("\\-- decompiled dts [$dtbCount]", shortenPath(theDtb.file!!) + ".*.${dtsSuffix}"))
                     }
                 }
             }
@@ -372,8 +377,8 @@ data class BootV2(
         val tabVBMeta = AsciiTable().let {
             if (File("vbmeta.img").exists()) {
                 it.addRule()
-                it.addRow("vbmeta.img", Avb.getJsonFileName("vbmeta.img"))
-                prints.add(Pair("vbmeta.img", Avb.getJsonFileName("vbmeta.img")))
+                it.addRow("vbmeta.img", shortenPath(Avb.getJsonFileName("vbmeta.img")))
+                prints.add(Pair("vbmeta.img", shortenPath(Avb.getJsonFileName("vbmeta.img"))))
                 it.addRule()
                 "\n" + it.render()
             } else {
@@ -382,15 +387,17 @@ data class BootV2(
         }
 
         if (EnvironmentVerifier().isWindows) {
-            log.info("\n" +
-                    com.github.freva.asciitable.AsciiTable.getTable(
-                        com.github.freva.asciitable.AsciiTable.BASIC_ASCII,
-                        prints, mutableListOf(
-                            com.github.freva.asciitable.Column().header("What")
-                                .dataAlign(HorizontalAlign.LEFT)
-                                .with { it.first },
-                            com.github.freva.asciitable.Column().header("Where").with { it.second })
-                    ))
+            log.info(
+                "\n" +
+                        com.github.freva.asciitable.AsciiTable.getTable(
+                            com.github.freva.asciitable.AsciiTable.BASIC_ASCII,
+                            prints, mutableListOf(
+                                com.github.freva.asciitable.Column().header("What")
+                                    .dataAlign(HorizontalAlign.LEFT)
+                                    .with { it.first },
+                                com.github.freva.asciitable.Column().header("Where").with { it.second })
+                        )
+            )
         } else {
             log.info(
                 "\n\t\t\tUnpack Summary of ${info.output}\n{}\n{}{}",
@@ -433,14 +440,14 @@ data class BootV2(
             ramdisk.file = null
             ramdisk.loadOffset = 0
         } else {
-            if (File(this.ramdisk.file!!).exists() && !File(workDir + "root").exists()) {
+            if (File(this.ramdisk.file!!).exists() && !File(workDir(), "root").exists()) {
                 //do nothing if we have ramdisk.img.gz but no /root
                 log.warn("Use prebuilt ramdisk file: ${this.ramdisk.file}")
             } else {
                 File(this.ramdisk.file!!).deleleIfExists()
                 File(this.ramdisk.file!!.removeSuffix(".gz")).deleleIfExists()
                 //Common.packRootfs("${workDir}/root", this.ramdisk.file!!, Common.parseOsMajor(info.osVersion.toString()))
-                Common.packRootfs(File(workDir, "root").path, this.ramdisk.file!!, this.ramdisk.xzFlags)
+                Common.packRootfs(File(workDir(), "root").path, this.ramdisk.file!!, this.ramdisk.xzFlags)
             }
             this.ramdisk.size = File(this.ramdisk.file!!).length().toInt()
         }
@@ -466,18 +473,21 @@ data class BootV2(
             0 -> {
                 Common.hashFileAndSize(kernel.file, ramdisk.file, secondBootloader?.file)
             }
+
             1 -> {
                 Common.hashFileAndSize(
                     kernel.file, ramdisk.file,
                     secondBootloader?.file, recoveryDtbo?.file
                 )
             }
+
             2 -> {
                 Common.hashFileAndSize(
                     kernel.file, ramdisk.file,
                     secondBootloader?.file, recoveryDtbo?.file, dtb?.file
                 )
             }
+
             else -> {
                 throw IllegalArgumentException("headerVersion ${info.headerVersion} illegal")
             }

@@ -194,6 +194,7 @@ class AndroidCpio {
         val rounded = Helper.round_to_multiple(len, 256) //file in page 256
         if (len != rounded) {
             FileOutputStream(outFile, true).use { fos ->
+                log.info("cpio padding size: " + (rounded - len) + " bytes")
                 fos.write(ByteArray((rounded - len).toInt()))
             }
         }

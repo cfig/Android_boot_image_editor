@@ -21,16 +21,16 @@ should be compatible with "/usr/bin/env sh"
 ## TODO: command line usage
 unpack
 ```
-abe unpack boot.img out
+be unpack file
+be unpack file dir
 ```
-
 pack
 ```
-abe pack out boot.img
+be pack dir
 ```
 properties: "out.file": the final output file
 
-### something interesting in abe
+### something interesting in be
 a zsh script, parse the input  command line parameters, for example, 
 if args are: "unpack file dir", the shell script will print 'gradle unpack --args="unpackInternal file dir"'; 
 if args are "pack dir file", the shell script will print 'gradle pack --args="packInternal dir file"'.
