@@ -59,12 +59,7 @@ class SparseImgParser : IPackable {
 
     override fun pack(fileName: String) {
         //TODO("not implemented: refer to https://github.com/cfig/Android_boot_image_editor/issues/133")
-        val cfgFile = outDir + fileName.removeSuffix(".img") + ".json"
-        val readBackSi = ObjectMapper().readValue(File(cfgFile), SparseImage::class.java)
-        readBackSi
-            .pack()
-            .updateVbmeta()
-            .unwrap()
+        packInternal(Helper.prop("workDir")!!, fileName)
     }
 
     fun packInternal(workspace: String, outFileName: String) {
@@ -83,6 +78,11 @@ class SparseImgParser : IPackable {
         val iniRole = Common.loadProperties(File(workspace, "workspace.ini").canonicalPath).getProperty("role")
         val cfgFile = File(workspace, iniRole.removeSuffix(".img") + ".json").canonicalPath
         log.info("Loading config from $cfgFile")
+        val readBackSi = ObjectMapper().readValue(File(cfgFile), SparseImage::class.java)
+        readBackSi
+            .pack()
+            .updateVbmeta()
+            .unwrap()
     }
 
     // invoked solely by reflection

@@ -34,7 +34,7 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
                     partName,
                     workDir,
                     File(workDir, File(info.output).nameWithoutExtension).path,
-                    File(workDir, File(info.pulp).name + ".signed").path
+                    File(Helper.prop("intermediateDir"), File(info.pulp).name + ".signed").path
                 )
             }
 
@@ -44,7 +44,7 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
                     partName,
                     workDir,
                     File(workDir, File(info.output).nameWithoutExtension).path,
-                    File(workDir, "${info.output}.signed").path
+                    File(Helper.prop("intermediateDir"), "${info.output}.signed").path
                 )
             }
 
@@ -119,7 +119,7 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
         if (info.outerFsType == "sparse") {
             img2simg(File(workDir, (File(info.output).name + ".signed")).path, File(info.output).name + ".signed")
         } else {
-            val s = info.pulp + ".signed"
+            val s = Helper.joinPath(Helper.prop("intermediateDir")!!, File(info.pulp + ".signed").name)
             val t = info.output + ".signed"
             log.info("Moving $s -> $t")
             Files.move(Path(s), Path(t), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
@@ -261,7 +261,7 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
             DefaultExecutor().apply {
                 streamHandler = PumpStreamHandler(System.out, System.err)
             }.execute(CommandLine.parse("aosp/plugged/bin/sefcontext_compile").apply {
-                addArguments("-o " + Helper.prop("workDir") + "file_contexts.bin")
+                addArguments("-o " + File(Helper.prop("workDir"), "file_contexts.bin").path)
                 addArgument("aosp/plugged/res/file_contexts.concat")
             }.also { log.warn(it.toString()) }, env)
         }
