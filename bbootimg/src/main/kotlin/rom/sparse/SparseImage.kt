@@ -147,29 +147,32 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
             val ret = SparseImage()
             ret.info.json = File(fileName).name.removeSuffix(".img") + ".json"
             ret.info.output = fileName
-            ret.info.pulp = workDir + fileName
+            ret.info.pulp = File(Helper.prop("workDir")!!, File(fileName).nameWithoutExtension).path
+            log.info(ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(ret.info))
             if (isSparse(fileName)) {
                 val tempFile = UUID.randomUUID().toString()
                 ret.info.outerFsType = "sparse"
-                val rawFile = "${workDir}${File(fileName).nameWithoutExtension}"
                 simg2img(fileName, tempFile)
                 ret.info.pulp = if (isExt4(tempFile)) {
                     ret.info.innerFsType = "ext4"
-                    "$rawFile.ext4"
+                    ret.info.pulp  + ".ext4"
                 } else if (isErofs(tempFile)) {
                     ret.info.innerFsType = "erofs"
-                    "$rawFile.erofs"
+                    ret.info.pulp  + ".erofs"
                 } else {
-                    "$rawFile.raw"
+                    ret.info.pulp  + ".raw"
                 }
                 Files.move(Path(tempFile), Path(ret.info.pulp))
             } else if (isExt4(fileName)) {
                 ret.info.outerFsType = "ext4"
                 ret.info.innerFsType = "ext4"
+                ret.info.pulp = ret.info.pulp + ".ext4"
+                log.info("COPY $fileName -> ${ret.info.pulp}")
                 File(fileName).copyTo(File(ret.info.pulp))
             } else if (isErofs(fileName)) {
                 ret.info.outerFsType = "erofs"
                 ret.info.innerFsType = "erofs"
+                ret.info.pulp = ret.info.pulp + ".erofs"
                 File(fileName).copyTo(File(ret.info.pulp))
             }
             when (ret.info.innerFsType) {

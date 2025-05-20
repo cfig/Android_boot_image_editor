@@ -36,6 +36,7 @@ class VendorBootParser : IPackable {
     }
 
     fun unpackInternal(fileName: String, unpackDir: String) {
+        //set workdir
         log.info("unpackInternal(fileName: $fileName, unpackDir: $unpackDir)")
         Helper.setProp("workDir", unpackDir)
         clear()

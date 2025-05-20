@@ -53,8 +53,9 @@ class VBMetaParser : IPackable {
                 it.mkdirs()
             }
         }
+        //workspace.ini
         log.info("workspace set to $unpackDir")
-        Common.createWorkspaceIni(fileName)
+        Common.createWorkspaceIni(fileName, prefix = "vbmeta")
 
         val ai = AVBInfo.parseFrom(Dumpling(fileName)).dumpDefault(fileName)
         log.info("Signing Key: " + Avb.inspectKey(ai))
@@ -66,9 +67,9 @@ class VBMetaParser : IPackable {
 
     // called via reflection
     fun packInternal(workspace: String, outFileName: String) {
-        log.info("packInternal(workspace: $workspace)")
+        log.info("packInternal(workspace: $workspace, $outFileName)")
         Helper.setProp("workDir", workspace)
-        val iniRole = Common.loadProperties(File(workspace, "workspace.ini").canonicalPath).getProperty("role")
+        val iniRole = Common.loadProperties(File(workspace, "workspace.ini").canonicalPath).getProperty("vbmeta.role")
         val blob = ObjectMapper().readValue(File(Avb.getJsonFileName(iniRole)), AVBInfo::class.java).encodePadded()
         log.info("Writing padded vbmeta to file: $outFileName.signed")
         Files.write(Paths.get("$outFileName.signed"), blob, StandardOpenOption.CREATE)

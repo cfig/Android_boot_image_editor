@@ -525,23 +525,46 @@ class Common {
             }
         }
 
-        fun createWorkspaceIni(fileName: String) {
-            //create workspace file
-            val workspaceFile = File(Helper.prop("workDir"), "workspace.ini").canonicalPath
+        fun createWorkspaceIni(fileName: String, iniFileName: String = "workspace.ini", prefix: String? = null) {
+            log.trace("create workspace file")
+            val workDir = Helper.prop("workDir")
+            val workspaceFile = File(workDir, iniFileName)
+
             try {
-                FileOutputStream(workspaceFile).use { output ->
-                    Properties().also {
-                        it.setProperty("file", fileName)
-                        it.setProperty("workDir", Helper.prop("workDir"))
-                        it.setProperty("role", File(fileName).name)
-                        it.store(output, "unpackInternal configuration")
+                if (prefix.isNullOrBlank()) {
+                    // override existing file entirely when prefix is null or empty
+                    val props = Properties().apply {
+                        setProperty("file", fileName)
+                        setProperty("workDir", workDir)
+                        setProperty("role", File(fileName).name)
                     }
-                    log.info("workspace file created: $workspaceFile")
+                    FileOutputStream(workspaceFile).use { out ->
+                        props.store(out, "unpackInternal configuration (overridden)")
+                    }
+                    log.info("workspace file overridden: ${workspaceFile.canonicalPath}")
+                } else {
+                    // merge into existing (or create new) with prefixed keys
+                    val props = Properties().apply {
+                        if (workspaceFile.exists()) {
+                            FileInputStream(workspaceFile).use { load(it) }
+                        }
+                    }
+
+                    fun key(name: String) = "${prefix.trim()}.$name"
+                    props.setProperty(key("file"), fileName)
+                    props.setProperty(key("workDir"), workDir)
+                    props.setProperty(key("role"), File(fileName).name)
+
+                    FileOutputStream(workspaceFile).use { out ->
+                        props.store(out, "unpackInternal configuration (with prefix='$prefix')")
+                    }
+                    log.info("workspace file created/updated with prefix '$prefix': ${workspaceFile.canonicalPath}")
                 }
             } catch (e: IOException) {
                 log.error("error writing workspace file: ${e.message}")
             }
-            //create workspace file done
+
+            log.trace("create workspace file done")
         }
     }
 }

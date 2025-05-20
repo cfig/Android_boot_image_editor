@@ -341,7 +341,9 @@ data class VendorBoot(
     }
 
     fun postCopy(outFile: String): VendorBoot {
-        val signedFile = Helper.joinPath(Helper.prop("intermediateDir")!!, this.info.role + ".signed")
+        val dir = Helper.prop("intermediateDir")!!
+        val signedFile = Helper.joinPath(dir, "${info.role}.signed").takeIf { File(it).exists() }
+            ?: Helper.joinPath(dir, "${info.role}.clear")
         log.info("COPY $signedFile -> $outFile")
         File(signedFile).copyTo(File(outFile), overwrite = true)
         return this

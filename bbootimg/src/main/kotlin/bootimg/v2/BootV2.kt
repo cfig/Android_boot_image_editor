@@ -300,8 +300,8 @@ data class BootV2(
                     "verify fail"
                 }
                 Avb.getJsonFileName(info.output).let { jsonFile ->
-                    it.addRow("AVB info [$verifyStatus]", jsonFile)
-                    prints.add(Pair("AVB info [$verifyStatus]", jsonFile))
+                    it.addRow("AVB info [$verifyStatus]", shortenPath(jsonFile))
+                    prints.add(Pair("AVB info [$verifyStatus]", shortenPath(jsonFile)))
                     if (File(jsonFile).exists()) {
                         mapper.readValue(File(jsonFile), AVBInfo::class.java).let { ai ->
                             val inspectRet = Avb.inspectKey(ai)
@@ -362,11 +362,11 @@ data class BootV2(
                 if (theDtb.size > 0) {
                     val dtbCount = this.dtb!!.dtbList.size
                     it.addRule()
-                    it.addRow("dtb", theDtb.file)
-                    prints.add(Pair("dtb", theDtb.file.toString()))
+                    it.addRow("dtb", theDtb.file?.let { fullPath -> shortenPath(fullPath) })
+                    prints.add(Pair("dtb", shortenPath(theDtb.file.toString())))
                     if (File(theDtb.file + ".0.${dtsSuffix}").exists()) {
-                        it.addRow("\\-- decompiled dts [$dtbCount]", theDtb.file + ".*.${dtsSuffix}")
-                        prints.add(Pair("\\-- decompiled dts [$dtbCount]", theDtb.file + ".*.${dtsSuffix}"))
+                        it.addRow("\\-- decompiled dts [$dtbCount]", shortenPath(theDtb.file + ".*.${dtsSuffix}"))
+                        prints.add(Pair("\\-- decompiled dts [$dtbCount]", shortenPath(theDtb.file + ".*.${dtsSuffix}")))
                     }
                 }
             }
@@ -377,8 +377,8 @@ data class BootV2(
         val tabVBMeta = AsciiTable().let {
             if (File("vbmeta.img").exists()) {
                 it.addRule()
-                it.addRow("vbmeta.img", Avb.getJsonFileName("vbmeta.img"))
-                prints.add(Pair("vbmeta.img", Avb.getJsonFileName("vbmeta.img")))
+                it.addRow("vbmeta.img", shortenPath(Avb.getJsonFileName("vbmeta.img")))
+                prints.add(Pair("vbmeta.img", shortenPath(Avb.getJsonFileName("vbmeta.img"))))
                 it.addRule()
                 "\n" + it.render()
             } else {
