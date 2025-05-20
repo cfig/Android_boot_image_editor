@@ -365,8 +365,8 @@ data class BootV2(
                     it.addRow("dtb", theDtb.file?.let { fullPath -> shortenPath(fullPath) })
                     prints.add(Pair("dtb", shortenPath(theDtb.file.toString())))
                     if (File(theDtb.file + ".0.${dtsSuffix}").exists()) {
-                        it.addRow("\\-- decompiled dts [$dtbCount]", shortenPath(theDtb.file + ".*.${dtsSuffix}"))
-                        prints.add(Pair("\\-- decompiled dts [$dtbCount]", shortenPath(theDtb.file + ".*.${dtsSuffix}")))
+                        it.addRow("\\-- decompiled dts [$dtbCount]", shortenPath(theDtb.file!!) + ".*.${dtsSuffix}")
+                        prints.add(Pair("\\-- decompiled dts [$dtbCount]", shortenPath(theDtb.file!!) + ".*.${dtsSuffix}"))
                     }
                 }
             }
