@@ -1,4 +1,7 @@
-# Android_boot_image_editor
+# Android_boot_image_editor_fork 
+
+credits: thanks @cfig
+
 [![CI](https://github.com/cfig/Android_boot_image_editor/actions/workflows/main.yml/badge.svg)](https://github.com/cfig/Android_boot_image_editor/actions/workflows/main.yml)
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
