@@ -12,7 +12,7 @@ Make sure you have [JDK11+](https://www.oracle.com/java/technologies/downloads/#
 * Mac: `brew install lz4 xz dtc`
 
 * Windows: Install openssl and device-tree compiler with [chocolate](https://chocolatey.org/install)
-`choco install openssl dtc-msys2 zip vim`
+`choco install openssl dtc-msys2 zip vim gzip 7zip`
 
 ## Getting Started
 Put your boot.img to current directory, then start gradle 'unpack' task:

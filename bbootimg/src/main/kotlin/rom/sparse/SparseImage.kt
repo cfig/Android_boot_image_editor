@@ -1,3 +1,17 @@
+// Copyright 2023-2025 yuyezhong@gmail.com
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package rom.sparse
 
 import avb.AVBInfo
@@ -139,7 +153,7 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
     companion object {
         private val SPARSE_MAGIC: UInt = 0x3aff26edu
         private val log = LoggerFactory.getLogger(SparseImage::class.java)
-        private val workDir = Helper.prop("workDir")!!
+        private val workDir get() = Helper.prop("workDir")!!
         private val simg2imgBin = "simg2img"
         private val img2simgBin = "img2simg"
 
@@ -188,8 +202,8 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
                     log.warn("unsuported image type: ${ret.info.innerFsType}")
                 }
             }
-            ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File("${workDir}/${ret.info.json}"), ret)
-            File("${workDir}mount").mkdir()
+            ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(File(workDir, ret.info.json), ret)
+            File(workDir, "mount").mkdir()
             extractVBMeta(ret.info.pulp)
             generateFileContexts()
 
@@ -216,8 +230,9 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
         private fun extractExt4(fileName: String) {
             if (EnvironmentVerifier().has7z) {
                 val stem = File(fileName).nameWithoutExtension
-                val outStr = "7z x $fileName -y -o${workDir}$stem".check_output()
-                File("${workDir}/$stem.log").writeText(outStr)
+                val outFilePath = Helper.joinPath(workDir, stem)
+                val outStr = "7z x $fileName -y -o$outFilePath".check_output()
+                File(workDir, "$stem.log").writeText(outStr)
             } else {
                 log.warn("Please install 7z for ext4 extraction")
             }

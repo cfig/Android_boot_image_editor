@@ -1,4 +1,4 @@
-// Copyright 2021 yuyezhong@gmail.com
+// Copyright 2020-2025 yuyezhong@gmail.com
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -345,16 +345,18 @@ data class BootV2(
             this.secondBootloader?.let { theSecondBootloader ->
                 if (theSecondBootloader.size > 0) {
                     it.addRule()
-                    it.addRow("second bootloader", theSecondBootloader.file)
-                    prints.add(Pair("second bootloader", theSecondBootloader.file.toString()))
+                    val tmp = theSecondBootloader.file?.let { file -> shortenPath(file) } ?: "NONE"
+                    it.addRow("second bootloader", tmp)
+                    prints.add(Pair("second bootloader", tmp))
                 }
             }
             //dtbo
             this.recoveryDtbo?.let { theDtbo ->
                 if (theDtbo.size > 0) {
                     it.addRule()
-                    it.addRow("recovery dtbo", theDtbo.file)
-                    prints.add(Pair("recovery dtbo", theDtbo.file.toString()))
+                    val tmp = theDtbo.file.toString()
+                    it.addRow("recovery dtbo", tmp)
+                    prints.add(Pair("recovery dtbo", tmp))
                 }
             }
             //dtb
@@ -362,8 +364,9 @@ data class BootV2(
                 if (theDtb.size > 0) {
                     val dtbCount = this.dtb!!.dtbList.size
                     it.addRule()
-                    it.addRow("dtb", theDtb.file?.let { fullPath -> shortenPath(fullPath) })
-                    prints.add(Pair("dtb", shortenPath(theDtb.file.toString())))
+                    val tmp = shortenPath(shortenPath(theDtb.file!!))
+                    it.addRow("dtb", tmp)
+                    prints.add(Pair("dtb", tmp))
                     if (File(theDtb.file + ".0.${dtsSuffix}").exists()) {
                         it.addRow("\\-- decompiled dts [$dtbCount]", shortenPath(theDtb.file!!) + ".*.${dtsSuffix}")
                         prints.add(Pair("\\-- decompiled dts [$dtbCount]", shortenPath(theDtb.file!!) + ".*.${dtsSuffix}"))

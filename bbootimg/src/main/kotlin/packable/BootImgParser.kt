@@ -1,4 +1,4 @@
-// Copyright 2021 yuyezhong@gmail.com
+// Copyright 2019-2025 yuyezhong@gmail.com
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -96,7 +96,6 @@ class BootImgParser : IPackable {
     fun packInternal(workspace: String, outFileName: String) {
         log.info("packInternal($workspace, $outFileName)")
         Helper.setProp("workDir", workspace)
-        val targetFile = outFileName
         val iniRole = Common.loadProperties(File(workspace, "workspace.ini").canonicalPath).getProperty("role")
         val cfgFile = File(workspace, iniRole.removeSuffix(".img") + ".json").canonicalPath
         log.info("Loading config from $cfgFile")
@@ -137,61 +136,7 @@ class BootImgParser : IPackable {
             is BootV3 -> {
                 worker
                     .pack()
-                    .sign(targetFile)
-                    .updateVbmeta()
-                    .printPackSummary(worker.info.role)
-            }
-
-            else -> {
-                log.error("unsupported boot image format")
-                exitProcess(2)
-            }
-        }
-    }
-
-    fun packInternalLegacy(targetFile: String, workspace: String, fileName: String) {
-        log.info("packInternal(targetFile: $targetFile, fileName: $fileName, workspace: $workspace)")
-        Helper.setProp("workDir", workspace)
-        val cfgFile = Helper.joinPath(outDir, targetFile.removeSuffix(".img") + ".json")
-        log.info("Loading config from $cfgFile")
-        if (!File(cfgFile).exists()) {
-            val tab = AsciiTable().let {
-                it.addRule()
-                it.addRow("'$cfgFile' doesn't exist, did you forget to 'unpack' ?")
-                it.addRule()
-                it
-            }
-            log.info("\n{}", tab.render())
-            return
-        }
-
-        val worker =
-            try {
-                ObjectMapper().readValue(File(cfgFile), BootV2::class.java)
-            } catch (e: com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException) {
-                try {
-                    ObjectMapper().readValue(File(cfgFile), BootV3::class.java)
-                } catch (e: com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException) {
-                    null
-                }
-            }
-        if (worker == null) {
-            log.error("no worker available")
-            exitProcess(2)
-        }
-        when (worker) {
-            is BootV2 -> {
-                worker
-                    .pack()
-                    .sign()
-                    .updateVbmeta()
-                    .printPackSummary()
-            }
-
-            is BootV3 -> {
-                worker
-                    .pack()
-                    .sign(fileName)
+                    .sign(outFileName)
                     .updateVbmeta()
                     .printPackSummary(worker.info.role)
             }
@@ -231,7 +176,7 @@ class BootImgParser : IPackable {
     }
 
     override fun `@verify`(fileName: String) {
-        File(Helper.prop("workDir")!!).let {
+        File(outDir).let {
             if (!it.exists()) {
                 it.mkdirs()
             }

@@ -1,4 +1,4 @@
-// Copyright 2021 yuyezhong@gmail.com
+// Copyright 2023-2025 yuyezhong@gmail.com
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ class SparseImgParser : IPackable {
 
     override fun unpack(fileName: String) {
         log.info("unpack(fileName: $fileName)")
-        unpackInternal(fileName, Helper.prop("workDir")!!)
+        unpackInternal(fileName, outDir)
     }
 
     fun unpackInternal(fileName: String, unpackDir: String) {
@@ -59,7 +59,7 @@ class SparseImgParser : IPackable {
 
     override fun pack(fileName: String) {
         //TODO("not implemented: refer to https://github.com/cfig/Android_boot_image_editor/issues/133")
-        packInternal(Helper.prop("workDir")!!, fileName)
+        packInternal(outDir, fileName)
     }
 
     fun packInternal(workspace: String, outFileName: String) {
@@ -121,7 +121,6 @@ class SparseImgParser : IPackable {
 
 
     companion object {
-        private val workDir = Helper.prop("workDir")
         private var outerFsType = "raw"
         private var innerFsType = "raw"
     }

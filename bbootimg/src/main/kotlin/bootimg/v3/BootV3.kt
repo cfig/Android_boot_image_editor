@@ -1,4 +1,4 @@
-// Copyright 2021 yuyezhong@gmail.com
+// Copyright 2020-2025 yuyezhong@gmail.com
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -214,57 +214,21 @@ data class BootV3(
         return this
     }
 
-    fun sign(fileName: String): BootV3 {
-        var bSigningNeeded = false
-        if (File(Avb.getJsonFileName(info.role)).exists()) {
-            bSigningNeeded = true
-            Signer.signAVB(
-                Helper.joinPath(Helper.prop("intermediateDir")!!, info.role),
-                this.info.imageSize,
-                String.format(Helper.prop("avbtool")!!, "v1.2")
-            )
+    fun sign(outputFile: String): BootV3 {
+        val bSigningNeeded = File(Avb.getJsonFileName(info.role)).exists()
+        val origOutFile = Helper.joinPath(Helper.prop("intermediateDir")!!, info.role)
+        val clearOutFile = Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".clear")
+        val signedOutFile = Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".signed")
+        if (bSigningNeeded) {
+            Signer.signAVB(origOutFile, this.info.imageSize, String.format(Helper.prop("avbtool")!!, "v1.2"))
+            File(signedOutFile).copyTo(File(outputFile), true)
+            log.info("Signed image saved as $outputFile")
         } else {
-            bSigningNeeded = false
             log.warn("no AVB info found, assume it's clear image")
+            File(clearOutFile).copyTo(File(outputFile), true)
+            log.info("Unsigned image saved as $outputFile")
         }
-
-        if (fileName != info.role) {
-            if (bSigningNeeded) {
-                log.info("x1")
-                Helper.setProp("out.file", "$fileName.signed")
-                //@formatter:off
-                File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".signed"))
-                    .copyTo(File(Helper.prop("out.file")!!), true)
-                //@formatter:on
-                log.info("Signed image saved as " + Helper.prop("out.file"))
-            } else {
-                log.info("x2")
-                Helper.setProp("out.file", fileName)
-                //@formatter:off
-                File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".clear"))
-                    .copyTo(File(Helper.prop("out.file")!!), true)
-                //@formatter:on
-                log.info("Unsigned image saved as " + Helper.prop("out.file"))
-            }
-        } else {
-            if (bSigningNeeded) {
-                log.info("x3")
-                Helper.setProp("out.file", info.role + ".signed")
-                //@formatter:off
-                File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".signed"))
-                    .copyTo(File(info.role + ".signed"), true)
-                //@formatter:on
-                log.info("Signed image saved as ${info.role}.signed")
-            } else {
-                log.info("x4")
-                Helper.setProp("out.file", info.role + ".clear")
-                //@formatter:off
-                File(Helper.joinPath(Helper.prop("intermediateDir")!!, info.role + ".clear"))
-                    .copyTo(File(info.role + ".clear"), true)
-                //@formatter:on
-                log.info("Unsigned image saved as ${info.role}.clear")
-            }
-        }
+        Helper.setProp("out.file", outputFile)
         return this
     }
 
@@ -392,14 +356,22 @@ data class BootV3(
         val tab = AsciiTable().let {
             it.addRule()
             it.addRow("image info", shortenPath(Helper.joinPath(workDir!!, info.role.removeSuffix(".img") + ".json")))
-            prints.add(Pair("image info", shortenPath(Helper.joinPath(workDir, info.role.removeSuffix(".img") + ".json"))))
+            prints.add(
+                Pair(
+                    "image info",
+                    shortenPath(Helper.joinPath(workDir, info.role.removeSuffix(".img") + ".json"))
+                )
+            )
             it.addRule()
             if (this.kernel.size > 0) {
                 it.addRow("kernel", shortenPath(this.kernel.file))
                 prints.add(Pair("kernel", shortenPath(this.kernel.file)))
                 File(Helper.joinPath(workDir, Helper.prop("kernelVersionStem")!!)).let { kernelVersionFile ->
                     if (kernelVersionFile.exists()) {
-                        it.addRow("\\-- version " + kernelVersionFile.readLines().toString(), shortenPath( kernelVersionFile.path))
+                        it.addRow(
+                            "\\-- version " + kernelVersionFile.readLines().toString(),
+                            shortenPath(kernelVersionFile.path)
+                        )
                         prints.add(
                             Pair(
                                 "\\-- version " + kernelVersionFile.readLines().toString(),
