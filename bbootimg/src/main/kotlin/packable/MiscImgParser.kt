@@ -65,8 +65,7 @@ class MiscImgParser : IPackable {
     }
 
     fun flash(fileName: String) {
-        val stem = fileName.substring(0, fileName.indexOf("."))
-        super.flash("$fileName.new", stem)
+        super.flash("$fileName.new", File(fileName).nameWithoutExtension)
     }
 
     override fun `@verify`(fileName: String) {

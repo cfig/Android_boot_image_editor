@@ -41,7 +41,7 @@ interface IPackable {
         "adb root".check_call()
         val abUpdateProp = "adb shell getprop ro.build.ab_update".check_output()
         log.info("ro.build.ab_update=$abUpdateProp")
-        val slotSuffix = if (abUpdateProp == "true" && !fileName.startsWith("misc.img")) {
+        val slotSuffix = if (abUpdateProp == "true" && !fileName.contains("misc.img")) {
             "adb shell getprop ro.boot.slot_suffix".check_output()
         } else {
             ""
@@ -56,7 +56,7 @@ interface IPackable {
         "adb root".check_call()
         val abUpdateProp = "adb shell getprop ro.build.ab_update".check_output()
         log.info("ro.build.ab_update=$abUpdateProp")
-        val slotSuffix = if (abUpdateProp == "true" && !fileName.startsWith("misc.img")) {
+        val slotSuffix = if (abUpdateProp == "true" && !fileName.endsWith("misc.img")) {
             "adb shell getprop ro.boot.slot_suffix".check_output()
         } else {
             ""

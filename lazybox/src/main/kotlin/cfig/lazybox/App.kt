@@ -1,5 +1,6 @@
 package cfig.lazybox
 
+import cfig.lazybox.staging.DiffCI
 import cfig.lazybox.sysinfo.BootChart
 import cfig.lazybox.sysinfo.CpuInfo
 import cfig.lazybox.sysinfo.Pidstat
@@ -26,6 +27,8 @@ fun main(args: Array<String>) {
         println("sysinfo  : get overall system info from Android")
         println("\nIncubating usage:")
         println("apps     : get apk file list from Android")
+        println("dmainfo  : parse /d/dma_buf/bufinfo")
+        println("diffci  : find changelist files from CI server based on date and time ranges")
         exitProcess(0)
     }
     if (args[0] == "cpuinfo") {
@@ -82,5 +85,21 @@ fun main(args: Array<String>) {
     if (args[0] == "booting") {
         //BootingParser.run()
         BootingParser.run2()
+    }
+    if (args[0] == "dmainfo") {
+        if (args.size != 2) {
+            log.error("Usage: dmainfo <dmainfo_file>")
+            return
+        }
+        val dmainfoFile = args[1]
+        if (File(dmainfoFile).exists()) {
+            val dmaInfoParser = DmaInfoParser()
+            val dmaInfo = dmaInfoParser.parse(args.drop(1).toTypedArray())
+        } else {
+            log.error("File not found: $dmainfoFile")
+        }
+    }
+    if (args[0] == "diffci") {
+        DiffCI().run(args.drop(1).toTypedArray())
     }
 }
