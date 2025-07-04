@@ -1,6 +1,7 @@
 package cfig.lazybox
 
 import cfig.lazybox.staging.DiffCI
+import cfig.lazybox.staging.RepoWorker
 import cfig.lazybox.sysinfo.BootChart
 import cfig.lazybox.sysinfo.CpuInfo
 import cfig.lazybox.sysinfo.Pidstat
@@ -26,9 +27,11 @@ fun main(args: Array<String>) {
         println("cpuinfo  : get cpu info from /sys/devices/system/cpu/")
         println("sysinfo  : get overall system info from Android")
         println("\nIncubating usage:")
-        println("apps     : get apk file list from Android")
-        println("dmainfo  : parse /d/dma_buf/bufinfo")
-        println("diffci  : find changelist files from CI server based on date and time ranges")
+        println("apps          : get apk file list from Android")
+        println("dmainfo       : parse /d/dma_buf/bufinfo")
+        println("diffci        : find changelist files from CI server based on date and time ranges")
+        println("repo_lfs      : pull LFS files from Git repositories managed by 'repo'")
+        println("repo_unshallow: unshallow Git repositories managed by 'repo'")
         exitProcess(0)
     }
     if (args[0] == "cpuinfo") {
@@ -101,5 +104,11 @@ fun main(args: Array<String>) {
     }
     if (args[0] == "diffci") {
         DiffCI().run(args.drop(1).toTypedArray())
+    }
+    if (args[0] == "repo_lfs") {
+        RepoWorker().lfsPullRepo(args.drop(1).toTypedArray())
+    }
+    if (args[0] == "repo_unshallow") {
+        RepoWorker().unshallowRepo(args.drop(1).toTypedArray())
     }
 }

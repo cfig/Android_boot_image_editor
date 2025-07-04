@@ -1,8 +1,12 @@
 package cfig.lazybox.staging
 
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.MalformedURLException
 import java.net.URI
+import java.net.URL
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -20,7 +24,7 @@ class DiffCI {
     private val dateFormat = DateTimeFormatter.ofPattern("yyyyMMdd")
     private val dateTimeFormat = DateTimeFormatter.ofPattern("yyyyMMddHHmm")
     private val buildIdRegex = ".*/(\\d{12})/changelist".toRegex()
-    private val log = LoggerFactory.getLogger(DiffCI::class.java)
+    private val log = LoggerFactory.getLogger(DiffCI::class.simpleName)
 
     fun run(args: Array<String>) {
         if (baseUrl == FAKE_URL) {
@@ -85,7 +89,7 @@ class DiffCI {
         val allUrls = mutableListOf<String>()
         var currentDate = startDate
         while (currentDate <= endDate) {
-            log.info("\n----- Processing Date: $currentDate -----")
+            log.info("----- Processing Date: $currentDate -----")
             val dailyUrls = finder.findChangelistUrlsForDate(currentDate)
             allUrls.addAll(dailyUrls)
             currentDate = currentDate.plusDays(1)
@@ -109,7 +113,7 @@ class DiffCI {
         val allUrls = mutableListOf<String>()
         var currentDate = startDateTime.toLocalDate()
         while (currentDate <= endDateTime.toLocalDate()) {
-            log.info("\n----- Processing Date: $currentDate -----")
+            log.info("----- Processing Date: $currentDate -----")
             val dailyUrls = finder.findChangelistUrlsForDate(currentDate)
 
             val filteredUrls = dailyUrls.filter { url ->
@@ -130,19 +134,85 @@ class DiffCI {
 
     private fun printUsageAndExit() {
         log.info("Error: Invalid number of arguments.")
-        log.info("\nUsage:")
+        log.info("Usage:")
         log.info("  Single Date:   --args='diffci <yyyymmdd>'")
         log.info("  Date Range:    --args='diffci <start_date> <end_date>'")
         log.info("  Time Range:    --args='diffci <start_datetime> <end_datetime>'")
-        log.info("\nExamples:")
+        log.info("Examples:")
         log.info("  --args='diffci  20250628'")
         log.info("  --args='diffci  20250627 20250628'")
         log.info("  --args='diffci  202506281000 202506281430'")
         exitProcess(1)
     }
 
+    fun fetchChangeList(urlsToFetch: List<String>) {
+        val OUTPUT_FILENAME = "merged_content.txt"
+        if (urlsToFetch.isEmpty()) {
+            return
+        }
+        val outputFile = File(OUTPUT_FILENAME)
+        log.info("Starting to fetch content from ${urlsToFetch.size} URLs ...")
+
+        outputFile.bufferedWriter().use { writer ->
+            // Iterate over each URL string in the list.
+            urlsToFetch.forEachIndexed { index, urlString ->
+                log.info("(${index + 1}/${urlsToFetch.size}) Fetching: $urlString")
+                try {
+                    // Create a URL object from the string.
+                    val url = URL(urlString)
+                    val connection = (url.openConnection() as HttpURLConnection).also {
+                        it.requestMethod = "GET"
+                        it.connectTimeout = 5000 // 5 seconds
+                        it.readTimeout = 5000    // 5 seconds
+                    }
+                    val responseCode = connection.responseCode
+                    // Write a header for this URL's content in the output file.
+                    writer.write("--- START: Content from $urlString ---")
+                    writer.newLine()
+                    // Check for a successful HTTP response (2xx status codes).
+                    if (responseCode in 200..299) {
+                        connection.inputStream.bufferedReader().use { reader ->
+                            // Read the content line by line and write to the file.
+                            reader.forEachLine { line ->
+                                writer.write(line)
+                                writer.newLine()
+                            }
+                        }
+                    } else {
+                        val errorMessage = "Received non-OK response code: $responseCode"
+                        log.info("Warning: $errorMessage for $urlString")
+                        writer.write("! FAILED: $errorMessage")
+                        writer.newLine()
+                    }
+
+                } catch (e: MalformedURLException) {
+                    val errorMessage = "Invalid URL format"
+                    log.error("Error for '$urlString': $errorMessage. Skipping.")
+                    writer.write("! FAILED: $errorMessage")
+                    writer.newLine()
+                } catch (e: IOException) {
+                    val errorMessage = "Error reading data (I/O problem): ${e.message}"
+                    log.info("Error for '$urlString': $errorMessage. Skipping.")
+                    writer.write("! FAILED: $errorMessage")
+                    writer.newLine()
+                } catch (e: Exception) {
+                    val errorMessage = "An unexpected error occurred: ${e.message}"
+                    log.error("Error for '$urlString': $errorMessage. Skipping.")
+                    writer.write("! FAILED: $errorMessage")
+                    writer.newLine()
+                } finally {
+                    // Write a footer and add extra newlines for separation.
+                    writer.write("--- END: Content from $urlString ---")
+                    writer.newLine()
+                    writer.newLine()
+                }
+            }
+        }
+        log.info("Process complete. '${outputFile.absolutePath}'.")
+    }
+
     private fun printResults(urls: List<String>, isTimeRange: Boolean = false) {
-        log.info("\n--- Results ---")
+        log.info("--- Results ---")
         if (urls.isNotEmpty()) {
             log.info("Successfully found ${urls.size} changelist files:")
             urls.forEach { log.info(it) }
@@ -151,6 +221,7 @@ class DiffCI {
             log.info("No changelist files were found for the specified $rangeType.")
         }
         log.info("---------------")
+        fetchChangeList(urls)
     }
 
     private fun parseDate(dateStr: String): LocalDate? {
