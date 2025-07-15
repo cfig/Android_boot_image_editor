@@ -1,6 +1,7 @@
 package cfig.lazybox
 
 import cfig.lazybox.staging.DiffCI
+import cfig.lazybox.staging.Perfetto
 import cfig.lazybox.staging.RepoWorker
 import cfig.lazybox.sysinfo.BootChart
 import cfig.lazybox.sysinfo.CpuInfo
@@ -32,6 +33,7 @@ fun main(args: Array<String>) {
         println("diffci        : find changelist files from CI server based on date and time ranges")
         println("repo_lfs      : pull LFS files from Git repositories managed by 'repo'")
         println("repo_unshallow: unshallow Git repositories managed by 'repo'")
+        println("perfetto      : generate a Perfetto configuration file")
         exitProcess(0)
     }
     if (args[0] == "cpuinfo") {
@@ -110,5 +112,8 @@ fun main(args: Array<String>) {
     }
     if (args[0] == "repo_unshallow") {
         RepoWorker().unshallowRepo(args.drop(1).toTypedArray())
+    }
+    if (args[0] == "perfetto") {
+        Perfetto().run(args.drop(1).toTypedArray())
     }
 }

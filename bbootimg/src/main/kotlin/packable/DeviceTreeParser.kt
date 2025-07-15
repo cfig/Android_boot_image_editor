@@ -87,20 +87,24 @@ class DeviceTreeParser : IPackable {
 
         //pull
         "adb root".check_call()
-        "adb push tools/bin/dtc-android /data/vendor/dtc-android".check_call()
-        val hw = "adb shell getprop ro.hardware".check_output()
-        log.info("ro.hardware=$hw")
-        "adb shell /data/vendor/dtc-android -I fs /proc/device-tree -o /data/vendor/file.to.pull".check_call()
+        var hw = "linux"
+        if ("adb shell which getprop".check_output().isBlank()) { //linux
+            "adb push tools/bin/dtc-linux /data/vendor/dtc".check_call()
+        } else { //android
+            "adb push tools/bin/dtc-android /data/vendor/dtc".check_call()
+            hw = "adb shell getprop ro.hardware".check_output()
+            log.info("ro.hardware=$hw")
+        }
+        "adb shell /data/vendor/dtc -I fs /proc/device-tree -o /data/vendor/file.to.pull".check_call()
         "adb pull /data/vendor/file.to.pull $workDir$hw.dts".check_call()
-        "adb shell /data/vendor/dtc-android -I fs -O dtb /proc/device-tree -o /data/vendor/file.to.pull".check_call()
+        "adb shell /data/vendor/dtc -I fs -O dtb /proc/device-tree -o /data/vendor/file.to.pull".check_call()
         "adb pull /data/vendor/file.to.pull $hw.dtb".check_call()
         "adb shell rm /data/vendor/file.to.pull".check_call()
-        "adb shell rm /data/vendor/dtc-android".check_call()
+        "adb shell rm /data/vendor/dtc".check_call()
         if (fileName != "$hw.dtb") {
             File(fileName).delete()
             log.warn("deleting intermediate dtb file: $fileName")
         }
-
         //print summary
         val prints: MutableList<Pair<String, String>> = mutableListOf()
         prints.add(Pair("source", "/proc/device-tree"))

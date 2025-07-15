@@ -51,8 +51,7 @@ class RepoWorker {
         gitRepositories.forEach { repoDir ->
             val relativePath = repoDir.toRelativeString(startDir).ifEmpty { "." }
             if (checker(repoDir)) {
-                log.info("Checking [$relativePath]...")
-                log.info("  -> ✅ $checkerName")
+                log.info("Checking [$relativePath]... ✅ $checkerName")
                 ret.add(repoDir)
             } else {
                 //log.info("Checking [$relativePath]...")
