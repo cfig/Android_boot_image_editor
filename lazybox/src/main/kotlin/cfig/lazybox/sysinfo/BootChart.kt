@@ -9,11 +9,13 @@ class BootChart {
     companion object {
         private val log = LoggerFactory.getLogger(BootChart::class.java)
         fun run() {
+            /*
             "adb wait-for-device".check_call()
             "adb root".check_call()
             "adb wait-for-device".check_call()
             "adb shell touch /data/bootchart/enabled".check_call()
-            Helper.adbCmd("reboot")
+            "adb reboot".check_call()
+            //Helper.adbCmd("reboot")
             "adb wait-for-device".check_call()
             "adb root".check_call()
             "adb wait-for-device".check_call()
@@ -29,6 +31,7 @@ class BootChart {
                     TimeUnit.SECONDS.sleep(1)
                 }
             }
+            */
             "header proc_stat.log proc_ps.log proc_diskstats.log".split("\\s".toRegex()).forEach {
                 val LOGROOT = "/data/bootchart/"
                 "adb pull ${LOGROOT}$it".check_call()

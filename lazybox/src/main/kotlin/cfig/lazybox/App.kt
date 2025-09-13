@@ -1,5 +1,6 @@
 package cfig.lazybox
 
+import cfig.lazybox.staging.AospCompiledb
 import cfig.lazybox.staging.DiffCI
 import cfig.lazybox.staging.Perfetto
 import cfig.lazybox.staging.RepoWorker
@@ -7,6 +8,7 @@ import cfig.lazybox.sysinfo.BootChart
 import cfig.lazybox.sysinfo.CpuInfo
 import cfig.lazybox.sysinfo.Pidstat
 import cfig.lazybox.sysinfo.SysInfo
+import cfig.lazybox.sysinfo.ThermalInfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -20,15 +22,17 @@ fun main(args: Array<String>) {
         println("Usage: args: (Array<String>) ...")
         println("   or: function [arguments]...")
         println("\nCurrently defined functions:")
-        println("\tcpuinfo sysinfo sysstat pidstat bootchart")
+        println("\tcpuinfo sysinfo sysstat pidstat bootchart thermal_info compiledb")
         println("\nCommand Usage:")
         println("bootchart: generate Android bootchart")
         println("pidstat  : given a pid, profile its CPU usage")
         println("tracecmd : analyze trace-cmd report")
         println("cpuinfo  : get cpu info from /sys/devices/system/cpu/")
         println("sysinfo  : get overall system info from Android")
+        println("thermal_info : get thermal info from /sys/class/thermal/")
         println("\nIncubating usage:")
         println("apps          : get apk file list from Android")
+        println("compiledb     : generate compilation database for AOSP")
         println("dmainfo       : parse /d/dma_buf/bufinfo")
         println("diffci        : find changelist files from CI server based on date and time ranges")
         println("repo_lfs      : pull LFS files from Git repositories managed by 'repo'")
@@ -47,6 +51,9 @@ fun main(args: Array<String>) {
     }
     if (args[0] == "sysinfo") {
         SysInfo().run()
+    }
+    if (args[0] == "thermal_info") {
+        ThermalInfo().run()
     }
     if (args[0] == "sysstat") {
         println("adb shell /data/vendor/sadc -F -L -S ALL 2 20 /data/vendor")
@@ -115,5 +122,8 @@ fun main(args: Array<String>) {
     }
     if (args[0] == "perfetto") {
         Perfetto().run(args.drop(1).toTypedArray())
+    }
+    if (args[0] == "compiledb") {
+        AospCompiledb().run()
     }
 }
