@@ -231,7 +231,7 @@ data class SparseImage(var info: SparseInfo = SparseInfo()) {
             if (EnvironmentVerifier().has7z) {
                 val stem = File(fileName).nameWithoutExtension
                 val outFilePath = Helper.joinPath(workDir, stem)
-                val outStr = "7z x $fileName -y -o$outFilePath".check_output()
+                val outStr = "7z -snld x $fileName -y -o$outFilePath".check_output()
                 File(workDir, "$stem.log").writeText(outStr)
             } else {
                 log.warn("Please install 7z for ext4 extraction")
