@@ -136,6 +136,12 @@ data class MiscImage(
                 }
             }
 
+            fun rebootQuiescent(): BootloaderMessage {
+                return BootloaderMessage().apply {
+                    command = "boot-quiescent"
+                }
+            }
+
             fun rebootRecovery(): BootloaderMessage {
                 return BootloaderMessage().apply {
                     this.updateBootloaderMessageInStruct(arrayOf())

@@ -104,6 +104,10 @@ class Reboot {
                                 val bcb = MiscImage.BootloaderMessage.rebootBootloader()
                                 log.info(bcb.toString())
                             }
+                            "quiescent" -> {
+                                val bcb = MiscImage.BootloaderMessage.rebootQuiescent()
+                                log.info(bcb.toString())
+                            }
                             "sideload", "sideload-auto-reboot" -> {
                                 val bcb = MiscImage.BootloaderMessage().apply {
                                     updateBootloaderMessageInStruct(arrayOf("--" + rebootTarget.replace("-", "_")))

@@ -98,8 +98,8 @@ class VendorBootParser : IPackable {
     }
 
     fun flash(fileName: String) {
-        val stem = fileName.substring(0, fileName.indexOf("."))
-        super.flash("$fileName.signed", stem)
+        val stem = File(fileName).nameWithoutExtension
+        super.flash(fileName, stem)
 
         if (File("vbmeta.img.signed").exists()) {
             super.flash("vbmeta.img.signed", "vbmeta")
