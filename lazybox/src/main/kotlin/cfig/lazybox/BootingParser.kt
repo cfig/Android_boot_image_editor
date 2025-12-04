@@ -17,7 +17,6 @@ class BootingParser {
                     val kernelTime = matcher.group(2)
                     val tLevel = matcher.group(3)
                     val serviceName = matcher.group(4)
-
                     println("Timestamp: $timestamp, Kernel Time: $kernelTime, T-Level: $tLevel, Service Name: $serviceName")
                 }
             }
@@ -25,8 +24,6 @@ class BootingParser {
 
         fun run2() {
             val logLines = File("booting.log2").readLines()
-
-
             val actionRegex = Pattern.compile("""\[([^]]+)] \[\s*([0-9.]+)]\[\s*(T\d+)] init: processing action \(([^)]+)\) from \(([^)]+)\).*""")
             val commandRegex = Pattern.compile("""\[([^]]+)] \[\s*([0-9.]+)]\[\s*(T\d+)] init: Command '([^']+)' action=([^\(]+) \(([^)]+)\) took (\d+)ms and (succeeded|failed)(.*)?""")
             val svcExecRegex = Pattern.compile("""\[([^]]+)] \[\s*([0-9.]+)]\[\s*(T\d+)] init: SVC_EXEC service '([^']+)' pid (\d+) \(([^)]+)\) started; waiting\.""")
@@ -67,7 +64,6 @@ class BootingParser {
                     val serviceName = svcExecMatcher.group(4)
                     val pid = svcExecMatcher.group(5)
                     val context = svcExecMatcher.group(6)
-
                     println("Timestamp: $timestamp, Kernel Time: $kernelTime, T-Level: $tLevel, Service Name: $serviceName, PID: $pid, Context: $context")
                 }
 
@@ -77,14 +73,9 @@ class BootingParser {
                     val kernelTime = serviceStartMatcher.group(2)
                     val tLevel = serviceStartMatcher.group(3)
                     val serviceName = serviceStartMatcher.group(4)
-
                     println("Timestamp: $timestamp, Kernel Time: $kernelTime, T-Level: $tLevel, Service Name: $serviceName")
                 }
             }
-
-
-
-
         } // end-of-fun
     } // end-of-companion
 }

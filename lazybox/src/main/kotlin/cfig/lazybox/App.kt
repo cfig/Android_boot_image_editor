@@ -31,13 +31,13 @@ fun main(args: Array<String>) {
         println("sysinfo  : get overall system info from Android")
         println("thermal_info : get thermal info from /sys/class/thermal/")
         println("\nIncubating usage:")
-        println("apps          : get apk file list from Android")
         println("compiledb     : generate compilation database for AOSP")
         println("dmainfo       : parse /d/dma_buf/bufinfo")
         println("diffci        : find changelist files from CI server based on date and time ranges")
         println("repo_lfs      : pull LFS files from Git repositories managed by 'repo'")
         println("repo_unshallow: unshallow Git repositories managed by 'repo'")
         println("perfetto      : generate a Perfetto configuration file")
+        println("ina           : probe INA power sensor data")
         exitProcess(0)
     }
     if (args[0] == "cpuinfo") {
@@ -82,9 +82,6 @@ fun main(args: Array<String>) {
         }
         CompileCommand().run(args[1], args[2])
     }
-    if (args[0] == "apps") {
-        //AppList.retrieveList()
-    }
     if (args[0] == "rel") {
         ImageRelease.run()
     }
@@ -125,5 +122,8 @@ fun main(args: Array<String>) {
     }
     if (args[0] == "compiledb") {
         AospCompiledb().run()
+    }
+    if (args[0] == "ina") {
+        InaSensor().run()
     }
 }
