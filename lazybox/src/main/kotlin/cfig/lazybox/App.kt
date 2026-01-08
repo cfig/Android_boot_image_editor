@@ -22,9 +22,10 @@ fun main(args: Array<String>) {
         println("Usage: args: (Array<String>) ...")
         println("   or: function [arguments]...")
         println("\nCurrently defined functions:")
-        println("\tcpuinfo sysinfo sysstat pidstat bootchart thermal_info compiledb")
+        println("\tcpuinfo gki sysinfo sysstat pidstat bootchart thermal_info compiledb")
         println("\nCommand Usage:")
         println("bootchart: generate Android bootchart")
+        println("gki      : interactive GKI JSON downloader/parser, or process GKI modules from <dir>")
         println("pidstat  : given a pid, profile its CPU usage")
         println("tracecmd : analyze trace-cmd report")
         println("cpuinfo  : get cpu info from /sys/devices/system/cpu/")
@@ -48,6 +49,9 @@ fun main(args: Array<String>) {
                 .writeValueAsString(ret)
         )
         log.info("cpuinfo.json is ready")
+    }
+    if (args[0] == "gki") {
+        Gki.run(args.drop(1).toTypedArray())
     }
     if (args[0] == "sysinfo") {
         SysInfo().run()

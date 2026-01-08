@@ -99,17 +99,15 @@ class AMS {
             log.info(text)
             val lines = text.trim().split("\n") // Split lines
             val regex = Regex("""^ +Proc #\d+: (.*?) +oom: max=\d+ curRaw=(-?\d+) setRaw=(-?\d+) cur=(-?\d+) set=(-?\d+)""") // Match relevant parts
-            val results = lines.mapNotNull { line ->
-                val matchResult = regex.matchEntire(line) ?: return@mapNotNull null
-                val groups = matchResult.groups
-                // Extract data from groups
-                val packageName = groups[1]?.value ?: ""
-                val oomCurValue = groups[2]?.value?.toIntOrNull() ?: 0
-                val status = groups[3]?.value ?: ""
-
-                // Create the Any array
-                arrayOf(packageName, oomCurValue, status)
-                log.info("$packageName -> $oomCurValue -> $status")
+            lines.forEach { line ->
+                regex.matchEntire(line)?.let { matchResult ->
+                    val groups = matchResult.groups
+                    // Extract data from groups
+                    val packageName = groups[1]?.value ?: ""
+                    val oomCurValue = groups[2]?.value?.toIntOrNull() ?: 0
+                    val status = groups[3]?.value ?: ""
+                    log.info("$packageName -> $oomCurValue -> $status")
+                }
             }
         }
 
