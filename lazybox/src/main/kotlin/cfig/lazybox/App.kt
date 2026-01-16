@@ -1,5 +1,6 @@
 package cfig.lazybox
 
+import cfig.lazybox.profiler.VideoAnalyzer
 import cfig.lazybox.staging.AospCompiledb
 import cfig.lazybox.staging.DiffCI
 import cfig.lazybox.staging.Perfetto
@@ -22,7 +23,7 @@ fun main(args: Array<String>) {
         println("Usage: args: (Array<String>) ...")
         println("   or: function [arguments]...")
         println("\nCurrently defined functions:")
-        println("\tcpuinfo gki sysinfo sysstat pidstat bootchart thermal_info compiledb")
+        println("\tcpuinfo gki sysinfo sysstat pidstat bootchart thermal_info compiledb analyze batch_analyze stat apex")
         println("\nCommand Usage:")
         println("bootchart: generate Android bootchart")
         println("gki      : interactive GKI JSON downloader/parser, or process GKI modules from <dir>")
@@ -31,6 +32,12 @@ fun main(args: Array<String>) {
         println("cpuinfo  : get cpu info from /sys/devices/system/cpu/")
         println("sysinfo  : get overall system info from Android")
         println("thermal_info : get thermal info from /sys/class/thermal/")
+        println("apex     : find APEX files and mounts on Android device")
+        println("analyze [log|video] <log_dir> : analyze device boot performance from video recording and/or logs")
+        println("                                default to analyze both video and logs")
+        println("batch_analyze <dir> : analyze every immediate subdirectory under <dir>")
+        println("stat outlier <dir> : generate boot_time_stability_report.md for all runs under <dir>")
+        println("stat compare <a_dir> <b_dir> [--a-name NAME] [--b-name NAME] : compare boot times between A and B")
         println("\nIncubating usage:")
         println("compiledb     : generate compilation database for AOSP")
         println("dmainfo       : parse /d/dma_buf/bufinfo")
@@ -129,5 +136,68 @@ fun main(args: Array<String>) {
     }
     if (args[0] == "ina") {
         InaSensor().run()
+    }
+    if (args[0] == "analyze") {
+        val subCommand = args.getOrNull(1)
+        if (subCommand == "log") {
+            // analyze log <log_dir>
+            VideoAnalyzer().analyzeLog(args.drop(2).toTypedArray())
+        } else if (subCommand == "video") {
+            // analyze video <log_dir>
+            VideoAnalyzer().analyzeVideo(args.drop(2).toTypedArray())
+        } else if (subCommand == "merge") {
+            VideoAnalyzer().mergeReports(args.drop(2).toTypedArray())
+        } else {
+            // analyze <log_dir>
+            val analyzerArgs = args.drop(1).toTypedArray()
+            VideoAnalyzer().analyzeVideo(analyzerArgs)
+            VideoAnalyzer().analyzeLog(analyzerArgs)
+            VideoAnalyzer().mergeReports(analyzerArgs)
+        }
+    }
+    if (args[0] == "batch_analyze") {
+        if (args.size != 2) {
+            log.error("Usage: batch_analyze <parent_dir>")
+            return
+        }
+        val parentDir = File(args[1])
+        if (!parentDir.exists() || !parentDir.isDirectory) {
+            log.error("Directory not found: ${parentDir.absolutePath}")
+            return
+        }
+
+        val children = parentDir.listFiles()?.filter { it.isDirectory }?.sortedBy { it.name } ?: emptyList()
+        if (children.isEmpty()) {
+            log.warn("No subdirectories found under: ${parentDir.absolutePath}")
+            return
+        }
+
+        for (child in children) {
+            log.info("batch_analyze: ${child.absolutePath}")
+            val analyzerArgs = arrayOf(child.absolutePath)
+            val analyzer = VideoAnalyzer()
+            val videoFile = File(child, "video.mp4")
+            val csvFile = File(child, "video.csv")
+            if (videoFile.exists() && csvFile.exists()) {
+                analyzer.analyzeVideo(analyzerArgs)
+            } else {
+                log.warn("Skip video analyze (video.mp4/video.csv missing): ${child.absolutePath}")
+            }
+            analyzer.analyzeLog(analyzerArgs)
+            analyzer.mergeReports(analyzerArgs)
+        }
+    }
+    if (args[0] == "stat") {
+        val subCommand = args.getOrNull(1)
+        if (subCommand == "outlier") {
+            BootTimeStability.run(args.drop(2).toTypedArray())
+        } else if (subCommand == "compare") {
+            BootTimeABCompare.run(args.drop(2).toTypedArray())
+        } else {
+            log.error("Usage: stat outlier <dir> | stat compare <a_dir> <b_dir>")
+        }
+    }
+    if (args[0] == "apex") {
+        Apex().run(args.drop(1).toTypedArray())
     }
 }
