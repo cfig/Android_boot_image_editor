@@ -35,6 +35,7 @@ class Dtbo(
     var header: DtboHeader = DtboHeader(),
     var dtEntries: MutableList<DeviceTreeTableEntry> = mutableListOf()
 ) {
+    private var avbInfoExtracted: Boolean = false
     class DtboInfo(
         var output: String = "",
         var json: String = "",
@@ -168,8 +169,10 @@ class Dtbo(
     }
 
     fun extractVBMeta(): Dtbo {
+        avbInfoExtracted = false
         try {
             AVBInfo.parseFrom(Dumpling(info.output)).dumpDefault(info.output)
+            avbInfoExtracted = true
         } catch (e: Exception) {
             log.error("extraceVBMeta(): $e")
         }
@@ -236,7 +239,11 @@ class Dtbo(
             it.addRow("device-tree blob   (${this.header.entryCount} blobs)", "${outDir}dt/dt.*")
             it.addRow("\\-- device-tree source ", "${outDir}dt/dt.*.$dtsSuffix")
             it.addRule()
-            it.addRow("AVB info", Avb.getJsonFileName(info.output))
+            if (avbInfoExtracted) {
+                it.addRow("AVB info", Avb.getJsonFileName(info.output))
+            } else {
+                it.addRow("AVB info", "NONE")
+            }
             it.addRule()
             it
         }
