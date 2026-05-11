@@ -197,6 +197,8 @@ def main():
         log.info("sparse image is not supported on OS other than Linux, skip testing")
     # Issue 134: multiple DTs
     verifySingleDir(resDir3, "issue_134_multiple_DTs")
+    # Issue 175: GKI vendor_kernel_boot
+    verifySingleDir(resDir3, "issue_175_no_bootconfig_in_vkb")
     # legacy OTA support
     verifySingleDir(resDir3, "legacy_OTA")
 

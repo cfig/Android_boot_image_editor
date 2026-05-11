@@ -1,4 +1,4 @@
-// Copyright 2020-2025 yuyezhong@gmail.com
+// Copyright 2020-2026 yuyezhong@gmail.com
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -370,7 +370,7 @@ data class VendorBoot(
             vrtSize = ramdisk_table.eachEntrySize * ramdisk_table.ramdidks.size,
             vrtEntryNum = ramdisk_table.ramdidks.size,
             vrtEntrySize = ramdisk_table.eachEntrySize,
-            bootconfigSize = File(bootconfig.file).length().toInt()
+            bootconfigSize = if (bootconfig.file.isNotBlank()) File(bootconfig.file).length().toInt() else 0
         ).feature67()
     }
 
