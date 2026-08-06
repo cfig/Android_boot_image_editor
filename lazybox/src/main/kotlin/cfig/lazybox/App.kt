@@ -2,7 +2,6 @@ package cfig.lazybox
 
 import cfig.lazybox.profiler.VideoAnalyzer
 import cfig.lazybox.staging.AospCompiledb
-import cfig.lazybox.staging.DiffCI
 import cfig.lazybox.staging.Perfetto
 import cfig.lazybox.staging.RepoWorker
 import cfig.lazybox.sysinfo.BootChart
@@ -41,7 +40,6 @@ fun main(args: Array<String>) {
         println("\nIncubating usage:")
         println("compiledb     : generate compilation database for AOSP")
         println("dmainfo       : parse /d/dma_buf/bufinfo")
-        println("diffci        : find changelist files from CI server based on date and time ranges")
         println("repo_lfs      : pull LFS files from Git repositories managed by 'repo'")
         println("repo_unshallow: unshallow Git repositories managed by 'repo'")
         println("perfetto      : generate a Perfetto configuration file")
@@ -118,9 +116,6 @@ fun main(args: Array<String>) {
         } else {
             log.error("File not found: $dmainfoFile")
         }
-    }
-    if (args[0] == "diffci") {
-        DiffCI().run(args.drop(1).toTypedArray())
     }
     if (args[0] == "repo_lfs") {
         RepoWorker().lfsPullRepo(args.drop(1).toTypedArray())
